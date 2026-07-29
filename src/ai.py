@@ -1,9 +1,8 @@
 import os
-import google.generativeai as genai
+from google import genai
 
 api_key = os.environ.get("GEMINI_API_KEY")
-if api_key:
-    genai.configure(api_key=api_key)
+client = genai.Client(api_key=api_key) if api_key else None
 
 def classify_event(article_text, candidate_rules):
     """
@@ -13,7 +12,7 @@ def classify_event(article_text, candidate_rules):
     events = [r.get('Event Family') for r in candidate_rules]
     events_str = ', '.join(events)
     
-    if not api_key:
+    if not client:
         print("[WARNING] GEMINI_API_KEY not set. Mocking AI classification.")
         return events[0] if events else "Unknown"
 
@@ -30,8 +29,10 @@ Based on the intent of the article, which exact Cash Event from the list above i
 Return ONLY the exact name of the Event Family.
 """
     try:
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+        )
         return response.text.strip()
     except Exception as e:
         print(f"[AI ERROR] {e}")
@@ -42,7 +43,7 @@ def execute_playbook(article_text, playbook_steps):
     """
     Given the playbook research questions, ask the AI to extract answers from the article.
     """
-    if not api_key:
+    if not client:
         return "[MOCK AI] GEMINI_API_KEY not set. AI Research skipped."
 
     prompt = f"""
@@ -59,8 +60,10 @@ Keep it extremely concise.
 If the information is not present in the article, state "Not disclosed in article".
 """
     try:
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+        )
         return response.text.strip()
     except Exception as e:
         print(f"[AI ERROR] {e}")

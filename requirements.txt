@@ -3,4 +3,4 @@ feedparser
 requests
 gspread
 google-auth
-google-generativeai
+google-genai
