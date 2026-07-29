@@ -12,6 +12,18 @@ def classify_event(article_text, candidate_rules):
     events = [r.get('Event Family') for r in candidate_rules]
     events_str = ', '.join(events)
     
+    # Extract custom training instructions from the Google Sheet
+    instructions = []
+    for r in candidate_rules:
+        event = r.get('Event Family')
+        ai_prompt = str(r.get('AI Prompt', '')).strip()
+        if ai_prompt:
+            instructions.append(f"- For '{event}': {ai_prompt}")
+            
+    custom_instructions_str = "\n".join(instructions)
+    if custom_instructions_str:
+        custom_instructions_str = f"\nHere are specific training instructions from the analyst:\n{custom_instructions_str}\n"
+    
     if not client:
         print("[WARNING] GEMINI_API_KEY not set. Mocking AI classification.")
         return events[0] if events else "Unknown"
@@ -21,7 +33,7 @@ You are an expert event-driven investing analyst.
 
 We have detected strong evidence that this article relates to one of the following Cash Events:
 {events_str}
-
+{custom_instructions_str}
 Article:
 {article_text[:4000]}
 
