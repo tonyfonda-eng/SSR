@@ -54,3 +54,48 @@ def append_to_research_queue(sheet_url, article_title, article_url, event_family
     except gspread.exceptions.WorksheetNotFound:
         print(f"[WARNING] 'AI Research Queue' tab not found in the workbook.")
         return False
+
+def update_last_checked(sheet_url, sources_to_update, timestamp_str):
+    """
+    Batch updates the 'Last Checked (UTC)' column (K / 11) for the given source names.
+    Only updates sources if their current value doesn't already start with today's date.
+    """
+    if not sources_to_update:
+        return
+        
+    client = get_client()
+    sheet = client.open_by_url(sheet_url)
+    worksheet = sheet.worksheet("Sources")
+    
+    all_values = worksheet.get_all_values()
+    
+    # Find column index for 'Last Checked (UTC)'. It should be 10 (0-indexed) if it's the 11th column.
+    header = all_values[0]
+    try:
+        col_idx = header.index("Last Checked (UTC)")
+    except ValueError:
+        print("[WARNING] 'Last Checked (UTC)' column not found in Sources sheet.")
+        return
+        
+    updates = []
+    # today_str = timestamp_str.split()[0] # e.g. '2026-07-29'
+    
+    for row_idx, row in enumerate(all_values):
+        if row_idx == 0:
+            continue
+            
+        source_name = row[2] # 3rd column is 'Source'
+        if source_name in sources_to_update:
+            current_val = row[col_idx] if len(row) > col_idx else ""
+            
+            # If the current value doesn't match today's date string, we update it
+            # We check if today's date is in the string to avoid updating multiple times a day
+            today_date = timestamp_str.split()[0]
+            if today_date not in current_val:
+                # Add to batch update (row_idx is 0-indexed, google sheets is 1-indexed)
+                cell_name = gspread.utils.rowcol_to_a1(row_idx + 1, col_idx + 1)
+                updates.append({'range': cell_name, 'values': [[timestamp_str]]})
+                
+    if updates:
+        worksheet.batch_update(updates)
+        print(f"[SHEETS] Updated 'Last Checked' timestamp for {len(updates)} sources.")

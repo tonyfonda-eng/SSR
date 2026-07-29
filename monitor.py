@@ -10,7 +10,7 @@ from src.database import (
 
 from src.scrapers.prnewswire import download_article
 from src.scrapers import get_scraper_for_source
-from src.sheets import load_rules, load_sources, load_playbooks, append_to_research_queue
+from src.sheets import load_rules, load_sources, load_playbooks, append_to_research_queue, update_last_checked
 from src.rules_engine import evaluate
 from src.ai import classify_event, execute_playbook
 from src.alerts.email import send_alert
@@ -165,6 +165,7 @@ def main():
     print(f"[LOADED] {len(sources)} Sources | {len(rules)} Rules | {len(playbooks)} Playbooks")
 
     total_new = 0
+    successful_sources = []
 
     # Pipeline: Sources -> Articles
     for source in sources:
@@ -173,17 +174,33 @@ def main():
         rss_url = source.get("RSS URL", "")
         
         if is_enabled:
+            success = False
             if rss_url:
-                total_new += process_rss_feed(rss_url, rules, playbook_map, source_name)
+                try:
+                    total_new += process_rss_feed(rss_url, rules, playbook_map, source_name)
+                    success = True
+                except Exception as e:
+                    print(f"[ERROR] Ingestion failed for {source_name}: {e}")
             else:
                 scraper = get_scraper_for_source(source_name)
                 if scraper:
-                    total_new += process_custom_scraper(scraper, rules, playbook_map, source_name)
+                    try:
+                        total_new += process_custom_scraper(scraper, rules, playbook_map, source_name)
+                        success = True
+                    except Exception as e:
+                        print(f"[ERROR] Scraper failed for {source_name}: {e}")
                 else:
                     print(f"[SKIP] Source '{source_name}' enabled but missing RSS URL and no custom scraper found.")
+            
+            if success:
+                successful_sources.append(source_name)
         
     print(f"\n[DATABASE] {total_new} new articles stored.")
     print(f"[DATABASE] Total articles: {article_count()}")
+
+    import datetime
+    timestamp_str = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+    update_last_checked(SHEET_URL, successful_sources, timestamp_str)
 
 if __name__ == "__main__":
     main()
