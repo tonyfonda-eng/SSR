@@ -81,3 +81,32 @@ If the information is not present in the article, state "Not disclosed in articl
     except Exception as e:
         print(f"[AI ERROR] {e}")
         return f"[AI ERROR] {e}"
+
+
+def extract_target_ticker(article_text):
+    """
+    Given an article, ask the AI to identify the target company and return its stock ticker.
+    """
+    if not client:
+        return "[MOCK AI] GEMINI_API_KEY not set. Ticker Extraction skipped."
+
+    prompt = f"""
+You are an expert event-driven investing analyst. Read this article and identify the PRIMARY company that is the subject of this cash event (e.g. the company being acquired, delisted, or undergoing liquidation).
+
+Article:
+{article_text[:6000]}
+
+If the primary subject company is publicly traded on a global stock exchange, return ONLY its primary ticker symbol. 
+If it is an international stock, use the standard Yahoo Finance suffix (e.g., 'VOD.L' for London, '005930.KS' for Korea).
+If the company is private, or if you cannot determine the ticker, return exactly 'PRIVATE'.
+Return NOTHING ELSE besides the ticker or 'PRIVATE'.
+"""
+    try:
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+        )
+        return response.text.strip().upper()
+    except Exception as e:
+        print(f"[AI ERROR] Ticker Extraction: {e}")
+        return "UNKNOWN"

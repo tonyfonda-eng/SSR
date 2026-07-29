@@ -71,6 +71,43 @@ def _process_article(source_name, article_id, title, url, published, body, rules
             )
             return 1
 
+        # Ticker Verification (Stage 3)
+        from src.ai import extract_target_ticker
+        ticker = extract_target_ticker(body)
+        print(f"    [AI TICKER] {ticker}")
+        
+        if ticker == "PRIVATE":
+            print("    [AI REJECTED] Target is a private company.")
+            save_article(
+                source=source_name,
+                article_id=article_id,
+                title=title,
+                url=url,
+                published=published,
+                body=body,
+            )
+            return 1
+            
+        if ticker != "UNKNOWN" and "MOCK AI" not in ticker:
+            import yfinance as yf
+            try:
+                info = yf.Ticker(ticker).info
+                exchange = info.get("exchange")
+                if not exchange or exchange.strip() == "":
+                    print(f"    [YFINANCE REJECTED] Ticker {ticker} is not publicly traded.")
+                    save_article(
+                        source=source_name,
+                        article_id=article_id,
+                        title=title,
+                        url=url,
+                        published=published,
+                        body=body,
+                    )
+                    return 1
+                print(f"    [YFINANCE VERIFIED] {ticker} trades on {exchange}")
+            except Exception as e:
+                print(f"    [YFINANCE WARNING] Could not verify ticker {ticker}: {e}")
+
         confidence = matches[0]["_Score"]
         research_summary = "Playbook not found."
 
