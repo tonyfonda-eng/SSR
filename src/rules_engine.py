@@ -17,7 +17,7 @@ def evaluate(article_text, rules, threshold=15):
         # 1. Check Exclusions (instant disqualification)
         exclusions_raw = str(rule.get("Exclusions", "")).strip()
         if exclusions_raw:
-            exclusions = [x.strip().lower() for x in exclusions_raw.split(",") if x.strip()]
+            exclusions = [x.strip().lower() for x in re.split(r'[,|]', exclusions_raw) if x.strip()]
             if any(exc in text for exc in exclusions):
                 # An exclusion was hit, disqualify this rule
                 continue
@@ -26,7 +26,7 @@ def evaluate(article_text, rules, threshold=15):
         keywords_raw = str(rule.get("Keywords", "")).strip()
         evidence_log = []
         if keywords_raw:
-            keywords = [x.strip().lower() for x in keywords_raw.split(",") if x.strip()]
+            keywords = [x.strip().lower() for x in re.split(r'[,|]', keywords_raw) if x.strip()]
             for kw in keywords:
                 if kw in text:
                     score += 5  # Base points for a keyword
@@ -36,8 +36,8 @@ def evaluate(article_text, rules, threshold=15):
         # e.g., "all cash +10, board approved +5"
         modifiers_raw = str(rule.get("Confidence Modifiers", "")).strip()
         if modifiers_raw:
-            # Split by comma
-            mods = [x.strip().lower() for x in modifiers_raw.split(",") if x.strip()]
+            # Split by comma or pipe
+            mods = [x.strip().lower() for x in re.split(r'[,|]', modifiers_raw) if x.strip()]
             for mod in mods:
                 # Regex to extract phrase and points: e.g. "all cash +10" -> "all cash", "10"
                 match = re.match(r"^(.*?)\s*\+?(\d+)$", mod)

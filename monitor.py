@@ -30,7 +30,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         return 0
 
     # Cash Event Detection (Stage 1)
-    matches = evaluate(body, rules, threshold=15)
+    matches = evaluate(body, rules, threshold=5)
 
     if matches:
         print("    [MATCH] High confidence event signals detected!")
