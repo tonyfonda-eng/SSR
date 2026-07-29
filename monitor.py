@@ -39,6 +39,18 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         event_family = classify_event(body, matches)
         print(f"    [AI CLASSIFICATION] {event_family}")
 
+        if "false positive" in event_family.lower() or event_family.strip().lower() == "unknown":
+            print("    [AI REJECTED] Article flagged as noise/false positive.")
+            save_article(
+                source=source_name,
+                article_id=article_id,
+                title=title,
+                url=url,
+                published=published,
+                body=body,
+            )
+            return 1
+
         confidence = matches[0]["_Score"]
         research_summary = "Playbook not found."
 

@@ -26,7 +26,8 @@ Article:
 {article_text[:4000]}
 
 Based on the intent of the article, which exact Cash Event from the list above is this? 
-Return ONLY the exact name of the Event Family.
+If the article is a false positive and does NOT represent a real corporate cash event (such as marketing, generic advice, or product launches), return 'False Positive'.
+Otherwise, return ONLY the exact name of the Event Family.
 """
     try:
         response = client.models.generate_content(
