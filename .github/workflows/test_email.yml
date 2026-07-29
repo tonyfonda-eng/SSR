@@ -29,4 +29,4 @@ jobs:
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
           ALERT_EMAIL_RECIPIENT: ${{ secrets.ALERT_EMAIL_RECIPIENT }}
         run: |
-          python scripts/trigger_test_email.py
+          PYTHONPATH=. python scripts/trigger_test_email.py
