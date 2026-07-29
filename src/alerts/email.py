@@ -2,7 +2,7 @@ import os
 import smtplib
 from email.message import EmailMessage
 
-def send_alert(article_title, article_url, event_family, confidence, research_summary, evidence_log=None):
+def send_alert(article_title, article_url, event_family, confidence, research_summary, evidence_log=None, is_update=False):
     """
     Sends an email alert for a high-confidence cash event.
     If SMTP credentials are not found in the environment, it mocks the email in the console.
@@ -16,7 +16,10 @@ def send_alert(article_title, article_url, event_family, confidence, research_su
     smtp_pass = os.environ.get("SMTP_PASS")
     recipient = os.environ.get("ALERT_EMAIL_RECIPIENT")
 
-    subject = f"🚨 SSR Alert: {event_family} Detected ({article_title})"
+    if is_update:
+        subject = f"🔄 SSR UPDATE: {event_family} Detected ({article_title})"
+    else:
+        subject = f"🚨 SSR Alert: {event_family} Detected ({article_title})"
     
     evidence_bullets = "\n".join([f"✓ {e}" for e in evidence_log]) if evidence_log else "None recorded."
     

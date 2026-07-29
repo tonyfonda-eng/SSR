@@ -127,6 +127,48 @@ Article text:
         print(f"[AI ERROR] {e}")
         return f"[AI ERROR] {e}"
 
+def check_material_update(article_text, event_family, ticker):
+    """
+    Checks if a duplicate article contains material new information.
+    """
+    client = _get_client()
+    if not client:
+        return False
+        
+    prompt = f"""
+You are an expert financial analyst. 
+We are already tracking a '{event_family}' involving the target company '{ticker}'.
+
+Read the following new article. Does it contain NEW, material information that warrants updating our case file?
+Examples of material updates:
+- A competing bidder has emerged.
+- The deal price/premium has been bumped.
+- A major regulatory approval or block was announced.
+- Shareholder vote results.
+- Deal termination or broken deal.
+
+Examples of non-material updates (syndicated noise):
+- Law firms announcing "investigations" into the merger.
+- Another news outlet just repeating the original announcement facts.
+- Generic PR boilerplate about the merger that contains no new milestones.
+
+Answer strictly with YES or NO on the first line. 
+On the second line, provide a 1-sentence explanation.
+
+Article text:
+{article_text[:6000]}
+"""
+    try:
+        response = client.models.generate_content(
+            model='gemini-2.5-flash',
+            contents=prompt,
+        )
+        text = response.text.strip().upper()
+        return text.startswith("YES")
+    except Exception as e:
+        print(f"[AI ERROR] {e}")
+        return False
+
 
 def extract_target_ticker(article_text):
     """

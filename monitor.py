@@ -16,7 +16,7 @@ from src.scrapers.prnewswire import download_article
 from src.scrapers import get_scraper_for_source
 from src.sheets import load_rules, load_sources, load_playbooks, append_to_research_queue, update_last_checked, load_global_exclusions
 from src.rules_engine import evaluate
-from src.ai import classify_event, execute_playbook
+from src.ai import classify_event, execute_playbook, check_material_update
 from src.alerts.email import send_alert
 
 SHEET_URL = "https://docs.google.com/spreadsheets/d/1YDOyc8WReBei-7LKPLiXZtmOGCmoY7zuyTvyfMHeL4E/edit#gid=0"
@@ -113,21 +113,28 @@ def _process_article(source_name, article_id, title, url, published, body, rules
             )
             return 1
             
+        is_update = False
         if ticker != "UNKNOWN" and "MOCK AI" not in ticker:
             print(f"    [AI TICKER VERIFIED] Public ticker extracted: {ticker}")
             track_company(ticker)
-            event_id = create_event_if_new(event_family, ticker)
-            if not event_id:
-                print(f"    [DEDUPLICATED] {event_family} for {ticker} already tracked this month. Dropping duplicate article.")
-                save_article(
-                    source=source_name,
-                    article_id=article_id,
-                    title=title,
-                    url=url,
-                    published=published,
-                    body=body,
-                )
-                return 1
+            event_id, is_new = create_event_if_new(event_family, ticker)
+            
+            if not is_new:
+                print(f"    [DEDUPLICATION] Event already tracked. Checking for material updates...")
+                if check_material_update(body, event_family, ticker):
+                    print(f"    [AI UPDATE] Material update detected. Generating new memo.")
+                    is_update = True
+                else:
+                    print(f"    [AI UPDATE] No material update. Dropping syndicated noise.")
+                    save_article(
+                        source=source_name,
+                        article_id=article_id,
+                        title=title,
+                        url=url,
+                        published=published,
+                        body=body,
+                    )
+                    return 1
         else:
             event_id = f"UNKNOWN_{article_id}"
             
@@ -159,7 +166,8 @@ def _process_article(source_name, article_id, title, url, published, body, rules
             event_family=event_family,
             confidence=confidence,
             research_summary=research_summary,
-            evidence_log=matches[0].get("_Evidence", [])
+            evidence_log=matches[0].get("_Evidence", []),
+            is_update=is_update,
         )
 
     # Archive

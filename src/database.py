@@ -110,7 +110,7 @@ def track_company(ticker):
 def create_event_if_new(event_family, ticker):
     """
     Creates an event ID formatted as EventFamily_Ticker_YYYY_MM.
-    Returns the event_id if it's new, or None if it already exists (duplicate).
+    Returns (event_id, is_new) where is_new is a boolean.
     """
     now = datetime.datetime.now()
     event_id = f"{event_family.replace(' ', '_')}_{ticker}_{now.year}_{now.month:02d}"
@@ -121,7 +121,7 @@ def create_event_if_new(event_family, ticker):
     cursor.execute("SELECT 1 FROM events WHERE event_id = ?", (event_id,))
     if cursor.fetchone() is not None:
         conn.close()
-        return None # Event already exists, duplicate!
+        return event_id, False
         
     cursor.execute("""
         INSERT INTO events (event_id, event_family, target_ticker, status, created_at, updated_at)
@@ -130,7 +130,7 @@ def create_event_if_new(event_family, ticker):
     
     conn.commit()
     conn.close()
-    return event_id
+    return event_id, True
 
 def log_research(event_id, article_id, rules_score, ai_summary):
     conn = get_connection()
