@@ -1,8 +1,15 @@
 import os
+import random
 from google import genai
 
-api_key = os.environ.get("GEMINI_API_KEY")
-client = genai.Client(api_key=api_key) if api_key else None
+raw_keys = os.environ.get("GEMINI_API_KEY", "")
+api_keys = [k.strip() for k in raw_keys.split(",") if k.strip()]
+clients = [genai.Client(api_key=k) for k in api_keys]
+
+def _get_client():
+    if not clients:
+        return None
+    return random.choice(clients)
 
 def classify_event(article_text, candidate_rules):
     """
@@ -24,6 +31,7 @@ def classify_event(article_text, candidate_rules):
     if custom_instructions_str:
         custom_instructions_str = f"\nHere are specific training instructions from the analyst:\n{custom_instructions_str}\n"
     
+    client = _get_client()
     if not client:
         print("[WARNING] GEMINI_API_KEY not set. Mocking AI classification.")
         return events[0] if events else "Unknown"
@@ -56,6 +64,7 @@ def execute_playbook(article_text, playbook_steps):
     """
     Given the playbook research questions, ask the AI to extract answers from the article.
     """
+    client = _get_client()
     if not client:
         return "[MOCK AI] GEMINI_API_KEY not set. AI Research skipped."
 
@@ -87,6 +96,7 @@ def extract_target_ticker(article_text):
     """
     Given an article, ask the AI to identify the target company and return its stock ticker.
     """
+    client = _get_client()
     if not client:
         return "[MOCK AI] GEMINI_API_KEY not set. Ticker Extraction skipped."
 
