@@ -118,14 +118,10 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         research_summary = "Playbook not found."
 
         # Playbook & AI Research (Stage 3)
-        if event_family in playbook_map:
-            playbook_steps = playbook_map[event_family]
-            if playbook_steps.strip():
-                print(f"    [AI RESEARCH] Executing playbook...")
-                research_summary = execute_playbook(body, playbook_steps)
-                print(f"    [AI RESEARCH] Done.")
-            else:
-                research_summary = "No specific research questions defined for this playbook."
+        playbook_steps = playbook_map.get(event_family, "")
+        print(f"    [AI RESEARCH] Generating Investment Memo...")
+        research_summary = execute_playbook(body, playbook_steps, event_family)
+        print(f"    [AI RESEARCH] Done.")
         
         # Review (Sheets)
         append_to_research_queue(

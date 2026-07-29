@@ -18,23 +18,32 @@ def send_alert(article_title, article_url, event_family, confidence, research_su
 
     subject = f"🚨 SSR Alert: {event_family} Detected ({article_title})"
     
-    evidence_str = "\n".join(evidence_log) if evidence_log else "None recorded."
+    evidence_bullets = "\n".join([f"✓ {e}" for e in evidence_log]) if evidence_log else "None recorded."
     
-    body = f"""
-Special Situations Radar - Alert
+    section_3 = f"""
+3. Why did SSR trigger?
 
-Event: {event_family}
-Confidence Score: {confidence}
+Matched Rules
+{evidence_bullets}
+
+Score
+{confidence}
+"""
+    
+    # Inject Section 3 right before Section 4 in the AI's markdown response
+    if "4. Investment Facts" in research_summary:
+        full_memo = research_summary.replace("4. Investment Facts", f"{section_3}\n4. Investment Facts")
+    elif "4. " in research_summary:
+        full_memo = research_summary.replace("4. ", f"{section_3}\n4. ")
+    else:
+        # Fallback if AI messes up the formatting
+        full_memo = f"{research_summary}\n\n{section_3}"
+
+    body = f"""
 Source: {article_title}
 URL: {article_url}
 
-=== Rules Engine Evidence ===
-{evidence_str}
-===========================
-
-=== AI Research Summary ===
-{research_summary}
-===========================
+{full_memo}
 """
 
     if not all([smtp_server, smtp_user, smtp_pass, recipient]):
