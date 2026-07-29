@@ -11,23 +11,43 @@ from src.database import (
 from src.scrapers.prnewswire import download_article
 from src.scrapers import get_scraper_for_source
 from src.sheets import load_rules, load_sources, load_playbooks, append_to_research_queue, update_last_checked
+from src.sheets import load_rules, load_sources, load_playbooks, append_to_research_queue, update_last_checked, load_global_exclusions
 from src.rules_engine import evaluate
 from src.ai import classify_event, execute_playbook
 from src.alerts.email import send_alert
 
 SHEET_URL = "https://docs.google.com/spreadsheets/d/1YDOyc8WReBei-7LKPLiXZtmOGCmoY7zuyTvyfMHeL4E/edit#gid=0"
 
-def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map):
+def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None):
+    if global_exclusions is None:
+        global_exclusions = []
+        
     article_key = f"{source_name}:{article_id}"
-
     if article_exists(article_key):
         return 0
 
-    print(f"  [ARTICLE] {title}")
-
     if not body:
-        print("    [WARNING] No content extracted.")
+        print(f"    [SKIP] Empty body for {title}")
         return 0
+        
+    # Global Exclusion Pre-Filter
+    title_lower = title.lower()
+    body_lower = body.lower()
+    for ex in global_exclusions:
+        if ex in title_lower or ex in body_lower:
+            print(f"    [GLOBAL EXCLUSION] Match found for '{ex}'. Skipping article.")
+            # Save it so we don't scan it again
+            save_article(
+                source=source_name,
+                article_id=article_id,
+                title=title,
+                url=url,
+                published=published,
+                body=body,
+            )
+            return 1
+            
+    print(f"  -> Processing: {title}")
 
     # Cash Event Detection (Stage 1)
     matches = evaluate(body, rules, threshold=5)
@@ -94,12 +114,12 @@ def _process_article(source_name, article_id, title, url, published, body, rules
     return 1
 
 
-def process_rss_feed(source_url, rules, playbook_map, source_name):
-    print(f"\n[INGESTION] Polling RSS: {source_name} ({source_url})")
+def process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusions=None):
+    print(f"\n[INGESTION] Polling RSS: {source_name} ({rss_url})")
     try:
-        feed = feedparser.parse(source_url)
+        feed = feedparser.parse(rss_url)
     except Exception as e:
-        print(f"[ERROR] Failed to parse feed {source_url}: {e}")
+        print(f"[ERROR] Failed to parse feed {rss_url}: {e}")
         return 0
 
     new_articles = 0
@@ -122,13 +142,14 @@ def process_rss_feed(source_url, rules, playbook_map, source_name):
             published=published, 
             body=body, 
             rules=rules, 
-            playbook_map=playbook_map
+            playbook_map=playbook_map,
+            global_exclusions=global_exclusions
         )
         time.sleep(1) # respect API limits
         
     return new_articles, len(feed.entries)
 
-def process_custom_scraper(scraper, rules, playbook_map, source_name):
+def process_custom_scraper(scraper, rules, playbook_map, source_name, global_exclusions=None):
     print(f"\n[INGESTION] Polling Custom Scraper: {source_name}")
     try:
         articles = scraper.get_latest_articles()
@@ -156,7 +177,8 @@ def process_custom_scraper(scraper, rules, playbook_map, source_name):
             published=article.get('published', ''), 
             body=body, 
             rules=rules, 
-            playbook_map=playbook_map
+            playbook_map=playbook_map,
+            global_exclusions=global_exclusions
         )
         time.sleep(1) # respect API limits
 
@@ -167,10 +189,11 @@ def main():
     
     initialise_database()
 
-    print("[LOADING] Fetching Control Centre from Google Sheets...")
-    sources = load_sources(SHEET_URL)
+    print("Loading rules, sources, playbooks, and exclusions from Google Sheets...")
     rules = load_rules(SHEET_URL)
+    sources = load_sources(SHEET_URL)
     playbooks = load_playbooks(SHEET_URL)
+    global_exclusions = load_global_exclusions(SHEET_URL)
 
     playbook_map = {p['Playbook']: p.get('Questions/Research Steps', '') for p in playbooks}
 
@@ -192,7 +215,7 @@ def main():
             # 1. Attempt HTML Custom Scraper First
             if scraper:
                 try:
-                    new_count, parsed_count = process_custom_scraper(scraper, rules, playbook_map, source_name)
+                    new_count, parsed_count = process_custom_scraper(scraper, rules, playbook_map, source_name, global_exclusions)
                     if parsed_count > 0:
                         method_used = "HTML"
                         total_new += new_count
@@ -203,7 +226,7 @@ def main():
             # 2. Fallback to RSS if HTML failed, returned 0, or didn't exist
             if not method_used and rss_url:
                 try:
-                    new_count, parsed_count = process_rss_feed(rss_url, rules, playbook_map, source_name)
+                    new_count, parsed_count = process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusions)
                     method_used = "RSS"
                     total_new += new_count
                     source_stats[source_name] = {"count": parsed_count, "method": method_used}

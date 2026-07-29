@@ -37,6 +37,20 @@ def load_playbooks(sheet_url):
     return worksheet.get_all_records()
 
 
+def load_global_exclusions(sheet_url):
+    client = get_client()
+    sheet = client.open_by_url(sheet_url)
+    try:
+        worksheet = sheet.worksheet("Global Exclusions")
+        # Grab all values in column A (index 1)
+        values = worksheet.col_values(1)
+        # Skip empty strings and a potential "Keyword" header
+        return [v.strip().lower() for v in values if v.strip() and v.strip().lower() != "keyword"]
+    except gspread.exceptions.WorksheetNotFound:
+        print("[WARNING] 'Global Exclusions' tab not found in spreadsheet. Returning empty list.")
+        return []
+
+
 def append_to_research_queue(sheet_url, article_title, article_url, event_family, confidence, action="Hold"):
     """
     Appends a row of data to the 'AI Research Queue' tab.
