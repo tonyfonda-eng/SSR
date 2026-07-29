@@ -57,7 +57,7 @@ def append_to_research_queue(sheet_url, article_title, article_url, event_family
 
 def update_last_checked(sheet_url, source_stats, timestamp_str):
     """
-    Batch updates the timestamp and parsed counts for the given source names.
+    Batch updates the timestamp, parsed counts, and ingestion method for the given source names.
     Creates necessary columns if they don't exist.
     """
     if not source_stats:
@@ -82,6 +82,13 @@ def update_last_checked(sheet_url, source_stats, timestamp_str):
     else:
         col_idx_last_checked = header.index("Last Checked (UTC)")
         
+    if "Ingestion Method" not in header:
+        header.append("Ingestion Method")
+        col_idx_method = len(header) - 1
+        updates.append({'range': gspread.utils.rowcol_to_a1(1, col_idx_method + 1), 'values': [["Ingestion Method"]]})
+    else:
+        col_idx_method = header.index("Ingestion Method")
+        
     if "Parsed (Last Run)" not in header:
         header.append("Parsed (Last Run)")
         col_idx_parsed_last = len(header) - 1
@@ -105,7 +112,15 @@ def update_last_checked(sheet_url, source_stats, timestamp_str):
             
         source_name = row[2] if len(row) > 2 else ""
         if source_name in source_stats:
-            parsed_count = source_stats[source_name]
+            stat_data = source_stats[source_name]
+            
+            # Handle both old format (int) and new format (dict) just in case
+            if isinstance(stat_data, dict):
+                parsed_count = stat_data.get("count", 0)
+                method_used = stat_data.get("method", "Unknown")
+            else:
+                parsed_count = stat_data
+                method_used = "Unknown"
             
             current_last_checked = row[col_idx_last_checked] if len(row) > col_idx_last_checked else ""
             current_cumulative_str = row[col_idx_cumulative] if len(row) > col_idx_cumulative else "0"
@@ -122,10 +137,12 @@ def update_last_checked(sheet_url, source_stats, timestamp_str):
                 cumulative_val = parsed_count
                 
             cell_last_checked = gspread.utils.rowcol_to_a1(row_idx + 1, col_idx_last_checked + 1)
+            cell_method = gspread.utils.rowcol_to_a1(row_idx + 1, col_idx_method + 1)
             cell_parsed_last = gspread.utils.rowcol_to_a1(row_idx + 1, col_idx_parsed_last + 1)
             cell_cumulative = gspread.utils.rowcol_to_a1(row_idx + 1, col_idx_cumulative + 1)
             
             updates.append({'range': cell_last_checked, 'values': [[timestamp_str]]})
+            updates.append({'range': cell_method, 'values': [[method_used]]})
             updates.append({'range': cell_parsed_last, 'values': [[parsed_count]]})
             updates.append({'range': cell_cumulative, 'values': [[cumulative_val]]})
                 

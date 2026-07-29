@@ -6,6 +6,7 @@ import requests
 from bs4 import BeautifulSoup
 
 from src.config import USER_AGENT
+from src.scrapers.base import SourceScraper
 
 
 def download_article(url):
@@ -47,3 +48,40 @@ def download_article(url):
                 return text
 
     return None
+
+
+class PRNewsWireScraper(SourceScraper):
+    def get_latest_articles(self):
+        url = "https://www.prnewswire.com/news-releases/news-releases-list/"
+        headers = {
+            "User-Agent": USER_AGENT
+        }
+        
+        response = requests.get(url, headers=headers, timeout=30)
+        response.raise_for_status()
+        
+        soup = BeautifulSoup(response.text, "html.parser")
+        
+        # PR Newswire news release cards
+        article_links = soup.select('.news-release') or soup.select('.card h3 a') or soup.select('.row.newsCards a')
+        
+        articles = []
+        for a_tag in article_links:
+            href = a_tag.get('href')
+            if not href:
+                continue
+            
+            full_url = href if href.startswith("http") else "https://www.prnewswire.com" + href
+            article_id = full_url.rstrip("/").split("-")[-1].replace(".html", "")
+            
+            articles.append({
+                "id": article_id,
+                "title": a_tag.get_text(strip=True),
+                "url": full_url,
+                "published": ""  # Could be parsed from HTML, but keep simple for now
+            })
+            
+        return articles
+
+    def get_article_body(self, url):
+        return download_article(url)

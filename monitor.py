@@ -174,25 +174,32 @@ def main():
         rss_url = source.get("RSS URL", "")
         
         if is_enabled:
-            if rss_url:
+            scraper = get_scraper_for_source(source_name)
+            method_used = None
+            
+            # 1. Attempt HTML Custom Scraper First
+            if scraper:
+                try:
+                    new_count, parsed_count = process_custom_scraper(scraper, rules, playbook_map, source_name)
+                    if parsed_count > 0:
+                        method_used = "HTML"
+                        total_new += new_count
+                        source_stats[source_name] = {"count": parsed_count, "method": method_used}
+                except Exception as e:
+                    print(f"[WARNING] HTML Scraper failed for {source_name}: {e}. Falling back to RSS if available...")
+
+            # 2. Fallback to RSS if HTML failed, returned 0, or didn't exist
+            if not method_used and rss_url:
                 try:
                     new_count, parsed_count = process_rss_feed(rss_url, rules, playbook_map, source_name)
+                    method_used = "RSS"
                     total_new += new_count
-                    source_stats[source_name] = parsed_count
+                    source_stats[source_name] = {"count": parsed_count, "method": method_used}
                 except Exception as e:
-                    print(f"[ERROR] Ingestion failed for {source_name}: {e}")
-            else:
-                scraper = get_scraper_for_source(source_name)
-                if scraper:
-                    try:
-                        new_count, parsed_count = process_custom_scraper(scraper, rules, playbook_map, source_name)
-                        total_new += new_count
-                        source_stats[source_name] = parsed_count
-                    except Exception as e:
-                        print(f"[ERROR] Scraper failed for {source_name}: {e}")
-                else:
-                    print(f"[SKIP] Source '{source_name}' enabled but missing RSS URL and no custom scraper found.")
-        
+                    print(f"[ERROR] RSS Ingestion failed for {source_name}: {e}")
+
+            if not method_used and not rss_url and not scraper:
+                print(f"[SKIP] Source '{source_name}' enabled but missing RSS URL and no custom scraper found.")
     print(f"\n[DATABASE] {total_new} new articles stored.")
     print(f"[DATABASE] Total articles: {article_count()}")
 
