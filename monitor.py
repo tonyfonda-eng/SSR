@@ -14,14 +14,14 @@ from src.database import (
 
 from src.scrapers.prnewswire import download_article
 from src.scrapers import get_scraper_for_source
-from src.sheets import load_rules, load_sources, load_playbooks, append_to_research_queue, update_last_checked, load_global_exclusions
+from src.sheets import load_rules, load_sources, load_playbooks, append_to_research_queue, update_last_checked, load_global_exclusions, load_gold_standards
 from src.rules_engine import evaluate
 from src.ai import classify_event, execute_playbook, check_material_update
 from src.alerts.email import send_alert
 
 SHEET_URL = "https://docs.google.com/spreadsheets/d/1YDOyc8WReBei-7LKPLiXZtmOGCmoY7zuyTvyfMHeL4E/edit#gid=0"
 
-def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None):
+def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None, gold_standards=None):
     if global_exclusions is None:
         global_exclusions = []
         
@@ -141,10 +141,10 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         confidence = matches[0]["_Score"]
         research_summary = "Playbook not found."
 
-        # Playbook & AI Research (Stage 3)
         playbook_steps = playbook_map.get(event_family, "")
+        gold_standard = gold_standards.get(event_family) if gold_standards else None
         print(f"    [AI RESEARCH] Generating Investment Memo...")
-        research_summary = execute_playbook(body, playbook_steps, event_family)
+        research_summary = execute_playbook(body, playbook_steps, event_family, gold_standard)
         print(f"    [AI RESEARCH] Done.")
         
         # Log to Database
@@ -182,7 +182,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
     return 1
 
 
-def process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusions=None):
+def process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusions=None, gold_standards=None):
     print(f"\n[INGESTION] Polling RSS: {source_name} ({rss_url})")
     try:
         feed = feedparser.parse(rss_url)
@@ -211,13 +211,14 @@ def process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusion
             body=body, 
             rules=rules, 
             playbook_map=playbook_map,
-            global_exclusions=global_exclusions
+            global_exclusions=global_exclusions,
+            gold_standards=gold_standards
         )
         time.sleep(1) # respect API limits
         
     return new_articles, len(feed.entries)
 
-def process_custom_scraper(scraper, rules, playbook_map, source_name, global_exclusions=None):
+def process_custom_scraper(scraper, rules, playbook_map, source_name, global_exclusions=None, gold_standards=None):
     print(f"\n[INGESTION] Polling Custom Scraper: {source_name}")
     try:
         articles = scraper.get_latest_articles()
@@ -246,7 +247,8 @@ def process_custom_scraper(scraper, rules, playbook_map, source_name, global_exc
             body=body, 
             rules=rules, 
             playbook_map=playbook_map,
-            global_exclusions=global_exclusions
+            global_exclusions=global_exclusions,
+            gold_standards=gold_standards
         )
         time.sleep(1) # respect API limits
 
@@ -262,6 +264,7 @@ def main():
     sources = load_sources(SHEET_URL)
     playbooks = load_playbooks(SHEET_URL)
     global_exclusions = load_global_exclusions(SHEET_URL)
+    gold_standards = load_gold_standards(SHEET_URL)
 
     playbook_map = {p['Playbook']: p.get('Questions/Research Steps', '') for p in playbooks}
 
@@ -283,7 +286,7 @@ def main():
             # 1. Attempt HTML Custom Scraper First
             if scraper:
                 try:
-                    new_count, parsed_count = process_custom_scraper(scraper, rules, playbook_map, source_name, global_exclusions)
+                    new_count, parsed_count = process_custom_scraper(scraper, rules, playbook_map, source_name, global_exclusions, gold_standards)
                     if parsed_count > 0:
                         method_used = "HTML"
                         total_new += new_count
@@ -294,7 +297,7 @@ def main():
             # 2. Fallback to RSS if HTML failed, returned 0, or didn't exist
             if not method_used and rss_url:
                 try:
-                    new_count, parsed_count = process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusions)
+                    new_count, parsed_count = process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusions, gold_standards)
                     method_used = "RSS"
                     total_new += new_count
                     source_stats[source_name] = {"count": parsed_count, "method": method_used}

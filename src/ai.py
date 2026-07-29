@@ -77,16 +77,20 @@ Otherwise, return ONLY the exact name of the Event Family.
         return events[0] if events else "Unknown"
 
 
-def execute_playbook(article_text, playbook_steps, event_family):
+def execute_playbook(article_text, playbook_steps, event_family, gold_standard=None):
     """
     Acts as a 1st-year IB analyst executing a structured investment memo.
     """
     if not clients:
         return "[MOCK AI] GEMINI_API_KEY not set. AI Research skipped."
 
+    gold_standard_str = ""
+    if gold_standard:
+        gold_standard_str = f"\n\n--- GOLD STANDARD ANALYST EXAMPLE ---\nHere is how a senior analyst at our firm wrote a highly praised memo for a similar event. Emulate the tone, brevity, and focus on mathematical upside seen here:\n{gold_standard}\n---------------------------------------\n"
+
     prompt = f"""
 You are a first-year investment banking analyst who has exactly 10 minutes to brief a portfolio manager.
-You have been handed an article regarding a '{event_family}'.
+You have been handed an article regarding a '{event_family}'.{gold_standard_str}
 
 The portfolio manager ONLY wants to know: "Is this potentially investable, and if so, why?"
 Do NOT write a narrative summary of what happened. Extract only objective facts.

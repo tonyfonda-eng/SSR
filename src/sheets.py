@@ -50,6 +50,18 @@ def load_global_exclusions(sheet_url):
         print("[WARNING] 'Global Exclusions' tab not found in spreadsheet. Returning empty list.")
         return []
 
+def load_gold_standards(sheet_url):
+    client = get_client()
+    sheet = client.open_by_url(sheet_url)
+    try:
+        worksheet = sheet.worksheet("AI Gold Standards")
+        records = worksheet.get_all_records()
+        # Map Event Family -> Gold Standard Example
+        return {r.get('Event Family', '').strip(): r.get('Gold Standard Example', '').strip() for r in records if r.get('Event Family')}
+    except gspread.exceptions.WorksheetNotFound:
+        print("[WARNING] 'AI Gold Standards' tab not found. Returning empty dict.")
+        return {}
+
 
 def append_to_research_queue(sheet_url, article_title, article_url, event_family, confidence, action="Hold"):
     """
