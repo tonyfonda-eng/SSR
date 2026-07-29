@@ -100,8 +100,9 @@ Maximum 5 lines. Example: Cash acquisition announced. ABC Corp has agreed to acq
 2. Event Classification
 Structured fields only: Event Family, Subtype, Status, Target, Acquirer, Jurisdiction, Exchange.
 
-4. Investment Facts
-Extract ONLY objective facts. Do NOT use prose. Use fields like: Offer price, Undisturbed price, Premium %, Spread %, Expected completion, Board recommendation, Break fee, Tender minimum, Regulatory approvals.
+4. Investment Facts & Returns
+Extract ONLY objective facts. Do NOT use prose. Use fields like: Offer price, Undisturbed price, Premium %, Expected completion, Board recommendation, Break fee.
+CRITICAL MATH: If an Offer Price and a current market price are available, explicitly calculate the 'Gross Spread (%)'. If an expected closing date is available, explicitly calculate the 'Estimated Annualized IRR'.
 (Also incorporate these specific research questions if relevant: {playbook_steps})
 
 5. Risk Assessment
