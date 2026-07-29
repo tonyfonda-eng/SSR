@@ -1,3 +1,12 @@
+import sqlite3
+from pathlib import Path
+import datetime
+
+DB_PATH = Path(__file__).resolve().parent.parent / "ssr_cache.sqlite"
+
+def get_connection():
+    return sqlite3.connect(DB_PATH)
+
 def initialise_database():
     conn = get_connection()
 
@@ -27,3 +36,31 @@ def initialise_database():
     conn.close()
 
     print("[DATABASE] Ready")
+
+def article_exists(article_key):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT 1 FROM articles WHERE article_key = ?", (article_key,))
+    exists = cursor.fetchone() is not None
+    conn.close()
+    return exists
+
+def save_article(source, article_id, title, url, published, body):
+    conn = get_connection()
+    cursor = conn.cursor()
+    article_key = f"{source}:{article_id}"
+    processed_at = datetime.datetime.now().isoformat()
+    cursor.execute("""
+        INSERT OR REPLACE INTO articles (article_key, source, article_id, title, url, published, body, processed_at)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    """, (article_key, source, article_id, title, url, published, body, processed_at))
+    conn.commit()
+    conn.close()
+
+def article_count():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("SELECT COUNT(*) FROM articles")
+    count = cursor.fetchone()[0]
+    conn.close()
+    return count
