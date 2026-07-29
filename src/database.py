@@ -10,7 +10,7 @@ def get_connection():
 def initialise_database():
     conn = get_connection()
 
-    # 1. Create the table if it is a completely fresh run
+    # 1. Create the tables if it is a completely fresh run
     conn.execute("""
         CREATE TABLE IF NOT EXISTS articles (
             article_key TEXT PRIMARY KEY,
@@ -20,6 +20,36 @@ def initialise_database():
             url TEXT,
             published TEXT,
             body TEXT,
+            processed_at TEXT
+        )
+    """)
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS companies (
+            ticker TEXT PRIMARY KEY,
+            first_seen TEXT,
+            alert_count INTEGER DEFAULT 0
+        )
+    """)
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS events (
+            event_id TEXT PRIMARY KEY,
+            event_family TEXT,
+            target_ticker TEXT,
+            status TEXT,
+            created_at TEXT,
+            updated_at TEXT
+        )
+    """)
+
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS research_logs (
+            log_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            event_id TEXT,
+            article_id TEXT,
+            rules_score INTEGER,
+            ai_summary TEXT,
             processed_at TEXT
         )
     """)
