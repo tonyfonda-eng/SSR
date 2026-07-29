@@ -2,11 +2,14 @@ import os
 import smtplib
 from email.message import EmailMessage
 
-def send_alert(article_title, article_url, event_family, confidence, research_summary):
+def send_alert(article_title, article_url, event_family, confidence, research_summary, evidence_log=None):
     """
     Sends an email alert for a high-confidence cash event.
     If SMTP credentials are not found in the environment, it mocks the email in the console.
     """
+    if evidence_log is None:
+        evidence_log = []
+        
     smtp_server = os.environ.get("SMTP_SERVER")
     smtp_port = os.environ.get("SMTP_PORT", 587)
     smtp_user = os.environ.get("SMTP_USER")
@@ -15,13 +18,19 @@ def send_alert(article_title, article_url, event_family, confidence, research_su
 
     subject = f"🚨 SSR Alert: {event_family} Detected ({article_title})"
     
+    evidence_str = "\n".join(evidence_log) if evidence_log else "None recorded."
+    
     body = f"""
 Special Situations Radar - Alert
 
 Event: {event_family}
-Confidence: {confidence}
+Confidence Score: {confidence}
 Source: {article_title}
 URL: {article_url}
+
+=== Rules Engine Evidence ===
+{evidence_str}
+===========================
 
 === AI Research Summary ===
 {research_summary}

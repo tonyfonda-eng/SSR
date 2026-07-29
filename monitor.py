@@ -136,7 +136,8 @@ def _process_article(source_name, article_id, title, url, published, body, rules
             article_url=url,
             event_family=event_family,
             confidence=confidence,
-            research_summary=research_summary
+            research_summary=research_summary,
+            evidence_log=matches[0].get("_Evidence", [])
         )
 
     # Archive
