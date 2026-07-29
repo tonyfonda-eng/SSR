@@ -50,7 +50,13 @@ def _process_article(source_name, article_id, title, url, published, body, rules
             
     # Regex Public Ticker Pre-Filter (Skip for EDGAR)
     if "edgar" not in source_name.lower():
-        pattern = r'\b(?:NYSE|NASDAQ|TSX|TSXV|LSE|ASX|OTC|NYSE\s+AMERICAN|AMEX)\s*:\s*[A-Z]+\b'
+        exchanges = (
+            r"(NYSE|NASDAQ|OTC|OTCQX|OTCQB|AMEX|BATS|ARCA|NYSEMKT|TSX|TSXV|CSE|NEO|CBOE|"
+            r"LSE|LON|FRA|ETR|XETRA|EPA|PAR|AMS|BRU|LIS|SWX|SIX|STO|CPH|HEL|OSL|VIE|MAD|BME|MIL|BIT|WSE|PRA|EURONEXT|"
+            r"ASX|NZX|TYO|TSE|HKEX|HKG|SHG|SHE|SZSE|SSE|SGX|KRX|KOSPI|KOSDAQ|TWSE|TPE|BOM|BSE|NSE|"
+            r"JSE|TASE|DFM|ADX|BOVESPA|B3|BMV|BCS)"
+        )
+        pattern = r'\b' + exchanges + r'(?:\s+[-A-Z]+)?\s*:\s*[A-Z0-9\.]+\b'
         matches = re.findall(pattern, body, re.IGNORECASE)
         if len(matches) == 0:
             print(f"    [REGEX REJECTED] No public tickers found. Likely a private company or noise.")
