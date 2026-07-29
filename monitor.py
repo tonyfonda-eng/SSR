@@ -1,3 +1,4 @@
+import re
 import feedparser
 import time
 
@@ -37,6 +38,22 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         if ex in title_lower or ex in body_lower:
             print(f"    [GLOBAL EXCLUSION] Match found for '{ex}'. Skipping article.")
             # Save it so we don't scan it again
+            save_article(
+                source=source_name,
+                article_id=article_id,
+                title=title,
+                url=url,
+                published=published,
+                body=body,
+            )
+            return 1
+            
+    # Regex Public Ticker Pre-Filter (Skip for EDGAR)
+    if "edgar" not in source_name.lower():
+        pattern = r'\b(?:NYSE|NASDAQ|TSX|TSXV|LSE|ASX|OTC|NYSE\s+AMERICAN|AMEX)\s*:\s*[A-Z]+\b'
+        matches = re.findall(pattern, body, re.IGNORECASE)
+        if len(matches) == 0:
+            print(f"    [REGEX REJECTED] No public tickers found. Likely a private company or noise.")
             save_article(
                 source=source_name,
                 article_id=article_id,
