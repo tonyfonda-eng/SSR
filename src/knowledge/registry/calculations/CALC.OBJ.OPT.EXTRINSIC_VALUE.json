@@ -1,0 +1,18 @@
+{
+  "calc_id": "CALC.OBJ.OPT.EXTRINSIC_VALUE",
+  "category": "Object",
+  "namespace": "Options",
+  "deterministic": true,
+  "cache_policy": "immutable",
+  "implementation": {
+    "language": "python",
+    "function": "calc_obj_opt_extrinsic_value",
+    "version": "1.0.0"
+  },
+  "required_inputs": [
+    "OBJ.MKT.PREMIUM_SNAPSHOT",
+    "OBJ.OPT.INTRINSIC_VALUE"
+  ],
+  "produces": "OBJ.OPT.EXTRINSIC_VALUE",
+  "trigger_on": ["OBJ.MKT.PREMIUM_SNAPSHOT", "OBJ.OPT.INTRINSIC_VALUE"]
+}

@@ -1,0 +1,19 @@
+{
+  "calc_id": "CALC.ANALYTICS.OPT.ASSIGNMENT_RISK",
+  "category": "Analytics",
+  "namespace": "Options",
+  "deterministic": false,
+  "cache_policy": "volatile",
+  "implementation": {
+    "language": "python",
+    "function": "calc_analytics_opt_assignment_risk",
+    "version": "1.0.0"
+  },
+  "required_inputs": [
+    "OBJ.OPT.INTRINSIC_VALUE",
+    "OBJ.OPT.EXTRINSIC_VALUE",
+    "OBJ.OPT.OPTION_CONTRACT"
+  ],
+  "produces": "OBJ.ANALYTICS.OPT.ASSIGNMENT_PROBABILITY",
+  "trigger_on": ["OBJ.OPT.EXTRINSIC_VALUE"]
+}

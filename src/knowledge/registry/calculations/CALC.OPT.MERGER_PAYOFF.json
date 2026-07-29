@@ -1,0 +1,14 @@
+{
+  "calc_id": "CALC.OPT.MERGER_PAYOFF",
+  "version": "1.0",
+  "name": "Merger Payoff PnL",
+  "family": "Event Math",
+  "description": "Calculates terminal PnL for holding an option position through deal closure.",
+  "required_inputs": ["CALC.OPT.EXPECTED_SETTLEMENT", "OBJ.MKT.OPTION_PREMIUM", "OBJ.PORT.POSITION_TYPE"],
+  "output_object": "CALC.OPT.MERGER_PAYOFF",
+  "trigger_on": ["CALC.OPT.EXPECTED_SETTLEMENT"],
+  "implementation": { "type": "python_function", "function_name": "calc_opt_merger_payoff" },
+  "cache_policy": "snapshot_bound",
+  "test_vectors": [],
+  "maturity": "Verified"
+}

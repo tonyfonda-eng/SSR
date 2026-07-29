@@ -1,0 +1,23 @@
+{
+  "calc_id": "CALC.MNA.DEAL_SPREAD",
+  "version": "1.0",
+  "name": "Gross Deal Spread Percentage",
+  "family": "Merger Arbitrage",
+  "description": "Calculates the un-annualized percentage spread between the target's current trading price and the announced cash consideration.",
+  "required_inputs": ["OBJ.FIN.CASH_CONSIDERATION", "OBJ.MKT.PRICE_SNAPSHOT"],
+  "output_object": "OBJ.FIN.DEAL_SPREAD_PCT",
+  "formula_expression": "(OBJ.FIN.CASH_CONSIDERATION - OBJ.MKT.PRICE_SNAPSHOT) / OBJ.MKT.PRICE_SNAPSHOT",
+  "assumptions": ["ASM.MNA.NO_TOPPING_BID"],
+  "precision": 4,
+  "test_vectors": [
+    {
+      "test_id": "TEST.MNA.SPREAD.001",
+      "input_values": {
+        "OBJ.FIN.CASH_CONSIDERATION": 50.00,
+        "OBJ.MKT.PRICE_SNAPSHOT": 46.00
+      },
+      "expected_output": 0.0869
+    }
+  ],
+  "maturity": "Verified"
+}

@@ -1,0 +1,26 @@
+[
+  {
+    "policy_id": "POLICY_FAST_TRIAGE",
+    "name": "Rapid Triage Mode",
+    "parallel_execution": true,
+    "retry_policy": "NO_RETRIES",
+    "stop_on_failure": true,
+    "allow_async": true,
+    "cache_strategy": "USE_CACHE",
+    "budget_limit_tokens": 50000,
+    "timeout_seconds": 60,
+    "max_ai_calls": 5
+  },
+  {
+    "policy_id": "POLICY_FULL_DD",
+    "name": "Full Institutional Due Diligence",
+    "parallel_execution": true,
+    "retry_policy": "3_RETRIES_EXPONENTIAL_BACKOFF",
+    "stop_on_failure": false,
+    "allow_async": true,
+    "cache_strategy": "FORCE_REFRESH",
+    "budget_limit_tokens": 500000,
+    "timeout_seconds": 600,
+    "max_ai_calls": 50
+  }
+]

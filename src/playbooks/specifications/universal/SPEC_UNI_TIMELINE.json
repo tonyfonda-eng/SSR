@@ -1,0 +1,22 @@
+{
+  "spec_id": "SPEC.UNI.TIMELINE.v3.2",
+  "module_id": "UNI.TIMELINE",
+  "version": "3.2",
+  "objective": "Extract critical operational calendar checkpoints.",
+  "activation": {
+    "requires_modules": ["UNI.STRUCTURE"],
+    "required_objects": []
+  },
+  "required_artifact_types": ["Document_Root", "Section"],
+  "minimum_evidence_tier": "Primary Filing",
+  "research_questions": ["What is the expected closing date?"],
+  "decision_rules": ["Prioritize outside date clauses."],
+  "ambiguity_strategy": "EmitMultipleObservations",
+  "confidence_method": "ExactMatch",
+  "produces_outputs": [
+    { "local_key": "cls", "schema_id": "SCHEMA.TIME.DATE", "object_id": "OBJ.TIME.EXPECTED_CLOSE_DATE" }
+  ],
+  "validation_rules": [],
+  "failure_conditions": ["No temporal markers found"],
+  "maturity": "Verified"
+}

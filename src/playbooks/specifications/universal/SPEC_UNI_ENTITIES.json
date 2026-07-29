@@ -1,0 +1,22 @@
+{
+  "spec_id": "SPEC.UNI.ENTITIES.v3.2",
+  "module_id": "UNI.ENTITIES",
+  "version": "3.2",
+  "objective": "Isolate raw legal party descriptor substrings.",
+  "activation": {
+    "requires_modules": [],
+    "required_objects": []
+  },
+  "required_artifact_types": ["Document_Root"],
+  "minimum_evidence_tier": "Primary Filing",
+  "research_questions": ["What are the precise corporate names?"],
+  "decision_rules": ["Scan preamble only."],
+  "ambiguity_strategy": "EmitCompetingAssertions",
+  "confidence_method": "HeaderPriority",
+  "produces_outputs": [
+    { "local_key": "tgt", "schema_id": "SCHEMA.CORP.LEGAL_ENTITY", "object_id": "OBJ.CORP.TARGET_ENTITY" }
+  ],
+  "validation_rules": [],
+  "failure_conditions": ["No entities found"],
+  "maturity": "Verified"
+}

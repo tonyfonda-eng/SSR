@@ -1,0 +1,11 @@
+[
+  {
+    "calc_id": "CALC.FIN.DEAL_SPREAD",
+    "name": "Gross Deal Spread Percentage",
+    "description": "Calculates the un-annualized spread between the target's current trading price and the announced cash consideration.",
+    "required_inputs": ["OBJ.FIN.CASH_CONSIDERATION", "OBJ.MKT.CURRENT_PRICE"],
+    "formula_expression": "(OBJ.FIN.CASH_CONSIDERATION - OBJ.MKT.CURRENT_PRICE) / OBJ.MKT.CURRENT_PRICE",
+    "output_object": "OBJ.FIN.DEAL_SPREAD_PCT",
+    "maturity": "Verified"
+  }
+]

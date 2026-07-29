@@ -1,0 +1,18 @@
+{
+  "calc_id": "CALC.OBJ.OPT.INTRINSIC_VALUE",
+  "category": "Object",
+  "namespace": "Options",
+  "deterministic": true,
+  "cache_policy": "immutable",
+  "implementation": {
+    "language": "python",
+    "function": "calc_obj_opt_intrinsic_value",
+    "version": "1.0.0"
+  },
+  "required_inputs": [
+    "OBJ.OPT.OPTION_CONTRACT",
+    "OBJ.MKT.PRICE_SNAPSHOT"
+  ],
+  "produces": "OBJ.OPT.INTRINSIC_VALUE",
+  "trigger_on": ["OBJ.MKT.PRICE_SNAPSHOT"]
+}

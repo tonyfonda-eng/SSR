@@ -1,0 +1,2 @@
+COMPONENT: EventBusSubscriber:legacy_adapter
+EXCEPTION: 'title'

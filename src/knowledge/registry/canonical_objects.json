@@ -1,0 +1,41 @@
+[
+  {
+    "object_id": "OBJ.CORP.TARGET_ENTITY",
+    "name": "M&A Target Entity",
+    "definition": "Exact registered legal name of the target entity.",
+    "semantic_type": "Fact",
+    "uses_schema_id": "SCHEMA.CORP.LEGAL_ENTITY",
+    "source_module": "UNI.ENTITIES",
+    "introduced_by_spec": "SPEC.UNI.ENTITIES.v3",
+    "maturity": "Verified"
+  },
+  {
+    "object_id": "OBJ.CORP.ACQUIRER_ENTITY",
+    "name": "M&A Acquirer Entity",
+    "definition": "Exact registered legal name of the acquirer parent entity.",
+    "semantic_type": "Fact",
+    "uses_schema_id": "SCHEMA.CORP.LEGAL_ENTITY",
+    "source_module": "UNI.ENTITIES",
+    "introduced_by_spec": "SPEC.UNI.ENTITIES.v3",
+    "maturity": "Verified"
+  },
+  {
+    "object_id": "OBJ.FIN.CASH_CONSIDERATION",
+    "name": "M&A Cash Consideration Payout",
+    "definition": "Gross cash consideration explicitly payable per common share to target stock holders.",
+    "semantic_type": "Fact",
+    "uses_schema_id": "SCHEMA.FIN.CURRENCY_AMOUNT",
+    "source_module": "UNI.CONSIDERATION",
+    "introduced_by_spec": "SPEC.UNI.CONSIDERATION.v3",
+    "maturity": "Verified"
+  },
+  {
+    "object_id": "OBJ.OPT.OPTION_CONTRACT",
+    "name": "OCC Option Contract Definition",
+    "definition": "Metadata for a specific tradeable option contract.",
+    "semantic_type": "Fact",
+    "uses_schema_id": "SCHEMA.OPT.CONTRACT",
+    "source_module": "UNI.SECURITIES",
+    "maturity": "Verified"
+  }
+]

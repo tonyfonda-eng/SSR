@@ -1,0 +1,23 @@
+{
+  "calc_id": "CALC.TAX.NET_DIVIDEND",
+  "version": "1.0",
+  "name": "Net Dividend Post-Withholding",
+  "family": "Tax",
+  "description": "Deducts cross-border withholding tax rates from gross distributions.",
+  "required_inputs": ["OBJ.DIS.GROSS_DIVIDEND", "OBJ.TAX.WITHHOLDING_RATE"],
+  "output_object": "OBJ.DIS.NET_DIVIDEND",
+  "implementation": {
+    "type": "python_function",
+    "function_name": "calc_tax_net_dividend"
+  },
+  "cache_policy": "immutable",
+  "test_vectors": [
+    {
+      "test_id": "TEST.TAX.WHT.001",
+      "input_values": { "OBJ.DIS.GROSS_DIVIDEND": 2.50, "OBJ.TAX.WITHHOLDING_RATE": 0.15 },
+      "expected_output": 2.1250,
+      "absolute_tolerance": 0.0001
+    }
+  ],
+  "maturity": "Verified"
+}

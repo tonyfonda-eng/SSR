@@ -1,0 +1,28 @@
+{
+  "playbook_id": "PLAYBOOK_CASH_MERGER",
+  "version": "1.1",
+  "canonical_name": "Comprehensive Cash Merger Research Blueprint",
+  "supported_ontology_nodes": ["CC-001-A", "CC-001-A4"],
+  "supported_instruments": ["COMMON STOCK", "ADR"],
+  "jurisdiction": "GLOBAL",
+  "stages": {
+    "Document Review": [
+      "MOD_UNI_DOCUMENT"
+    ],
+    "Transaction Review": [
+      "MOD_UNI_STRUCTURE",
+      "MOD_UNI_TIMELINE"
+    ],
+    "Risk & Regulatory Review": [
+      "MOD_UNI_REGULATORY",
+      "MOD_UNI_RISK"
+    ],
+    "Financial Review": [
+      "MOD_FIN_FINANCING"
+    ],
+    "Alpha Review": [
+      "MOD_ALPHA_SPREAD",
+      "MOD_ALPHA_OPTIONS"
+    ]
+  }
+}

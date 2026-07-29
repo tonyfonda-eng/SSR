@@ -1,0 +1,22 @@
+{
+  "spec_id": "SPEC.UNI.CLOSING.v3.2",
+  "module_id": "UNI.CLOSING",
+  "version": "3.2",
+  "objective": "Identify explicit regulatory and shareholder conditions required to close.",
+  "activation": {
+    "requires_modules": ["UNI.STRUCTURE"],
+    "required_objects": []
+  },
+  "required_artifact_types": ["Document_Root", "Section"],
+  "minimum_evidence_tier": "Primary Filing",
+  "research_questions": ["What specific regulatory bodies (FTC, DOJ, CMA) or shareholder votes are required?"],
+  "decision_rules": ["Extract conditions precedent to closing."],
+  "ambiguity_strategy": "EmitMultipleObservations",
+  "confidence_method": "HeaderPriority",
+  "produces_outputs": [
+    { "local_key": "cond", "schema_id": "SCHEMA.LEGAL.APPROVAL_CONDITION", "object_id": "OBJ.LEGAL.CLOSING_CONDITION" }
+  ],
+  "validation_rules": [],
+  "failure_conditions": ["No closing conditions explicitly stated"],
+  "maturity": "Verified"
+}

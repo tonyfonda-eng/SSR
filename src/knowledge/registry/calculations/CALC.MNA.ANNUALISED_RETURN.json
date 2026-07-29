@@ -1,0 +1,23 @@
+{
+  "calc_id": "CALC.MNA.ANNUALISED_RETURN",
+  "version": "1.0",
+  "name": "Annualized Arbitrage Yield",
+  "family": "Merger Arbitrage",
+  "description": "Extrapolates the gross deal spread across a 365-day year based on estimated days to close.",
+  "required_inputs": ["CALC.MNA.DEAL_SPREAD", "OBJ.TIME.DAYS_TO_CLOSE"],
+  "output_object": "OBJ.FIN.ANNUALISED_YIELD",
+  "formula_expression": "((1 + CALC.MNA.DEAL_SPREAD) ** (365 / OBJ.TIME.DAYS_TO_CLOSE)) - 1",
+  "assumptions": ["ASM.REG.STANDARD_TIMELINE"],
+  "precision": 4,
+  "test_vectors": [
+    {
+      "test_id": "TEST.MNA.YIELD.001",
+      "input_values": {
+        "CALC.MNA.DEAL_SPREAD": 0.0869,
+        "OBJ.TIME.DAYS_TO_CLOSE": 120
+      },
+      "expected_output": 0.2882
+    }
+  ],
+  "maturity": "Verified"
+}

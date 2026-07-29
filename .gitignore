@@ -1,0 +1,22 @@
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Credentials
+google_credentials.json
+
+# Databases
+*.sqlite
+*.sqlite-journal
+*.db
+data/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class

@@ -1,0 +1,14 @@
+{
+  "calc_id": "CALC.OPT.EXPECTED_SETTLEMENT",
+  "version": "1.0",
+  "name": "Merger Option Settlement Value",
+  "family": "Event Math",
+  "description": "Computes the terminal payoff of the option based on the cash consideration of the merger.",
+  "required_inputs": ["OBJ.OPT.OPTION_CONTRACT", "OBJ.FIN.CASH_CONSIDERATION"],
+  "output_object": "CALC.OPT.EXPECTED_SETTLEMENT",
+  "trigger_on": ["OBJ.FIN.CASH_CONSIDERATION"],
+  "implementation": { "type": "python_function", "function_name": "calc_opt_expected_settlement" },
+  "cache_policy": "snapshot_bound",
+  "test_vectors": [],
+  "maturity": "Verified"
+}

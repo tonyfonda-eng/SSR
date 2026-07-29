@@ -1,0 +1,22 @@
+{
+  "spec_id": "SPEC.UNI.GOVERNANCE.v3.2",
+  "module_id": "UNI.GOVERNANCE",
+  "version": "3.2",
+  "objective": "Extract the target board's official recommendation and fairness opinion providers.",
+  "activation": {
+    "requires_modules": ["UNI.ENTITIES"],
+    "required_objects": []
+  },
+  "required_artifact_types": ["Document_Root"],
+  "minimum_evidence_tier": "Primary Filing",
+  "research_questions": ["Did the board unanimously recommend the transaction?"],
+  "decision_rules": ["Locate the 'Recommendation of the Board' section."],
+  "ambiguity_strategy": "EmitCompetingAssertions",
+  "confidence_method": "ExactMatch",
+  "produces_outputs": [
+    { "local_key": "rec", "schema_id": "SCHEMA.CORP.ROLE", "object_id": "OBJ.CORP.BOARD_RECOMMENDATION" }
+  ],
+  "validation_rules": [],
+  "failure_conditions": ["No board recommendation found"],
+  "maturity": "Verified"
+}

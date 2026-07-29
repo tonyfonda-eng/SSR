@@ -1,0 +1,248 @@
+{
+  "Universal_Layer_Tier_1": {
+    "U01_DOCUMENT_ANALYSIS": {
+      "purpose": "Extract objective, raw structural text and verify disclosure completeness from primary source filings.",
+      "inputs": ["Raw Filings", "SEC Feeds", "Press Releases"],
+      "outputs": ["Document Completeness Flag", "Truncation Warning", "Filing Timestamp Summary"],
+      "ai_capability": "High-Context Extraction",
+      "parallelisable": true,
+      "cacheable": true
+    },
+    "U02_PARTIES_ENTITIES": {
+      "purpose": "Isolate exact legal entity names, target corporate shells, and parent jurisdictions.",
+      "inputs": ["U01_DOCUMENT_ANALYSIS Outputs"],
+      "outputs": ["Target Canonical Name", "Acquirer Parent Entity", "Jurisdiction Matrix"],
+      "ai_capability": "High-Context Extraction",
+      "parallelisable": true,
+      "cacheable": true
+    },
+    "U03_TRANSACTION_STRUCTURE": {
+      "purpose": "Map out the specific corporate action sub-type and technical transaction path.",
+      "inputs": ["U01_DOCUMENT_ANALYSIS Outputs"],
+      "outputs": ["Transaction Type Tag", "Structural Mechanism", "Governing Rule Schema"],
+      "ai_capability": "Logical Semantic Parsing",
+      "parallelisable": false,
+      "cacheable": true
+    },
+    "U04_CONSIDERATION_ANALYSIS": {
+      "purpose": "Parse the specific payout metrics, token definitions, or share exchange configurations.",
+      "inputs": ["U03_TRANSACTION_STRUCTURE Outputs"],
+      "outputs": ["Consideration Category", "Fixed vs Floating Status", "Cash Value per Unit"],
+      "ai_capability": "Logical Semantic Parsing",
+      "parallelisable": false,
+      "cacheable": true
+    },
+    "U05_TIMELINE_MILESTONES": {
+      "purpose": "Construct the strict temporal bounding boxes and key corporate dead-lines.",
+      "inputs": ["U01_DOCUMENT_ANALYSIS Outputs"],
+      "outputs": ["Record Date", "Election Deadline", "Payment Date", "Estimated Close Date"],
+      "ai_capability": "Temporal Extraction",
+      "parallelisable": true,
+      "cacheable": true
+    },
+    "U06_REGULATORY": {
+      "purpose": "Track global competition hurdles, antitrust cooling periods, and national security blocks.",
+      "inputs": ["U02_PARTIES_ENTITIES Outputs"],
+      "outputs": ["Pending Regulatory Approvals List", "HSR Expiration Track"],
+      "ai_capability": "Legal Concept Extraction",
+      "parallelisable": true,
+      "cacheable": true
+    },
+    "U07_RISK_CONDITIONS": {
+      "purpose": "Identify Material Adverse Change (MAC) exceptions and explicit closing preconditions.",
+      "inputs": ["U03_TRANSACTION_STRUCTURE Outputs"],
+      "outputs": ["Closing Preconditions Matrix", "MAC Break Clauses"],
+      "ai_capability": "Legal Concept Extraction",
+      "parallelisable": true,
+      "cacheable": true
+    },
+    "U08_GOVERNANCE": {
+      "purpose": "Parse required voting supermajorities, board split records, and fairness opinions.",
+      "inputs": ["U01_DOCUMENT_ANALYSIS Outputs"],
+      "outputs": ["Required Voting Threshold", "Board Recommendation Status"],
+      "ai_capability": "High-Context Extraction",
+      "parallelisable": true,
+      "cacheable": true
+    },
+    "U09_INSTRUMENT_MAPPING": {
+      "purpose": "Map the specific C-Corp shares, ADR classes, or tracking stock units impacted.",
+      "inputs": ["U02_PARTIES_ENTITIES Outputs"],
+      "outputs": ["Eligible CUSIPs", "Ticker Underlay Map"],
+      "ai_capability": "High-Context Extraction",
+      "parallelisable": true,
+      "cacheable": true
+    },
+    "U10_EVIDENCE_VALIDATION": {
+      "purpose": "Audit cross-filing compliance and assign source text verification scores.",
+      "inputs": ["All Prior Tier 1 Outputs"],
+      "outputs": ["Graph Cohesion Score", "Conflicting Fact Flags"],
+      "ai_capability": "Cross-Reference Validation",
+      "parallelisable": false,
+      "cacheable": false
+    }
+  },
+  "Financial_Layer_Tier_2": {
+    "F01_FINANCING": {
+      "purpose": "Audit deal funding parameters, debt syndication commitments, or bridge facility constraints.",
+      "inputs": ["U04_CONSIDERATION_ANALYSIS Outputs"],
+      "outputs": ["Committed Capital Value", "Financing Out Contingency Flag"],
+      "ai_capability": "Quantitative Reasoning",
+      "parallelisable": true,
+      "cacheable": true
+    },
+    "F02_TAX": {
+      "purpose": "Track corporate capital gain treatments, withholding rates, and cross-border tax status.",
+      "inputs": ["U02_PARTIES_ENTITIES Outputs", "U04_CONSIDERATION_ANALYSIS Outputs"],
+      "outputs": ["Taxability Status", "Backup Withholding Rate"],
+      "ai_capability": "Legal Concept Extraction",
+      "parallelisable": true,
+      "cacheable": true
+    },
+    "F03_VALUATION": {
+      "purpose": "Evaluate premium parameters, target enterprise ratios, and fairness assessment spreads.",
+      "inputs": ["U04_CONSIDERATION_ANALYSIS Outputs"],
+      "outputs": ["Implied Transaction Multiple", "Historical Premium vs 30-Day VWAP"],
+      "ai_capability": "Quantitative Reasoning",
+      "parallelisable": true,
+      "cacheable": true
+    },
+    "F04_CAPITAL_STRUCTURE": {
+      "purpose": "Map out current target share counts, dilutive warrants, and outstanding convertible debt stacks.",
+      "inputs": ["U09_INSTRUMENT_MAPPING Outputs"],
+      "outputs": ["Fully Diluted Share Count", "Convertible Debt Seniority Flag"],
+      "ai_capability": "Quantitative Reasoning",
+      "parallelisable": true,
+      "cacheable": true
+    },
+    "F05_ACCOUNTING": {
+      "purpose": "Extract amortization, restructuring allocations, and post-combination balance sheet write-ups.",
+      "inputs": ["U03_TRANSACTION_STRUCTURE Outputs"],
+      "outputs": ["Accounting Method Treatment", "Goodwill Allocation Estimate"],
+      "ai_capability": "Quantitative Reasoning",
+      "parallelisable": true,
+      "cacheable": true
+    },
+    "F06_CASH_FLOW": {
+      "purpose": "Calculate burn rates, terminal dividend flows, and liquidating cash pool stubs.",
+      "inputs": ["U05_TIMELINE_MILESTONES Outputs"],
+      "outputs": ["Net Cash Burn Profile", "Residual Cash Stub Projection"],
+      "ai_capability": "Quantitative Reasoning",
+      "parallelisable": true,
+      "cacheable": true
+    },
+    "F07_IRR_SPREAD": {
+      "purpose": "Track dynamic transaction spreads and calculate annualized net yield rates.",
+      "inputs": ["U04_CONSIDERATION_ANALYSIS Outputs", "U05_TIMELINE_MILESTONES Outputs"],
+      "outputs": ["Gross Transaction Spread", "Annualized IRR Estimate"],
+      "ai_capability": "Quantitative Reasoning",
+      "parallelisable": true,
+      "cacheable": false
+    },
+    "F08_FX": {
+      "purpose": "Isolate multi-currency conversion thresholds, cross-border pegging risks, and payment day collars.",
+      "inputs": ["U04_CONSIDERATION_ANALYSIS Outputs"],
+      "outputs": ["Base Currency", "FX Adjustment Collar Parameters"],
+      "ai_capability": "Quantitative Reasoning",
+      "parallelisable": true,
+      "cacheable": true
+    },
+    "F09_DISTRIBUTION_MECHANICS": {
+      "purpose": "Map out physical disbursement channels, proration scaling rules, and transfer agent routing.",
+      "inputs": ["U03_TRANSACTION_STRUCTURE Outputs"],
+      "outputs": ["Proration Cap Threshold", "Disbursement Method Status"],
+      "ai_capability": "Logical Semantic Parsing",
+      "parallelisable": false,
+      "cacheable": true
+    },
+    "F10_LIQUIDATION_WATERFALL": {
+      "purpose": "Determine payout priorities across senior debt, preferred classes, and common equity stacks.",
+      "inputs": ["F04_CAPITAL_STRUCTURE Outputs"],
+      "outputs": ["Equity Settlement Tier", "Residual Waterfall Recovery Rate"],
+      "ai_capability": "Quantitative Reasoning",
+      "parallelisable": false,
+      "cacheable": true
+    }
+  },
+  "Alpha_Layer_Tier_3": {
+    "A01_OPTIONS_TELEMETRY": {
+      "purpose": "Analyze implied volatility crushes, strike skew metrics, and premium decay options profiles.",
+      "inputs": ["U09_INSTRUMENT_MAPPING Outputs", "F07_IRR_SPREAD Outputs"],
+      "outputs": ["IV Term Structure Skew", "Naked Call Position Risk Profile"],
+      "ai_capability": "Quantitative Reasoning",
+      "parallelisable": true,
+      "cacheable": false
+    },
+    "A02_SHORT_INTEREST": {
+      "purpose": "Track short volumes, open short allocations, and target short squeeze indicators.",
+      "inputs": ["U09_INSTRUMENT_MAPPING Outputs"],
+      "outputs": ["Short Float Percentage", "Days to Cover Metric"],
+      "ai_capability": "Quantitative Reasoning",
+      "parallelisable": true,
+      "cacheable": false
+    },
+    "A03_SECURITIES_LENDING": {
+      "purpose": "Monitor inventory levels, institutional borrow rates, and short squeeze thresholds.",
+      "inputs": ["U09_INSTRUMENT_MAPPING Outputs"],
+      "outputs": ["Borrow Fee Percentage", "Lending Inventory Utilization Score"],
+      "ai_capability": "Quantitative Reasoning",
+      "parallelisable": true,
+      "cacheable": false
+    },
+    "A04_OWNERSHIP": {
+      "purpose": "Evaluate arbitrage fund positioning, tracking index blocks, and insider holding concentrations.",
+      "inputs": ["U02_PARTIES_ENTITIES Outputs"],
+      "outputs": ["Arbitrage Concentration Index", "Insider Alignment Percentage"],
+      "ai_capability": "High-Context Extraction",
+      "parallelisable": true,
+      "cacheable": false
+    },
+    "A05_PEER_TRANSACTIONS": {
+      "purpose": "Query previous sector historical timelines to compute benchmark transaction duration.",
+      "inputs": ["U03_TRANSACTION_STRUCTURE Outputs"],
+      "outputs": ["Historical Peer Mean Duration", "Sector Spread Standard Deviation"],
+      "ai_capability": "Cross-Reference Validation",
+      "parallelisable": true,
+      "cacheable": true
+    },
+    "A06_COMPETING_BID_PROBABILITY": {
+      "purpose": "Analyze premium size, topping fee ratios, and inter-bidder hostility variables.",
+      "inputs": ["F03_VALUATION_Outputs", "U07_RISK_CONDITIONS Outputs"],
+      "outputs": ["Topping Bid Probability Score", "Inter-Lover Rivalry Index"],
+      "ai_capability": "Quantitative Reasoning",
+      "parallelisable": false,
+      "cacheable": false
+    },
+    "A07_INSIDER_BEHAVIOUR": {
+      "purpose": "Monitor executive Form 4 distributions, blackout exceptions, and management open market transactions.",
+      "inputs": ["U02_PARTIES_ENTITIES Outputs"],
+      "outputs": ["Net Management Accumulation Vector", "Insider Blackout Status"],
+      "ai_capability": "High-Context Extraction",
+      "parallelisable": true,
+      "cacheable": false
+    },
+    "A08_ARBITRAGE_DYNAMICS": {
+      "purpose": "Identify cross-exchange parity spreads, index tracking frictions, and tracking basket imbalances.",
+      "inputs": ["F07_IRR_SPREAD Outputs"],
+      "outputs": ["Net Arbitrage Yield Parity", "Friction Premium Index"],
+      "ai_capability": "Quantitative Reasoning",
+      "parallelisable": true,
+      "cacheable": false
+    },
+    "A09_EVENT_QUALITY_SCORE": {
+      "purpose": "Synthesize structural components to rank absolute closing probabilities vs failure risks.",
+      "inputs": ["U10_EVIDENCE_VALIDATION Outputs", "A06_COMPETING_BID_PROBABILITY Outputs"],
+      "outputs": ["SSR Event Quality Rank", "Absolute Transaction Failure Probability"],
+      "ai_capability": "Quantitative Reasoning",
+      "parallelisable": false,
+      "cacheable": false
+    },
+    "A10_MARKET_MICROSTRUCTURE": {
+      "purpose": "Track depth-of-book order books, trade imbalance loops, and odd-lot flow metrics.",
+      "inputs": ["U09_INSTRUMENT_MAPPING Outputs"],
+      "outputs": ["Order Book Liquidity Depth Score", "Odd-Lot Priority Retail Vector"],
+      "ai_capability": "Quantitative Reasoning",
+      "parallelisable": true,
+      "cacheable": false
+    }
+  }
+}

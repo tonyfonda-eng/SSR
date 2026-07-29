@@ -1,0 +1,16 @@
+[
+  {
+    "edge_id": "EDG.MNA.XYZ_CASH_TERMS",
+    "relationship": "APPLIES_TO",
+    "source": {
+      "reference_type": "Assertion",
+      "reference_id": "AST.FIN.CASH_CONSIDERATION.001"
+    },
+    "target": {
+      "reference_type": "OntologyNode",
+      "reference_id": "CC-001-A4"
+    },
+    "assertion_id": "AST.FIN.CASH_CONSIDERATION.001",
+    "created_at": "2026-07-27T12:46:00Z"
+  }
+]

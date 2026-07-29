@@ -1,0 +1,16 @@
+[
+  {
+    "assumption_id": "ASM.MNA.NO_TOPPING_BID",
+    "statement": "No superior competing bid will emerge prior to shareholder vote.",
+    "confidence_score": 0.85,
+    "expiry_date": null,
+    "dependent_assertions": []
+  },
+  {
+    "assumption_id": "ASM.REG.STANDARD_TIMELINE",
+    "statement": "Regulatory bodies will not issue a Second Request or extensive delay.",
+    "confidence_score": 0.70,
+    "expiry_date": null,
+    "dependent_assertions": []
+  }
+]

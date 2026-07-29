@@ -1,0 +1,286 @@
+[
+  {
+    "schema_id": "SCHEMA.FIN.CURRENCY_AMOUNT",
+    "version": "1.0",
+    "name": "Standardized Currency Metric",
+    "layer": "Financial",
+    "fields": [
+      {
+        "name": "amount",
+        "datatype": "float",
+        "required": true,
+        "description": "Absolute quantitative value"
+      },
+      {
+        "name": "currency_code",
+        "datatype": "string",
+        "required": true,
+        "description": "ISO 4217 currency block code"
+      },
+      {
+        "name": "gross_net",
+        "datatype": "string",
+        "required": true,
+        "description": "Gross or Net treatment status"
+      },
+      {
+        "name": "per_share",
+        "datatype": "boolean",
+        "required": true,
+        "description": "True if unit evaluated per share"
+      }
+    ],
+    "validation_rules": [
+      "amount >= 0.0",
+      "currency_code matches ^[A-Z]{3}$"
+    ],
+    "maturity": "Verified"
+  },
+  {
+    "schema_id": "SCHEMA.FIN.PERCENTAGE",
+    "version": "1.0",
+    "name": "Standardized Percentage Float",
+    "layer": "Financial",
+    "fields": [
+      {
+        "name": "value",
+        "datatype": "float",
+        "required": true,
+        "description": "Percentage value expressed as decimals"
+      }
+    ],
+    "validation_rules": [
+      "value >= -1.0"
+    ],
+    "maturity": "Verified"
+  },
+  {
+    "schema_id": "SCHEMA.TIME.DATE",
+    "version": "1.0",
+    "name": "Standardized ISO Temporal Timestamp",
+    "layer": "Time",
+    "fields": [
+      {
+        "name": "iso_timestamp",
+        "datatype": "datetime",
+        "required": true,
+        "description": "ISO 8601 calendar coordinate"
+      },
+      {
+        "name": "date_type",
+        "datatype": "string",
+        "required": true,
+        "description": "Definitive, Estimated, Target, drop-dead"
+      }
+    ],
+    "validation_rules": [],
+    "maturity": "Verified"
+  },
+  {
+    "schema_id": "SCHEMA.CORP.LEGAL_ENTITY",
+    "version": "1.0",
+    "name": "Standardized Corporate Entity",
+    "layer": "Corporate",
+    "fields": [
+      {
+        "name": "canonical_name",
+        "datatype": "string",
+        "required": true,
+        "description": "Full registered legal string"
+      },
+      {
+        "name": "jurisdiction",
+        "datatype": "string",
+        "required": false,
+        "description": "State or country of incorporation"
+      },
+      {
+        "name": "is_shell_company",
+        "datatype": "boolean",
+        "required": true,
+        "description": "True if entity is a temporary merger sub"
+      }
+    ],
+    "validation_rules": [],
+    "maturity": "Verified"
+  },
+  {
+    "schema_id": "SCHEMA.CORP.SECURITY",
+    "version": "1.0",
+    "name": "Standardized Tradable Security",
+    "layer": "Corporate",
+    "fields": [
+      {
+        "name": "security_class",
+        "datatype": "string",
+        "required": true,
+        "description": "Common, Preferred, ADR, Warrant"
+      },
+      {
+        "name": "primary_ticker",
+        "datatype": "string",
+        "required": false,
+        "description": "Exchange trading symbol"
+      }
+    ],
+    "validation_rules": [],
+    "maturity": "Verified"
+  },
+  {
+    "schema_id": "SCHEMA.OPT.CONTRACT",
+    "version": "2.0",
+    "name": "Institutional Option Contract",
+    "fields": [
+      {
+        "name": "underlying_ticker",
+        "datatype": "string",
+        "required": true
+      },
+      {
+        "name": "occ_symbol",
+        "datatype": "string",
+        "required": true
+      },
+      {
+        "name": "strike",
+        "datatype": "float",
+        "required": true
+      },
+      {
+        "name": "expiration",
+        "datatype": "datetime",
+        "required": true
+      },
+      {
+        "name": "option_type",
+        "datatype": "string",
+        "required": true
+      },
+      {
+        "name": "exercise_style",
+        "datatype": "string",
+        "required": true
+      },
+      {
+        "name": "multiplier",
+        "datatype": "float",
+        "required": true
+      },
+      {
+        "name": "deliverable",
+        "datatype": "string",
+        "required": true
+      },
+      {
+        "name": "settlement_type",
+        "datatype": "string",
+        "required": true
+      },
+      {
+        "name": "listing_exchange",
+        "datatype": "string",
+        "required": true
+      },
+      {
+        "name": "is_adjusted",
+        "datatype": "boolean",
+        "required": true
+      },
+      {
+        "name": "occ_memo_id",
+        "datatype": "string",
+        "required": false
+      },
+      {
+        "name": "contract_size",
+        "datatype": "int",
+        "required": true
+      },
+      {
+        "name": "currency",
+        "datatype": "string",
+        "required": true
+      }
+    ],
+    "validation_rules": [
+      "strike >= 0.0"
+    ],
+    "maturity": "Institutional"
+  },
+  {
+    "schema_id": "SCHEMA.MKT.SNAPSHOT",
+    "version": "1.0",
+    "name": "Market Price Snapshot",
+    "fields": [
+      {
+        "name": "timestamp",
+        "datatype": "datetime",
+        "required": true
+      },
+      {
+        "name": "price",
+        "datatype": "float",
+        "required": true
+      },
+      {
+        "name": "bid",
+        "datatype": "float",
+        "required": false
+      },
+      {
+        "name": "ask",
+        "datatype": "float",
+        "required": false
+      },
+      {
+        "name": "volume",
+        "datatype": "int",
+        "required": false
+      },
+      {
+        "name": "exchange",
+        "datatype": "string",
+        "required": false
+      }
+    ],
+    "validation_rules": [
+      "price >= 0.0"
+    ],
+    "maturity": "Institutional"
+  },
+  {
+    "schema_id": "SCHEMA.DOC.SEC_FILING",
+    "version": "1.0",
+    "name": "SEC Regulatory Filing",
+    "layer": "Document",
+    "fields": [
+      {
+        "name": "ticker",
+        "datatype": "string",
+        "required": true
+      },
+      {
+        "name": "form_type",
+        "datatype": "string",
+        "required": true
+      },
+      {
+        "name": "accession_number",
+        "datatype": "string",
+        "required": true
+      },
+      {
+        "name": "filing_date",
+        "datatype": "string",
+        "required": true
+      },
+      {
+        "name": "document_url",
+        "datatype": "string",
+        "required": true
+      }
+    ],
+    "validation_rules": [],
+    "maturity": "Institutional"
+  }
+]

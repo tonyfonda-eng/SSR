@@ -1,0 +1,21 @@
+{
+  "event_id": "EVT.TEST.TXNM_GOLDEN",
+  "position_record": {
+    "ticker": "TXNM",
+    "position_type": "short",
+    "quantity": -10,
+    "average_entry_price": 2.00,
+    "multiplier": 100.0
+  },
+  "option_contract": {
+    "option_type": "call",
+    "strike": 45.0
+  },
+  "market_price": {
+    "price": 43.50
+  },
+  "cash_consideration": {
+    "price": 48.00,
+    "currency": "USD"
+  }
+}

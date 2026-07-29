@@ -1,0 +1,20 @@
+{
+  "playbook_id": "PLAYBOOK_ETF_LIQUIDATION",
+  "version": "1.1",
+  "canonical_name": "Exchange Traded Fund Terminal Liquidation Blueprint",
+  "supported_ontology_nodes": ["FND-001"],
+  "supported_instruments": ["ETF"],
+  "jurisdiction": "GLOBAL",
+  "stages": {
+    "Document Review": [
+      "MOD_UNI_DOCUMENT"
+    ],
+    "Timeline Review": [
+      "MOD_UNI_TIMELINE"
+    ],
+    "Financial Review": [
+      "MOD_FIN_TAX",
+      "MOD_FIN_VALUATION"
+    ]
+  }
+}

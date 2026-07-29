@@ -1,0 +1,22 @@
+{
+  "spec_id": "SPEC.UNI.SECURITIES.v3.2",
+  "module_id": "UNI.SECURITIES",
+  "version": "3.2",
+  "objective": "Extract specific tradeable instruments.",
+  "activation": {
+    "requires_modules": ["UNI.ENTITIES"],
+    "required_objects": []
+  },
+  "required_artifact_types": ["Document_Root", "Table"],
+  "minimum_evidence_tier": "Primary Filing",
+  "research_questions": ["What are the specific tickers and CUSIPs?"],
+  "decision_rules": ["Extract specific security identifiers."],
+  "ambiguity_strategy": "EmitMultipleObservations",
+  "confidence_method": "TablePriority",
+  "produces_outputs": [
+    { "local_key": "sec", "schema_id": "SCHEMA.CORP.SECURITY", "object_id": "OBJ.CORP.TARGET_SECURITY" }
+  ],
+  "validation_rules": [],
+  "failure_conditions": ["Unable to resolve security"],
+  "maturity": "Verified"
+}

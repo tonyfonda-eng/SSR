@@ -1,0 +1,14 @@
+{
+  "calc_id": "CALC.OPT.INTRINSIC_VALUE",
+  "version": "1.0",
+  "name": "Option Intrinsic Value",
+  "family": "Options Math",
+  "description": "Calculates the embedded in-the-money value of an option contract.",
+  "required_inputs": ["OBJ.OPT.OPTION_CONTRACT", "OBJ.MKT.PRICE_SNAPSHOT"],
+  "output_object": "CALC.OPT.INTRINSIC_VALUE",
+  "trigger_on": ["OBJ.MKT.PRICE_SNAPSHOT"],
+  "implementation": { "type": "python_function", "function_name": "calc_opt_intrinsic_value" },
+  "cache_policy": "volatile",
+  "test_vectors": [],
+  "maturity": "Verified"
+}

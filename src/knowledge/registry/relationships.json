@@ -1,0 +1,20 @@
+[
+  {
+    "relationship_id": "REL.ACQUIRED_BY",
+    "name": "Acquired By",
+    "description": "Indicates target firm is absorbed or merged into the acquirer corporate parent structure.",
+    "inverse_relationship_id": "REL.ACQUIRES"
+  },
+  {
+    "relationship_id": "REL.APPLIES_TO",
+    "name": "Applies To",
+    "description": "Binds specific analytical metrics or considerations directly to an instrument tier node.",
+    "inverse_relationship_id": null
+  },
+  {
+    "relationship_id": "REL.BLOCKED_BY",
+    "name": "Blocked By",
+    "description": "Denotes a hard closing timeline lock requiring explicit regulatory clearings or conditions removal.",
+    "inverse_relationship_id": "REL.BLOCKS"
+  }
+]

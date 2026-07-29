@@ -1,0 +1,19 @@
+{
+  "calc_id": "CALC.MNA.OPT.MERGER_PAYOFF",
+  "category": "Analytics",
+  "namespace": "Merger Arbitrage",
+  "deterministic": true,
+  "cache_policy": "volatile",
+  "implementation": {
+    "language": "python",
+    "function": "calc_mna_opt_merger_payoff",
+    "version": "1.0.0"
+  },
+  "required_inputs": [
+    "OBJ.OPT.OPTION_CONTRACT",
+    "OBJ.PORT.POSITION_RECORD",
+    "OBJ.FIN.CASH_CONSIDERATION"
+  ],
+  "produces": "OBJ.MNA.OPT.TERMINAL_PAYOFF",
+  "trigger_on": ["OBJ.FIN.CASH_CONSIDERATION"]
+}

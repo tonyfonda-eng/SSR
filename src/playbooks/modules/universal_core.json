@@ -1,0 +1,77 @@
+[
+  {
+    "module_id": "MOD_UNI_DOCUMENT",
+    "name": "Universal Document Analysis",
+    "layer": "Universal",
+    "inputs": ["Raw Disclosures", "SEC Feeds", "Press Releases"],
+    "outputs": ["Identified Counterparties", "Governing Law", "Document Completeness Flag", "Missing Disclosures"],
+    "dependencies": [],
+    "required_documents": ["Primary Announcement"],
+    "estimated_runtime": "30 Seconds",
+    "ai_capability": "High-Context Extraction",
+    "validation_rules": ["Must return absolute legal entities", "Must flag if primary source text is truncated"],
+    "tasks": [
+        {
+            "task_id": "TASK_DOC_001",
+            "name": "Extract Core Legal Counterparties",
+            "specification": {
+                "specification_id": "SPEC_DOC_001",
+                "objective": "Identify the exact legal entities acting as Acquirer, Target, or Issuer.",
+                "required_inputs": ["Primary Announcement Text"],
+                "required_outputs": ["Target Legal Name", "Acquirer Legal Name", "Jurisdiction of Incorporation"],
+                "evidence_status": "Required"
+            }
+        }
+    ]
+  },
+  {
+    "module_id": "MOD_UNI_STRUCTURE",
+    "name": "Transaction Structure Mechanics",
+    "layer": "Universal",
+    "inputs": ["MOD_UNI_DOCUMENT Outputs", "Primary Announcement"],
+    "outputs": ["Consideration Type", "Election Mechanics", "Odd-Lot Provisions", "Break Fee"],
+    "dependencies": ["MOD_UNI_DOCUMENT"],
+    "required_documents": ["Merger Agreement", "Proxy Statement", "Schedule TO"],
+    "estimated_runtime": "45 Seconds",
+    "ai_capability": "Logical Semantic Parsing",
+    "validation_rules": ["Consideration type must be categorized as Cash, Stock, or Mixed"],
+    "tasks": [
+        {
+            "task_id": "TASK_STRUC_001",
+            "name": "Determine Consideration Mechanics",
+            "specification": {
+                "specification_id": "SPEC_STRUC_001",
+                "objective": "Extract the exact nature of the consideration offered to security holders.",
+                "required_inputs": ["Merger Agreement or Press Release"],
+                "required_outputs": ["Consideration Mix", "Fixed vs Floating Status", "Odd-Lot Priority Exists (Boolean)"],
+                "evidence_status": "Required"
+            }
+        }
+    ]
+  },
+  {
+    "module_id": "MOD_UNI_REGULATORY",
+    "name": "Global Regulatory & Competition Approvals",
+    "layer": "Universal",
+    "inputs": ["MOD_UNI_DOCUMENT Outputs"],
+    "outputs": ["HSR Requirement", "CFIUS Requirement", "CMA/EC Triggers", "Sector-Specific Approvals"],
+    "dependencies": ["MOD_UNI_DOCUMENT"],
+    "required_documents": ["Definitive Agreement", "8-K"],
+    "estimated_runtime": "30 Seconds",
+    "ai_capability": "Legal Concept Extraction",
+    "validation_rules": ["Must explicitly list pending regulatory bodies"],
+    "tasks": [
+        {
+            "task_id": "TASK_REG_001",
+            "name": "Map Antitrust & Competition Conditions",
+            "specification": {
+                "specification_id": "SPEC_REG_001",
+                "objective": "Identify all regulatory hurdles explicitly listed as closing conditions.",
+                "required_inputs": ["Definitive Agreement 'Conditions to Closing' Section"],
+                "required_outputs": ["List of Regulatory Agencies", "HSR Waiting Period Expiration Date (if known)"],
+                "evidence_status": "Required"
+            }
+        }
+    ]
+  }
+]

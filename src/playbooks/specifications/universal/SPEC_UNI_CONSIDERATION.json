@@ -1,0 +1,22 @@
+{
+  "spec_id": "SPEC.UNI.CONSIDERATION.v3.2",
+  "module_id": "UNI.CONSIDERATION",
+  "version": "3.2",
+  "objective": "Locate raw payout quantities and financial settlement variables.",
+  "activation": {
+    "requires_modules": ["UNI.STRUCTURE"],
+    "required_objects": []
+  },
+  "required_artifact_types": ["Document_Root", "Table"],
+  "minimum_evidence_tier": "Primary Filing",
+  "research_questions": ["What numerical distributions are allocated?"],
+  "decision_rules": ["Isolate quantitative figures."],
+  "ambiguity_strategy": "EmitMultipleObservations",
+  "confidence_method": "TablePriority",
+  "produces_outputs": [
+    { "local_key": "csh", "schema_id": "SCHEMA.FIN.CURRENCY_AMOUNT", "object_id": "OBJ.FIN.CASH_CONSIDERATION" }
+  ],
+  "validation_rules": [],
+  "failure_conditions": ["No currency parameters located"],
+  "maturity": "Verified"
+}

@@ -1,0 +1,22 @@
+{
+  "spec_id": "SPEC.UNI.STRUCTURE.v3.2",
+  "module_id": "UNI.STRUCTURE",
+  "version": "3.2",
+  "objective": "Classify the exact legal mechanics of the corporate action.",
+  "activation": {
+    "requires_modules": ["UNI.ENTITIES"],
+    "required_objects": []
+  },
+  "required_artifact_types": ["Document_Root"],
+  "minimum_evidence_tier": "Primary Filing",
+  "research_questions": ["Is this a merger, tender offer, or liquidation?"],
+  "decision_rules": ["Identify primary legal mechanism."],
+  "ambiguity_strategy": "EmitCompetingAssertions",
+  "confidence_method": "HeaderPriority",
+  "produces_outputs": [
+    { "local_key": "str", "schema_id": "SCHEMA.CORP.LEGAL_ENTITY", "object_id": "OBJ.CORP.DEAL_STRUCTURE" }
+  ],
+  "validation_rules": [],
+  "failure_conditions": ["No recognized structure"],
+  "maturity": "Verified"
+}

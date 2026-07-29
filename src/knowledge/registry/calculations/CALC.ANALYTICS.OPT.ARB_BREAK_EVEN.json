@@ -1,0 +1,18 @@
+{
+  "calc_id": "CALC.ANALYTICS.OPT.ARB_BREAK_EVEN",
+  "category": "Analytics",
+  "namespace": "Options",
+  "deterministic": true,
+  "cache_policy": "volatile",
+  "implementation": {
+    "language": "python",
+    "function": "calc_analytics_opt_arb_break_even",
+    "version": "1.0.0"
+  },
+  "required_inputs": [
+    "OBJ.OPT.OPTION_CONTRACT",
+    "OBJ.MKT.PREMIUM_SNAPSHOT"
+  ],
+  "produces": "OBJ.ANALYTICS.OPT.BREAK_EVEN_PRICE",
+  "trigger_on": ["OBJ.MKT.PREMIUM_SNAPSHOT"]
+}

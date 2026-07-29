@@ -1,0 +1,99 @@
+{
+  "event_id": "EVT.2026.REPLAY_PROOF",
+  "completed_modules": [],
+  "available_objects": [
+    "OBJ.ANALYTICS.OPT.ASSIGNMENT_PROBABILITY",
+    "OBJ.OPT.OPTION_CONTRACT",
+    "OBJ.ANALYTICS.OPT.BREAK_EVEN_PRICE",
+    "OBJ.OPT.EXTRINSIC_VALUE",
+    "OBJ.MKT.PRICE_SNAPSHOT",
+    "OBJ.MKT.PREMIUM_SNAPSHOT",
+    "OBJ.OPT.INTRINSIC_VALUE"
+  ],
+  "market_snapshots": {
+    "OBJ.OPT.OPTION_CONTRACT": {
+      "option_type": "call",
+      "strike": 40.0
+    },
+    "OBJ.MKT.PRICE_SNAPSHOT": {
+      "price": 46.5
+    },
+    "OBJ.MKT.PREMIUM_SNAPSHOT": {
+      "price": 8.0
+    }
+  },
+  "calculation_results": {
+    "OBJ.OPT.INTRINSIC_VALUE": {
+      "result_value": 6.5,
+      "input_object_ids": [
+        "OBJ.OPT.OPTION_CONTRACT",
+        "OBJ.MKT.PRICE_SNAPSHOT"
+      ],
+      "input_hash": "dd9e39f4d54519618e23bf2b29ce45ed79b8e41f97e0600c7e76f4a574964604",
+      "implementation_version": "1.0.0",
+      "execution_time_ms": 0.006640000037805294,
+      "calculated_at": "2026-07-27 22:14:56.527384"
+    },
+    "OBJ.OPT.EXTRINSIC_VALUE": {
+      "result_value": 1.5,
+      "input_object_ids": [
+        "OBJ.MKT.PREMIUM_SNAPSHOT",
+        "OBJ.OPT.INTRINSIC_VALUE"
+      ],
+      "input_hash": "39d720b24ec0b47dbb814b5bc78941869f2f3a506bf858c0eab05a264bf252e3",
+      "implementation_version": "1.0.0",
+      "execution_time_ms": 0.003971000069213915,
+      "calculated_at": "2026-07-27 22:14:56.527460"
+    },
+    "OBJ.ANALYTICS.OPT.ASSIGNMENT_PROBABILITY": {
+      "result_value": 0.45,
+      "input_object_ids": [
+        "OBJ.OPT.INTRINSIC_VALUE",
+        "OBJ.OPT.EXTRINSIC_VALUE",
+        "OBJ.OPT.OPTION_CONTRACT"
+      ],
+      "input_hash": "f368634a54842c1150e564397aed4acf139a492058ad9bb3a4ddcb726d437a56",
+      "implementation_version": "1.0.0",
+      "execution_time_ms": 0.00228800013246655,
+      "calculated_at": "2026-07-27 22:14:56.527502"
+    },
+    "OBJ.ANALYTICS.OPT.BREAK_EVEN_PRICE": {
+      "result_value": 48.0,
+      "input_object_ids": [
+        "OBJ.OPT.OPTION_CONTRACT",
+        "OBJ.MKT.PREMIUM_SNAPSHOT"
+      ],
+      "input_hash": "92d7ffdd8e878c8548157646c9c8837a4f04710f02c3042cdb378820431cb281",
+      "implementation_version": "1.0.0",
+      "execution_time_ms": 0.0017579998257133411,
+      "calculated_at": "2026-07-27 22:14:56.527533"
+    }
+  },
+  "ledger": [
+    {
+      "timestamp": "2026-07-27T22:14:56.527233",
+      "action": "CONTEXT_INITIALIZED",
+      "details": {}
+    },
+    {
+      "timestamp": "2026-07-27T22:14:56.527403",
+      "action": "REACTIVE_TRIGGER: CALC.OBJ.OPT.INTRINSIC_VALUE fired by OBJ.MKT.PRICE_SNAPSHOT",
+      "details": {}
+    },
+    {
+      "timestamp": "2026-07-27T22:14:56.527462",
+      "action": "REACTIVE_TRIGGER: CALC.OBJ.OPT.EXTRINSIC_VALUE fired by OBJ.MKT.PREMIUM_SNAPSHOT",
+      "details": {}
+    },
+    {
+      "timestamp": "2026-07-27T22:14:56.527511",
+      "action": "REACTIVE_TRIGGER: CALC.ANALYTICS.OPT.ASSIGNMENT_RISK fired by OBJ.OPT.EXTRINSIC_VALUE",
+      "details": {}
+    },
+    {
+      "timestamp": "2026-07-27T22:14:56.527535",
+      "action": "REACTIVE_TRIGGER: CALC.ANALYTICS.OPT.ARB_BREAK_EVEN fired by OBJ.MKT.PREMIUM_SNAPSHOT",
+      "details": {}
+    }
+  ]
+}

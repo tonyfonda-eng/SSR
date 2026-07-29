@@ -1,0 +1,18 @@
+{
+  "calc_id": "CALC.PORT.POSITION_PNL",
+  "category": "Portfolio",
+  "namespace": "Positions",
+  "deterministic": true,
+  "cache_policy": "volatile",
+  "implementation": {
+    "language": "python",
+    "function": "calc_port_position_pnl",
+    "version": "1.0.0"
+  },
+  "required_inputs": [
+    "OBJ.PORT.POSITION_RECORD",
+    "OBJ.MKT.PREMIUM_SNAPSHOT"
+  ],
+  "produces": "OBJ.PORT.POSITION_PNL",
+  "trigger_on": ["OBJ.MKT.PREMIUM_SNAPSHOT"]
+}

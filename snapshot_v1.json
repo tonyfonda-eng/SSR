@@ -1,0 +1,109 @@
+{
+  "event_id": "EVT.2026.FREEZE_RUN",
+  "completed_modules": [],
+  "available_objects": [
+    "OBJ.MKT.PRICE_SNAPSHOT",
+    "OBJ.ANALYTICS.OPT.ASSIGNMENT_PROBABILITY",
+    "OBJ.OPT.INTRINSIC_VALUE",
+    "OBJ.ANALYTICS.OPT.BREAK_EVEN_PRICE",
+    "OBJ.OPT.EXTRINSIC_VALUE",
+    "OBJ.MKT.PREMIUM_SNAPSHOT",
+    "OBJ.OPT.OPTION_CONTRACT"
+  ],
+  "market_snapshots": {
+    "OBJ.OPT.OPTION_CONTRACT": {
+      "option_type": "call",
+      "strike": 35.0
+    },
+    "OBJ.MKT.PRICE_SNAPSHOT": {
+      "price": 38.5
+    },
+    "OBJ.MKT.PREMIUM_SNAPSHOT": {
+      "price": 4.5
+    }
+  },
+  "calculation_results": {
+    "OBJ.ANALYTICS.OPT.BREAK_EVEN_PRICE": {
+      "result_value": 39.5,
+      "input_object_ids": [
+        "OBJ.OPT.OPTION_CONTRACT",
+        "OBJ.MKT.PREMIUM_SNAPSHOT"
+      ],
+      "input_hash": "7645ec7c15f2bf2f9a18a0c6bdc319d54c37e6e3ed5ce2060ccde944ec98c6b5",
+      "implementation_version": "1.0.0",
+      "execution_time_ms": 0.0038350001432263525,
+      "calculated_at": "2026-07-27 22:07:41.488399"
+    },
+    "OBJ.OPT.INTRINSIC_VALUE": {
+      "result_value": 3.5,
+      "input_object_ids": [
+        "OBJ.OPT.OPTION_CONTRACT",
+        "OBJ.MKT.PRICE_SNAPSHOT"
+      ],
+      "input_hash": "f4f406f95fe90dcc3433c007bf80913a44069b1d954404ca2e9bf1791395d985",
+      "implementation_version": "1.0.0",
+      "execution_time_ms": 0.006395999889718951,
+      "calculated_at": "2026-07-27 22:07:41.488534"
+    },
+    "OBJ.OPT.EXTRINSIC_VALUE": {
+      "result_value": 1.0,
+      "input_object_ids": [
+        "OBJ.MKT.PREMIUM_SNAPSHOT",
+        "OBJ.OPT.INTRINSIC_VALUE"
+      ],
+      "input_hash": "dc41fb481f0674319aa9aef819bfdd5955f53ea6c45e920c580b869692570744",
+      "implementation_version": "1.0.0",
+      "execution_time_ms": 0.004761999889524304,
+      "calculated_at": "2026-07-27 22:07:41.488633"
+    },
+    "OBJ.ANALYTICS.OPT.ASSIGNMENT_PROBABILITY": {
+      "result_value": 0.45,
+      "input_object_ids": [
+        "OBJ.OPT.INTRINSIC_VALUE",
+        "OBJ.OPT.EXTRINSIC_VALUE",
+        "OBJ.OPT.OPTION_CONTRACT"
+      ],
+      "input_hash": "0e6cfd94d501f29054e7819ff672b5f4319bfeeef5ecfc8c57baa0cf7e8066a7",
+      "implementation_version": "1.0.0",
+      "execution_time_ms": 0.003530999947543023,
+      "calculated_at": "2026-07-27 22:07:41.488713"
+    }
+  },
+  "ledger": [
+    {
+      "timestamp": "2026-07-27T22:07:41.488172",
+      "action": "CONTEXT_INITIALIZED",
+      "details": {}
+    },
+    {
+      "timestamp": "2026-07-27T22:07:41.488221",
+      "action": "REACTIVE_OBJECT_DAG_COMPILE",
+      "details": {}
+    },
+    {
+      "timestamp": "2026-07-27T22:07:41.488428",
+      "action": "OBJECT_PUBLISHED: OBJ.ANALYTICS.OPT.BREAK_EVEN_PRICE | Val: 39.5 | Hash: 7645ec7c",
+      "details": {}
+    },
+    {
+      "timestamp": "2026-07-27T22:07:41.488545",
+      "action": "OBJECT_PUBLISHED: OBJ.OPT.INTRINSIC_VALUE | Val: 3.5 | Hash: f4f406f9",
+      "details": {}
+    },
+    {
+      "timestamp": "2026-07-27T22:07:41.488651",
+      "action": "OBJECT_PUBLISHED: OBJ.OPT.EXTRINSIC_VALUE | Val: 1.0 | Hash: dc41fb48",
+      "details": {}
+    },
+    {
+      "timestamp": "2026-07-27T22:07:41.488721",
+      "action": "OBJECT_PUBLISHED: OBJ.ANALYTICS.OPT.ASSIGNMENT_PROBABILITY | Val: 0.45 | Hash: 0e6cfd94",
+      "details": {}
+    },
+    {
+      "timestamp": "2026-07-27T22:07:41.488752",
+      "action": "EVENT_EXECUTION_COMPLETE",
+      "details": {}
+    }
+  ]
+}

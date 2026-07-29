@@ -1,0 +1,14 @@
+{
+  "calc_id": "CALC.OPT.EXTRINSIC_VALUE",
+  "version": "1.0",
+  "name": "Option Extrinsic Value",
+  "family": "Options Math",
+  "description": "Calculates the time/volatility premium of an option.",
+  "required_inputs": ["OBJ.MKT.OPTION_PREMIUM", "CALC.OPT.INTRINSIC_VALUE"],
+  "output_object": "CALC.OPT.EXTRINSIC_VALUE",
+  "trigger_on": ["OBJ.MKT.OPTION_PREMIUM", "CALC.OPT.INTRINSIC_VALUE"],
+  "implementation": { "type": "python_function", "function_name": "calc_opt_extrinsic_value" },
+  "cache_policy": "volatile",
+  "test_vectors": [],
+  "maturity": "Verified"
+}
