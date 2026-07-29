@@ -6,10 +6,32 @@ raw_keys = os.environ.get("GEMINI_API_KEY", "")
 api_keys = [k.strip() for k in raw_keys.split(",") if k.strip()]
 clients = [genai.Client(api_key=k) for k in api_keys]
 
-def _get_client():
+def _generate_with_retry(prompt):
     if not clients:
-        return None
-    return random.choice(clients)
+        raise ValueError("GEMINI_API_KEY not set")
+    
+    available_clients = list(clients)
+    random.shuffle(available_clients)
+    
+    last_error = None
+    for client in available_clients:
+        try:
+            response = client.models.generate_content(
+                model='gemini-2.5-flash',
+                contents=prompt,
+            )
+            return response.text.strip()
+        except Exception as e:
+            last_error = e
+            error_str = str(e)
+            if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str:
+                print(f"[AI RETRY] Key rate-limited (429). Switching to backup key...")
+                continue
+            else:
+                print(f"[AI RETRY] Error: {e}. Switching to backup key...")
+                continue
+                
+    raise last_error
 
 def classify_event(article_text, candidate_rules):
     """
@@ -31,8 +53,7 @@ def classify_event(article_text, candidate_rules):
     if custom_instructions_str:
         custom_instructions_str = f"\nHere are specific training instructions from the analyst:\n{custom_instructions_str}\n"
     
-    client = _get_client()
-    if not client:
+    if not clients:
         print("[WARNING] GEMINI_API_KEY not set. Mocking AI classification.")
         return events[0] if events else "Unknown"
 
@@ -50,13 +71,9 @@ If the article is a false positive and does NOT represent a real corporate cash 
 Otherwise, return ONLY the exact name of the Event Family.
 """
     try:
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=prompt,
-        )
-        return response.text.strip()
+        return _generate_with_retry(prompt)
     except Exception as e:
-        print(f"[AI ERROR] {e}")
+        print(f"[AI ERROR] All keys exhausted or failed: {e}")
         return events[0] if events else "Unknown"
 
 
@@ -64,8 +81,7 @@ def execute_playbook(article_text, playbook_steps, event_family):
     """
     Acts as a 1st-year IB analyst executing a structured investment memo.
     """
-    client = _get_client()
-    if not client:
+    if not clients:
         return "[MOCK AI] GEMINI_API_KEY not set. AI Research skipped."
 
     prompt = f"""
@@ -118,21 +134,16 @@ Article text:
 {article_text[:6000]}
 """
     try:
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=prompt,
-        )
-        return response.text.strip()
+        return _generate_with_retry(prompt)
     except Exception as e:
-        print(f"[AI ERROR] {e}")
+        print(f"[AI ERROR] All keys exhausted or failed: {e}")
         return f"[AI ERROR] {e}"
 
 def check_material_update(article_text, event_family, ticker):
     """
     Checks if a duplicate article contains material new information.
     """
-    client = _get_client()
-    if not client:
+    if not clients:
         return False
         
     prompt = f"""
@@ -159,14 +170,10 @@ Article text:
 {article_text[:6000]}
 """
     try:
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=prompt,
-        )
-        text = response.text.strip().upper()
+        text = _generate_with_retry(prompt).upper()
         return text.startswith("YES")
     except Exception as e:
-        print(f"[AI ERROR] {e}")
+        print(f"[AI ERROR] All keys exhausted or failed: {e}")
         return False
 
 
@@ -174,8 +181,7 @@ def extract_target_ticker(article_text):
     """
     Given an article, ask the AI to identify the target company and return its stock ticker.
     """
-    client = _get_client()
-    if not client:
+    if not clients:
         return "[MOCK AI] GEMINI_API_KEY not set. Ticker Extraction skipped."
 
     prompt = f"""
@@ -190,11 +196,8 @@ If the company is private, or if you cannot determine the ticker, return exactly
 Return NOTHING ELSE besides the ticker or 'PRIVATE'.
 """
     try:
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=prompt,
-        )
-        return response.text.strip().upper()
+        text = _generate_with_retry(prompt)
+        return text.upper()
     except Exception as e:
-        print(f"[AI ERROR] Ticker Extraction: {e}")
+        print(f"[AI ERROR] Ticker Extraction failed: {e}")
         return "UNKNOWN"
