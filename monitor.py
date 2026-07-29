@@ -114,7 +114,7 @@ def process_rss_feed(source_url, rules, playbook_map, source_name):
         )
         time.sleep(1) # respect API limits
         
-    return new_articles
+    return new_articles, len(feed.entries)
 
 def process_custom_scraper(scraper, rules, playbook_map, source_name):
     print(f"\n[INGESTION] Polling Custom Scraper: {source_name}")
@@ -148,7 +148,7 @@ def process_custom_scraper(scraper, rules, playbook_map, source_name):
         )
         time.sleep(1) # respect API limits
 
-    return new_articles
+    return new_articles, len(articles)
 
 def main():
     print("=== Special Situations Radar v1.0.0 ===")
@@ -165,7 +165,7 @@ def main():
     print(f"[LOADED] {len(sources)} Sources | {len(rules)} Rules | {len(playbooks)} Playbooks")
 
     total_new = 0
-    successful_sources = []
+    source_stats = {}
 
     # Pipeline: Sources -> Articles
     for source in sources:
@@ -174,33 +174,31 @@ def main():
         rss_url = source.get("RSS URL", "")
         
         if is_enabled:
-            success = False
             if rss_url:
                 try:
-                    total_new += process_rss_feed(rss_url, rules, playbook_map, source_name)
-                    success = True
+                    new_count, parsed_count = process_rss_feed(rss_url, rules, playbook_map, source_name)
+                    total_new += new_count
+                    source_stats[source_name] = parsed_count
                 except Exception as e:
                     print(f"[ERROR] Ingestion failed for {source_name}: {e}")
             else:
                 scraper = get_scraper_for_source(source_name)
                 if scraper:
                     try:
-                        total_new += process_custom_scraper(scraper, rules, playbook_map, source_name)
-                        success = True
+                        new_count, parsed_count = process_custom_scraper(scraper, rules, playbook_map, source_name)
+                        total_new += new_count
+                        source_stats[source_name] = parsed_count
                     except Exception as e:
                         print(f"[ERROR] Scraper failed for {source_name}: {e}")
                 else:
                     print(f"[SKIP] Source '{source_name}' enabled but missing RSS URL and no custom scraper found.")
-            
-            if success:
-                successful_sources.append(source_name)
         
     print(f"\n[DATABASE] {total_new} new articles stored.")
     print(f"[DATABASE] Total articles: {article_count()}")
 
     import datetime
     timestamp_str = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
-    update_last_checked(SHEET_URL, successful_sources, timestamp_str)
+    update_last_checked(SHEET_URL, source_stats, timestamp_str)
 
 if __name__ == "__main__":
     main()
