@@ -7,11 +7,13 @@ from src.database import (
     article_exists,
     save_article,
     article_count,
+    track_company,
+    create_event_if_new,
+    log_research,
 )
 
 from src.scrapers.prnewswire import download_article
 from src.scrapers import get_scraper_for_source
-from src.sheets import load_rules, load_sources, load_playbooks, append_to_research_queue, update_last_checked
 from src.sheets import load_rules, load_sources, load_playbooks, append_to_research_queue, update_last_checked, load_global_exclusions
 from src.rules_engine import evaluate
 from src.ai import classify_event, execute_playbook
@@ -113,6 +115,21 @@ def _process_article(source_name, article_id, title, url, published, body, rules
             
         if ticker != "UNKNOWN" and "MOCK AI" not in ticker:
             print(f"    [AI TICKER VERIFIED] Public ticker extracted: {ticker}")
+            track_company(ticker)
+            event_id = create_event_if_new(event_family, ticker)
+            if not event_id:
+                print(f"    [DEDUPLICATED] {event_family} for {ticker} already tracked this month. Dropping duplicate article.")
+                save_article(
+                    source=source_name,
+                    article_id=article_id,
+                    title=title,
+                    url=url,
+                    published=published,
+                    body=body,
+                )
+                return 1
+        else:
+            event_id = f"UNKNOWN_{article_id}"
             
         confidence = matches[0]["_Score"]
         research_summary = "Playbook not found."
@@ -122,6 +139,9 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         print(f"    [AI RESEARCH] Generating Investment Memo...")
         research_summary = execute_playbook(body, playbook_steps, event_family)
         print(f"    [AI RESEARCH] Done.")
+        
+        # Log to Database
+        log_research(event_id, article_id, confidence, research_summary)
         
         # Review (Sheets)
         append_to_research_queue(

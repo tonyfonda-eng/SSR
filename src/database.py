@@ -94,3 +94,51 @@ def article_count():
     count = cursor.fetchone()[0]
     conn.close()
     return count
+
+def track_company(ticker):
+    conn = get_connection()
+    cursor = conn.cursor()
+    now = datetime.datetime.now().isoformat()
+    cursor.execute("""
+        INSERT INTO companies (ticker, first_seen, alert_count)
+        VALUES (?, ?, 1)
+        ON CONFLICT(ticker) DO UPDATE SET alert_count = alert_count + 1
+    """, (ticker, now))
+    conn.commit()
+    conn.close()
+
+def create_event_if_new(event_family, ticker):
+    """
+    Creates an event ID formatted as EventFamily_Ticker_YYYY_MM.
+    Returns the event_id if it's new, or None if it already exists (duplicate).
+    """
+    now = datetime.datetime.now()
+    event_id = f"{event_family.replace(' ', '_')}_{ticker}_{now.year}_{now.month:02d}"
+    
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT 1 FROM events WHERE event_id = ?", (event_id,))
+    if cursor.fetchone() is not None:
+        conn.close()
+        return None # Event already exists, duplicate!
+        
+    cursor.execute("""
+        INSERT INTO events (event_id, event_family, target_ticker, status, created_at, updated_at)
+        VALUES (?, ?, ?, 'Announced', ?, ?)
+    """, (event_id, event_family, ticker, now.isoformat(), now.isoformat()))
+    
+    conn.commit()
+    conn.close()
+    return event_id
+
+def log_research(event_id, article_id, rules_score, ai_summary):
+    conn = get_connection()
+    cursor = conn.cursor()
+    now = datetime.datetime.now().isoformat()
+    cursor.execute("""
+        INSERT INTO research_logs (event_id, article_id, rules_score, ai_summary, processed_at)
+        VALUES (?, ?, ?, ?, ?)
+    """, (event_id, article_id, rules_score, ai_summary, now))
+    conn.commit()
+    conn.close()
