@@ -385,7 +385,7 @@ def main():
                     if parsed_count > 0:
                         method_used = "HTML"
                         total_new += new_count
-                        source_stats[source_name] = {"count": parsed_count, "method": method_used}
+                        source_stats[source_name] = {"count": parsed_count, "new": new_count, "method": method_used}
                 except Exception as e:
                     print(f"[WARNING] HTML Scraper failed for {source_name}: {e}. Falling back to RSS if available...")
 
@@ -395,7 +395,7 @@ def main():
                     new_count, parsed_count = process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusions, gold_standards, triage_all, needs_translation)
                     method_used = "RSS"
                     total_new += new_count
-                    source_stats[source_name] = {"count": parsed_count, "method": method_used}
+                    source_stats[source_name] = {"count": parsed_count, "new": new_count, "method": method_used}
                 except Exception as e:
                     print(f"[ERROR] RSS Ingestion failed for {source_name}: {e}")
 

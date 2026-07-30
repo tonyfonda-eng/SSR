@@ -143,9 +143,11 @@ def update_last_checked(sheet_url, source_stats, timestamp_str):
             # Handle both old format (int) and new format (dict) just in case
             if isinstance(stat_data, dict):
                 parsed_count = stat_data.get("count", 0)
+                new_count = stat_data.get("new", 0)
                 method_used = stat_data.get("method", "Unknown")
             else:
                 parsed_count = stat_data
+                new_count = 0
                 method_used = "Unknown"
             
             current_last_checked = row[col_idx_last_checked] if len(row) > col_idx_last_checked else ""
@@ -158,9 +160,9 @@ def update_last_checked(sheet_url, source_stats, timestamp_str):
                 
             # If the last check was today, add to cumulative, else reset
             if today_date in current_last_checked:
-                cumulative_val += parsed_count
+                cumulative_val += new_count
             else:
-                cumulative_val = parsed_count
+                cumulative_val = new_count
                 
             cell_last_checked = gspread.utils.rowcol_to_a1(row_idx + 1, col_idx_last_checked + 1)
             cell_method = gspread.utils.rowcol_to_a1(row_idx + 1, col_idx_method + 1)
