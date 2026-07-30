@@ -31,7 +31,7 @@ def _generate_with_retry(prompt, max_retries=3):
         client = available_clients[attempt % len(available_clients)]
         try:
             response = client.models.generate_content(
-                model='gemini-3.0-flash',
+                model='gemini-2.0-flash',
                 contents=prompt,
             )
             return response.text.strip()
