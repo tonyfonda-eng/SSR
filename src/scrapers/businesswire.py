@@ -50,17 +50,38 @@ class BusinessWireScraper(SourceScraper):
         except Exception as e:
             print(f"[WARNING] BusinessWire HTML pagination failed: {e}. Falling back to RSS.")
             
-        # Fallback to RSS if HTML scraping fails or is blocked
-        print("[INFO] BusinessWire using RSS fallback.")
-        feed = feedparser.parse(self.RSS_URL)
-        for entry in feed.entries:
-            article_id = entry.link.split("/")[-2] if len(entry.link.split("/")) > 2 else entry.link
-            articles.append({
-                "id": article_id,
-                "title": entry.title,
-                "url": entry.link,
-                "published": getattr(entry, "published", "")
-            })
+        # Fallback to multi-RSS strategy if HTML scraping fails or is blocked
+        print("[INFO] BusinessWire using multi-RSS fallback.")
+        
+        # BusinessWire provides multiple category feeds. We merge them to bypass the 30-item limit.
+        rss_feeds = [
+            "https://feed.businesswire.com/rss/home/?rss=G1QFDERJXkJeGVtQWA%3D%3D", # Global News
+            "https://feed.businesswire.com/rss/home/?rss=G1QFDERJXkJeGVtQXg%3D%3D", # Earnings
+            "https://feed.businesswire.com/rss/home/?rss=G1QFDERJXkJeGVtQXA%3D%3D", # Mergers & Acquisitions
+            "https://feed.businesswire.com/rss/home/?rss=G1QFDERJXkJeGVtRWg%3D%3D", # Venture Capital
+            "https://feed.businesswire.com/rss/home/?rss=G1QFDERJXkJeGVtQWw%3D%3D", # Technology
+            "https://feed.businesswire.com/rss/home/?rss=G1QFDERJXkJeGVtQWg%3D%3D", # Healthcare
+        ]
+        
+        seen_ids = set()
+        
+        for feed_url in rss_feeds:
+            try:
+                feed = feedparser.parse(feed_url)
+                for entry in feed.entries:
+                    article_id = entry.link.split("/")[-2] if len(entry.link.split("/")) > 2 else entry.link
+                    
+                    if article_id not in seen_ids:
+                        seen_ids.add(article_id)
+                        articles.append({
+                            "id": article_id,
+                            "title": entry.title,
+                            "url": entry.link,
+                            "published": getattr(entry, "published", "")
+                        })
+            except Exception as e:
+                print(f"[WARNING] Failed to parse BusinessWire feed {feed_url}: {e}")
+                
         return articles
 
     def get_article_body(self, url):
