@@ -6,15 +6,17 @@ raw_keys = os.environ.get("GEMINI_API_KEY", "")
 api_keys = [k.strip() for k in raw_keys.split(",") if k.strip()]
 clients = [genai.Client(api_key=k) for k in api_keys]
 
-def _generate_with_retry(prompt):
+def _generate_with_retry(prompt, max_retries=3):
     if not clients:
         raise ValueError("GEMINI_API_KEY not set")
     
+    import time
     available_clients = list(clients)
     random.shuffle(available_clients)
     
     last_error = None
-    for client in available_clients:
+    for attempt in range(max_retries * len(available_clients)):
+        client = available_clients[attempt % len(available_clients)]
         try:
             response = client.models.generate_content(
                 model='gemini-2.5-flash',
@@ -25,10 +27,11 @@ def _generate_with_retry(prompt):
             last_error = e
             error_str = str(e)
             if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str:
-                print(f"[AI RETRY] Key rate-limited (429). Switching to backup key...")
+                print(f"[AI RETRY] Key rate-limited (429). Sleeping 15s before next attempt...")
+                time.sleep(15)
                 continue
             else:
-                print(f"[AI RETRY] Error: {e}. Switching to backup key...")
+                print(f"[AI RETRY] Error: {e}. Trying next key...")
                 continue
                 
     raise last_error
