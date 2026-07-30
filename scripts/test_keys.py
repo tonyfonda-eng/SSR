@@ -21,32 +21,25 @@ def main():
 
     print(f"Found {len(api_keys)} unique API keys to test.\n")
 
-    print(f"\n--- Testing Active Models ---")
+    print(f"\n--- Testing Active Model ---")
     
-    models_to_test = ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-flash-latest']
-    
+    success_count = 0
     for idx, key in enumerate(api_keys):
         masked_key = key[:4] + "*" * (len(key) - 8) + key[-4:] if len(key) > 8 else "***"
         print(f"\nTesting Key {idx+1}/{len(api_keys)} ({masked_key})...")
         
         try:
             client = genai.Client(api_key=key)
-            for model_name in models_to_test:
-                print(f"  Trying {model_name}...")
-                try:
-                    response = client.models.generate_content(
-                        model=model_name,
-                        contents="Reply with exactly the word OK"
-                    )
-                    text = response.text.strip()
-                    print(f"    -> SUCCESS! Response: {text}")
-                except Exception as e:
-                    error_str = str(e)
-                    print(f"    -> RAW ERROR: {repr(e)}")
+            response = client.models.generate_content(
+                model="gemini-flash-latest",
+                contents="Reply with exactly the word OK"
+            )
+            text = response.text.strip()
+            print(f"  -> SUCCESS! Response: {text}")
+            success_count += 1
         except Exception as e:
-            print(f"  -> Client Init Failed: {e}")
-            
-    sys.exit(0)
+            error_str = str(e)
+            print(f"  -> RAW ERROR: {repr(e)}")
 
     print(f"\n=== Summary ===")
     print(f"Working keys: {success_count} / {len(api_keys)}")
