@@ -57,8 +57,8 @@ class PRNewsWireScraper(SourceScraper):
         }
         
         articles = []
-        # Fetch 3 pages of 100 articles each = 300 articles per run
-        for page in range(1, 4):
+        # Fetch 5 pages of 100 articles each = 500 articles per run
+        for page in range(1, 6):
             url = f"https://www.prnewswire.com/news-releases/news-releases-list/?page={page}&pagesize=100"
             
             try:
