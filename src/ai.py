@@ -2,9 +2,21 @@ import os
 import random
 from google import genai
 
+# Load primary key (could be comma separated)
 raw_keys = os.environ.get("GEMINI_API_KEY", "")
 api_keys = [k.strip() for k in raw_keys.split(",") if k.strip()]
+
+# Load explicitly numbered keys (GEMINI_API_KEY_1 to GEMINI_API_KEY_10)
+for i in range(1, 11):
+    val = os.environ.get(f"GEMINI_API_KEY_{i}")
+    if val:
+        keys = [k.strip() for k in val.split(",") if k.strip()]
+        api_keys.extend(keys)
+
+# Deduplicate and initialize clients
+api_keys = list(set(api_keys))
 clients = [genai.Client(api_key=k) for k in api_keys]
+print(f"[AI INFO] Initialized {len(clients)} Gemini API clients.")
 
 def _generate_with_retry(prompt, max_retries=3):
     if not clients:
