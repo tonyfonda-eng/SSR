@@ -21,15 +21,31 @@ def main():
 
     print(f"Found {len(api_keys)} unique API keys to test.\n")
 
-    print(f"\n--- Available Models for Key 1 ---")
-    try:
-        client = genai.Client(api_key=api_keys[0])
-        for model in client.models.list():
-            if 'flash' in model.name:
-                print(f"- {model.name}")
-    except Exception as e:
-        print(f"Error fetching models: {e}")
+    print(f"\n--- Testing Active Models ---")
+    
+    models_to_test = ['gemini-3.6-flash', 'gemini-3.5-flash', 'gemini-flash-latest']
+    
+    for idx, key in enumerate(api_keys):
+        masked_key = key[:4] + "*" * (len(key) - 8) + key[-4:] if len(key) > 8 else "***"
+        print(f"\nTesting Key {idx+1}/{len(api_keys)} ({masked_key})...")
         
+        try:
+            client = genai.Client(api_key=key)
+            for model_name in models_to_test:
+                print(f"  Trying {model_name}...")
+                try:
+                    response = client.models.generate_content(
+                        model=model_name,
+                        contents="Reply with exactly the word OK"
+                    )
+                    text = response.text.strip()
+                    print(f"    -> SUCCESS! Response: {text}")
+                except Exception as e:
+                    error_str = str(e)
+                    print(f"    -> RAW ERROR: {repr(e)}")
+        except Exception as e:
+            print(f"  -> Client Init Failed: {e}")
+            
     sys.exit(0)
 
     print(f"\n=== Summary ===")
