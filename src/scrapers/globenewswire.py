@@ -9,16 +9,41 @@ class GlobeNewswireScraper(SourceScraper):
     RSS_URL = "https://www.globenewswire.com/RssFeed/country/US/feedTitle/GlobeNewswire%20-%20US%20News"
 
     def get_latest_articles(self):
-        feed = feedparser.parse(self.RSS_URL)
+        import time
+        headers = {"User-Agent": USER_AGENT}
         articles = []
-        for entry in feed.entries:
-            article_id = entry.link.split("/")[-2] if len(entry.link.split("/")) > 2 else entry.link
-            articles.append({
-                "id": article_id,
-                "title": entry.title,
-                "url": entry.link,
-                "published": getattr(entry, "published", "")
-            })
+        
+        for page in range(1, 11):
+            url = f"https://www.globenewswire.com/NewsRoom?page={page}"
+            try:
+                response = requests.get(url, headers=headers, timeout=30)
+                response.raise_for_status()
+                soup = BeautifulSoup(response.text, "html.parser")
+                
+                article_links = [a for a in soup.select("a") if 'href' in a.attrs and '/news-release/' in a['href']]
+                if not article_links:
+                    break
+                    
+                for a_tag in article_links:
+                    href = a_tag.get('href')
+                    if not href:
+                        continue
+                        
+                    full_url = href if href.startswith("http") else "https://www.globenewswire.com" + href
+                    article_id = full_url.rstrip("/").split("/")[-2] if len(full_url.split("/")) > 2 else full_url
+                    
+                    articles.append({
+                        "id": article_id,
+                        "title": a_tag.get_text(strip=True),
+                        "url": full_url,
+                        "published": ""
+                    })
+                    
+                time.sleep(1)
+            except Exception as e:
+                print(f"[WARNING] GlobeNewswire pagination failed on page {page}: {e}")
+                break
+                
         return articles
 
     def get_article_body(self, url):

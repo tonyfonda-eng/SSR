@@ -1,0 +1,475 @@
+monitor	Set up job	﻿2026-07-30T20:00:52.6294714Z Current runner version: '2.336.0'
+monitor	Set up job	2026-07-30T20:00:52.6322883Z ##[group]Runner Image Provisioner
+monitor	Set up job	2026-07-30T20:00:52.6324136Z Hosted Compute Agent
+monitor	Set up job	2026-07-30T20:00:52.6325153Z Version: 20260707.563
+monitor	Set up job	2026-07-30T20:00:52.6326140Z Commit: 02667638d2b423fbc733a8e32a88b44996a3ba6e
+monitor	Set up job	2026-07-30T20:00:52.6327125Z Build Date: 2026-07-07T19:33:50Z
+monitor	Set up job	2026-07-30T20:00:52.6328722Z Worker ID: ***ce677fd5-3a55-4bd3-854f-2da07014aaae***
+monitor	Set up job	2026-07-30T20:00:52.6329881Z Azure Region: westus2
+monitor	Set up job	2026-07-30T20:00:52.6330808Z ##[endgroup]
+monitor	Set up job	2026-07-30T20:00:52.6332670Z ##[group]Operating System
+monitor	Set up job	2026-07-30T20:00:52.6333565Z Ubuntu
+monitor	Set up job	2026-07-30T20:00:52.6334409Z 24.04.4
+monitor	Set up job	2026-07-30T20:00:52.6335214Z LTS
+monitor	Set up job	2026-07-30T20:00:52.6335914Z ##[endgroup]
+monitor	Set up job	2026-07-30T20:00:52.6336811Z ##[group]Runner Image
+monitor	Set up job	2026-07-30T20:00:52.6337867Z Image: ubuntu-24.04
+monitor	Set up job	2026-07-30T20:00:52.6338986Z Version: 20260720.247.2
+monitor	Set up job	2026-07-30T20:00:52.6340391Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260720.247/images/ubuntu/Ubuntu2404-Readme.md
+monitor	Set up job	2026-07-30T20:00:52.6342466Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260720.247
+monitor	Set up job	2026-07-30T20:00:52.6343762Z ##[endgroup]
+monitor	Set up job	2026-07-30T20:00:52.6345466Z ##[group]GITHUB_TOKEN Permissions
+monitor	Set up job	2026-07-30T20:00:52.6348227Z Contents: read
+monitor	Set up job	2026-07-30T20:00:52.6349052Z Metadata: read
+monitor	Set up job	2026-07-30T20:00:52.6349978Z Packages: read
+monitor	Set up job	2026-07-30T20:00:52.6350914Z ##[endgroup]
+monitor	Set up job	2026-07-30T20:00:52.6353235Z Secret source: Actions
+monitor	Set up job	2026-07-30T20:00:52.6354829Z Prepare workflow directory
+monitor	Set up job	2026-07-30T20:00:52.6697306Z Prepare all required actions
+monitor	Set up job	2026-07-30T20:00:52.6747981Z Getting action download info
+monitor	Set up job	2026-07-30T20:00:53.0364010Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+monitor	Set up job	2026-07-30T20:00:53.3744258Z Download action repository 'actions/cache@v4' (SHA:0057852bfaa89a56745cba8c7296529d2fc39830)
+monitor	Set up job	2026-07-30T20:00:53.5083329Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+monitor	Set up job	2026-07-30T20:00:53.7087167Z Complete job name: monitor
+monitor	Checkout repository	﻿2026-07-30T20:00:53.7873609Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+monitor	Checkout repository	2026-07-30T20:00:53.7882694Z ##[group]Run actions/checkout@v4
+monitor	Checkout repository	2026-07-30T20:00:53.7883624Z with:
+monitor	Checkout repository	2026-07-30T20:00:53.7884234Z   repository: tonyfonda-eng/SSR
+monitor	Checkout repository	2026-07-30T20:00:53.7888716Z   token: ***
+monitor	Checkout repository	2026-07-30T20:00:53.7889331Z   ssh-strict: true
+monitor	Checkout repository	2026-07-30T20:00:53.7889937Z   ssh-user: git
+monitor	Checkout repository	2026-07-30T20:00:53.7890556Z   persist-credentials: true
+monitor	Checkout repository	2026-07-30T20:00:53.7891225Z   clean: true
+monitor	Checkout repository	2026-07-30T20:00:53.7891830Z   sparse-checkout-cone-mode: true
+monitor	Checkout repository	2026-07-30T20:00:53.7892517Z   fetch-depth: 1
+monitor	Checkout repository	2026-07-30T20:00:53.7893112Z   fetch-tags: false
+monitor	Checkout repository	2026-07-30T20:00:53.7893718Z   show-progress: true
+monitor	Checkout repository	2026-07-30T20:00:53.7894326Z   lfs: false
+monitor	Checkout repository	2026-07-30T20:00:53.7894915Z   submodules: false
+monitor	Checkout repository	2026-07-30T20:00:53.7895551Z   set-safe-directory: true
+monitor	Checkout repository	2026-07-30T20:00:53.7896229Z   allow-unsafe-pr-checkout: false
+monitor	Checkout repository	2026-07-30T20:00:53.7897216Z ##[endgroup]
+monitor	Checkout repository	2026-07-30T20:00:53.8897374Z Syncing repository: tonyfonda-eng/SSR
+monitor	Checkout repository	2026-07-30T20:00:53.8900613Z ##[group]Getting Git version info
+monitor	Checkout repository	2026-07-30T20:00:53.8901978Z Working directory is '/home/runner/work/SSR/SSR'
+monitor	Checkout repository	2026-07-30T20:00:53.8904175Z [command]/usr/bin/git version
+monitor	Checkout repository	2026-07-30T20:00:53.8961976Z git version 2.54.0
+monitor	Checkout repository	2026-07-30T20:00:53.8986448Z ##[endgroup]
+monitor	Checkout repository	2026-07-30T20:00:53.8999571Z Temporarily overriding HOME='/home/runner/work/_temp/12445538-9e11-4601-8c4f-2ba179605154' before making global git config changes
+monitor	Checkout repository	2026-07-30T20:00:53.9002474Z Adding repository directory to the temporary git global config as a safe directory
+monitor	Checkout repository	2026-07-30T20:00:53.9004919Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/SSR/SSR
+monitor	Checkout repository	2026-07-30T20:00:53.9062662Z Deleting the contents of '/home/runner/work/SSR/SSR'
+monitor	Checkout repository	2026-07-30T20:00:53.9066881Z ##[group]Initializing the repository
+monitor	Checkout repository	2026-07-30T20:00:53.9072709Z [command]/usr/bin/git init /home/runner/work/SSR/SSR
+monitor	Checkout repository	2026-07-30T20:00:53.9191264Z hint: Using 'master' as the name for the initial branch. This default branch name
+monitor	Checkout repository	2026-07-30T20:00:53.9193204Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+monitor	Checkout repository	2026-07-30T20:00:53.9194463Z hint: to use in all of your new repositories, which will suppress this warning,
+monitor	Checkout repository	2026-07-30T20:00:53.9195721Z hint: call:
+monitor	Checkout repository	2026-07-30T20:00:53.9196731Z hint:
+monitor	Checkout repository	2026-07-30T20:00:53.9198164Z hint: 	git config --global init.defaultBranch <name>
+monitor	Checkout repository	2026-07-30T20:00:53.9199631Z hint:
+monitor	Checkout repository	2026-07-30T20:00:53.9201109Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+monitor	Checkout repository	2026-07-30T20:00:53.9203400Z hint: 'development'. The just-created branch can be renamed via this command:
+monitor	Checkout repository	2026-07-30T20:00:53.9205186Z hint:
+monitor	Checkout repository	2026-07-30T20:00:53.9206332Z hint: 	git branch -m <name>
+monitor	Checkout repository	2026-07-30T20:00:53.9207990Z hint:
+monitor	Checkout repository	2026-07-30T20:00:53.9209460Z hint: Disable this message with "git config set advice.defaultBranchName false"
+monitor	Checkout repository	2026-07-30T20:00:53.9211557Z Initialized empty Git repository in /home/runner/work/SSR/SSR/.git/
+monitor	Checkout repository	2026-07-30T20:00:53.9215201Z [command]/usr/bin/git remote add origin https://github.com/tonyfonda-eng/SSR
+monitor	Checkout repository	2026-07-30T20:00:53.9258431Z ##[endgroup]
+monitor	Checkout repository	2026-07-30T20:00:53.9260242Z ##[group]Disabling automatic garbage collection
+monitor	Checkout repository	2026-07-30T20:00:53.9263613Z [command]/usr/bin/git config --local gc.auto 0
+monitor	Checkout repository	2026-07-30T20:00:53.9295902Z ##[endgroup]
+monitor	Checkout repository	2026-07-30T20:00:53.9298683Z ##[group]Setting up auth
+monitor	Checkout repository	2026-07-30T20:00:53.9304286Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+monitor	Checkout repository	2026-07-30T20:00:53.9341163Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+monitor	Checkout repository	2026-07-30T20:00:53.9719207Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+monitor	Checkout repository	2026-07-30T20:00:53.9758474Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+monitor	Checkout repository	2026-07-30T20:00:54.0000129Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+monitor	Checkout repository	2026-07-30T20:00:54.0036449Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+monitor	Checkout repository	2026-07-30T20:00:54.0260331Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+monitor	Checkout repository	2026-07-30T20:00:54.0299614Z ##[endgroup]
+monitor	Checkout repository	2026-07-30T20:00:54.0301599Z ##[group]Fetching the repository
+monitor	Checkout repository	2026-07-30T20:00:54.0311560Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +b87574c222cb5b3a98b2bd6ae94e6d42aa562bee:refs/remotes/origin/main
+monitor	Checkout repository	2026-07-30T20:00:54.3862541Z From https://github.com/tonyfonda-eng/SSR
+monitor	Checkout repository	2026-07-30T20:00:54.3864477Z  * [new ref]         b87574c222cb5b3a98b2bd6ae94e6d42aa562bee -> origin/main
+monitor	Checkout repository	2026-07-30T20:00:54.3902060Z ##[endgroup]
+monitor	Checkout repository	2026-07-30T20:00:54.3904868Z ##[group]Determining the checkout info
+monitor	Checkout repository	2026-07-30T20:00:54.3907271Z ##[endgroup]
+monitor	Checkout repository	2026-07-30T20:00:54.3911266Z [command]/usr/bin/git sparse-checkout disable
+monitor	Checkout repository	2026-07-30T20:00:54.3961375Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+monitor	Checkout repository	2026-07-30T20:00:54.3994054Z ##[group]Checking out the ref
+monitor	Checkout repository	2026-07-30T20:00:54.3997335Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+monitor	Checkout repository	2026-07-30T20:00:54.4183654Z Switched to a new branch 'main'
+monitor	Checkout repository	2026-07-30T20:00:54.4186811Z branch 'main' set up to track 'origin/main'.
+monitor	Checkout repository	2026-07-30T20:00:54.4196542Z ##[endgroup]
+monitor	Checkout repository	2026-07-30T20:00:54.4241423Z [command]/usr/bin/git log -1 --format=%H
+monitor	Checkout repository	2026-07-30T20:00:54.4269770Z b87574c222cb5b3a98b2bd6ae94e6d42aa562bee
+monitor	Restore database	﻿2026-07-30T20:00:54.4644666Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+monitor	Restore database	2026-07-30T20:00:54.4651159Z ##[group]Run actions/cache@v4
+monitor	Restore database	2026-07-30T20:00:54.4652502Z with:
+monitor	Restore database	2026-07-30T20:00:54.4653622Z   path: ssr_cache.sqlite
+monitor	Restore database	2026-07-30T20:00:54.4654943Z   key: ssr-database-30577298930
+monitor	Restore database	2026-07-30T20:00:54.4656356Z   restore-keys: ssr-database-
+monitor	Restore database	
+monitor	Restore database	2026-07-30T20:00:54.4657911Z   enableCrossOsArchive: false
+monitor	Restore database	2026-07-30T20:00:54.4659335Z   fail-on-cache-miss: false
+monitor	Restore database	2026-07-30T20:00:54.4660715Z   lookup-only: false
+monitor	Restore database	2026-07-30T20:00:54.4661949Z   save-always: false
+monitor	Restore database	2026-07-30T20:00:54.4663163Z ##[endgroup]
+monitor	Restore database	2026-07-30T20:00:54.5701428Z (node:2282) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+monitor	Restore database	2026-07-30T20:00:54.5705545Z (Use `node --trace-deprecation ...` to show where the warning was created)
+monitor	Restore database	2026-07-30T20:00:54.8313387Z Cache hit for restore-key: ssr-database-30576907689
+monitor	Restore database	2026-07-30T20:00:54.8423029Z (node:2282) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+monitor	Restore database	2026-07-30T20:00:56.0457764Z Received 3154342 of 3154342 (100.0%), 3.4 MBs/sec
+monitor	Restore database	2026-07-30T20:00:56.0459176Z Cache Size: ~3 MB (3154342 B)
+monitor	Restore database	2026-07-30T20:00:56.0492815Z [command]/usr/bin/tar -xf /home/runner/work/_temp/8cbe41d1-29bb-4987-b066-9aa8569e1f76/cache.tzst -P -C /home/runner/work/SSR/SSR --use-compress-program unzstd
+monitor	Restore database	2026-07-30T20:00:56.0769783Z Cache restored successfully
+monitor	Restore database	2026-07-30T20:00:56.0853792Z Cache restored from key: ssr-database-30576907689
+monitor	Set up Python	﻿2026-07-30T20:00:56.1033784Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+monitor	Set up Python	2026-07-30T20:00:56.1035348Z ##[group]Run actions/setup-python@v5
+monitor	Set up Python	2026-07-30T20:00:56.1035765Z with:
+monitor	Set up Python	2026-07-30T20:00:56.1036117Z   python-version: 3.11
+monitor	Set up Python	2026-07-30T20:00:56.1036509Z   check-latest: false
+monitor	Set up Python	2026-07-30T20:00:56.1039420Z   token: ***
+monitor	Set up Python	2026-07-30T20:00:56.1039826Z   update-environment: true
+monitor	Set up Python	2026-07-30T20:00:56.1040239Z   allow-prereleases: false
+monitor	Set up Python	2026-07-30T20:00:56.1040635Z   freethreaded: false
+monitor	Set up Python	2026-07-30T20:00:56.1040998Z ##[endgroup]
+monitor	Set up Python	2026-07-30T20:00:56.2316482Z ##[group]Installed versions
+monitor	Set up Python	2026-07-30T20:00:56.2404408Z (node:2300) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+monitor	Set up Python	2026-07-30T20:00:56.2405602Z (Use `node --trace-deprecation ...` to show where the warning was created)
+monitor	Set up Python	2026-07-30T20:00:56.2406779Z Successfully set up CPython (3.11.15)
+monitor	Set up Python	2026-07-30T20:00:56.2408364Z ##[endgroup]
+monitor	Install dependencies	﻿2026-07-30T20:00:56.2666656Z ##[group]Run python -m pip install --upgrade pip
+monitor	Install dependencies	2026-07-30T20:00:56.2667941Z [36;1mpython -m pip install --upgrade pip[0m
+monitor	Install dependencies	2026-07-30T20:00:56.2668761Z [36;1mpip install -r requirements.txt[0m
+monitor	Install dependencies	2026-07-30T20:00:56.2746356Z shell: /usr/bin/bash -e ***0***
+monitor	Install dependencies	2026-07-30T20:00:56.2747078Z env:
+monitor	Install dependencies	2026-07-30T20:00:56.2748032Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.15/x64
+monitor	Install dependencies	2026-07-30T20:00:56.2749086Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib/pkgconfig
+monitor	Install dependencies	2026-07-30T20:00:56.2750102Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+monitor	Install dependencies	2026-07-30T20:00:56.2751039Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+monitor	Install dependencies	2026-07-30T20:00:56.2751943Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+monitor	Install dependencies	2026-07-30T20:00:56.2752906Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib
+monitor	Install dependencies	2026-07-30T20:00:56.2753806Z ##[endgroup]
+monitor	Install dependencies	2026-07-30T20:00:57.2822859Z Requirement already satisfied: pip in /opt/hostedtoolcache/Python/3.11.15/x64/lib/python3.11/site-packages (26.1.2)
+monitor	Install dependencies	2026-07-30T20:00:57.3928310Z Collecting pip
+monitor	Install dependencies	2026-07-30T20:00:57.4557847Z   Downloading pip-26.2-py3-none-any.whl.metadata (4.6 kB)
+monitor	Install dependencies	2026-07-30T20:00:57.4674048Z Downloading pip-26.2-py3-none-any.whl (1.8 MB)
+monitor	Install dependencies	2026-07-30T20:00:57.5871775Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.8/1.8 MB 18.2 MB/s  0:00:00
+monitor	Install dependencies	2026-07-30T20:00:57.6152410Z Installing collected packages: pip
+monitor	Install dependencies	2026-07-30T20:00:57.6158347Z   Attempting uninstall: pip
+monitor	Install dependencies	2026-07-30T20:00:57.6178077Z     Found existing installation: pip 26.1.2
+monitor	Install dependencies	2026-07-30T20:00:57.6770777Z     Uninstalling pip-26.1.2:
+monitor	Install dependencies	2026-07-30T20:00:57.6877278Z       Successfully uninstalled pip-26.1.2
+monitor	Install dependencies	2026-07-30T20:00:58.4815343Z Successfully installed pip-26.2
+monitor	Install dependencies	2026-07-30T20:00:59.2405239Z Collecting beautifulsoup4 (from -r requirements.txt (line 1))
+monitor	Install dependencies	2026-07-30T20:00:59.2979892Z   Downloading beautifulsoup4-4.15.0-py3-none-any.whl.metadata (3.8 kB)
+monitor	Install dependencies	2026-07-30T20:00:59.3174604Z Collecting feedparser (from -r requirements.txt (line 2))
+monitor	Install dependencies	2026-07-30T20:00:59.3254382Z   Downloading feedparser-6.0.14-py3-none-any.whl.metadata (2.7 kB)
+monitor	Install dependencies	2026-07-30T20:00:59.3584114Z Collecting requests (from -r requirements.txt (line 3))
+monitor	Install dependencies	2026-07-30T20:00:59.3676770Z   Downloading requests-2.34.2-py3-none-any.whl.metadata (4.8 kB)
+monitor	Install dependencies	2026-07-30T20:00:59.3912990Z Collecting gspread (from -r requirements.txt (line 4))
+monitor	Install dependencies	2026-07-30T20:00:59.4008652Z   Downloading gspread-6.2.1-py3-none-any.whl.metadata (11 kB)
+monitor	Install dependencies	2026-07-30T20:00:59.4517749Z Collecting google-auth (from -r requirements.txt (line 5))
+monitor	Install dependencies	2026-07-30T20:00:59.4609446Z   Downloading google_auth-2.56.2-py3-none-any.whl.metadata (6.0 kB)
+monitor	Install dependencies	2026-07-30T20:00:59.4933890Z Collecting google-genai (from -r requirements.txt (line 6))
+monitor	Install dependencies	2026-07-30T20:00:59.5019912Z   Downloading google_genai-2.16.0-py3-none-any.whl.metadata (56 kB)
+monitor	Install dependencies	2026-07-30T20:00:59.5393541Z Collecting yfinance (from -r requirements.txt (line 7))
+monitor	Install dependencies	2026-07-30T20:00:59.5474914Z   Downloading yfinance-1.5.2-py2.py3-none-any.whl.metadata (6.2 kB)
+monitor	Install dependencies	2026-07-30T20:00:59.5689388Z Collecting PyPDF2 (from -r requirements.txt (line 8))
+monitor	Install dependencies	2026-07-30T20:00:59.5777909Z   Downloading pypdf2-3.0.1-py3-none-any.whl.metadata (6.8 kB)
+monitor	Install dependencies	2026-07-30T20:00:59.5986945Z Collecting soupsieve>=1.6.1 (from beautifulsoup4->-r requirements.txt (line 1))
+monitor	Install dependencies	2026-07-30T20:00:59.6065699Z   Downloading soupsieve-2.9.1-py3-none-any.whl.metadata (4.6 kB)
+monitor	Install dependencies	2026-07-30T20:00:59.6258125Z Collecting typing-extensions>=4.0.0 (from beautifulsoup4->-r requirements.txt (line 1))
+monitor	Install dependencies	2026-07-30T20:00:59.6345755Z   Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+monitor	Install dependencies	2026-07-30T20:00:59.6489867Z Collecting feedparser-sgmllib<3,>=2 (from feedparser->-r requirements.txt (line 2))
+monitor	Install dependencies	2026-07-30T20:00:59.6571411Z   Downloading feedparser_sgmllib-2.0.1-py3-none-any.whl.metadata (926 bytes)
+monitor	Install dependencies	2026-07-30T20:00:59.7599201Z Collecting charset_normalizer<4,>=2 (from requests->-r requirements.txt (line 3))
+monitor	Install dependencies	2026-07-30T20:00:59.7679237Z   Downloading charset_normalizer-3.4.9-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (41 kB)
+monitor	Install dependencies	2026-07-30T20:00:59.7896897Z Collecting idna<4,>=2.5 (from requests->-r requirements.txt (line 3))
+monitor	Install dependencies	2026-07-30T20:00:59.7973428Z   Downloading idna-3.18-py3-none-any.whl.metadata (6.1 kB)
+monitor	Install dependencies	2026-07-30T20:00:59.8211745Z Collecting urllib3<3,>=1.26 (from requests->-r requirements.txt (line 3))
+monitor	Install dependencies	2026-07-30T20:00:59.8290803Z   Downloading urllib3-2.7.0-py3-none-any.whl.metadata (6.9 kB)
+monitor	Install dependencies	2026-07-30T20:00:59.8495665Z Collecting certifi>=2023.5.7 (from requests->-r requirements.txt (line 3))
+monitor	Install dependencies	2026-07-30T20:00:59.8572545Z   Downloading certifi-2026.7.22-py3-none-any.whl.metadata (2.5 kB)
+monitor	Install dependencies	2026-07-30T20:00:59.8821462Z Collecting google-auth-oauthlib>=0.4.1 (from gspread->-r requirements.txt (line 4))
+monitor	Install dependencies	2026-07-30T20:00:59.8898799Z   Downloading google_auth_oauthlib-1.4.0-py3-none-any.whl.metadata (2.6 kB)
+monitor	Install dependencies	2026-07-30T20:00:59.9111283Z Collecting pyasn1-modules>=0.2.1 (from google-auth->-r requirements.txt (line 5))
+monitor	Install dependencies	2026-07-30T20:00:59.9188202Z   Downloading pyasn1_modules-0.4.2-py3-none-any.whl.metadata (3.5 kB)
+monitor	Install dependencies	2026-07-30T20:01:00.0808743Z Collecting cryptography>=38.0.3 (from google-auth->-r requirements.txt (line 5))
+monitor	Install dependencies	2026-07-30T20:01:00.0887798Z   Downloading cryptography-49.0.0-cp311-abi3-manylinux_2_34_x86_64.whl.metadata (4.3 kB)
+monitor	Install dependencies	2026-07-30T20:01:00.1096843Z Collecting anyio<5.0.0,>=4.8.0 (from google-genai->-r requirements.txt (line 6))
+monitor	Install dependencies	2026-07-30T20:01:00.1172665Z   Downloading anyio-4.14.2-py3-none-any.whl.metadata (4.6 kB)
+monitor	Install dependencies	2026-07-30T20:01:00.1384978Z Collecting httpx<1.0.0,>=0.28.1 (from google-genai->-r requirements.txt (line 6))
+monitor	Install dependencies	2026-07-30T20:01:00.1460633Z   Downloading httpx-0.28.1-py3-none-any.whl.metadata (7.1 kB)
+monitor	Install dependencies	2026-07-30T20:01:00.2532219Z Collecting pydantic<3.0.0,>=2.12.5 (from google-genai->-r requirements.txt (line 6))
+monitor	Install dependencies	2026-07-30T20:01:00.2613529Z   Downloading pydantic-2.13.4-py3-none-any.whl.metadata (109 kB)
+monitor	Install dependencies	2026-07-30T20:01:00.2892322Z Collecting tenacity<9.2.0,>=8.2.3 (from google-genai->-r requirements.txt (line 6))
+monitor	Install dependencies	2026-07-30T20:01:00.2968359Z   Downloading tenacity-9.1.4-py3-none-any.whl.metadata (1.2 kB)
+monitor	Install dependencies	2026-07-30T20:01:00.3853709Z Collecting websockets<17.0,>=13.0.0 (from google-genai->-r requirements.txt (line 6))
+monitor	Install dependencies	2026-07-30T20:01:00.3938727Z   Downloading websockets-16.1.1-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (6.8 kB)
+monitor	Install dependencies	2026-07-30T20:01:00.4097428Z Collecting distro<2,>=1.7.0 (from google-genai->-r requirements.txt (line 6))
+monitor	Install dependencies	2026-07-30T20:01:00.4181359Z   Downloading distro-1.9.0-py3-none-any.whl.metadata (6.8 kB)
+monitor	Install dependencies	2026-07-30T20:01:00.4363380Z Collecting sniffio (from google-genai->-r requirements.txt (line 6))
+monitor	Install dependencies	2026-07-30T20:01:00.4439184Z   Downloading sniffio-1.3.1-py3-none-any.whl.metadata (3.9 kB)
+monitor	Install dependencies	2026-07-30T20:01:00.4689561Z Collecting httpcore==1.* (from httpx<1.0.0,>=0.28.1->google-genai->-r requirements.txt (line 6))
+monitor	Install dependencies	2026-07-30T20:01:00.4769472Z   Downloading httpcore-1.0.9-py3-none-any.whl.metadata (21 kB)
+monitor	Install dependencies	2026-07-30T20:01:00.4934828Z Collecting h11>=0.16 (from httpcore==1.*->httpx<1.0.0,>=0.28.1->google-genai->-r requirements.txt (line 6))
+monitor	Install dependencies	2026-07-30T20:01:00.5009882Z   Downloading h11-0.16.0-py3-none-any.whl.metadata (8.3 kB)
+monitor	Install dependencies	2026-07-30T20:01:00.5156192Z Collecting annotated-types>=0.6.0 (from pydantic<3.0.0,>=2.12.5->google-genai->-r requirements.txt (line 6))
+monitor	Install dependencies	2026-07-30T20:01:00.5232661Z   Downloading annotated_types-0.8.0-py3-none-any.whl.metadata (15 kB)
+monitor	Install dependencies	2026-07-30T20:01:01.1010858Z Collecting pydantic-core==2.46.4 (from pydantic<3.0.0,>=2.12.5->google-genai->-r requirements.txt (line 6))
+monitor	Install dependencies	2026-07-30T20:01:01.1091716Z   Downloading pydantic_core-2.46.4-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl.metadata (6.6 kB)
+monitor	Install dependencies	2026-07-30T20:01:01.1247969Z Collecting typing-inspection>=0.4.2 (from pydantic<3.0.0,>=2.12.5->google-genai->-r requirements.txt (line 6))
+monitor	Install dependencies	2026-07-30T20:01:01.1326860Z   Downloading typing_inspection-0.4.2-py3-none-any.whl.metadata (2.6 kB)
+monitor	Install dependencies	2026-07-30T20:01:01.2554977Z Collecting pandas>=1.3.0 (from yfinance->-r requirements.txt (line 7))
+monitor	Install dependencies	2026-07-30T20:01:01.2635739Z   Downloading pandas-3.0.5-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (79 kB)
+monitor	Install dependencies	2026-07-30T20:01:01.4557265Z Collecting numpy>=1.16.5 (from yfinance->-r requirements.txt (line 7))
+monitor	Install dependencies	2026-07-30T20:01:01.4670056Z   Downloading numpy-2.4.6-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (6.6 kB)
+monitor	Install dependencies	2026-07-30T20:01:01.4838494Z Collecting multitasking>=0.0.7 (from yfinance->-r requirements.txt (line 7))
+monitor	Install dependencies	2026-07-30T20:01:01.4922084Z   Downloading multitasking-0.0.13-py3-none-any.whl.metadata (16 kB)
+monitor	Install dependencies	2026-07-30T20:01:01.5143453Z Collecting platformdirs>=2.0.0 (from yfinance->-r requirements.txt (line 7))
+monitor	Install dependencies	2026-07-30T20:01:01.5226703Z   Downloading platformdirs-4.11.0-py3-none-any.whl.metadata (5.5 kB)
+monitor	Install dependencies	2026-07-30T20:01:01.5578340Z Collecting pytz>=2022.5 (from yfinance->-r requirements.txt (line 7))
+monitor	Install dependencies	2026-07-30T20:01:01.5658368Z   Downloading pytz-2026.3.post1-py2.py3-none-any.whl.metadata (22 kB)
+monitor	Install dependencies	2026-07-30T20:01:01.5887275Z Collecting peewee>=3.16.2 (from yfinance->-r requirements.txt (line 7))
+monitor	Install dependencies	2026-07-30T20:01:01.5965889Z   Downloading peewee-4.2.6-py3-none-any.whl.metadata (10 kB)
+monitor	Install dependencies	2026-07-30T20:01:01.6518904Z Collecting curl_cffi>=0.15 (from yfinance->-r requirements.txt (line 7))
+monitor	Install dependencies	2026-07-30T20:01:01.6601198Z   Downloading curl_cffi-0.15.0-cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (18 kB)
+monitor	Install dependencies	2026-07-30T20:01:01.8214459Z Collecting protobuf>=3.19.0 (from yfinance->-r requirements.txt (line 7))
+monitor	Install dependencies	2026-07-30T20:01:01.8296507Z   Downloading protobuf-7.35.1-cp310-abi3-manylinux2014_x86_64.whl.metadata (595 bytes)
+monitor	Install dependencies	2026-07-30T20:01:01.9210423Z Collecting cffi>=2.0.0 (from cryptography>=38.0.3->google-auth->-r requirements.txt (line 5))
+monitor	Install dependencies	2026-07-30T20:01:01.9288231Z   Downloading cffi-2.1.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.5 kB)
+monitor	Install dependencies	2026-07-30T20:01:01.9444539Z Collecting pycparser (from cffi>=2.0.0->cryptography>=38.0.3->google-auth->-r requirements.txt (line 5))
+monitor	Install dependencies	2026-07-30T20:01:01.9521984Z   Downloading pycparser-3.0-py3-none-any.whl.metadata (8.2 kB)
+monitor	Install dependencies	2026-07-30T20:01:01.9909893Z Collecting rich (from curl_cffi>=0.15->yfinance->-r requirements.txt (line 7))
+monitor	Install dependencies	2026-07-30T20:01:01.9987919Z   Downloading rich-15.0.0-py3-none-any.whl.metadata (18 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.0165476Z Collecting requests-oauthlib>=0.7.0 (from google-auth-oauthlib>=0.4.1->gspread->-r requirements.txt (line 4))
+monitor	Install dependencies	2026-07-30T20:01:02.0259182Z   Downloading requests_oauthlib-2.0.0-py2.py3-none-any.whl.metadata (11 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.0456815Z Collecting python-dateutil>=2.8.2 (from pandas>=1.3.0->yfinance->-r requirements.txt (line 7))
+monitor	Install dependencies	2026-07-30T20:01:02.0535158Z   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.0790259Z Collecting pyasn1<0.7.0,>=0.6.1 (from pyasn1-modules>=0.2.1->google-auth->-r requirements.txt (line 5))
+monitor	Install dependencies	2026-07-30T20:01:02.0869778Z   Downloading pyasn1-0.6.4-py3-none-any.whl.metadata (8.4 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.1040057Z Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas>=1.3.0->yfinance->-r requirements.txt (line 7))
+monitor	Install dependencies	2026-07-30T20:01:02.1120441Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.1286744Z Collecting oauthlib>=3.0.0 (from requests-oauthlib>=0.7.0->google-auth-oauthlib>=0.4.1->gspread->-r requirements.txt (line 4))
+monitor	Install dependencies	2026-07-30T20:01:02.1365756Z   Downloading oauthlib-3.3.1-py3-none-any.whl.metadata (7.9 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.1601162Z Collecting markdown-it-py>=2.2.0 (from rich->curl_cffi>=0.15->yfinance->-r requirements.txt (line 7))
+monitor	Install dependencies	2026-07-30T20:01:02.1678190Z   Downloading markdown_it_py-4.2.0-py3-none-any.whl.metadata (7.4 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.1907709Z Collecting pygments<3.0.0,>=2.13.0 (from rich->curl_cffi>=0.15->yfinance->-r requirements.txt (line 7))
+monitor	Install dependencies	2026-07-30T20:01:02.1984445Z   Downloading pygments-2.20.0-py3-none-any.whl.metadata (2.5 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.2138773Z Collecting mdurl~=0.1 (from markdown-it-py>=2.2.0->rich->curl_cffi>=0.15->yfinance->-r requirements.txt (line 7))
+monitor	Install dependencies	2026-07-30T20:01:02.2215143Z   Downloading mdurl-0.1.2-py3-none-any.whl.metadata (1.6 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.2338474Z Downloading beautifulsoup4-4.15.0-py3-none-any.whl (109 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.2443458Z Downloading feedparser-6.0.14-py3-none-any.whl (80 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.2545892Z Downloading feedparser_sgmllib-2.0.1-py3-none-any.whl (10 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.2640242Z Downloading requests-2.34.2-py3-none-any.whl (73 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.2738115Z Downloading charset_normalizer-3.4.9-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (221 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.2892153Z Downloading idna-3.18-py3-none-any.whl (65 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.2988783Z Downloading urllib3-2.7.0-py3-none-any.whl (131 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.3103217Z Downloading gspread-6.2.1-py3-none-any.whl (59 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.3225246Z Downloading google_auth-2.56.2-py3-none-any.whl (258 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.3334140Z Downloading google_genai-2.16.0-py3-none-any.whl (1.1 MB)
+monitor	Install dependencies	2026-07-30T20:01:02.3486379Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.1/1.1 MB 62.5 MB/s  0:00:00
+monitor	Install dependencies	2026-07-30T20:01:02.3563829Z Downloading anyio-4.14.2-py3-none-any.whl (125 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.3664567Z Downloading distro-1.9.0-py3-none-any.whl (20 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.3760122Z Downloading httpx-0.28.1-py3-none-any.whl (73 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.3863324Z Downloading httpcore-1.0.9-py3-none-any.whl (78 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.3963405Z Downloading pydantic-2.13.4-py3-none-any.whl (472 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.4072380Z Downloading pydantic_core-2.46.4-cp311-cp311-manylinux_2_17_x86_64.manylinux2014_x86_64.whl (2.1 MB)
+monitor	Install dependencies	2026-07-30T20:01:02.4240993Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 2.1/2.1 MB 124.7 MB/s  0:00:00
+monitor	Install dependencies	2026-07-30T20:01:02.4316876Z Downloading tenacity-9.1.4-py3-none-any.whl (28 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.4415468Z Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.4513002Z Downloading websockets-16.1.1-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (186 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.4613025Z Downloading yfinance-1.5.2-py2.py3-none-any.whl (144 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.4713576Z Downloading pypdf2-3.0.1-py3-none-any.whl (232 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.4827069Z Downloading annotated_types-0.8.0-py3-none-any.whl (13 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.4927647Z Downloading certifi-2026.7.22-py3-none-any.whl (136 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.5030336Z Downloading cryptography-49.0.0-cp311-abi3-manylinux_2_34_x86_64.whl (4.7 MB)
+monitor	Install dependencies	2026-07-30T20:01:02.5243458Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.7/4.7 MB 250.1 MB/s  0:00:00
+monitor	Install dependencies	2026-07-30T20:01:02.5323514Z Downloading cffi-2.1.0-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (217 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.5428574Z Downloading curl_cffi-0.15.0-cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (11.1 MB)
+monitor	Install dependencies	2026-07-30T20:01:02.5833760Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 11.1/11.1 MB 293.4 MB/s  0:00:00
+monitor	Install dependencies	2026-07-30T20:01:02.5914168Z Downloading google_auth_oauthlib-1.4.0-py3-none-any.whl (19 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.6013893Z Downloading h11-0.16.0-py3-none-any.whl (37 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.6111454Z Downloading multitasking-0.0.13-py3-none-any.whl (16 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.6214834Z Downloading numpy-2.4.6-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.9 MB)
+monitor	Install dependencies	2026-07-30T20:01:02.6706753Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.9/16.9 MB 361.8 MB/s  0:00:00
+monitor	Install dependencies	2026-07-30T20:01:02.6786201Z Downloading pandas-3.0.5-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (11.3 MB)
+monitor	Install dependencies	2026-07-30T20:01:02.7129495Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 11.3/11.3 MB 347.6 MB/s  0:00:00
+monitor	Install dependencies	2026-07-30T20:01:02.7208868Z Downloading peewee-4.2.6-py3-none-any.whl (173 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.7311266Z Downloading platformdirs-4.11.0-py3-none-any.whl (23 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.7413481Z Downloading protobuf-7.35.1-cp310-abi3-manylinux2014_x86_64.whl (327 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.7521750Z Downloading pyasn1_modules-0.4.2-py3-none-any.whl (181 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.7621972Z Downloading pyasn1-0.6.4-py3-none-any.whl (84 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.7723675Z Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.7836968Z Downloading pytz-2026.3.post1-py2.py3-none-any.whl (508 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.7943036Z Downloading requests_oauthlib-2.0.0-py2.py3-none-any.whl (24 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.8039838Z Downloading oauthlib-3.3.1-py3-none-any.whl (160 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.8138889Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.8233461Z Downloading soupsieve-2.9.1-py3-none-any.whl (37 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.8330629Z Downloading typing_inspection-0.4.2-py3-none-any.whl (14 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.8427898Z Downloading pycparser-3.0-py3-none-any.whl (48 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.8527514Z Downloading rich-15.0.0-py3-none-any.whl (310 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.8633655Z Downloading pygments-2.20.0-py3-none-any.whl (1.2 MB)
+monitor	Install dependencies	2026-07-30T20:01:02.8719988Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 1.2/1.2 MB 157.3 MB/s  0:00:00
+monitor	Install dependencies	2026-07-30T20:01:02.8795124Z Downloading markdown_it_py-4.2.0-py3-none-any.whl (91 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.8892296Z Downloading mdurl-0.1.2-py3-none-any.whl (10.0 kB)
+monitor	Install dependencies	2026-07-30T20:01:02.8991303Z Downloading sniffio-1.3.1-py3-none-any.whl (10 kB)
+monitor	Install dependencies	2026-07-30T20:01:03.1705848Z Installing collected packages: pytz, peewee, multitasking, websockets, urllib3, typing-extensions, tenacity, soupsieve, sniffio, six, PyPDF2, pygments, pycparser, pyasn1, protobuf, platformdirs, oauthlib, numpy, mdurl, idna, h11, feedparser-sgmllib, distro, charset_normalizer, certifi, annotated-types, typing-inspection, requests, python-dateutil, pydantic-core, pyasn1-modules, markdown-it-py, httpcore, feedparser, cffi, beautifulsoup4, anyio, rich, requests-oauthlib, pydantic, pandas, httpx, cryptography, google-auth, curl_cffi, yfinance, google-auth-oauthlib, gspread, google-genai
+monitor	Install dependencies	2026-07-30T20:01:13.3143572Z 
+monitor	Install dependencies	2026-07-30T20:01:13.3171330Z Successfully installed PyPDF2-3.0.1 annotated-types-0.8.0 anyio-4.14.2 beautifulsoup4-4.15.0 certifi-2026.7.22 cffi-2.1.0 charset_normalizer-3.4.9 cryptography-49.0.0 curl_cffi-0.15.0 distro-1.9.0 feedparser-6.0.14 feedparser-sgmllib-2.0.1 google-auth-2.56.2 google-auth-oauthlib-1.4.0 google-genai-2.16.0 gspread-6.2.1 h11-0.16.0 httpcore-1.0.9 httpx-0.28.1 idna-3.18 markdown-it-py-4.2.0 mdurl-0.1.2 multitasking-0.0.13 numpy-2.4.6 oauthlib-3.3.1 pandas-3.0.5 peewee-4.2.6 platformdirs-4.11.0 protobuf-7.35.1 pyasn1-0.6.4 pyasn1-modules-0.4.2 pycparser-3.0 pydantic-2.13.4 pydantic-core-2.46.4 pygments-2.20.0 python-dateutil-2.9.0.post0 pytz-2026.3.post1 requests-2.34.2 requests-oauthlib-2.0.0 rich-15.0.0 six-1.17.0 sniffio-1.3.1 soupsieve-2.9.1 tenacity-9.1.4 typing-extensions-4.16.0 typing-inspection-0.4.2 urllib3-2.7.0 websockets-16.1.1 yfinance-1.5.2
+monitor	Run monitor	﻿2026-07-30T20:01:13.4458905Z ##[group]Run python monitor.py
+monitor	Run monitor	2026-07-30T20:01:13.4459356Z [36;1mpython monitor.py[0m
+monitor	Run monitor	2026-07-30T20:01:13.4505106Z shell: /usr/bin/bash -e ***0***
+monitor	Run monitor	2026-07-30T20:01:13.4505459Z env:
+monitor	Run monitor	2026-07-30T20:01:13.4505819Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.15/x64
+monitor	Run monitor	2026-07-30T20:01:13.4506362Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib/pkgconfig
+monitor	Run monitor	2026-07-30T20:01:13.4506910Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+monitor	Run monitor	2026-07-30T20:01:13.4507650Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+monitor	Run monitor	2026-07-30T20:01:13.4508158Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+monitor	Run monitor	2026-07-30T20:01:13.4508658Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib
+monitor	Run monitor	2026-07-30T20:01:13.4518720Z   GOOGLE_SERVICE_ACCOUNT_JSON: ***
+monitor	Run monitor	
+monitor	Run monitor	2026-07-30T20:01:13.4520642Z   GEMINI_API_KEY: ***
+monitor	Run monitor	2026-07-30T20:01:13.4520956Z   GEMINI_API_KEY_1: 
+monitor	Run monitor	2026-07-30T20:01:13.4521249Z   GEMINI_API_KEY_2: 
+monitor	Run monitor	2026-07-30T20:01:13.4521562Z   GEMINI_API_KEY_3: 
+monitor	Run monitor	2026-07-30T20:01:13.4521877Z   GEMINI_API_KEY_4: 
+monitor	Run monitor	2026-07-30T20:01:13.4522155Z   GEMINI_API_KEY_5: 
+monitor	Run monitor	2026-07-30T20:01:13.4522434Z   GEMINI_API_KEY_6: 
+monitor	Run monitor	2026-07-30T20:01:13.4522712Z   GEMINI_API_KEY_7: 
+monitor	Run monitor	2026-07-30T20:01:13.4523025Z   SMTP_SERVER: ***
+monitor	Run monitor	2026-07-30T20:01:13.4523328Z   SMTP_PORT: ***
+monitor	Run monitor	2026-07-30T20:01:13.4523637Z   SMTP_USER: ***
+monitor	Run monitor	2026-07-30T20:01:13.4523942Z   SMTP_PASS: ***
+monitor	Run monitor	2026-07-30T20:01:13.4524295Z   ALERT_EMAIL_RECIPIENT: ***
+monitor	Run monitor	2026-07-30T20:01:13.4524621Z ##[endgroup]
+monitor	Run monitor	2026-07-30T20:03:12.3420795Z [AI INFO] Initialized 7 Gemini API clients.
+monitor	Run monitor	2026-07-30T20:03:12.3421646Z === Special Situations Radar v1.0.0 ===
+monitor	Run monitor	2026-07-30T20:03:12.3422277Z [DATABASE] Ready
+monitor	Run monitor	2026-07-30T20:03:12.3422996Z Loading rules, sources, playbooks, and exclusions from Google Sheets...
+monitor	Run monitor	2026-07-30T20:03:12.3423889Z [LOADED] 14 Sources | 36 Rules | 28 Playbooks
+monitor	Run monitor	2026-07-30T20:03:12.3424330Z 
+monitor	Run monitor	2026-07-30T20:03:12.3424617Z [INGESTION] Polling Custom Scraper: PR Newswire
+monitor	Run monitor	2026-07-30T20:03:12.3426495Z     [SKIP] Empty body for 16:00 ETBlue Moon Announces Voting Results from Annual General and Special MeetingBlue Moon Metals Inc. ("Blue Moon" or the "Company") (TSXV: MOON) (NASDAQ: BMM), is pleased to report the voting results from the Company's Annual...
+monitor	Run monitor	2026-07-30T20:03:12.3430043Z   -> Processing: 16:00 ETCoveo Reports First Quarter Fiscal 2027 Financial ResultsCoveo (TSX: CVO), the leader in AI-Relevance, delivering best-in-class search and generative experiences, today announced financial results for its...
+monitor	Run monitor	2026-07-30T20:03:12.3432065Z     [MATCH] High confidence event signals detected!
+monitor	Run monitor	2026-07-30T20:03:12.3432819Z     [AI TICKER] CVO.TO
+monitor	Run monitor	2026-07-30T20:03:12.3433368Z     [FINANCIALS] Market Cap: $404,728,064.00
+monitor	Run monitor	2026-07-30T20:03:12.3434134Z     [OPTIONS] No options chain found for CVO.TO.
+monitor	Run monitor	2026-07-30T20:03:12.3434742Z     [AI CLASSIFICATION] False Positive
+monitor	Run monitor	2026-07-30T20:03:12.3435699Z     [AI REJECTED] Article flagged as noise/false positive or failed quantitative filters.
+monitor	Run monitor	2026-07-30T20:03:12.3437668Z   -> Processing: 16:00 ETGreenberg Traurig Represents Ashlins Pharmaceuticals in Strategic Global Life Sciences Licensing TransactionGlobal law firm Greenberg Traurig, LLP advised Ashlins Ocular Pharmaceuticals, Inc. (Ashlins), a wholly owned subsidiary of Ashlins Pharmaceuticals,...
+monitor	Run monitor	2026-07-30T20:03:12.3440437Z   -> Processing: 16:00 ETHuntington Bank Commits $80 Billion to Support Affordable Housing, Small Businesses and Local CommunitiesHuntington Bancshares Incorporated (Nasdaq: HBAN) today announced a new $80 billion Community Plan. The plan will help improve financial...
+monitor	Run monitor	2026-07-30T20:03:12.3441742Z     [MATCH] High confidence event signals detected!
+monitor	Run monitor	2026-07-30T20:03:12.3443264Z [AI RETRY] Error: 503 UNAVAILABLE. ***'error': ***'code': 503, 'message': 'This model is currently experiencing high demand. Spikes in demand are usually temporary. Please try again later.', 'status': 'UNAVAILABLE'***. Trying next key...
+monitor	Run monitor	2026-07-30T20:03:12.3444324Z     [AI TICKER] HBAN
+monitor	Run monitor	2026-07-30T20:03:12.3444657Z     [FINANCIALS] Market Cap: $34,508,685,312.00
+monitor	Run monitor	2026-07-30T20:03:12.3445130Z     [OPTIONS] Options chain available. Earliest exp: 2026-08-21
+monitor	Run monitor	2026-07-30T20:03:12.3445849Z     [AI CLASSIFICATION] False Positive
+monitor	Run monitor	2026-07-30T20:03:12.3446389Z     [AI REJECTED] Article flagged as noise/false positive or failed quantitative filters.
+monitor	Run monitor	2026-07-30T20:03:12.3447968Z   -> Processing: 16:00 ETFatPipe, Inc. (FATN) Reports Q1 FY2027 Results: 28% Y-o-Y Q1 Revenue Growth and 25.6% Adjusted EBITDA MarginFatPipe, Inc. (NASDAQ: FATN) ("FatPipe" or the "Company"), a pioneer and multiple patents holder in enterprise-class, application-aware, secure...
+monitor	Run monitor	2026-07-30T20:03:12.3449922Z     [SKIP] Empty body for 12:49 ETNational Airlines Accelerates Fleet Expansion with Delivery of Third Boeing 777-200 FreighterNational Airlines announces the delivery of its third Boeing 777-200 Freighter (N795CA), further strengthening National Airlines long-haul cargo...
+monitor	Run monitor	2026-07-30T20:03:12.3451685Z     [SKIP] Empty body for 11:11 ETSOUTHWEST AIRLINES DECLARES 190th QUARTERLY DIVIDENDSouthwest Airlines Co. (NYSE: LUV) Board of Directors declared a quarterly cash dividend of $.18 per share to Shareholders of record at the close of...
+monitor	Run monitor	2026-07-30T20:03:12.3452588Z 
+monitor	Run monitor	2026-07-30T20:03:12.3452768Z [INGESTION] Polling Custom Scraper: GlobeNewswire
+monitor	Run monitor	2026-07-30T20:03:12.3453041Z 
+monitor	Run monitor	2026-07-30T20:03:12.3453206Z [INGESTION] Polling Custom Scraper: Business Wire
+monitor	Run monitor	2026-07-30T20:03:12.3454378Z     [SKIP] Empty body for Singapur selecciona a Thales para su sistema de gestión del tráfico aéreo de próxima generación impulsado por IA, que dará servicio a uno de los espacios aéreos más transitados de Asia
+monitor	Run monitor	2026-07-30T20:03:12.3455826Z     [SKIP] Empty body for Die Cessna Citation CJ3 Gen3 absolviert ihren Erstflug und bringt den Leichtjet der nächsten Generation der Zertifizierung einen Schritt näher
+monitor	Run monitor	2026-07-30T20:03:12.3457049Z     [SKIP] Empty body for Cessna Citation CJ3 Gen3 realiza seu primeiro voo, impulsionando a próxima geração de jatos leves rumo à certificação
+monitor	Run monitor	2026-07-30T20:03:12.3458399Z     [SKIP] Empty body for Le Cessna Citation CJ3 Gen3 réalise son premier vol et rapproche de la certification ce jet léger de nouvelle génération
+monitor	Run monitor	2026-07-30T20:03:12.3459522Z     [SKIP] Empty body for Samenvatting: Cessna Citation CJ3 Gen3 voltooit zijn eerste vlucht en stevent af op certificering van dit lichte vliegtuig van de nieuwe generatie
+monitor	Run monitor	2026-07-30T20:03:12.3470022Z     [SKIP] Empty body for Riassunto: Cessna Citation CJ3 Gen3 completa il primo volo, avvicinando il jet leggero di nuova generazione alla certificazione
+monitor	Run monitor	2026-07-30T20:03:12.3471397Z     [SKIP] Empty body for Cessna Citation CJ3 Gen3 completa su primer vuelo y avanza hacia su certificación
+monitor	Run monitor	2026-07-30T20:03:12.3472590Z     [SKIP] Empty body for Coulson Aviation presenta CFR HALO, un retardante de fuego de larga duración diseñado para las operaciones modernas de extinción aérea de los incendios
+monitor	Run monitor	2026-07-30T20:03:12.3473905Z     [SKIP] Empty body for Coulson Aviation apresenta o CFR HALO, um retardante de fogo de longa duração desenvolvido para o combate aéreo moderno a incêndios
+monitor	Run monitor	2026-07-30T20:03:12.3475155Z     [SKIP] Empty body for Coulson Aviation introduceert CFR HALO, een brandvertragend materiaal voor langdurig gebruik, speciaal ontwikkeld voor moderne brandbestrijding vanuit de lucht
+monitor	Run monitor	2026-07-30T20:03:12.3476382Z     [SKIP] Empty body for Coulson Aviation lancia CFR HALO, un ritardante di fiamma a effetto prolungato studiato per la moderna lotta aerea contro gli incendi
+monitor	Run monitor	2026-07-30T20:03:12.3477907Z     [SKIP] Empty body for Coulson Aviation présente CFR HALO, un retardateur de feu à action prolongée conçu pour la lutte aérienne moderne contre les incendies
+monitor	Run monitor	2026-07-30T20:03:12.3479040Z     [SKIP] Empty body for Coulson Aviation präsentiert CFR HALO, ein Langzeit-Feuerhemmstoff für die moderne Luftbrandbekämpfung
+monitor	Run monitor	2026-07-30T20:03:12.3479892Z     [SKIP] Empty body for CDB Aviation Completes Mandate for Four A320neo Deliveries to Marabu Airlines
+monitor	Run monitor	2026-07-30T20:03:12.3480734Z     [SKIP] Empty body for Comdata Launches Pay Codes, Advancing Its Longstanding Commitment to Protecting Fleets and Drivers
+monitor	Run monitor	2026-07-30T20:03:12.3482133Z     [SKIP] Empty body for Latino Professionals in Aerospace’s Largest-Ever Aerospace Industry Expo To Bring 16 Airlines, Record Attendance to Orlando Sept. 17-18
+monitor	Run monitor	2026-07-30T20:03:12.3483157Z     [SKIP] Empty body for Innovative Aerosystems Announces Third Quarter 2026 Results Conference Call and Webcast Date
+monitor	Run monitor	2026-07-30T20:03:12.3484047Z     [SKIP] Empty body for Republic Airways Holdings Inc. Announces Q2 2026 Financial Results And Increases Full Year Guidance
+monitor	Run monitor	2026-07-30T20:03:12.3484858Z     [SKIP] Empty body for UPS Makes Shipping Easier than Ever with New Digital Tools for SMB Customers
+monitor	Run monitor	2026-07-30T20:03:12.3485622Z     [SKIP] Empty body for Les agent(e)s de bord de WestJet déposent un préavis de grève
+monitor	Run monitor	2026-07-30T20:03:12.3486213Z     [SKIP] Empty body for WestJet Flight Attendants Issue Strike Notice
+monitor	Run monitor	2026-07-30T20:03:12.3487573Z     [SKIP] Empty body for Singapura seleciona a Thales para fornecer um sistema de gestão de tráfego aéreo de nova geração, com recurso a inteligência artificial, para um dos espaços aéreos mais movimentados da Ásia
+monitor	Run monitor	2026-07-30T20:03:12.3489205Z     [SKIP] Empty body for Singapour choisit Thales pour déployer son futur système de gestion du trafic aérien : une innovation portée par l’IA pour l’un des espaces aériens les plus denses d&apos;Asie
+monitor	Run monitor	2026-07-30T20:03:12.3490554Z     [SKIP] Empty body for Singapore Selects Thales for Next-generation AI-powered Air Traffic Management System Serving One of Asia’s Busiest Airspaces
+monitor	Run monitor	2026-07-30T20:03:12.3491501Z     [SKIP] Empty body for Singapore sceglie Thales per il nuovo sistema AI di gestione del traffico aereo
+monitor	Run monitor	2026-07-30T20:03:12.3492359Z     [SKIP] Empty body for Coulson Aviation Introduces CFR HALO, a Long-Term Fire Retardant Engineered for Modern Aerial Firefighting
+monitor	Run monitor	2026-07-30T20:03:12.3493109Z     [SKIP] Empty body for Avolon Q2 Net Income up 45% to US$209 Million
+monitor	Run monitor	2026-07-30T20:03:12.3493868Z     [SKIP] Empty body for Le public appuie massivement les agent(e)s de bord de WestJet et leur droit de grève
+monitor	Run monitor	2026-07-30T20:03:12.3494685Z     [SKIP] Empty body for Canadians overwhelmingly support WestJet flight attendants and their right to strike
+monitor	Run monitor	2026-07-30T20:03:12.3495415Z     [SKIP] Empty body for C.H. Robinson Reports 2026 Second Quarter Results
+monitor	Run monitor	2026-07-30T20:03:12.3495749Z 
+monitor	Run monitor	2026-07-30T20:03:12.3495918Z [INGESTION] Polling Custom Scraper: SEC Edgar
+monitor	Run monitor	2026-07-30T20:03:12.3496577Z   -> Processing: 8-K - Fortune Brands Innovations, Inc. (0001519751) (Filer)
+monitor	Run monitor	2026-07-30T20:03:12.3497108Z   -> Processing: 8-K - Datavault AI Inc. (0001682149) (Filer)
+monitor	Run monitor	2026-07-30T20:03:12.3497847Z   -> Processing: 8-K - Keros Therapeutics, Inc. (0001664710) (Filer)
+monitor	Run monitor	2026-07-30T20:03:12.3498362Z   -> Processing: 8-K - MIDDLESEX WATER CO (0000066004) (Filer)
+monitor	Run monitor	2026-07-30T20:03:12.3498816Z   -> Processing: 8-K - CURIS INC (0001108205) (Filer)
+monitor	Run monitor	2026-07-30T20:03:12.3499258Z   -> Processing: 8-K - Vireo Growth Inc. (0001771706) (Filer)
+monitor	Run monitor	2026-07-30T20:03:12.3499741Z   -> Processing: 8-K - ASTEC INDUSTRIES INC (0000792987) (Filer)
+monitor	Run monitor	2026-07-30T20:03:12.3500284Z   -> Processing: 8-K - Alignment Healthcare, Inc. (0001832466) (Filer)
+monitor	Run monitor	2026-07-30T20:03:12.3500784Z   -> Processing: 8-K - Tempus AI, Inc. (0001717115) (Filer)
+monitor	Run monitor	2026-07-30T20:03:12.3501278Z   -> Processing: 8-K - MONOLITHIC POWER SYSTEMS, INC. (0001280452) (Filer)
+monitor	Run monitor	2026-07-30T20:03:12.3501811Z   -> Processing: 8-K - Rivian Automotive, Inc. / DE (0001874178) (Filer)
+monitor	Run monitor	2026-07-30T20:03:12.3502311Z   -> Processing: 8-K - Fatpipe Inc/UT (0001993400) (Filer)
+monitor	Run monitor	2026-07-30T20:03:34.6868953Z   -> Processing: 8-K - FIRST BUSINESS FINANCIAL SERVICES, INC. (0001521951) (Filer)
+monitor	Run monitor	2026-07-30T20:03:34.6869876Z   -> Processing: 8-K - Strategy Inc (0001050446) (Filer)
+monitor	Run monitor	2026-07-30T20:03:34.6870664Z [SKIP] Source 'TSX News' enabled but missing RSS URL and no custom scraper found.
+monitor	Run monitor	2026-07-30T20:03:34.6871546Z [SKIP] Source 'HKEX' enabled but missing RSS URL and no custom scraper found.
+monitor	Run monitor	2026-07-30T20:03:34.6872396Z [SKIP] Source 'ASX' enabled but missing RSS URL and no custom scraper found.
+monitor	Run monitor	2026-07-30T20:03:34.6873257Z [SKIP] Source 'SEDAR+' enabled but missing RSS URL and no custom scraper found.
+monitor	Run monitor	2026-07-30T20:03:34.6874233Z 
+monitor	Run monitor	2026-07-30T20:03:34.6875257Z [INGESTION] Polling RSS: SEC EDGAR - Schedule 13D (Activism) (https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&CIK=&type=13D&company=&dateb=&owner=include&start=0&count=40&output=atom)
+monitor	Run monitor	2026-07-30T20:03:34.6876305Z 
+monitor	Run monitor	2026-07-30T20:03:34.6877663Z [INGESTION] Polling RSS: SEC EDGAR - Form 10 (Spin-Offs) (https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&CIK=&type=10-12B&company=&dateb=&owner=include&start=0&count=40&output=atom)
+monitor	Run monitor	2026-07-30T20:03:34.6878915Z 
+monitor	Run monitor	2026-07-30T20:03:34.6879729Z [INGESTION] Polling RSS: Investegate LSE RNS (UK Announcements) (https://www.investegate.co.uk/Rss.aspx?category=RNS)
+monitor	Run monitor	2026-07-30T20:03:34.6880631Z 
+monitor	Run monitor	2026-07-30T20:03:34.6881266Z [INGESTION] Polling RSS: Canadian Newswire SEDAR Feeds (https://www.newswire.ca/rss/SEDAR-filings.xml)
+monitor	Run monitor	2026-07-30T20:03:34.6882203Z 
+monitor	Run monitor	2026-07-30T20:03:34.6882750Z [INGESTION] Polling RSS: Special Situations Digest (https://specialsitsdigest.com/feed/)
+monitor	Run monitor	2026-07-30T20:03:34.6883401Z 
+monitor	Run monitor	2026-07-30T20:03:34.6883589Z [INGESTION] Polling RSS:  (TRUE)
+monitor	Run monitor	2026-07-30T20:03:34.6883871Z 
+monitor	Run monitor	2026-07-30T20:03:34.6884058Z [DATABASE] 18 new articles stored.
+monitor	Run monitor	2026-07-30T20:03:34.6884516Z [DATABASE] Total articles: 1883
+monitor	Run monitor	2026-07-30T20:03:34.6884975Z [SHEETS] Updated stats for 10 sources.
+monitor	Post Set up Python	﻿2026-07-30T20:03:34.9603921Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+monitor	Post Set up Python	2026-07-30T20:03:34.9605274Z Post job cleanup.
+monitor	Post Set up Python	2026-07-30T20:03:35.0806336Z (node:2408) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+monitor	Post Set up Python	2026-07-30T20:03:35.0808425Z (Use `node --trace-deprecation ...` to show where the warning was created)
+monitor	Post Restore database	﻿2026-07-30T20:03:35.0984503Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+monitor	Post Restore database	2026-07-30T20:03:35.0986851Z Post job cleanup.
+monitor	Post Restore database	2026-07-30T20:03:35.2141375Z (node:2416) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+monitor	Post Restore database	2026-07-30T20:03:35.2143019Z (Use `node --trace-deprecation ...` to show where the warning was created)
+monitor	Post Restore database	2026-07-30T20:03:35.2307019Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/SSR/SSR --files-from manifest.txt --use-compress-program zstdmt
+monitor	Post Restore database	2026-07-30T20:03:35.5920164Z (node:2416) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+monitor	Post Restore database	2026-07-30T20:03:36.4856704Z Sent 3173107 of 3173107 (100.0%), 3.4 MBs/sec
+monitor	Post Restore database	2026-07-30T20:03:36.6381130Z Cache saved with key: ssr-database-30577298930
+monitor	Post Checkout repository	﻿2026-07-30T20:03:36.6534489Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+monitor	Post Checkout repository	2026-07-30T20:03:36.6535898Z Post job cleanup.
+monitor	Post Checkout repository	2026-07-30T20:03:36.7377812Z [command]/usr/bin/git version
+monitor	Post Checkout repository	2026-07-30T20:03:36.7421315Z git version 2.54.0
+monitor	Post Checkout repository	2026-07-30T20:03:36.7493707Z Temporarily overriding HOME='/home/runner/work/_temp/584a2fda-27ac-4fa7-93bd-c1ca008feffa' before making global git config changes
+monitor	Post Checkout repository	2026-07-30T20:03:36.7495555Z Adding repository directory to the temporary git global config as a safe directory
+monitor	Post Checkout repository	2026-07-30T20:03:36.7499674Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/SSR/SSR
+monitor	Post Checkout repository	2026-07-30T20:03:36.7539959Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+monitor	Post Checkout repository	2026-07-30T20:03:36.7590072Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+monitor	Post Checkout repository	2026-07-30T20:03:36.7845191Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+monitor	Post Checkout repository	2026-07-30T20:03:36.7867859Z http.https://github.com/.extraheader
+monitor	Post Checkout repository	2026-07-30T20:03:36.7880919Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+monitor	Post Checkout repository	2026-07-30T20:03:36.7925175Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+monitor	Post Checkout repository	2026-07-30T20:03:36.8181056Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+monitor	Post Checkout repository	2026-07-30T20:03:36.8221993Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+monitor	Complete job	﻿2026-07-30T20:03:36.8613294Z Cleaning up orphan processes
+monitor	Complete job	2026-07-30T20:03:36.8910304Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/cache@v4, actions/checkout@v4, actions/setup-python@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/

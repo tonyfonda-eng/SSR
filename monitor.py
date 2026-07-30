@@ -26,7 +26,7 @@ from src.options_calc import calculate_naked_call_roi
 
 SHEET_URL = "https://docs.google.com/spreadsheets/d/1YDOyc8WReBei-7LKPLiXZtmOGCmoY7zuyTvyfMHeL4E/edit#gid=0"
 
-def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None, gold_standards=None, triage_all=False):
+def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False):
     if global_exclusions is None:
         global_exclusions = []
         
@@ -37,6 +37,12 @@ def _process_article(source_name, article_id, title, url, published, body, rules
     if not body:
         print(f"    [SKIP] Empty body for {title}")
         return 0
+        
+    if needs_translation:
+        print(f"    [TRANSLATION] Translating '{title}' to English...")
+        from src.ai import translate_to_english
+        title = translate_to_english(title)
+        body = translate_to_english(body)
         
     # Global Exclusion Pre-Filter
     title_lower = title.lower()
@@ -241,7 +247,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
     return 1
 
 
-def process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusions=None, gold_standards=None, triage_all=False):
+def process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False):
     print(f"\n[INGESTION] Polling RSS: {source_name} ({rss_url})")
     try:
         feed = feedparser.parse(rss_url)
@@ -272,13 +278,14 @@ def process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusion
             playbook_map=playbook_map,
             global_exclusions=global_exclusions,
             gold_standards=gold_standards,
-            triage_all=triage_all
+            triage_all=triage_all,
+            needs_translation=needs_translation
         )
         time.sleep(1) # respect API limits
         
     return new_articles, len(feed.entries)
 
-def process_custom_scraper(scraper, rules, playbook_map, source_name, global_exclusions=None, gold_standards=None, triage_all=False):
+def process_custom_scraper(scraper, rules, playbook_map, source_name, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False):
     print(f"\n[INGESTION] Polling Custom Scraper: {source_name}")
     try:
         articles = scraper.get_latest_articles()
@@ -309,7 +316,8 @@ def process_custom_scraper(scraper, rules, playbook_map, source_name, global_exc
             playbook_map=playbook_map,
             global_exclusions=global_exclusions,
             gold_standards=gold_standards,
-            triage_all=triage_all
+            triage_all=triage_all,
+            needs_translation=needs_translation
         )
         time.sleep(1) # respect API limits
 
@@ -364,6 +372,7 @@ def main():
         source_name = source.get("Source", "Unknown")
         rss_url = source.get("RSS URL", "")
         triage_all = str(source.get("Triage All (Email Rejections)", "")).strip().upper() == "TRUE"
+        needs_translation = str(source.get("Needs Translation", "")).strip().upper() == "TRUE"
         
         if is_enabled:
             scraper = get_scraper_for_source(source_name)
@@ -372,7 +381,7 @@ def main():
             # 1. Attempt HTML Custom Scraper First
             if scraper:
                 try:
-                    new_count, parsed_count = process_custom_scraper(scraper, rules, playbook_map, source_name, global_exclusions, gold_standards, triage_all)
+                    new_count, parsed_count = process_custom_scraper(scraper, rules, playbook_map, source_name, global_exclusions, gold_standards, triage_all, needs_translation)
                     if parsed_count > 0:
                         method_used = "HTML"
                         total_new += new_count
@@ -383,7 +392,7 @@ def main():
             # 2. Fallback to RSS if HTML failed, returned 0, or didn't exist
             if not method_used and rss_url:
                 try:
-                    new_count, parsed_count = process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusions, gold_standards, triage_all)
+                    new_count, parsed_count = process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusions, gold_standards, triage_all, needs_translation)
                     method_used = "RSS"
                     total_new += new_count
                     source_stats[source_name] = {"count": parsed_count, "method": method_used}

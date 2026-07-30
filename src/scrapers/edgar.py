@@ -12,25 +12,36 @@ class EdgarScraper(SourceScraper):
     USER_AGENT = "SpecialSituationsRadar ssr-admin@special-situations-radar.com"
 
     def get_latest_articles(self):
-        # Using requests to pass the specific User-Agent before parsing with feedparser
+        import time
         headers = {"User-Agent": self.USER_AGENT}
-        try:
-            response = requests.get(self.RSS_URL, headers=headers, timeout=30)
-            response.raise_for_status()
-            feed = feedparser.parse(response.content)
-        except Exception as e:
-            print(f"[ERROR] Edgar fetch failed: {e}")
-            return []
-
         articles = []
-        for entry in feed.entries:
-            article_id = entry.id
-            articles.append({
-                "id": article_id,
-                "title": entry.title,
-                "url": entry.link,
-                "published": getattr(entry, "published", getattr(entry, "updated", ""))
-            })
+        
+        # Paginate 3 times, 100 items each
+        for page in range(3):
+            start = page * 100
+            url = f"https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type=8-K&company=&dateb=&owner=include&start={start}&count=100&output=atom"
+            
+            try:
+                response = requests.get(url, headers=headers, timeout=30)
+                response.raise_for_status()
+                feed = feedparser.parse(response.content)
+                
+                if not feed.entries:
+                    break
+                    
+                for entry in feed.entries:
+                    article_id = entry.id
+                    articles.append({
+                        "id": article_id,
+                        "title": entry.title,
+                        "url": entry.link,
+                        "published": getattr(entry, "published", getattr(entry, "updated", ""))
+                    })
+                time.sleep(1)
+            except Exception as e:
+                print(f"[ERROR] Edgar fetch failed on page {page+1}: {e}")
+                break
+                
         return articles
 
     def get_article_body(self, url):
