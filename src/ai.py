@@ -203,6 +203,26 @@ Article text:
         print(f"[AI ERROR] All keys exhausted or failed: {e}")
         return False
 
+def translate_to_english(text):
+    """
+    Translates foreign language financial text to English using Gemini Flash.
+    Used for European/International sources before they hit the Rules Engine.
+    """
+    if not clients:
+        return text
+        
+    prompt = f"""
+Translate the following financial text into English. 
+Return ONLY the English translation. Maintain all financial terminology, company names, and ticker symbols exactly as they appear conceptually. Do not summarize or add commentary.
+
+Text:
+{text[:6000]}
+"""
+    try:
+        return _generate_with_retry(prompt)
+    except Exception as e:
+        print(f"[AI ERROR] Translation failed: {e}")
+        return text
 
 def extract_target_ticker(article_text):
     """
