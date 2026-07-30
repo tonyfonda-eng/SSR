@@ -54,12 +54,28 @@ def initialise_database():
         )
     """)
 
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS reminders (
+            reminder_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            event_id TEXT,
+            ticker TEXT,
+            reminder_date TEXT,
+            message TEXT,
+            sent INTEGER DEFAULT 0
+        )
+    """)
+
     # 2. Force a schema upgrade if it's loading an old cached database
     try:
         conn.execute("ALTER TABLE articles ADD COLUMN body TEXT")
         print("[DATABASE] Upgraded schema: added 'body' column.")
     except sqlite3.OperationalError:
-        # The column already exists, safe to ignore
+        pass
+        
+    try:
+        conn.execute("ALTER TABLE reminders ADD COLUMN ticker TEXT")
+        print("[DATABASE] Upgraded schema: added 'ticker' column to reminders.")
+    except sqlite3.OperationalError:
         pass
 
     conn.commit()
@@ -142,3 +158,35 @@ def log_research(event_id, article_id, rules_score, ai_summary):
     """, (event_id, article_id, rules_score, ai_summary, now))
     conn.commit()
     conn.close()
+
+def save_reminder(event_id, ticker, reminder_date, message):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO reminders (event_id, ticker, reminder_date, message)
+        VALUES (?, ?, ?, ?)
+    """, (event_id, ticker, reminder_date, message))
+    conn.commit()
+    conn.close()
+
+def get_pending_reminders():
+    conn = get_connection()
+    cursor = conn.cursor()
+    # Find reminders where reminder_date <= today and sent = 0
+    today = datetime.datetime.now().strftime('%Y-%m-%d')
+    cursor.execute("""
+        SELECT reminder_id, event_id, ticker, reminder_date, message 
+        FROM reminders 
+        WHERE reminder_date <= ? AND sent = 0
+    """, (today,))
+    reminders = cursor.fetchall()
+    conn.close()
+    return [{'id': r[0], 'event_id': r[1], 'ticker': r[2], 'date': r[3], 'message': r[4]} for r in reminders]
+
+def mark_reminder_sent(reminder_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE reminders SET sent = 1 WHERE reminder_id = ?", (reminder_id,))
+    conn.commit()
+    conn.close()
+

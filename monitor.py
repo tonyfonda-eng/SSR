@@ -10,18 +10,23 @@ from src.database import (
     track_company,
     create_event_if_new,
     log_research,
+    save_reminder,
+    get_pending_reminders,
+    mark_reminder_sent,
 )
 
 from src.scrapers.prnewswire import download_article
 from src.scrapers import get_scraper_for_source
 from src.sheets import load_rules, load_sources, load_playbooks, append_to_research_queue, update_last_checked, load_global_exclusions, load_gold_standards
 from src.rules_engine import evaluate
+from src.rules_engine import evaluate
 from src.ai import classify_event, execute_playbook, check_material_update
 from src.alerts.email import send_alert
+from src.options_calc import calculate_naked_call_roi
 
 SHEET_URL = "https://docs.google.com/spreadsheets/d/1YDOyc8WReBei-7LKPLiXZtmOGCmoY7zuyTvyfMHeL4E/edit#gid=0"
 
-def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None, gold_standards=None):
+def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None, gold_standards=None, triage_all=False):
     if global_exclusions is None:
         global_exclusions = []
         
@@ -97,17 +102,35 @@ def _process_article(source_name, article_id, title, url, published, body, rules
             )
             return 1
             
+        options_available = False
         market_cap = None
+        market_data_str = ""
         if ticker != "UNKNOWN" and "MOCK AI" not in ticker:
             try:
                 import yfinance as yf
                 # Handle basic ticker formatting for yfinance if needed, otherwise rely on AI's output
-                mc = yf.Ticker(ticker).info.get('marketCap')
+                yf_ticker = yf.Ticker(ticker)
+                
+                mc = yf_ticker.info.get('marketCap')
                 if mc:
                     market_cap = mc
                     print(f"    [FINANCIALS] Market Cap: ${market_cap:,.2f}")
+                    
+                current_price = yf_ticker.info.get('currentPrice', yf_ticker.info.get('regularMarketPrice'))
+                if current_price:
+                    market_data_str += f"Current Share Price: ${current_price}\n\n"
+                    
+                options = yf_ticker.options
+                if options and len(options) > 0:
+                    options_available = True
+                    print(f"    [OPTIONS] Options chain available. Earliest exp: {options[0]}")
+                    market_data_str += f"Exchange-listed Options Available: YES\n"
+                else:
+                    print(f"    [OPTIONS] No options chain found for {ticker}.")
+                    market_data_str += f"Exchange-listed Options Available: NO\n"
+                    
             except Exception as e:
-                print(f"    [WARNING] Failed to fetch market cap for {ticker}: {e}")
+                print(f"    [WARNING] Failed to fetch financial data for {ticker}: {e}")
 
         # Classification (Stage 3)
         event_family = classify_event(body, matches, ticker=ticker, market_cap=market_cap)
@@ -115,6 +138,22 @@ def _process_article(source_name, article_id, title, url, published, body, rules
 
         if "false positive" in event_family.lower() or event_family.strip().lower() == "unknown":
             print("    [AI REJECTED] Article flagged as noise/false positive or failed quantitative filters.")
+            if triage_all:
+                print(f"    [BYPASS] Source '{source_name}' has Triage All enabled. Bypassing rejection for analysis.")
+                event_family = "Triage Rejection"
+            else:
+                save_article(
+                    source=source_name,
+                    article_id=article_id,
+                    title=title,
+                    url=url,
+                    published=published,
+                    body=body,
+                )
+                return 1
+            
+        if event_family == "M&A Naked Call Strategy" and not options_available:
+            print(f"    [AI REJECTED] Strategy requires tradable options, but none found for {ticker}.")
             save_article(
                 source=source_name,
                 article_id=article_id,
@@ -156,7 +195,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         playbook_steps = playbook_map.get(event_family, "")
         gold_standard = gold_standards.get(event_family) if gold_standards else None
         print(f"    [AI RESEARCH] Generating Investment Memo...")
-        research_summary = execute_playbook(body, playbook_steps, event_family, gold_standard)
+        research_summary = execute_playbook(body, playbook_steps, event_family, gold_standard, market_data_str=market_data_str)
         print(f"    [AI RESEARCH] Done.")
         
         # Log to Database
@@ -182,6 +221,14 @@ def _process_article(source_name, article_id, title, url, published, body, rules
             is_update=is_update,
         )
 
+        # Check for Go-Shop Expiry
+        go_shop_match = re.search(r'GO-SHOP EXPIRY:\s*(\d{4}-\d{2}-\d{2})', research_summary)
+        if go_shop_match:
+            expiry_date = go_shop_match.group(1)
+            msg = f"Go-Shop period for {ticker} ({event_family}) expires TODAY ({expiry_date}). Please review for any competing bids!"
+            save_reminder(event_id, ticker, expiry_date, msg)
+            print(f"    [REMINDER] Saved go-shop expiry reminder for {expiry_date}")
+
     # Archive
     save_article(
         source=source_name,
@@ -194,7 +241,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
     return 1
 
 
-def process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusions=None, gold_standards=None):
+def process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusions=None, gold_standards=None, triage_all=False):
     print(f"\n[INGESTION] Polling RSS: {source_name} ({rss_url})")
     try:
         feed = feedparser.parse(rss_url)
@@ -224,13 +271,14 @@ def process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusion
             rules=rules, 
             playbook_map=playbook_map,
             global_exclusions=global_exclusions,
-            gold_standards=gold_standards
+            gold_standards=gold_standards,
+            triage_all=triage_all
         )
         time.sleep(1) # respect API limits
         
     return new_articles, len(feed.entries)
 
-def process_custom_scraper(scraper, rules, playbook_map, source_name, global_exclusions=None, gold_standards=None):
+def process_custom_scraper(scraper, rules, playbook_map, source_name, global_exclusions=None, gold_standards=None, triage_all=False):
     print(f"\n[INGESTION] Polling Custom Scraper: {source_name}")
     try:
         articles = scraper.get_latest_articles()
@@ -260,7 +308,8 @@ def process_custom_scraper(scraper, rules, playbook_map, source_name, global_exc
             rules=rules, 
             playbook_map=playbook_map,
             global_exclusions=global_exclusions,
-            gold_standards=gold_standards
+            gold_standards=gold_standards,
+            triage_all=triage_all
         )
         time.sleep(1) # respect API limits
 
@@ -270,6 +319,30 @@ def main():
     print("=== Special Situations Radar v1.0.0 ===")
     
     initialise_database()
+
+    # Process pending reminders
+    pending = get_pending_reminders()
+    for rem in pending:
+        print(f"[REMINDER] Sending scheduled alert for {rem['event_id']}")
+        
+        # Calculate fresh Naked Call ROI for the reminder
+        roi_table = ""
+        if rem.get('ticker') and rem['ticker'] != 'UNKNOWN':
+            print(f"    -> Calculating Naked Call ROI for {rem['ticker']}...")
+            roi_table = calculate_naked_call_roi(rem['ticker'])
+            
+        full_message = rem['message'] + "\n\n" + roi_table
+        
+        send_alert(
+            article_title=f"ACTION REQUIRED: Go-Shop Expiry for {rem['event_id']}",
+            article_url="",
+            event_family="SYSTEM ALERT",
+            confidence=100,
+            research_summary=full_message,
+            evidence_log=[],
+            is_update=False
+        )
+        mark_reminder_sent(rem['id'])
 
     print("Loading rules, sources, playbooks, and exclusions from Google Sheets...")
     rules = load_rules(SHEET_URL)
@@ -290,6 +363,7 @@ def main():
         is_enabled = str(source.get("Enabled", "")).upper() == "TRUE"
         source_name = source.get("Source", "Unknown")
         rss_url = source.get("RSS URL", "")
+        triage_all = str(source.get("Triage All (Email Rejections)", "")).strip().upper() == "TRUE"
         
         if is_enabled:
             scraper = get_scraper_for_source(source_name)
@@ -298,7 +372,7 @@ def main():
             # 1. Attempt HTML Custom Scraper First
             if scraper:
                 try:
-                    new_count, parsed_count = process_custom_scraper(scraper, rules, playbook_map, source_name, global_exclusions, gold_standards)
+                    new_count, parsed_count = process_custom_scraper(scraper, rules, playbook_map, source_name, global_exclusions, gold_standards, triage_all)
                     if parsed_count > 0:
                         method_used = "HTML"
                         total_new += new_count
@@ -309,7 +383,7 @@ def main():
             # 2. Fallback to RSS if HTML failed, returned 0, or didn't exist
             if not method_used and rss_url:
                 try:
-                    new_count, parsed_count = process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusions, gold_standards)
+                    new_count, parsed_count = process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusions, gold_standards, triage_all)
                     method_used = "RSS"
                     total_new += new_count
                     source_stats[source_name] = {"count": parsed_count, "method": method_used}

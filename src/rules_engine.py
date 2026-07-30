@@ -44,7 +44,7 @@ def evaluate(article_text, rules, threshold=15):
                 if match:
                     phrase = match.group(1).strip()
                     points = int(match.group(2))
-                    if phrase in text:
+                    if phrase and phrase in text:
                         score += points
                         evidence_log.append(f"Modifier: {phrase} (+{points})")
 
