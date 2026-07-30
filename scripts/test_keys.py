@@ -38,6 +38,7 @@ def main():
             success_count += 1
         except Exception as e:
             error_str = str(e)
+            print(f"  -> RAW ERROR: {repr(e)}")
             if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str:
                 print(f"  -> FAILED: Rate Limited (429 Resource Exhausted)")
             elif "400" in error_str or "API_KEY_INVALID" in error_str:
