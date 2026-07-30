@@ -36,7 +36,7 @@ def _generate_with_retry(prompt, max_retries=3):
                 
     raise last_error
 
-def classify_event(article_text, candidate_rules):
+def classify_event(article_text, candidate_rules, ticker='UNKNOWN', market_cap=None):
     """
     Given an article and a list of candidate rules (from rules_engine),
     ask the AI to determine the true intent and classify it into exactly one Event Family.
@@ -60,9 +60,14 @@ def classify_event(article_text, candidate_rules):
         print("[WARNING] GEMINI_API_KEY not set. Mocking AI classification.")
         return events[0] if events else "Unknown"
 
+    financial_context = f"Target Company: {ticker}\n"
+    if market_cap:
+        financial_context += f"Approximate Market Cap: ${market_cap:,.2f}\n"
+
     prompt = f"""
 You are an expert event-driven investing analyst.
 
+{financial_context}
 We have detected strong evidence that this article relates to one of the following Cash Events:
 {events_str}
 {custom_instructions_str}
@@ -70,7 +75,7 @@ Article:
 {article_text[:4000]}
 
 Based on the intent of the article, which exact Cash Event from the list above is this? 
-If the article is a false positive and does NOT represent a real corporate cash event (such as marketing, generic advice, or product launches), return 'False Positive'.
+If the article is a false positive and does NOT represent a real corporate cash event, OR if it fails to meet any mathematical constraints defined in the instructions (e.g., settlement value relative to market cap), return 'False Positive'.
 Otherwise, return ONLY the exact name of the Event Family.
 """
     try:

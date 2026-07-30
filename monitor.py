@@ -80,12 +80,13 @@ def _process_article(source_name, article_id, title, url, published, body, rules
     if matches:
         print("    [MATCH] High confidence event signals detected!")
         
-        # Classification (Stage 2)
-        event_family = classify_event(body, matches)
-        print(f"    [AI CLASSIFICATION] {event_family}")
-
-        if "false positive" in event_family.lower() or event_family.strip().lower() == "unknown":
-            print("    [AI REJECTED] Article flagged as noise/false positive.")
+        # Ticker Verification (Stage 2)
+        from src.ai import extract_target_ticker
+        ticker = extract_target_ticker(body)
+        print(f"    [AI TICKER] {ticker}")
+        
+        if ticker == "PRIVATE":
+            print("    [AI REJECTED] Target is a private company.")
             save_article(
                 source=source_name,
                 article_id=article_id,
@@ -95,14 +96,25 @@ def _process_article(source_name, article_id, title, url, published, body, rules
                 body=body,
             )
             return 1
+            
+        market_cap = None
+        if ticker != "UNKNOWN" and "MOCK AI" not in ticker:
+            try:
+                import yfinance as yf
+                # Handle basic ticker formatting for yfinance if needed, otherwise rely on AI's output
+                mc = yf.Ticker(ticker).info.get('marketCap')
+                if mc:
+                    market_cap = mc
+                    print(f"    [FINANCIALS] Market Cap: ${market_cap:,.2f}")
+            except Exception as e:
+                print(f"    [WARNING] Failed to fetch market cap for {ticker}: {e}")
 
-        # Ticker Verification (Stage 3)
-        from src.ai import extract_target_ticker
-        ticker = extract_target_ticker(body)
-        print(f"    [AI TICKER] {ticker}")
-        
-        if ticker == "PRIVATE":
-            print("    [AI REJECTED] Target is a private company.")
+        # Classification (Stage 3)
+        event_family = classify_event(body, matches, ticker=ticker, market_cap=market_cap)
+        print(f"    [AI CLASSIFICATION] {event_family}")
+
+        if "false positive" in event_family.lower() or event_family.strip().lower() == "unknown":
+            print("    [AI REJECTED] Article flagged as noise/false positive or failed quantitative filters.")
             save_article(
                 source=source_name,
                 article_id=article_id,
