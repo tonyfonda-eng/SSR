@@ -30,7 +30,7 @@ def main():
             client = genai.Client(api_key=key)
             # Send a minimal prompt
             response = client.models.generate_content(
-                model='gemini-2.5-flash',
+                model='gemini-2.0-flash',
                 contents="Reply with exactly the word OK"
             )
             text = response.text.strip()
