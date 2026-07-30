@@ -303,7 +303,11 @@ def process_custom_scraper(scraper, rules, playbook_map, source_name, global_exc
 
         body = article.get("body")
         if not body:
-            body = scraper.get_article_body(article['url'])
+            try:
+                body = scraper.get_article_body(article['url'])
+            except Exception as e:
+                print(f"[WARNING] Failed to fetch body for {article['url']}: {e}")
+                body = None
             
         new_articles += _process_article(
             source_name=source_name, 
