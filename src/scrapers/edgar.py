@@ -16,8 +16,8 @@ class EdgarScraper(SourceScraper):
         headers = {"User-Agent": self.USER_AGENT}
         articles = []
         
-        # Paginate 3 times, 100 items each
-        for page in range(3):
+        # Paginate 5 times, 100 items each = 500 items
+        for page in range(5):
             start = page * 100
             url = f"https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type=8-K&company=&dateb=&owner=include&start={start}&count=100&output=atom"
             

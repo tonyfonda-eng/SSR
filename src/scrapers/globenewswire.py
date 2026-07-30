@@ -13,8 +13,8 @@ class GlobeNewswireScraper(SourceScraper):
         headers = {"User-Agent": USER_AGENT}
         articles = []
         
-        # GlobeNewswire has 10 articles per page. 30 pages = 300 articles.
-        for page in range(1, 31):
+        # GlobeNewswire has 10 articles per page. 50 pages = 500 articles.
+        for page in range(1, 51):
             url = f"https://www.globenewswire.com/NewsRoom?page={page}"
             try:
                 response = requests.get(url, headers=headers, timeout=30)
