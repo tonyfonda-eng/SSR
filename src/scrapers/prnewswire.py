@@ -31,8 +31,7 @@ def download_article(url):
         "div.release-text",
         "div.article-body",
         "div[data-module='ArticleBody']",
-        "article",
-        "main",
+        "article"
     ]
 
     for selector in selectors:

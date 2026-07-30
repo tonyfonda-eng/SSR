@@ -1,4 +1,0 @@
-{"req_id": "e965a3dc", "url": "https://api.example.com/data", "reason": "Expected JSON, got HTML/Text", "timestamp": "2026-07-27T22:48:07.822982"}
-
-=== RAW PAYLOAD ===
-<html><body>Maintenance</body></html>

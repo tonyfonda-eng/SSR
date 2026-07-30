@@ -40,7 +40,7 @@ def evaluate(article_text, rules, threshold=15):
             mods = [x.strip().lower() for x in re.split(r'[,|]', modifiers_raw) if x.strip()]
             for mod in mods:
                 # Regex to extract phrase and points: e.g. "all cash +10" -> "all cash", "10"
-                match = re.match(r"^(.*?)\s*\+?(\d+)$", mod)
+                match = re.match(r"^(.+?)\s*\+(\d+)$", mod)
                 if match:
                     phrase = match.group(1).strip()
                     points = int(match.group(2))
