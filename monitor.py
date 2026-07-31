@@ -100,6 +100,10 @@ def _process_article(source_name, article_id, title, url, published, body, rules
             body=body,
         )
         return 1
+        
+    # Add to Daily Memory immediately to deduplicate any syndicated noise on subsequent runs
+    if issuer_memory and issuer != "UNKNOWN":
+        issuer_memory.add(issuer)
     
     if needs_translation:
         print(f"    [TRANSLATION] Translating '{title}' to English...")
@@ -373,10 +377,6 @@ def _process_article(source_name, article_id, title, url, published, body, rules
             )
             if funnel_metrics: funnel_metrics[11] += 1
             
-            # Record in Daily Memory AFTER successful alert
-            if issuer_memory and issuer != "UNKNOWN":
-                issuer_memory.add(issuer)
-                
         except Exception as e:
             print(f"    [ALERT ERROR] Failed to send email alert: {e}")
 

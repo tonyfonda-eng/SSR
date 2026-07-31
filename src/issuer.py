@@ -60,7 +60,7 @@ def extract_issuing_company(source_name, title, body):
     # we rely on the cheap AI fallback which is remarkably good at this specific task.
     
     # 3. Fallback to AI
-    from src.ai import _call_llm_pool
+    from src.ai import _generate_with_retry
     
     prompt = f"""
 Return ONLY the company issuing this announcement.
@@ -71,7 +71,7 @@ Article Body: {body[:1500]}
 """
     
     try:
-        response = _call_llm_pool(prompt)
+        response = _generate_with_retry(prompt)
         issuer = response.strip()
         if not issuer or issuer == "UNKNOWN":
             return "UNKNOWN"
