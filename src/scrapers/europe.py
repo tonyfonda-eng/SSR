@@ -4,29 +4,54 @@ class EQSScraper(GoogleNewsScraper):
     """Germany / DACH region OAM"""
     def __init__(self):
         super().__init__()
-        self.query = 'site:eqs-news.com "ad-hoc" OR "corporate news"'
-
-class ActusnewsScraper(GoogleNewsScraper):
-    """France OAM"""
-    def __init__(self):
-        super().__init__()
-        self.query = 'site:actusnews.com/en/ "regulated information" OR "press release"'
-
-class CNMVScraper(GoogleNewsScraper):
-    """Spain OAM (Hechos Relevantes)"""
-    def __init__(self):
-        super().__init__()
-        # OAM announcements in English or Spanish
-        self.query = 'site:cnmv.es "inside information" OR "other relevant information" OR "información privilegiada" OR "otra información relevante"'
+        self.query = 'site:eqs-news.com "ad-hoc"'
+        self.document_type = 'Ad-hoc'
 
 class BorsaItalianaScraper(GoogleNewsScraper):
     """Italy OAM (eMarket SDIR / Teleborsa)"""
     def __init__(self):
         super().__init__()
         self.query = 'site:emarketstorage.it OR site:emarketstorage.com "price sensitive" OR "regulated information"'
+        self.document_type = 'Price Sensitive'
 
-class EuronextScraper(GoogleNewsScraper):
-    """Netherlands / Pan-European Exchange"""
+class AMFScraper(GoogleNewsScraper):
+    """France OAM"""
     def __init__(self):
         super().__init__()
-        self.query = 'site:live.euronext.com/en/product/equities "company news" OR "press release"'
+        self.query = 'site:amf-france.org "information réglementée"'
+        self.document_type = 'Regulated Information'
+
+class CNMVScraper(GoogleNewsScraper):
+    """Spain OAM (Hechos Relevantes)"""
+    def __init__(self):
+        super().__init__()
+        self.query = 'site:cnmv.es "información privilegiada" OR "otra información relevante"'
+        self.document_type = 'Información Privilegiada'
+
+class FIScraper(GoogleNewsScraper):
+    """Sweden OAM (Finansinspektionen)"""
+    def __init__(self):
+        super().__init__()
+        self.query = 'site:fi.se "insider information"'
+        self.document_type = 'Regulatory'
+
+class NewsWebScraper(GoogleNewsScraper):
+    """Norway OAM (Oslo Børs)"""
+    def __init__(self):
+        super().__init__()
+        self.query = 'site:newsweb.oslobors.no "mandatory notification"'
+        self.document_type = 'Inside Information'
+
+class AFMScraper(GoogleNewsScraper):
+    """Netherlands OAM (Autoriteit Financiële Markten)"""
+    def __init__(self):
+        super().__init__()
+        self.query = 'site:afm.nl "inside information"'
+        self.document_type = 'Inside Information'
+
+class SIXScraper(GoogleNewsScraper):
+    """Switzerland OAM (SIX Exchange)"""
+    def __init__(self):
+        super().__init__()
+        self.query = 'site:six-group.com "ad hoc announcement"'
+        self.document_type = 'Ad-hoc'

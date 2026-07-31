@@ -7,7 +7,10 @@ from .kedm import KEDMScraper
 from .googlenews import GoogleNewsScraper
 from .nasdaq import NasdaqScraper
 from .lse import LSEScraper
-from .europe import EQSScraper, ActusnewsScraper, CNMVScraper, BorsaItalianaScraper, EuronextScraper
+from .europe import (
+    EQSScraper, BorsaItalianaScraper, AMFScraper, CNMVScraper, 
+    FIScraper, NewsWebScraper, AFMScraper, SIXScraper
+)
 
 SCRAPER_REGISTRY = {
     "Business Wire": BusinessWireScraper,
@@ -27,10 +30,13 @@ SCRAPER_REGISTRY = {
     "Nasdaq": NasdaqScraper,
     "London Stock Exchange": LSEScraper,
     "EQS News (Germany)": EQSScraper,
-    "Actusnews (France)": ActusnewsScraper,
-    "CNMV (Spain)": CNMVScraper,
     "eMarket SDIR (Italy)": BorsaItalianaScraper,
-    "Euronext (Netherlands)": EuronextScraper,
+    "AMF (France)": AMFScraper,
+    "CNMV (Spain)": CNMVScraper,
+    "Finansinspektionen (Sweden)": FIScraper,
+    "NewsWeb (Norway)": NewsWebScraper,
+    "AFM (Netherlands)": AFMScraper,
+    "SIX Exchange (Switzerland)": SIXScraper,
 }
 
 def get_scraper_for_source(source_name):

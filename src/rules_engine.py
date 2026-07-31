@@ -3,12 +3,16 @@ Investment playbook engine based on Evidence Scoring.
 """
 import re
 
-def evaluate(article_text, rules, threshold=15):
+def evaluate(article_text, rules, threshold=15, document_type=None):
     """
     Evaluates an article against the point-based Evidence Scoring rules.
     Returns a list of candidate rules that met or exceeded the threshold, sorted by score.
     """
     matches = []
+    
+    if document_type:
+        article_text = f"DOCUMENT_TYPE: {document_type}\n\n" + article_text
+        
     text = article_text.lower()
 
     for rule in rules:

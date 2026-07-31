@@ -29,12 +29,18 @@ class GoogleNewsScraper(SourceScraper):
                 # Google News puts the source at the end of the title, e.g. "... - Yahoo Finance"
                 title = entry.title
                 
-                articles.append({
+                article_data = {
                     "id": article_id,
                     "title": title,
                     "url": entry.link,
                     "published": getattr(entry, 'published', '')
-                })
+                }
+                
+                doc_type = getattr(self, 'document_type', None)
+                if doc_type:
+                    article_data['document_type'] = doc_type
+                    
+                articles.append(article_data)
         except Exception as e:
             print(f"[ERROR] Failed to fetch Google News RSS: {e}")
             

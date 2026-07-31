@@ -105,13 +105,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
     if issuer_memory and issuer != "UNKNOWN":
         issuer_memory.add(issuer)
     
-    if needs_translation:
-        print(f"    [TRANSLATION] Translating '{title}' to English...")
-        from src.ai import translate_to_english
-        title = translate_to_english(title)
-        body = translate_to_english(body)
-        
-    if funnel_metrics and needs_translation: funnel_metrics[3] += 1
+
 
         
     # Global Exclusion Pre-Filter
