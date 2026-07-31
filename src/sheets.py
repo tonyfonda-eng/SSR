@@ -330,7 +330,7 @@ def batch_append_daily_memory(sheet_url, new_articles):
                 article.get('url', '')
             ])
             
-        worksheet.append_rows(rows_to_append, value_input_option='USER_ENTERED')
+        worksheet.append_rows(rows_to_append, value_input_option='RAW')
         print(f"[SHEETS] Successfully appended {len(rows_to_append)} articles to Daily Memory.")
         
     except gspread.exceptions.WorksheetNotFound:
@@ -388,7 +388,7 @@ def prune_daily_memory(sheet_url, max_age_hours=48):
                     valid_rows.append(list(record.values()))
                     
             worksheet.clear()
-            worksheet.append_rows(valid_rows, value_input_option='USER_ENTERED')
+            worksheet.append_rows(valid_rows, value_input_option='RAW')
             print(f"[SHEETS] Daily Memory pruned successfully. Kept {len(valid_rows)-1} recent articles.")
             
     except gspread.exceptions.WorksheetNotFound:
