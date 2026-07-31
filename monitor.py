@@ -21,7 +21,7 @@ from src.scrapers.prnewswire import download_article
 from src.scrapers import get_scraper_for_source
 from src.sheets import load_rules, load_sources, load_playbooks, append_to_research_queue, update_last_checked, load_global_exclusions, load_gold_standards, log_unknown_event, update_pipeline_metrics
 from src.rules_engine import evaluate
-from src.ai import classify_event, execute_playbook, check_material_update
+from src.ai import classify_event, execute_playbook, check_material_update, clients
 from src.alerts.email import send_alert
 from src.options_calc import calculate_naked_call_roi
 
@@ -151,6 +151,11 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         ticker = extract_target_ticker(body)
         print(f"    [AI TICKER] {ticker}")
         
+        # --- AI EXHAUSTION CIRCUIT BREAKER ---
+        if "MOCK AI" in ticker or "ERROR" in ticker or ticker == "UNKNOWN" and not clients:
+            print("    [CRITICAL] AI Providers are exhausted or unavailable. Aborting ingestion loop to prevent spam and save cache.")
+            break
+            
         if ticker == "PRIVATE":
             print("    [AI REJECTED] Target is a private company.")
             save_article(
@@ -198,6 +203,10 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         # Classification (Stage 3)
         event_family = classify_event(body, matches, ticker=ticker, market_cap=market_cap)
         print(f"    [AI CLASSIFICATION] {event_family}")
+
+        if "Unknown" in event_family and not clients:
+             print("    [CRITICAL] AI Providers are exhausted. Aborting ingestion loop.")
+             break
 
         if "false positive" in event_family.lower():
             print("    [AI REJECTED] Article flagged as false positive.")
