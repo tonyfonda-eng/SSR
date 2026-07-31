@@ -691,6 +691,14 @@ def main():
         timestamp_str = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
         update_last_checked(SHEET_URL, source_stats, timestamp_str)
         update_pipeline_metrics(SHEET_URL, funnel_metrics, timestamp_str)
+        
+    print("\n[ONTOLOGY STATISTICS]")
+    print(f"Total Foreign Articles Evaluated: {ontology_stats['total']}")
+    if ontology_stats['total'] > 0:
+        coverage = (ontology_stats['extracted'] / ontology_stats['total']) * 100
+        print(f"Concepts Extracted: {ontology_stats['extracted']}")
+        print(f"Missed Extractions: {ontology_stats['missed']}")
+        print(f"Ontology Coverage:  {coverage:.1f}%")
 
 if __name__ == "__main__":
     try:
