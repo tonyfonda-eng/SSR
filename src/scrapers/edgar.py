@@ -5,8 +5,8 @@ import feedparser
 from src.scrapers.base import SourceScraper
 
 class EdgarScraper(SourceScraper):
-    # Fetch latest 8-K filings
-    RSS_URL = "https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type=8-K&company=&dateb=&owner=include&start=0&count=40&output=atom"
+    # Base class for EDGAR polling. Default is 8-K.
+    FILING_TYPE = "8-K"
     
     # Edgar requires a declared user agent
     USER_AGENT = "SpecialSituationsRadar ssr-admin@special-situations-radar.com"
@@ -19,7 +19,7 @@ class EdgarScraper(SourceScraper):
         # Paginate 5 times, 100 items each = 500 items
         for page in range(5):
             start = page * 100
-            url = f"https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type=8-K&company=&dateb=&owner=include&start={start}&count=100&output=atom"
+            url = f"https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type={self.FILING_TYPE}&company=&dateb=&owner=include&start={start}&count=100&output=atom"
             
             try:
                 response = requests.get(url, headers=headers, timeout=30)
@@ -39,7 +39,7 @@ class EdgarScraper(SourceScraper):
                     })
                 time.sleep(1)
             except Exception as e:
-                print(f"[ERROR] Edgar fetch failed on page {page+1}: {e}")
+                print(f"[ERROR] Edgar fetch failed on page {page+1} for {self.FILING_TYPE}: {e}")
                 break
                 
         return articles
@@ -58,3 +58,9 @@ class EdgarScraper(SourceScraper):
         if len(text) > 500:
             return text
         return None
+
+class Edgar13DScraper(EdgarScraper):
+    FILING_TYPE = "13D"
+
+class EdgarForm10Scraper(EdgarScraper):
+    FILING_TYPE = "10-12B"
