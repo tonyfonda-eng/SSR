@@ -558,6 +558,8 @@ def main():
         rss_url = source.get("RSS URL", "")
         triage_all = str(source.get("Triage All (Email Rejections)", "")).strip().upper() == "TRUE"
         needs_translation = str(source.get("Needs Translation", "")).strip().upper() == "TRUE"
+        country = source.get("Country", "")
+        language = source.get("Language", "")
         
         if is_enabled:
             scraper = get_scraper_for_source(source_name)
@@ -568,7 +570,7 @@ def main():
             # 1. Attempt HTML Custom Scraper First
             if scraper:
                 try:
-                    parsed, parsed_count = process_custom_scraper(scraper, source_name, rss_url=rss_url, triage_all=triage_all, needs_translation=needs_translation)
+                    parsed, parsed_count = process_custom_scraper(scraper, source_name, rss_url=rss_url, triage_all=triage_all, needs_translation=needs_translation, country=country, language=language)
                     if parsed_count > 0:
                         method_used = "HTML"
                         all_new_articles.extend(parsed)
@@ -579,7 +581,7 @@ def main():
             # 2. Fallback to RSS if HTML failed, returned 0, or didn't exist
             if not method_used and rss_url:
                 try:
-                    parsed, parsed_count = process_rss_feed(rss_url, source_name, triage_all, needs_translation)
+                    parsed, parsed_count = process_rss_feed(rss_url, source_name, triage_all, needs_translation, country, language)
                     method_used = "RSS"
                     all_new_articles.extend(parsed)
                     source_stats[source_name] = {"count": parsed_count, "new": len(parsed), "method": method_used}
@@ -614,7 +616,9 @@ def main():
             needs_translation=primary["needs_translation"],
             funnel_metrics=funnel_metrics,
             issuer_memory=issuer_memory,
-            document_type=primary.get("document_type")
+            document_type=primary.get("document_type"),
+            country=primary.get("country"),
+            language=primary.get("language")
         )
         
         # Quietly archive the syndicated clones to prevent fetching them again
