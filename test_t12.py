@@ -10,7 +10,7 @@ def test_t12():
     """
     
     mock_rules = [
-        {"Keyword": "Code T12", "Score": 10, "Event Family": "Resumption of Trading", "AI Prompt": ""}
+        {"Keywords": "Code T12, resumption of trading", "Score": 10, "Event Family": "Resumption of Trading", "AI Prompt": ""}
     ]
     
     mock_playbook_map = {
