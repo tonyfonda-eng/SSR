@@ -1,7 +1,9 @@
 name: Test AI Keys
 
 on:
-  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/test_ai_keys.yml'
 
 jobs:
   test_keys:
