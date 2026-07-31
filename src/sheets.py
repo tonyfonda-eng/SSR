@@ -197,3 +197,89 @@ def update_last_checked(sheet_url, source_stats, timestamp_str):
     if updates:
         worksheet.batch_update(updates)
         print(f"[SHEETS] Updated stats for {len(source_stats)} sources.")
+
+
+def update_pipeline_metrics(sheet_url, funnel_metrics, timestamp_str):
+    """
+    Updates the funnel metrics on the 'Decision Pipeline' tab.
+    Columns added dynamically: Count (Last Run), Timestamp (UTC), Cumulative Count (Today)
+    """
+    client = get_client()
+    sheet = client.open_by_url(sheet_url)
+    
+    try:
+        worksheet = sheet.worksheet("Decision Pipeline")
+    except gspread.exceptions.WorksheetNotFound:
+        print("[WARNING] 'Decision Pipeline' tab not found for metrics update.")
+        return
+        
+    all_values = worksheet.get_all_values()
+    if not all_values:
+        return
+        
+    header = all_values[0]
+    updates = []
+    
+    # 1. Ensure columns exist and get indices
+    if "Count (Last Run)" not in header:
+        header.append("Count (Last Run)")
+        col_idx_count = len(header) - 1
+        updates.append({'range': gspread.utils.rowcol_to_a1(1, col_idx_count + 1), 'values': [["Count (Last Run)"]]})
+    else:
+        col_idx_count = header.index("Count (Last Run)")
+        
+    if "Timestamp (UTC)" not in header:
+        header.append("Timestamp (UTC)")
+        col_idx_timestamp = len(header) - 1
+        updates.append({'range': gspread.utils.rowcol_to_a1(1, col_idx_timestamp + 1), 'values': [["Timestamp (UTC)"]]})
+    else:
+        col_idx_timestamp = header.index("Timestamp (UTC)")
+        
+    if "Cumulative Count (Today)" not in header:
+        header.append("Cumulative Count (Today)")
+        col_idx_cumulative = len(header) - 1
+        updates.append({'range': gspread.utils.rowcol_to_a1(1, col_idx_cumulative + 1), 'values': [["Cumulative Count (Today)"]]})
+    else:
+        col_idx_cumulative = header.index("Cumulative Count (Today)")
+        
+    today_date = timestamp_str.split()[0]
+    
+    # 2. Update data rows (assumes row 2 is Step 1, row 3 is Step 2, etc.)
+    for row_idx, row in enumerate(all_values):
+        if row_idx == 0:
+            continue
+            
+        step_num_str = row[0] if len(row) > 0 else ""
+        try:
+            step_num = int(step_num_str)
+        except ValueError:
+            continue
+            
+        if step_num in funnel_metrics:
+            new_count = funnel_metrics[step_num]
+            
+            current_timestamp = row[col_idx_timestamp] if len(row) > col_idx_timestamp else ""
+            current_cumulative_str = row[col_idx_cumulative] if len(row) > col_idx_cumulative else "0"
+            
+            try:
+                cumulative_val = int(current_cumulative_str)
+            except ValueError:
+                cumulative_val = 0
+                
+            if today_date in current_timestamp:
+                cumulative_val += new_count
+            else:
+                cumulative_val = new_count
+                
+            cell_count = gspread.utils.rowcol_to_a1(row_idx + 1, col_idx_count + 1)
+            cell_timestamp = gspread.utils.rowcol_to_a1(row_idx + 1, col_idx_timestamp + 1)
+            cell_cumulative = gspread.utils.rowcol_to_a1(row_idx + 1, col_idx_cumulative + 1)
+            
+            updates.append({'range': cell_count, 'values': [[new_count]]})
+            updates.append({'range': cell_timestamp, 'values': [[timestamp_str]]})
+            updates.append({'range': cell_cumulative, 'values': [[cumulative_val]]})
+            
+    if updates:
+        worksheet.batch_update(updates)
+        print(f"[SHEETS] Updated decision pipeline funnel metrics.")
+
