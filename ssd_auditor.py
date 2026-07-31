@@ -5,31 +5,12 @@ import smtplib
 from email.message import EmailMessage
 from datetime import datetime, timedelta
 
+from src.issuer import extract_issuing_company
+
 def get_db_connection():
     # Absolute path logic to run from anywhere
     db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "ssr_cache.sqlite")
     return sqlite3.connect(db_path)
-
-def extract_company_name(title):
-    # SSD often formats titles like "TICKER - Company Name announces..." or just "Company Name..."
-    # We will try to extract the first 3-4 words as a fuzzy match.
-    stop_words = ["announces", "to", "acquire", "merger", "delisting", "liquidation", "board", "special", "dividend", "spin-off", "tender", "offer"]
-    words = []
-    
-    # Remove punctuation
-    clean_title = re.sub(r'[^\w\s-]', '', title)
-    
-    for word in clean_title.split():
-        if word.lower() in stop_words:
-            break
-        # Skip pure tickers like AAPL
-        if word.isupper() and len(word) <= 5 and len(words) == 0:
-            continue
-        words.append(word)
-    
-    # Return at most first 2 words for a high-probability fuzzy match
-    core_name = " ".join(words[:2]).strip().lower()
-    return core_name
 
 def audit_ssd_coverage():
     conn = get_db_connection()
@@ -52,9 +33,12 @@ def audit_ssd_coverage():
     
     for ssd in ssd_articles:
         ssd_title = ssd['title']
-        company_name = extract_company_name(ssd_title)
+        ssd_body = ssd['body']
         
-        if not company_name:
+        # Use the exact same deterministic/AI extraction used in monitor.py for deduplication
+        company_name = extract_issuing_company("Special Situations Digest", ssd_title, ssd_body)
+        
+        if not company_name or company_name == "UNKNOWN":
             continue # Could not parse
             
         # Check if any OTHER source caught this company around the same time
