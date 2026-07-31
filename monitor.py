@@ -70,11 +70,20 @@ class EventMemory:
     def size(self):
         return len(self._events)
 
-def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False, funnel_metrics=None, entity_memory=None):
+def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False, funnel_metrics=None, event_memory=None, seen_articles=None):
     if global_exclusions is None:
         global_exclusions = []
+    if seen_articles is None:
+        seen_articles = set()
         
     article_key = f"{source_name}:{article_id}"
+    
+    # 1. Check in-memory session dedup
+    if article_id in seen_articles:
+        return 0
+    seen_articles.add(article_id)
+    
+    # 2. Check persistent SQLite dedup
     if article_exists(article_key):
         return 0
 
@@ -124,19 +133,6 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         from src.ai import extract_target_ticker
         ticker = extract_target_ticker(body)
         print(f"    [AI TICKER] {ticker}")
-        
-        # --- DAILY MEMORY ENTITY CHECK ---
-        if entity_memory and entity_memory.is_duplicate(ticker):
-            print(f"    [DAILY MEMORY] Entity '{ticker}' already processed today. Dropping duplicate news.")
-            save_article(
-                source=source_name,
-                article_id=article_id,
-                title=title,
-                url=url,
-                published=published,
-                body=body,
-            )
-            return 1
 
         # --- AI EXHAUSTION CIRCUIT BREAKER ---
         if "MOCK AI" in ticker or "ERROR" in ticker or ticker == "UNKNOWN":
@@ -190,10 +186,24 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         # Classification (Stage 3)
         event_family = classify_event(body, matches, ticker=ticker, market_cap=market_cap)
         print(f"    [AI CLASSIFICATION] {event_family}")
-
+        
         if "Unknown" in event_family:
              print("    [CRITICAL] AI Providers are exhausted. Aborting ingestion loop.")
              return 1
+             
+        # --- DAILY MEMORY EVENT CHECK ---
+        event_key = f"{event_family}_{ticker}"
+        if event_memory and event_memory.is_duplicate(event_key):
+            print(f"    [DAILY MEMORY] Event '{event_key}' already alerted today. Dropping duplicate syndicated news.")
+            save_article(
+                source=source_name,
+                article_id=article_id,
+                title=title,
+                url=url,
+                published=published,
+                body=body,
+            )
+            return 1
 
         if "false positive" in event_family.lower():
             print("    [AI REJECTED] Article flagged as false positive.")
@@ -354,9 +364,6 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         published=published,
         body=body,
     )
-    # Register in daily memory so subsequent articles for this entity are caught
-    if matches and entity_memory and ticker != "UNKNOWN":
-        entity_memory.add(ticker)
 
     if matches:
         # Alerts (safe to fail — article is already archived so it won't be re-processed)
@@ -371,6 +378,11 @@ def _process_article(source_name, article_id, title, url, published, body, rules
                 is_update=is_update,
             )
             if funnel_metrics: funnel_metrics[11] += 1
+            
+            # Record in Daily Memory AFTER successful alert
+            if event_memory and ticker != "UNKNOWN" and event_family != "UNKNOWN":
+                event_memory.add(event_key, ticker, event_family)
+                
         except Exception as e:
             print(f"    [ALERT ERROR] Failed to send email alert: {e}")
 
@@ -505,9 +517,11 @@ def main():
     
     initialise_database()
     
-    # Build the daily entity memory — loaded from DB, grows during this run
-    entity_memory = EntityMemory()
-    entity_memory.load_from_db()
+    # Build the daily event memory — loaded from DB, grows during this run
+    event_memory = EventMemory()
+    event_memory.load_from_db()
+    
+    seen_articles = set()
     
     funnel_metrics = {i: 0 for i in range(1, 13)}
 
@@ -611,7 +625,8 @@ def main():
             triage_all=primary["triage_all"],
             needs_translation=primary["needs_translation"],
             funnel_metrics=funnel_metrics,
-            entity_memory=entity_memory
+            event_memory=event_memory,
+            seen_articles=seen_articles
         )
         
         # Quietly archive the syndicated clones to prevent fetching them again
@@ -631,10 +646,10 @@ def main():
     print(f"[DATABASE] Total articles archived: {article_count()}")
     
     # Flush memory to sheets and prune old entries
-    entity_memory.flush_to_sheets()
+    event_memory.flush_to_sheets()
     prune_daily_memory(SHEET_URL)
     
-    print(f"[DAILY MEMORY] Session ended with {entity_memory.size} entities cached.")
+    print(f"[DAILY MEMORY] Session ended with {event_memory.size} events cached.")
 
     if source_stats:
         import datetime
