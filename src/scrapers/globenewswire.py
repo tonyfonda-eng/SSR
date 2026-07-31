@@ -32,7 +32,9 @@ class GlobeNewswireScraper(SourceScraper):
                         continue
                         
                     full_url = href if href.startswith("http") else "https://www.globenewswire.com" + href
-                    article_id = full_url.rstrip("/").split("/")[-2] if len(full_url.split("/")) > 2 else full_url
+                    
+                    # Use the path as the unique ID to avoid language-code collisions
+                    article_id = href if not href.startswith("http") else full_url.replace("https://www.globenewswire.com", "")
                     
                     if article_id in seen_ids:
                         continue
