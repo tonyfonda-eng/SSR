@@ -23,42 +23,43 @@ from src.sheets import load_rules, load_sources, load_playbooks, append_to_resea
 from src.rules_engine import evaluate
 from src.ai import classify_event, execute_playbook, clients
 from src.alerts.email import send_alert
+from src.issuer import extract_issuing_company
 from src.options_calc import calculate_naked_call_roi
 
 SHEET_URL = "https://docs.google.com/spreadsheets/d/1YDOyc8WReBei-7LKPLiXZtmOGCmoY7zuyTvyfMHeL4E/edit#gid=0"
 
 # ---------------------------------------------------------------------------
-# Daily Event Memory — fast in-memory dedup that persists across the pipeline
+# Daily Issuer Memory — fast in-memory dedup that persists across the pipeline
 # ---------------------------------------------------------------------------
-class EventMemory:
+class IssuerMemory:
     """
-    In-memory cache of all high-signal events (event_key) processed today.
+    In-memory cache of all issuing companies processed today.
     Loaded from Google Sheets at startup.
     Grows during the run as valid alerts are generated, then flushed to Sheets.
     """
     def __init__(self):
-        self._events = set()
-        self._new_additions = list() # stores (event_key, company, event_family)
+        self._issuers = set()
+        self._new_additions = list()
 
     def load_from_db(self):
-        """Load all event keys from the Daily Memory Google Sheet tab."""
-        event_keys = load_daily_memory(SHEET_URL)
-        self._events = set([str(k).lower() for k in event_keys if k])
-        print(f"[DAILY MEMORY] Loaded {len(self._events)} events from Google Sheets cache.")
+        """Load all issuers from the Daily Memory Google Sheet tab."""
+        issuers = load_daily_memory(SHEET_URL)
+        self._issuers = set([str(k).lower() for k in issuers if k])
+        print(f"[DAILY MEMORY] Loaded {len(self._issuers)} issuers from Google Sheets cache.")
 
-    def is_duplicate(self, event_key):
-        """Check if this exact event was already processed today."""
-        if not event_key:
+    def is_duplicate(self, issuer):
+        """Check if this exact issuer was already processed today."""
+        if not issuer or issuer == "UNKNOWN":
             return False
-        return event_key.lower() in self._events
+        return issuer.lower() in self._issuers
 
-    def add(self, event_key, company, event_family):
-        """Register an event as processed and queue it for Google Sheets append."""
-        if event_key:
-            key_lower = event_key.lower()
-            if key_lower not in self._events:
-                self._events.add(key_lower)
-                self._new_additions.append((event_key, company, event_family))
+    def add(self, issuer):
+        """Register an issuer as processed and queue it for Google Sheets append."""
+        if issuer and issuer != "UNKNOWN":
+            key_lower = issuer.lower()
+            if key_lower not in self._issuers:
+                self._issuers.add(key_lower)
+                self._new_additions.append(issuer)
 
     def flush_to_sheets(self):
         """Push all newly generated events to the Google Sheet tab."""
@@ -68,22 +69,15 @@ class EventMemory:
 
     @property
     def size(self):
-        return len(self._events)
+        return len(self._issuers)
 
-def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False, funnel_metrics=None, event_memory=None, seen_articles=None):
+def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False, funnel_metrics=None, issuer_memory=None):
     if global_exclusions is None:
         global_exclusions = []
-    if seen_articles is None:
-        seen_articles = set()
         
     article_key = f"{source_name}:{article_id}"
     
-    # 1. Check in-memory session dedup
-    if article_id in seen_articles:
-        return 0
-    seen_articles.add(article_id)
-    
-    # 2. Check persistent SQLite dedup
+    # 1. Check persistent SQLite dedup
     if article_exists(article_key):
         return 0
 
@@ -92,6 +86,20 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         return 0
 
     if funnel_metrics: funnel_metrics[2] += 1
+    
+    # 2. Extract Issuer and Dedupe
+    issuer = extract_issuing_company(source_name, title, body)
+    if issuer_memory and issuer_memory.is_duplicate(issuer):
+        print(f"    [DAILY MEMORY] Issuer '{issuer}' already processed today. Dropping duplicate syndicated news.")
+        save_article(
+            source=source_name,
+            article_id=article_id,
+            title=title,
+            url=url,
+            published=published,
+            body=body,
+        )
+        return 1
     
     if needs_translation:
         print(f"    [TRANSLATION] Translating '{title}' to English...")
@@ -190,20 +198,6 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         if "Unknown" in event_family:
              print("    [CRITICAL] AI Providers are exhausted. Aborting ingestion loop.")
              return 1
-             
-        # --- DAILY MEMORY EVENT CHECK ---
-        event_key = f"{event_family}_{ticker}"
-        if event_memory and event_memory.is_duplicate(event_key):
-            print(f"    [DAILY MEMORY] Event '{event_key}' already alerted today. Dropping duplicate syndicated news.")
-            save_article(
-                source=source_name,
-                article_id=article_id,
-                title=title,
-                url=url,
-                published=published,
-                body=body,
-            )
-            return 1
 
         if "false positive" in event_family.lower():
             print("    [AI REJECTED] Article flagged as false positive.")
@@ -380,8 +374,8 @@ def _process_article(source_name, article_id, title, url, published, body, rules
             if funnel_metrics: funnel_metrics[11] += 1
             
             # Record in Daily Memory AFTER successful alert
-            if event_memory and ticker != "UNKNOWN" and event_family != "UNKNOWN":
-                event_memory.add(event_key, ticker, event_family)
+            if issuer_memory and issuer != "UNKNOWN":
+                issuer_memory.add(issuer)
                 
         except Exception as e:
             print(f"    [ALERT ERROR] Failed to send email alert: {e}")
@@ -517,11 +511,9 @@ def main():
     
     initialise_database()
     
-    # Build the daily event memory — loaded from DB, grows during this run
-    event_memory = EventMemory()
-    event_memory.load_from_db()
-    
-    seen_articles = set()
+    # Build the daily issuer memory — loaded from DB, grows during this run
+    issuer_memory = IssuerMemory()
+    issuer_memory.load_from_db()
     
     funnel_metrics = {i: 0 for i in range(1, 13)}
 
@@ -625,8 +617,7 @@ def main():
             triage_all=primary["triage_all"],
             needs_translation=primary["needs_translation"],
             funnel_metrics=funnel_metrics,
-            event_memory=event_memory,
-            seen_articles=seen_articles
+            issuer_memory=issuer_memory
         )
         
         # Quietly archive the syndicated clones to prevent fetching them again
@@ -646,10 +637,10 @@ def main():
     print(f"[DATABASE] Total articles archived: {article_count()}")
     
     # Flush memory to sheets and prune old entries
-    event_memory.flush_to_sheets()
+    issuer_memory.flush_to_sheets()
     prune_daily_memory(SHEET_URL)
     
-    print(f"[DAILY MEMORY] Session ended with {event_memory.size} events cached.")
+    print(f"[DAILY MEMORY] Session ended with {issuer_memory.size} issuers cached.")
 
     if source_stats:
         import datetime

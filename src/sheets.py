@@ -290,15 +290,15 @@ def update_pipeline_metrics(sheet_url, funnel_metrics, timestamp_str):
 
 def load_daily_memory(sheet_url):
     """
-    Loads all event keys from the 'Daily Memory' tab to populate the in-memory cache.
-    Returns a list of event keys.
+    Loads all issuers from the 'Daily Memory' tab to populate the in-memory cache.
+    Returns a list of issuing companies.
     """
     client = get_client()
     sheet = client.open_by_url(sheet_url)
     try:
         worksheet = sheet.worksheet("Daily Memory")
         records = worksheet.get_all_records()
-        return [str(r.get('Event Key', '')).lower() for r in records if r.get('Event Key')]
+        return [str(r.get('Issuing Company', '')).lower() for r in records if r.get('Issuing Company')]
     except gspread.exceptions.WorksheetNotFound:
         print("[WARNING] 'Daily Memory' tab not found in Google Sheets. Returning empty memory.")
         return []
@@ -306,12 +306,12 @@ def load_daily_memory(sheet_url):
         print(f"[ERROR] Failed to load Daily Memory from Sheets: {e}")
         return []
 
-def batch_append_daily_memory(sheet_url, new_events):
+def batch_append_daily_memory(sheet_url, new_issuers):
     """
-    Appends a list of new events to the 'Daily Memory' tab in a single API call.
-    new_events is a list of tuples: [(event_key, company, event_family), ...]
+    Appends a list of new issuers to the 'Daily Memory' tab in a single API call.
+    new_issuers is a list of strings: ['STRYKER', ...]
     """
-    if not new_events:
+    if not new_issuers:
         return
         
     client = get_client()
@@ -322,16 +322,14 @@ def batch_append_daily_memory(sheet_url, new_events):
         rows_to_append = []
         now_str = datetime.datetime.utcnow().isoformat()
         
-        for event_key, company, event_family in new_events:
+        for issuer in new_issuers:
             rows_to_append.append([
                 now_str,
-                event_key,
-                company,
-                event_family
+                issuer
             ])
             
         worksheet.append_rows(rows_to_append, value_input_option='RAW')
-        print(f"[SHEETS] Successfully appended {len(rows_to_append)} events to Daily Memory.")
+        print(f"[SHEETS] Successfully appended {len(rows_to_append)} issuers to Daily Memory.")
         
     except gspread.exceptions.WorksheetNotFound:
         print("[WARNING] 'Daily Memory' tab not found. Could not save memory.")
