@@ -19,7 +19,6 @@ from src.scrapers.prnewswire import download_article
 from src.scrapers import get_scraper_for_source
 from src.sheets import load_rules, load_sources, load_playbooks, append_to_research_queue, update_last_checked, load_global_exclusions, load_gold_standards
 from src.rules_engine import evaluate
-from src.rules_engine import evaluate
 from src.ai import classify_event, execute_playbook, check_material_update
 from src.alerts.email import send_alert
 from src.options_calc import calculate_naked_call_roi
@@ -253,7 +252,7 @@ def process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusion
         feed = feedparser.parse(rss_url)
     except Exception as e:
         print(f"[ERROR] Failed to parse feed {rss_url}: {e}")
-        return 0
+        return 0, 0
 
     new_articles = 0
 
@@ -291,7 +290,7 @@ def process_custom_scraper(scraper, rules, playbook_map, source_name, global_exc
         articles = scraper.get_latest_articles()
     except Exception as e:
         print(f"[ERROR] Scraper {source_name} failed: {e}")
-        return 0
+        return 0, 0
 
     new_articles = 0
 

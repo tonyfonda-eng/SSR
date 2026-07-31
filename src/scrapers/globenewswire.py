@@ -12,6 +12,7 @@ class GlobeNewswireScraper(SourceScraper):
         import time
         headers = {"User-Agent": USER_AGENT}
         articles = []
+        seen_ids = set()
         
         # GlobeNewswire has 10 articles per page. 50 pages = 500 articles.
         for page in range(1, 51):
@@ -32,6 +33,10 @@ class GlobeNewswireScraper(SourceScraper):
                         
                     full_url = href if href.startswith("http") else "https://www.globenewswire.com" + href
                     article_id = full_url.rstrip("/").split("/")[-2] if len(full_url.split("/")) > 2 else full_url
+                    
+                    if article_id in seen_ids:
+                        continue
+                    seen_ids.add(article_id)
                     
                     articles.append({
                         "id": article_id,
