@@ -304,6 +304,23 @@ def load_daily_memory(sheet_url):
         return []
     except Exception as e:
         print(f"[ERROR] Failed to load Daily Memory from Sheets: {e}")
+
+def log_normalization_review(sheet_url, source, language, document_type, title, url):
+    """
+    Logs an un-normalized foreign article to the Normalization Review tab.
+    """
+    try:
+        sh = get_client().open_by_url(sheet_url)
+        ws = sh.worksheet("Normalization Review")
+        
+        # [Date, Source, Language, Document Type, Title, URL]
+        import datetime
+        now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+        row = [now_str, source, language, document_type, title, url]
+        ws.append_row(row)
+        print(f"[NORMALIZATION] Logged un-normalized article to Review tab: {title}")
+    except Exception as e:
+        print(f"[ERROR] Failed to log normalization review: {e}")
         return []
 
 def batch_append_daily_memory(sheet_url, new_issuers):
