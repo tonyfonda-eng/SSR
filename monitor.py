@@ -17,7 +17,7 @@ from src.database import (
 
 from src.scrapers.prnewswire import download_article
 from src.scrapers import get_scraper_for_source
-from src.sheets import load_rules, load_sources, load_playbooks, append_to_research_queue, update_last_checked, load_global_exclusions, load_gold_standards, log_unknown_event
+from src.sheets import load_rules, load_sources, load_playbooks, append_to_research_queue, update_last_checked, load_global_exclusions, load_gold_standards, log_unknown_event, update_pipeline_metrics
 from src.rules_engine import evaluate
 from src.ai import classify_event, execute_playbook, check_material_update
 from src.alerts.email import send_alert
@@ -25,7 +25,7 @@ from src.options_calc import calculate_naked_call_roi
 
 SHEET_URL = "https://docs.google.com/spreadsheets/d/1YDOyc8WReBei-7LKPLiXZtmOGCmoY7zuyTvyfMHeL4E/edit#gid=0"
 
-def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False):
+def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False, funnel_metrics=None):
     if global_exclusions is None:
         global_exclusions = []
         
@@ -37,11 +37,16 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         print(f"    [SKIP] Empty body for {title}")
         return 0
         
+    if funnel_metrics: funnel_metrics[2] += 1
+    
     if needs_translation:
         print(f"    [TRANSLATION] Translating '{title}' to English...")
         from src.ai import translate_to_english
         title = translate_to_english(title)
         body = translate_to_english(body)
+        
+    if funnel_metrics and needs_translation: funnel_metrics[3] += 1
+
         
     # Global Exclusion Pre-Filter
     title_lower = title.lower()
@@ -60,12 +65,14 @@ def _process_article(source_name, article_id, title, url, published, body, rules
             )
             return 1
             
+    if funnel_metrics: funnel_metrics[4] += 1
     print(f"  -> Processing: {title}")
 
     # Cash Event Detection (Stage 1)
     matches = evaluate(body, rules, threshold=10)
 
     if matches:
+        if funnel_metrics: funnel_metrics[5] += 1
         print("    [MATCH] High confidence event signals detected!")
         
         # Ticker Verification (Stage 2)
@@ -85,6 +92,8 @@ def _process_article(source_name, article_id, title, url, published, body, rules
             )
             return 1
             
+        if funnel_metrics: funnel_metrics[6] += 1
+        
         options_available = False
         market_cap = None
         market_data_str = ""
@@ -167,8 +176,11 @@ def _process_article(source_name, article_id, title, url, published, body, rules
             )
             return 1
             
+        if funnel_metrics: funnel_metrics[7] += 1
+        
         is_update = False
         if ticker != "UNKNOWN" and "MOCK AI" not in ticker:
+            if funnel_metrics and options_available: funnel_metrics[8] += 1
             print(f"    [AI TICKER VERIFIED] Public ticker extracted: {ticker}")
             track_company(ticker)
             event_id, is_new = create_event_if_new(event_family, ticker)
@@ -201,8 +213,12 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         research_summary = execute_playbook(body, playbook_steps, event_family, gold_standard, market_data_str=market_data_str)
         print(f"    [AI RESEARCH] Done.")
         
+        if funnel_metrics and is_update: funnel_metrics[9] += 1
+        
         # Log to Database
         log_research(event_id, article_id, confidence, research_summary)
+        
+        if funnel_metrics: funnel_metrics[10] += 1
         
         # Review (Sheets)
         append_to_research_queue(
@@ -223,6 +239,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
             evidence_log=matches[0].get("_Evidence", []),
             is_update=is_update,
         )
+        if funnel_metrics: funnel_metrics[11] += 1
 
         # Check for Go-Shop Expiry
         go_shop_match = re.search(r'GO-SHOP EXPIRY:\s*(\d{4}-\d{2}-\d{2})', research_summary)
@@ -230,6 +247,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
             expiry_date = go_shop_match.group(1)
             msg = f"Go-Shop period for {ticker} ({event_family}) expires TODAY ({expiry_date}). Please review for any competing bids!"
             save_reminder(event_id, ticker, expiry_date, msg)
+            if funnel_metrics: funnel_metrics[12] += 1
             print(f"    [REMINDER] Saved go-shop expiry reminder for {expiry_date}")
 
     # Archive
@@ -244,7 +262,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
     return 1
 
 
-def process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False):
+def process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False, funnel_metrics=None):
     print(f"\n[INGESTION] Polling RSS: {source_name} ({rss_url})")
     try:
         feed = feedparser.parse(rss_url)
@@ -276,13 +294,14 @@ def process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusion
             global_exclusions=global_exclusions,
             gold_standards=gold_standards,
             triage_all=triage_all,
-            needs_translation=needs_translation
+            needs_translation=needs_translation,
+            funnel_metrics=funnel_metrics
         )
         time.sleep(1) # respect API limits
         
     return new_articles, len(feed.entries)
 
-def process_custom_scraper(scraper, rules, playbook_map, source_name, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False):
+def process_custom_scraper(scraper, rules, playbook_map, source_name, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False, funnel_metrics=None):
     print(f"\n[INGESTION] Polling Custom Scraper: {source_name}")
     try:
         articles = scraper.get_latest_articles()
@@ -318,7 +337,8 @@ def process_custom_scraper(scraper, rules, playbook_map, source_name, global_exc
             global_exclusions=global_exclusions,
             gold_standards=gold_standards,
             triage_all=triage_all,
-            needs_translation=needs_translation
+            needs_translation=needs_translation,
+            funnel_metrics=funnel_metrics
         )
         time.sleep(1) # respect API limits
 
@@ -328,6 +348,8 @@ def main():
     print("=== Special Situations Radar v1.0.0 ===")
     
     initialise_database()
+    
+    funnel_metrics = {i: 0 for i in range(1, 13)}
 
     # Process pending reminders
     pending = get_pending_reminders()
@@ -382,7 +404,7 @@ def main():
             # 1. Attempt HTML Custom Scraper First
             if scraper:
                 try:
-                    new_count, parsed_count = process_custom_scraper(scraper, rules, playbook_map, source_name, global_exclusions, gold_standards, triage_all, needs_translation)
+                    new_count, parsed_count = process_custom_scraper(scraper, rules, playbook_map, source_name, global_exclusions, gold_standards, triage_all, needs_translation, funnel_metrics)
                     if parsed_count > 0:
                         method_used = "HTML"
                         total_new += new_count
@@ -393,7 +415,7 @@ def main():
             # 2. Fallback to RSS if HTML failed, returned 0, or didn't exist
             if not method_used and rss_url:
                 try:
-                    new_count, parsed_count = process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusions, gold_standards, triage_all, needs_translation)
+                    new_count, parsed_count = process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusions, gold_standards, triage_all, needs_translation, funnel_metrics)
                     method_used = "RSS"
                     total_new += new_count
                     source_stats[source_name] = {"count": parsed_count, "new": new_count, "method": method_used}
@@ -408,6 +430,7 @@ def main():
     import datetime
     timestamp_str = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
     update_last_checked(SHEET_URL, source_stats, timestamp_str)
+    update_pipeline_metrics(SHEET_URL, funnel_metrics, timestamp_str)
 
 if __name__ == "__main__":
     main()
