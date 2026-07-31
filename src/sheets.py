@@ -288,6 +288,30 @@ def update_pipeline_metrics(sheet_url, funnel_metrics, timestamp_str):
 # Daily Memory (Google Sheets Backend)
 # ---------------------------------------------------------------------------
 
+def load_document_type_scores(sheet_url):
+    """
+    Loads Document Type scores from the 'Document Types' tab.
+    Returns a dictionary mapping document type to integer score.
+    """
+    client = get_client()
+    sheet = client.open_by_url(sheet_url)
+    scores = {}
+    try:
+        worksheet = sheet.worksheet("Document Types")
+        records = worksheet.get_all_records()
+        for r in records:
+            dt = str(r.get('Document Type', '')).lower().strip()
+            score = r.get('Confidence Score', 0)
+            if dt:
+                try:
+                    scores[dt] = int(score)
+                except ValueError:
+                    pass
+    except Exception as e:
+        print(f"[WARNING] Failed to load Document Type scores: {e}")
+    
+    return scores
+
 def load_daily_memory(sheet_url):
     """
     Loads all issuers from the 'Daily Memory' tab to populate the in-memory cache.
