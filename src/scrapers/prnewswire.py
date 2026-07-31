@@ -50,7 +50,7 @@ def download_article(url):
 
 
 class PRNewsWireScraper(SourceScraper):
-    def get_latest_articles(self):
+    def get_latest_articles(self, **kwargs):
         import time
         headers = {
             "User-Agent": USER_AGENT

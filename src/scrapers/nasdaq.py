@@ -4,7 +4,7 @@ from src.scrapers.base import SourceScraper
 from src.config.settings import USER_AGENT
 
 class NasdaqScraper(SourceScraper):
-    def get_latest_articles(self):
+    def get_latest_articles(self, **kwargs):
         url = "https://www.nasdaqtrader.com/Rss.aspx?feed=currentheadlines&categorylist=105"
         
         articles = []

@@ -28,7 +28,7 @@ class EdgarItemScraper(SourceScraper):
     # Item codes we care about
     TARGET_ITEMS = ["1.01", "2.01", "5.01", "8.01"]
 
-    def get_latest_articles(self):
+    def get_latest_articles(self, **kwargs):
         headers = {"User-Agent": self.USER_AGENT}
         articles = []
         seen_ids = set()

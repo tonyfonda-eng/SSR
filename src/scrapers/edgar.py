@@ -11,7 +11,7 @@ class EdgarScraper(SourceScraper):
     # Edgar requires a declared user agent
     USER_AGENT = "SpecialSituationsRadar ssr-admin@special-situations-radar.com"
 
-    def get_latest_articles(self):
+    def get_latest_articles(self, **kwargs):
         import time
         headers = {"User-Agent": self.USER_AGENT}
         articles = []

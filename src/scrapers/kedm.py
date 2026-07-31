@@ -37,7 +37,7 @@ class KEDMScraper(SourceScraper):
         s.post('https://kedm.com/my-account/', data=login_data)
         return s
 
-    def get_latest_articles(self):
+    def get_latest_articles(self, **kwargs):
         """
         Returns a list of dicts representing the latest KEDM reports.
         """

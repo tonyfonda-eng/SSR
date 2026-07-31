@@ -8,7 +8,7 @@ from src.config.settings import USER_AGENT
 class GlobeNewswireScraper(SourceScraper):
     RSS_URL = "https://www.globenewswire.com/RssFeed/country/US/feedTitle/GlobeNewswire%20-%20US%20News"
 
-    def get_latest_articles(self):
+    def get_latest_articles(self, **kwargs):
         import time
         headers = {"User-Agent": USER_AGENT}
         articles = []

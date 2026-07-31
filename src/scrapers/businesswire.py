@@ -37,7 +37,7 @@ class BusinessWireScraper(SourceScraper):
         # Fallback: use the second-to-last path segment
         return parts[-2] if len(parts) > 2 else url
 
-    def get_latest_articles(self):
+    def get_latest_articles(self, **kwargs):
         import time
         articles = []
         seen_ids = set()
