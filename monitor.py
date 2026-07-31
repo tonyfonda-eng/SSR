@@ -470,7 +470,10 @@ def process_custom_scraper(scraper, source_name, rss_url=None, triage_all=False,
             "published": article.get('published', ''),
             "body": body,
             "triage_all": triage_all,
-            "needs_translation": needs_translation
+            "needs_translation": needs_translation,
+            "document_type": article.get("document_type"),
+            "country": country,
+            "language": language
         })
         time.sleep(1) # respect API limits
 
