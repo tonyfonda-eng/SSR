@@ -5,7 +5,7 @@ from src.config.settings import USER_AGENT
 
 class NasdaqScraper(SourceScraper):
     def get_latest_articles(self, **kwargs):
-        url = "https://www.nasdaqtrader.com/Rss.aspx?feed=currentheadlines&categorylist=105"
+        url = kwargs.get("rss_url") or "https://www.nasdaqtrader.com/Rss.aspx?feed=currentheadlines&categorylist=105"
         
         articles = []
         try:
