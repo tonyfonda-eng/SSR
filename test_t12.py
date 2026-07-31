@@ -5,7 +5,11 @@ import src.ai
 def mock_extract_target_ticker(body):
     return "INHD"
 
+def mock_extract_halt_date(body):
+    return "2024-03-15"
+
 src.ai.extract_target_ticker = mock_extract_target_ticker
+src.ai.extract_halt_date = mock_extract_halt_date
 
 def test_t12():
     mock_body = """
@@ -27,7 +31,7 @@ def test_t12():
     
     _process_article(
         source_name="Mock Source",
-        article_id="mock_inno_t12_v2",
+        article_id="mock_inno_t12_v3",
         title="Inno Holdings Inc. Announces Resumption of Trading on Nasdaq",
         url="http://mock.com",
         published="2024-04-10",
