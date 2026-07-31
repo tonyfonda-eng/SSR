@@ -129,9 +129,32 @@ def _process_article(source_name, article_id, title, url, published, body, rules
     print(f"  -> Processing: {title}")
 
     # Cash Event Detection (Stage 1)
-    from src.normalization import normalize_text
-    normalized_body = normalize_text(body)
-    matches = evaluate(normalized_body, rules, threshold=10, document_type=document_type)
+    from src.normalizers import get_normalizer
+    normalizer = get_normalizer(country)
+    
+    raw_text = f"{title}\n\n{body}"
+    normalized_terms = []
+    
+    if normalizer:
+        try:
+            normalized_terms = normalizer(raw_text)
+            
+            # Continuous Learning: Log foreign OAM articles that yielded 0 canonical terms
+            if not normalized_terms and "Google News" not in source_name and "Nasdaq" not in source_name and "London Stock" not in source_name:
+                from src.sheets import log_normalization_review
+                from src.config.settings import SHEET_URL
+                log_normalization_review(SHEET_URL, source_name, language, document_type, title, url)
+                
+        except Exception as e:
+            print(f"    [WARNING] Normalization failed for {country}: {e}")
+            
+    article_obj = {
+        "raw_text": raw_text,
+        "normalized_terms": normalized_terms,
+        "document_type": document_type
+    }
+    
+    matches = evaluate(article_obj, rules, threshold=10)
 
     if matches:
         if funnel_metrics: funnel_metrics[5] += 1
