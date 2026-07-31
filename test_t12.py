@@ -1,5 +1,11 @@
 import os
 from monitor import _process_article
+import src.ai
+
+def mock_extract_target_ticker(body):
+    return "INHD"
+
+src.ai.extract_target_ticker = mock_extract_target_ticker
 
 def test_t12():
     mock_body = """
