@@ -1,6 +1,7 @@
 import re
 import feedparser
 import time
+import datetime
 from difflib import SequenceMatcher
 
 from src.database import (
@@ -26,7 +27,63 @@ from src.options_calc import calculate_naked_call_roi
 
 SHEET_URL = "https://docs.google.com/spreadsheets/d/1YDOyc8WReBei-7LKPLiXZtmOGCmoY7zuyTvyfMHeL4E/edit#gid=0"
 
-def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False, funnel_metrics=None):
+# ---------------------------------------------------------------------------
+# Daily Title Memory — fast in-memory dedup that persists across the pipeline
+# ---------------------------------------------------------------------------
+class TitleMemory:
+    """
+    In-memory cache of all titles processed today (loaded from DB at startup).
+    Every new article is checked against this cache BEFORE any AI call.
+    Grows during the run as articles are processed.
+    Naturally resets daily because it's loaded fresh from the DB each run.
+    """
+    SIMILARITY_THRESHOLD = 0.80
+
+    def __init__(self):
+        self._titles = []  # list of lowercased titles
+
+    def load_from_db(self):
+        """Load all titles processed in the last 24 hours from the database."""
+        from src.database import get_connection
+        conn = get_connection()
+        cursor = conn.cursor()
+        cutoff = (datetime.datetime.now() - datetime.timedelta(hours=24)).isoformat()
+        cursor.execute("SELECT title FROM articles WHERE processed_at >= ?", (cutoff,))
+        rows = cursor.fetchall()
+        conn.close()
+        self._titles = [row[0].lower() for row in rows if row[0]]
+        print(f"[DAILY MEMORY] Loaded {len(self._titles)} titles from last 24 hours.")
+
+    def is_duplicate(self, title):
+        """Check if this title (or something very similar) was already seen today."""
+        if not title:
+            return False
+        title_lower = title.lower()
+
+        for cached in self._titles:
+            # Fast exact match
+            if title_lower == cached:
+                return True
+            # Substring match (for truncated RSS titles, min 30 chars)
+            if len(title_lower) > 30 and len(cached) > 30:
+                if title_lower in cached or cached in title_lower:
+                    return True
+            # Fuzzy match
+            if SequenceMatcher(None, title_lower, cached).ratio() > self.SIMILARITY_THRESHOLD:
+                return True
+
+        return False
+
+    def add(self, title):
+        """Register a title as processed."""
+        if title:
+            self._titles.append(title.lower())
+
+    @property
+    def size(self):
+        return len(self._titles)
+
+def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False, funnel_metrics=None, title_memory=None):
     if global_exclusions is None:
         global_exclusions = []
         
@@ -37,10 +94,10 @@ def _process_article(source_name, article_id, title, url, published, body, rules
     if not body:
         print(f"    [SKIP] Empty body for {title}")
         return 0
-        
-    from src.database import is_title_duplicate_in_db
-    if is_title_duplicate_in_db(title):
-        print(f"    [DEDUPLICATION] Historic syndicated clone detected (matched title in DB). Skipping.")
+
+    # --- DAILY MEMORY CHECK (before any AI call) ---
+    if title_memory and title_memory.is_duplicate(title):
+        print(f"    [DAILY MEMORY] Already seen today: '{title[:80]}'. Archiving without AI.")
         save_article(
             source=source_name,
             article_id=article_id,
@@ -296,6 +353,9 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         published=published,
         body=body,
     )
+    # Register in daily memory so subsequent articles in this run are caught
+    if title_memory:
+        title_memory.add(title)
 
     if matches:
         # Alerts (safe to fail — article is already archived so it won't be re-processed)
@@ -435,6 +495,10 @@ def main():
     
     initialise_database()
     
+    # Build the daily title memory — loaded from DB, grows during this run
+    title_memory = TitleMemory()
+    title_memory.load_from_db()
+    
     funnel_metrics = {i: 0 for i in range(1, 13)}
 
     # Process pending reminders
@@ -536,7 +600,8 @@ def main():
             gold_standards=gold_standards,
             triage_all=primary["triage_all"],
             needs_translation=primary["needs_translation"],
-            funnel_metrics=funnel_metrics
+            funnel_metrics=funnel_metrics,
+            title_memory=title_memory
         )
         
         # Quietly archive the syndicated clones to prevent fetching them again
@@ -553,6 +618,7 @@ def main():
 
     print(f"\n[DATABASE] {total_new} new unique articles processed.")
     print(f"[DATABASE] Total articles archived: {article_count()}")
+    print(f"[DAILY MEMORY] Session ended with {title_memory.size} titles cached.")
 
     import datetime
     timestamp_str = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
