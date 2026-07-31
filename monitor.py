@@ -65,6 +65,22 @@ class TitleMemory:
         s = ' '.join([w for w in s.split() if len(w) > 3])
         return s.strip()
 
+    def _extract_company_heuristic(self, title):
+        """Attempts to aggressively isolate the company name from the title for strict deduplication."""
+        import re
+        if " - " in title:
+            match = re.search(r'(?:8-K|13D|10-Q|10-K|Form 10)\s*-\s*([^(]+)', title, re.IGNORECASE)
+            if match:
+                return match.group(1).strip().lower()
+            parts = title.split(" - ")
+            return parts[0].strip().lower()
+            
+        s = self._normalize(title)
+        words = s.split()
+        if len(words) >= 2:
+            return " ".join(words[:2])
+        return s
+
     def is_duplicate(self, title):
         """Check if this title (or something very similar) was already seen today."""
         if not title:
@@ -88,6 +104,13 @@ class TitleMemory:
                 
             if SequenceMatcher(None, title_norm, cached_norm).ratio() > self.SIMILARITY_THRESHOLD:
                 return True
+                
+            # Heuristic Company Match (Crucial for SEDAR/EDGAR where suffixes change like "Material Change" vs "Early Warning")
+            title_comp = self._extract_company_heuristic(title_lower)
+            cached_comp = self._extract_company_heuristic(cached)
+            if title_comp and cached_comp and len(title_comp) > 5:
+                if title_comp == cached_comp:
+                    return True
 
         return False
 
