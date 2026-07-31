@@ -180,9 +180,9 @@ def update_last_checked(sheet_url, source_stats, timestamp_str):
                 
             # If the last check was today, add to cumulative, else reset
             if today_date in current_last_checked:
-                cumulative_val += new_count
+                cumulative_val += parsed_count
             else:
-                cumulative_val = new_count
+                cumulative_val = parsed_count
                 
             cell_last_checked = gspread.utils.rowcol_to_a1(row_idx + 1, col_idx_last_checked + 1)
             cell_method = gspread.utils.rowcol_to_a1(row_idx + 1, col_idx_method + 1)
