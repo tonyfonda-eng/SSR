@@ -157,7 +157,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         print(f"    [AI TICKER] {ticker}")
         
         # --- AI EXHAUSTION CIRCUIT BREAKER ---
-        if "MOCK AI" in ticker or "ERROR" in ticker or ticker == "UNKNOWN" and not clients:
+        if "MOCK AI" in ticker or "ERROR" in ticker or ticker == "UNKNOWN":
             print("    [CRITICAL] AI Providers are exhausted or unavailable. Aborting ingestion loop to prevent spam and save cache.")
             return 1
             
@@ -209,7 +209,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         event_family = classify_event(body, matches, ticker=ticker, market_cap=market_cap)
         print(f"    [AI CLASSIFICATION] {event_family}")
 
-        if "Unknown" in event_family and not clients:
+        if "Unknown" in event_family:
              print("    [CRITICAL] AI Providers are exhausted. Aborting ingestion loop.")
              return 1
 
