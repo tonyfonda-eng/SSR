@@ -5,6 +5,7 @@ from .edgar_items import EdgarItemScraper
 from .prnewswire import PRNewsWireScraper
 from .kedm import KEDMScraper
 from .googlenews import GoogleNewsScraper
+from .nasdaq import NasdaqScraper
 
 SCRAPER_REGISTRY = {
     "Business Wire": BusinessWireScraper,
@@ -14,6 +15,7 @@ SCRAPER_REGISTRY = {
     "PR Newswire": PRNewsWireScraper,
     "KEDM": KEDMScraper,
     "Google News": GoogleNewsScraper,
+    "Nasdaq": NasdaqScraper,
 }
 
 def get_scraper_for_source(source_name):
