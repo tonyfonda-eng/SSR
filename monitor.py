@@ -388,7 +388,16 @@ def _process_article(source_name, article_id, title, url, published, body, rules
 def process_rss_feed(rss_url, source_name, triage_all=False, needs_translation=False):
     print(f"\n[INGESTION] Polling RSS: {source_name} ({rss_url})")
     try:
-        feed = feedparser.parse(rss_url)
+        # Use requests with a timeout to prevent feedparser from hanging indefinitely
+        import requests
+        try:
+            headers = {"User-Agent": "Mozilla/5.0"}
+            response = requests.get(rss_url, headers=headers, timeout=15)
+            response.raise_for_status()
+            feed = feedparser.parse(response.content)
+        except Exception as e:
+            print(f"    [WARNING] RSS fetch failed for {rss_url}: {e}")
+            return [], 0
     except Exception as e:
         print(f"[ERROR] Failed to parse feed {rss_url}: {e}")
         return [], 0

@@ -44,7 +44,11 @@ class BusinessWireScraper(SourceScraper):
 
         for category_name, feed_url in self.RSS_FEEDS:
             try:
-                feed = feedparser.parse(feed_url)
+                # Fetch with requests to enforce timeout and avoid feedparser hangs
+                headers = {"User-Agent": USER_AGENT}
+                response = requests.get(feed_url, headers=headers, timeout=15)
+                response.raise_for_status()
+                feed = feedparser.parse(response.content)
                 new_in_feed = 0
                 for entry in feed.entries:
                     article_id = self._extract_article_id(entry.link)
