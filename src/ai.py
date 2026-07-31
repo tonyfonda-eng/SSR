@@ -1,22 +1,45 @@
 import os
 import random
 from google import genai
+import openai
 
-# Load primary key (could be comma separated)
-raw_keys = os.environ.get("GEMINI_API_KEY", "")
-api_keys = [k.strip() for k in raw_keys.split(",") if k.strip()]
-
-# Load explicitly numbered keys (GEMINI_API_KEY_1 to GEMINI_API_KEY_10)
+# --- 1. Load Gemini Keys ---
+raw_gemini_keys = os.environ.get("GEMINI_API_KEY", "")
+gemini_keys = [k.strip() for k in raw_gemini_keys.split(",") if k.strip()]
 for i in range(1, 11):
     val = os.environ.get(f"GEMINI_API_KEY_{i}")
     if val:
         keys = [k.strip() for k in val.split(",") if k.strip()]
-        api_keys.extend(keys)
+        gemini_keys.extend(keys)
+gemini_keys = list(set(gemini_keys))
 
-# Deduplicate and initialize clients
-api_keys = list(set(api_keys))
-clients = [genai.Client(api_key=k) for k in api_keys]
-print(f"[AI INFO] Initialized {len(clients)} Gemini API clients.")
+# --- 2. Load OpenRouter Keys ---
+raw_or_keys = os.environ.get("OPENROUTER_API_KEY", "")
+or_keys = [k.strip() for k in raw_or_keys.split(",") if k.strip()]
+for i in range(1, 11):
+    val = os.environ.get(f"OPENROUTER_API_KEY_{i}")
+    if val:
+        keys = [k.strip() for k in val.split(",") if k.strip()]
+        or_keys.extend(keys)
+or_keys = list(set(or_keys))
+
+# --- 3. Initialize Unified Client Pool ---
+# Pool stores tuples: (provider_name, client_instance)
+clients = []
+
+for k in or_keys:
+    # OpenRouter uses the OpenAI SDK structure
+    client = openai.Client(
+        base_url="https://openrouter.ai/api/v1",
+        api_key=k,
+    )
+    clients.append(("openrouter", client))
+
+for k in gemini_keys:
+    client = genai.Client(api_key=k)
+    clients.append(("gemini", client))
+
+print(f"[AI INFO] Initialized {len(or_keys)} OpenRouter clients and {len(gemini_keys)} Gemini clients.")
 
 def _generate_with_retry(prompt, max_retries=6):
     if not clients:

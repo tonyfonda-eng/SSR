@@ -5,6 +5,7 @@ gspread
 google-auth
 google-genai
 yfinance
+openai
 PyPDF2
 pandas
 tabulate
