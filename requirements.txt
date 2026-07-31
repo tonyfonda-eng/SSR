@@ -6,3 +6,5 @@ google-auth
 google-genai
 yfinance
 PyPDF2
+pandas
+tabulate

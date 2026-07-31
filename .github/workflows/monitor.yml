@@ -47,5 +47,7 @@ jobs:
           SMTP_USER: ${{ secrets.SMTP_USER }}
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
           ALERT_EMAIL_RECIPIENT: ${{ secrets.ALERT_EMAIL_RECIPIENT }}
+          KEDM_USER: ${{ secrets.KEDM_USER }}
+          KEDM_PASS: ${{ secrets.KEDM_PASS }}
         run: |
           python monitor.py
