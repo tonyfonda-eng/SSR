@@ -21,7 +21,7 @@ from src.scrapers.prnewswire import download_article
 from src.scrapers import get_scraper_for_source
 from src.sheets import load_rules, load_sources, load_playbooks, append_to_research_queue, update_last_checked, load_global_exclusions, load_gold_standards, log_unknown_event, update_pipeline_metrics
 from src.rules_engine import evaluate
-from src.ai import classify_event, execute_playbook, check_material_update, clients
+from src.ai import classify_event, execute_playbook, clients
 from src.alerts.email import send_alert
 from src.options_calc import calculate_naked_call_roi
 
@@ -304,15 +304,20 @@ def _process_article(source_name, article_id, title, url, published, body, rules
             event_id, is_new = create_event_if_new(event_family, ticker)
             
             if not is_new:
-                print(f"    [DEDUPLICATION] Event already tracked. Checking for material updates...")
-                from src.database import get_latest_research_summary
-                prev_summary = get_latest_research_summary(event_id)
+                print(f"    [DEDUPLICATION] Event already tracked. Using Python heuristic to check for material updates...")
                 
-                if check_material_update(body, event_family, ticker, previous_summary=prev_summary):
-                    print(f"    [AI UPDATE] Material update detected. Generating new memo.")
+                # Pure Python heuristic for material updates
+                material_keywords = ["bump", "increase", "amend", "terminate", "cancel", "revised", "superior proposal", "competing", "regulatory approval", "blocked"]
+                body_lower = body.lower()
+                title_lower = title.lower()
+                
+                is_material = any(kw in body_lower or kw in title_lower for kw in material_keywords)
+                
+                if is_material:
+                    print(f"    [PYTHON UPDATE] Material update keywords detected. Generating new memo.")
                     is_update = True
                 else:
-                    print(f"    [AI UPDATE] No material update (Syndicated News/Duplicate). Dropping article.")
+                    print(f"    [PYTHON UPDATE] No material keywords found (Syndicated News/Duplicate). Dropping article.")
                     save_article(
                         source=source_name,
                         article_id=article_id,
