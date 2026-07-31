@@ -19,7 +19,7 @@ from src.database import (
 
 from src.scrapers.prnewswire import download_article
 from src.scrapers import get_scraper_for_source
-from src.sheets import load_rules, load_sources, load_playbooks, append_to_research_queue, update_last_checked, load_global_exclusions, load_gold_standards, log_unknown_event, update_pipeline_metrics
+from src.sheets import load_rules, load_sources, load_playbooks, append_to_research_queue, update_last_checked, load_global_exclusions, load_gold_standards, log_unknown_event, update_pipeline_metrics, load_daily_memory, batch_append_daily_memory, prune_daily_memory
 from src.rules_engine import evaluate
 from src.ai import classify_event, execute_playbook, clients
 from src.alerts.email import send_alert
@@ -32,27 +32,21 @@ SHEET_URL = "https://docs.google.com/spreadsheets/d/1YDOyc8WReBei-7LKPLiXZtmOGCm
 # ---------------------------------------------------------------------------
 class TitleMemory:
     """
-    In-memory cache of all titles processed today (loaded from DB at startup).
+    In-memory cache of all titles processed today (loaded from Google Sheets at startup).
     Every new article is checked against this cache BEFORE any AI call.
-    Grows during the run as articles are processed.
-    Naturally resets daily because it's loaded fresh from the DB each run.
+    Grows during the run as articles are processed, then flushed to Sheets.
     """
     SIMILARITY_THRESHOLD = 0.80
 
     def __init__(self):
         self._titles = []  # list of lowercased titles
+        self._new_additions = [] # list of dicts to batch append to Sheets
 
     def load_from_db(self):
-        """Load all titles processed in the last 24 hours from the database."""
-        from src.database import get_connection
-        conn = get_connection()
-        cursor = conn.cursor()
-        cutoff = (datetime.datetime.now() - datetime.timedelta(hours=24)).isoformat()
-        cursor.execute("SELECT title FROM articles WHERE processed_at >= ?", (cutoff,))
-        rows = cursor.fetchall()
-        conn.close()
-        self._titles = [row[0].lower() for row in rows if row[0]]
-        print(f"[DAILY MEMORY] Loaded {len(self._titles)} titles from last 24 hours.")
+        """Load all titles from the Daily Memory Google Sheet tab."""
+        titles = load_daily_memory(SHEET_URL)
+        self._titles = [str(t).lower() for t in titles if t]
+        print(f"[DAILY MEMORY] Loaded {len(self._titles)} titles from Google Sheets cache.")
 
     def is_duplicate(self, title):
         """Check if this title (or something very similar) was already seen today."""
@@ -74,10 +68,21 @@ class TitleMemory:
 
         return False
 
-    def add(self, title):
-        """Register a title as processed."""
+    def add(self, title, source_name="", url=""):
+        """Register a title as processed and queue it for Google Sheets append."""
         if title:
             self._titles.append(title.lower())
+            self._new_additions.append({
+                'title': title,
+                'source': source_name,
+                'url': url
+            })
+
+    def flush_to_sheets(self):
+        """Push all newly processed articles to the Google Sheet tab."""
+        if self._new_additions:
+            batch_append_daily_memory(SHEET_URL, self._new_additions)
+            self._new_additions = []
 
     @property
     def size(self):
@@ -154,7 +159,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         # --- AI EXHAUSTION CIRCUIT BREAKER ---
         if "MOCK AI" in ticker or "ERROR" in ticker or ticker == "UNKNOWN" and not clients:
             print("    [CRITICAL] AI Providers are exhausted or unavailable. Aborting ingestion loop to prevent spam and save cache.")
-            break
+            return 1
             
         if ticker == "PRIVATE":
             print("    [AI REJECTED] Target is a private company.")
@@ -206,7 +211,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
 
         if "Unknown" in event_family and not clients:
              print("    [CRITICAL] AI Providers are exhausted. Aborting ingestion loop.")
-             break
+             return 1
 
         if "false positive" in event_family.lower():
             print("    [AI REJECTED] Article flagged as false positive.")
@@ -639,14 +644,21 @@ def main():
             )
             print(f"    [DEDUPLICATION] Quietly archived syndicated clone: {clone['title']} ({clone['source_name']})")
 
-    print(f"\n[DATABASE] {total_new} new unique articles processed.")
+    # Final cleanup and stat saves
+    print(f"[DATABASE] {sum(s['new'] for s in source_stats.values())} new unique articles processed.")
     print(f"[DATABASE] Total articles archived: {article_count()}")
+    
+    # Flush memory to sheets and prune old entries
+    title_memory.flush_to_sheets()
+    prune_daily_memory(SHEET_URL)
+    
     print(f"[DAILY MEMORY] Session ended with {title_memory.size} titles cached.")
 
-    import datetime
-    timestamp_str = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
-    update_last_checked(SHEET_URL, source_stats, timestamp_str)
-    update_pipeline_metrics(SHEET_URL, funnel_metrics, timestamp_str)
+    if source_stats:
+        import datetime
+        timestamp_str = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+        update_last_checked(SHEET_URL, source_stats, timestamp_str)
+        update_pipeline_metrics(SHEET_URL, funnel_metrics, timestamp_str)
 
 if __name__ == "__main__":
     try:

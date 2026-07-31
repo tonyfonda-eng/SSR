@@ -283,3 +283,115 @@ def update_pipeline_metrics(sheet_url, funnel_metrics, timestamp_str):
         worksheet.batch_update(updates)
         print(f"[SHEETS] Updated decision pipeline funnel metrics.")
 
+
+# ---------------------------------------------------------------------------
+# Daily Memory (Google Sheets Backend)
+# ---------------------------------------------------------------------------
+
+def load_daily_memory(sheet_url):
+    """
+    Loads all article titles from the 'Daily Memory' tab to populate the in-memory cache.
+    Returns a list of titles.
+    """
+    client = get_client()
+    sheet = client.open_by_url(sheet_url)
+    try:
+        worksheet = sheet.worksheet("Daily Memory")
+        records = worksheet.get_all_records()
+        return [str(r.get('Article Title', '')) for r in records if r.get('Article Title')]
+    except gspread.exceptions.WorksheetNotFound:
+        print("[WARNING] 'Daily Memory' tab not found in Google Sheets. Returning empty memory.")
+        return []
+    except Exception as e:
+        print(f"[ERROR] Failed to load Daily Memory from Sheets: {e}")
+        return []
+
+def batch_append_daily_memory(sheet_url, new_articles):
+    """
+    Appends a list of new articles to the 'Daily Memory' tab in a single API call.
+    new_articles is a list of dicts: {'source': ..., 'title': ..., 'url': ...}
+    """
+    if not new_articles:
+        return
+        
+    client = get_client()
+    sheet = client.open_by_url(sheet_url)
+    try:
+        worksheet = sheet.worksheet("Daily Memory")
+        
+        rows_to_append = []
+        now_str = datetime.datetime.utcnow().isoformat()
+        
+        for article in new_articles:
+            rows_to_append.append([
+                now_str,
+                article.get('source', ''),
+                article.get('title', ''),
+                article.get('url', '')
+            ])
+            
+        worksheet.append_rows(rows_to_append, value_input_option='USER_ENTERED')
+        print(f"[SHEETS] Successfully appended {len(rows_to_append)} articles to Daily Memory.")
+        
+    except gspread.exceptions.WorksheetNotFound:
+        print("[WARNING] 'Daily Memory' tab not found. Could not save memory.")
+    except Exception as e:
+        print(f"[ERROR] Failed to batch append to Daily Memory: {e}")
+
+def prune_daily_memory(sheet_url, max_age_hours=48):
+    """
+    Deletes rows from the 'Daily Memory' tab that are older than max_age_hours.
+    This keeps the Google Sheet lightweight and prevents 500,000 row limits.
+    """
+    client = get_client()
+    sheet = client.open_by_url(sheet_url)
+    try:
+        worksheet = sheet.worksheet("Daily Memory")
+        records = worksheet.get_all_records()
+        
+        if not records:
+            return
+            
+        now = datetime.datetime.utcnow()
+        cutoff_date = now - datetime.timedelta(hours=max_age_hours)
+        
+        rows_to_delete = []
+        # records is a list of dicts. Row 2 in sheet corresponds to records[0].
+        # We iterate backwards so deleting a row doesn't shift the indices of subsequent rows we want to delete.
+        for i in range(len(records) - 1, -1, -1):
+            timestamp_str = records[i].get('Timestamp', '')
+            if not timestamp_str:
+                rows_to_delete.append(i + 2) # +2 because row 1 is header, and 0-indexed records
+                continue
+                
+            try:
+                # Handle isoformat with or without microseconds
+                clean_ts = timestamp_str.split('.')[0] 
+                row_date = datetime.datetime.strptime(clean_ts, "%Y-%m-%dT%H:%M:%S")
+                if row_date < cutoff_date:
+                    rows_to_delete.append(i + 2)
+            except Exception:
+                # If timestamp is mangled, delete it
+                rows_to_delete.append(i + 2)
+                
+        # Batch delete rows (must delete from bottom up, which they already are due to reverse iteration)
+        # Google Sheets API is tricky with batch deletes, so we do it one by one from bottom up,
+        # or we can clear the whole sheet and rewrite the valid ones (much faster/safer).
+        
+        if len(rows_to_delete) > 100:
+            # If there are many to delete, rewriting is safer and uses fewer API calls
+            print(f"[SHEETS] Pruning {len(rows_to_delete)} old rows from Daily Memory by rewriting sheet...")
+            valid_rows = [list(records[0].keys())] # Header
+            
+            for i, record in enumerate(records):
+                if (i + 2) not in rows_to_delete:
+                    valid_rows.append(list(record.values()))
+                    
+            worksheet.clear()
+            worksheet.append_rows(valid_rows, value_input_option='USER_ENTERED')
+            print(f"[SHEETS] Daily Memory pruned successfully. Kept {len(valid_rows)-1} recent articles.")
+            
+    except gspread.exceptions.WorksheetNotFound:
+        pass
+    except Exception as e:
+        print(f"[ERROR] Failed to prune Daily Memory: {e}")
