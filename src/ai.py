@@ -43,51 +43,73 @@ print(f"[AI INFO] Initialized {len(or_keys)} OpenRouter clients and {len(gemini_
 
 def _generate_with_retry(prompt, max_retries=6):
     if not clients:
-        raise ValueError("GEMINI_API_KEY not set")
+        raise ValueError("No API keys (OpenRouter or Gemini) set in environment.")
     
     import time
     import re
+    
+    # We want to prioritize OpenRouter (since Llama 3.3 70B free has high limits) 
+    # but still allow random distribution to avoid hitting same key constantly.
     available_clients = list(clients)
-    random.shuffle(available_clients)
+    
+    # Sort so OpenRouter is tried first, but shuffle within providers
+    or_clients = [c for c in available_clients if c[0] == "openrouter"]
+    gem_clients = [c for c in available_clients if c[0] == "gemini"]
+    random.shuffle(or_clients)
+    random.shuffle(gem_clients)
+    available_clients = or_clients + gem_clients
     
     last_error = None
     for attempt in range(max_retries):
-        for client in list(available_clients):
+        for client_tuple in list(available_clients):
+            provider, client = client_tuple
             try:
-                response = client.models.generate_content(
-                    model='gemini-flash-latest',
-                    contents=prompt,
-                )
-                return response.text.strip()
+                if provider == "openrouter":
+                    response = client.chat.completions.create(
+                        model="meta-llama/llama-3.3-70b-instruct:free",
+                        messages=[{"role": "user", "content": prompt}],
+                    )
+                    return response.choices[0].message.content.strip()
+                    
+                elif provider == "gemini":
+                    response = client.models.generate_content(
+                        model='gemini-flash-latest',
+                        contents=prompt,
+                    )
+                    return response.text.strip()
+                    
             except Exception as e:
                 last_error = e
                 error_str = str(e)
-                if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str:
-                    if "GenerateRequestsPerDay" in error_str:
-                        print("[AI RETRY] Key hit absolute daily quota. Removing from pool.")
-                        available_clients.remove(client)
-                        if not available_clients:
-                            raise ValueError("CRITICAL: All API keys have exhausted their daily Free Tier quota.")
-                        continue # Swap to next key instantly
+                
+                # Handle provider-specific rate limits and auth errors
+                if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str or "401" in error_str or "auth" in error_str.lower():
+                    if provider == "gemini" and "GenerateRequestsPerDay" in error_str:
+                        print("[AI RETRY] Gemini key hit absolute daily quota. Removing from pool.")
+                        available_clients.remove(client_tuple)
+                    elif provider == "openrouter" and ("429" in error_str or "401" in error_str):
+                        print(f"[AI RETRY] OpenRouter key exhausted or invalid. Removing from pool.")
+                        available_clients.remove(client_tuple)
                         
-                    # Standard RPM rate limit, swap to next key instantly
-                    continue
+                    if not available_clients:
+                        raise ValueError("CRITICAL: All AI keys (OpenRouter and Gemini) have exhausted their quotas.")
+                    continue # Swap to next key instantly
                 else:
                     # Other API error, swap to next key instantly
                     continue
                     
-        # If we reach here, we've looped through ALL available keys and they ALL failed.
+        # If we reach here, we've looped through ALL available keys and they ALL failed for non-fatal reasons
         # Now we must sleep before trying the next cycle.
         wait_time = 20
-        if last_error:
+        if last_error and provider == "gemini":
             match = re.search(r'retry in (\d+(?:\.\d+)?)s', str(last_error))
             if match:
-                wait_time = max(20, int(float(match.group(1))) + 2)
-                
-        print(f"[AI RETRY] All available keys rate-limited. Sleeping {wait_time}s before next cycle (Attempt {attempt+1}/{max_retries})...")
+                wait_time = min(float(match.group(1)) + 1, 60)
+        
+        print(f"[AI RETRY] Attempt {attempt+1} failed across all keys. Retrying in {wait_time:.1f}s...")
         time.sleep(wait_time)
         
-    raise last_error
+    raise Exception(f"Failed to generate content after {max_retries} cycles. Last error: {last_error}")
 
 def classify_event(article_text, candidate_rules, ticker='UNKNOWN', market_cap=None):
     """
