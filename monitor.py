@@ -30,111 +30,47 @@ SHEET_URL = "https://docs.google.com/spreadsheets/d/1YDOyc8WReBei-7LKPLiXZtmOGCm
 # ---------------------------------------------------------------------------
 # Daily Title Memory — fast in-memory dedup that persists across the pipeline
 # ---------------------------------------------------------------------------
-class TitleMemory:
+class EntityMemory:
     """
-    In-memory cache of all titles processed today (loaded from Google Sheets at startup).
-    Every new article is checked against this cache BEFORE any AI call.
+    In-memory cache of all publishing entities (tickers/companies) processed today.
+    Loaded from Google Sheets at startup.
     Grows during the run as articles are processed, then flushed to Sheets.
     """
-    SIMILARITY_THRESHOLD = 0.80
-
     def __init__(self):
-        self._titles = []  # list of lowercased titles
-        self._new_additions = [] # list of dicts to batch append to Sheets
+        self._entities = set()
+        self._new_additions = set() # using set to avoid duplicate appends in one run
 
     def load_from_db(self):
-        """Load all titles from the Daily Memory Google Sheet tab."""
-        titles = load_daily_memory(SHEET_URL)
-        self._titles = [str(t).lower() for t in titles if t]
-        print(f"[DAILY MEMORY] Loaded {len(self._titles)} titles from Google Sheets cache.")
+        """Load all entities from the Daily Memory Google Sheet tab."""
+        entities = load_daily_memory(SHEET_URL)
+        self._entities = set([str(e).lower() for e in entities if e])
+        print(f"[DAILY MEMORY] Loaded {len(self._entities)} entities from Google Sheets cache.")
 
-    def _normalize(self, title):
-        """Strips reporting noise, timestamps, and small words to expose the core entities (e.g. Vantiva)."""
-        import re
-        s = title.lower()
-        noise_words = [
-            r'\bq[1-4]\b', r'\bquarter\b', r'\bresults\b', r'\bearnings\b', 
-            r'\breports\b', r'\bannounces\b', r'\bfinancial\b', r'\bfiscal\b',
-            r'\bupdate\b', r'\bconference call\b', r'\bwebcast\b',
-            r'\b[0-9]{4}\b', r'\b[0-9]{1,2}:[0-9]{2}\b', r'\bam\b', r'\bpm\b', r'\bedt\b', r'\best\b'
-        ]
-        for nw in noise_words:
-            s = re.sub(nw, ' ', s)
-        s = re.sub(r'[^a-z]+', ' ', s)
-        # Keep words longer than 3 chars (drops a, the, to, of, etc)
-        s = ' '.join([w for w in s.split() if len(w) > 3])
-        return s.strip()
-
-    def _extract_company_heuristic(self, title):
-        """Attempts to aggressively isolate the company name from the title for strict deduplication."""
-        import re
-        if " - " in title:
-            match = re.search(r'(?:8-K|13D|10-Q|10-K|Form 10)\s*-\s*([^(]+)', title, re.IGNORECASE)
-            if match:
-                return match.group(1).strip().lower()
-            parts = title.split(" - ")
-            return parts[0].strip().lower()
-            
-        s = self._normalize(title)
-        words = s.split()
-        if len(words) >= 2:
-            return " ".join(words[:2])
-        return s
-
-    def is_duplicate(self, title):
-        """Check if this title (or something very similar) was already seen today."""
-        if not title:
+    def is_duplicate(self, entity):
+        """Check if this entity was already processed today."""
+        if not entity or entity == "UNKNOWN":
             return False
-        title_lower = title.lower()
-        title_norm = self._normalize(title)
+        return entity.lower() in self._entities
 
-        for cached in self._titles:
-            # Fast exact match
-            if title_lower == cached:
-                return True
-            # Substring match (for truncated RSS titles, min 30 chars)
-            if len(title_lower) > 30 and len(cached) > 30:
-                if title_lower in cached or cached in title_lower:
-                    return True
-            
-            # Fuzzy match on normalized core words
-            cached_norm = self._normalize(cached)
-            if not title_norm or not cached_norm:
-                continue
-                
-            if SequenceMatcher(None, title_norm, cached_norm).ratio() > self.SIMILARITY_THRESHOLD:
-                return True
-                
-            # Heuristic Company Match (Crucial for SEDAR/EDGAR where suffixes change like "Material Change" vs "Early Warning")
-            title_comp = self._extract_company_heuristic(title_lower)
-            cached_comp = self._extract_company_heuristic(cached)
-            if title_comp and cached_comp and len(title_comp) > 5:
-                if title_comp == cached_comp:
-                    return True
-
-        return False
-
-    def add(self, title, source_name="", url=""):
-        """Register a title as processed and queue it for Google Sheets append."""
-        if title:
-            self._titles.append(title.lower())
-            self._new_additions.append({
-                'title': title,
-                'source': source_name,
-                'url': url
-            })
+    def add(self, entity):
+        """Register an entity as processed and queue it for Google Sheets append."""
+        if entity and entity != "UNKNOWN":
+            entity_lower = entity.lower()
+            if entity_lower not in self._entities:
+                self._entities.add(entity_lower)
+                self._new_additions.add(entity)
 
     def flush_to_sheets(self):
-        """Push all newly processed articles to the Google Sheet tab."""
+        """Push all newly processed entities to the Google Sheet tab."""
         if self._new_additions:
-            batch_append_daily_memory(SHEET_URL, self._new_additions)
-            self._new_additions = []
+            batch_append_daily_memory(SHEET_URL, list(self._new_additions))
+            self._new_additions.clear()
 
     @property
     def size(self):
-        return len(self._titles)
+        return len(self._entities)
 
-def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False, funnel_metrics=None, title_memory=None):
+def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False, funnel_metrics=None, entity_memory=None):
     if global_exclusions is None:
         global_exclusions = []
         
@@ -146,19 +82,6 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         print(f"    [SKIP] Empty body for {title}")
         return 0
 
-    # --- DAILY MEMORY CHECK (before any AI call) ---
-    if title_memory and title_memory.is_duplicate(title):
-        print(f"    [DAILY MEMORY] Already seen today: '{title[:80]}'. Archiving without AI.")
-        save_article(
-            source=source_name,
-            article_id=article_id,
-            title=title,
-            url=url,
-            published=published,
-            body=body,
-        )
-        return 0
-        
     if funnel_metrics: funnel_metrics[2] += 1
     
     if needs_translation:
@@ -202,6 +125,19 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         ticker = extract_target_ticker(body)
         print(f"    [AI TICKER] {ticker}")
         
+        # --- DAILY MEMORY ENTITY CHECK ---
+        if entity_memory and entity_memory.is_duplicate(ticker):
+            print(f"    [DAILY MEMORY] Entity '{ticker}' already processed today. Dropping duplicate news.")
+            save_article(
+                source=source_name,
+                article_id=article_id,
+                title=title,
+                url=url,
+                published=published,
+                body=body,
+            )
+            return 1
+
         # --- AI EXHAUSTION CIRCUIT BREAKER ---
         if "MOCK AI" in ticker or "ERROR" in ticker or ticker == "UNKNOWN":
             print("    [CRITICAL] AI Providers are exhausted or unavailable. Aborting ingestion loop to prevent spam and save cache.")
@@ -418,9 +354,9 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         published=published,
         body=body,
     )
-    # Register in daily memory so subsequent articles in this run are caught
-    if title_memory:
-        title_memory.add(title)
+    # Register in daily memory so subsequent articles for this entity are caught
+    if matches and entity_memory and ticker != "UNKNOWN":
+        entity_memory.add(ticker)
 
     if matches:
         # Alerts (safe to fail — article is already archived so it won't be re-processed)
@@ -569,9 +505,9 @@ def main():
     
     initialise_database()
     
-    # Build the daily title memory — loaded from DB, grows during this run
-    title_memory = TitleMemory()
-    title_memory.load_from_db()
+    # Build the daily entity memory — loaded from DB, grows during this run
+    entity_memory = EntityMemory()
+    entity_memory.load_from_db()
     
     funnel_metrics = {i: 0 for i in range(1, 13)}
 
@@ -675,7 +611,7 @@ def main():
             triage_all=primary["triage_all"],
             needs_translation=primary["needs_translation"],
             funnel_metrics=funnel_metrics,
-            title_memory=title_memory
+            entity_memory=entity_memory
         )
         
         # Quietly archive the syndicated clones to prevent fetching them again
@@ -695,10 +631,10 @@ def main():
     print(f"[DATABASE] Total articles archived: {article_count()}")
     
     # Flush memory to sheets and prune old entries
-    title_memory.flush_to_sheets()
+    entity_memory.flush_to_sheets()
     prune_daily_memory(SHEET_URL)
     
-    print(f"[DAILY MEMORY] Session ended with {title_memory.size} titles cached.")
+    print(f"[DAILY MEMORY] Session ended with {entity_memory.size} entities cached.")
 
     if source_stats:
         import datetime

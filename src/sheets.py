@@ -290,15 +290,15 @@ def update_pipeline_metrics(sheet_url, funnel_metrics, timestamp_str):
 
 def load_daily_memory(sheet_url):
     """
-    Loads all article titles from the 'Daily Memory' tab to populate the in-memory cache.
-    Returns a list of titles.
+    Loads all publishing entities from the 'Daily Memory' tab to populate the in-memory cache.
+    Returns a list of entity names.
     """
     client = get_client()
     sheet = client.open_by_url(sheet_url)
     try:
         worksheet = sheet.worksheet("Daily Memory")
         records = worksheet.get_all_records()
-        return [str(r.get('Article Title', '')) for r in records if r.get('Article Title')]
+        return [str(r.get('Publishing Entity', '')).lower() for r in records if r.get('Publishing Entity')]
     except gspread.exceptions.WorksheetNotFound:
         print("[WARNING] 'Daily Memory' tab not found in Google Sheets. Returning empty memory.")
         return []
@@ -306,12 +306,12 @@ def load_daily_memory(sheet_url):
         print(f"[ERROR] Failed to load Daily Memory from Sheets: {e}")
         return []
 
-def batch_append_daily_memory(sheet_url, new_articles):
+def batch_append_daily_memory(sheet_url, new_entities):
     """
-    Appends a list of new articles to the 'Daily Memory' tab in a single API call.
-    new_articles is a list of dicts: {'source': ..., 'title': ..., 'url': ...}
+    Appends a list of new entity names to the 'Daily Memory' tab in a single API call.
+    new_entities is a list of strings: ['VANTIVA', 'SPACE X', ...]
     """
-    if not new_articles:
+    if not new_entities:
         return
         
     client = get_client()
@@ -322,16 +322,14 @@ def batch_append_daily_memory(sheet_url, new_articles):
         rows_to_append = []
         now_str = datetime.datetime.utcnow().isoformat()
         
-        for article in new_articles:
+        for entity in new_entities:
             rows_to_append.append([
                 now_str,
-                article.get('source', ''),
-                article.get('title', ''),
-                article.get('url', '')
+                entity
             ])
             
         worksheet.append_rows(rows_to_append, value_input_option='RAW')
-        print(f"[SHEETS] Successfully appended {len(rows_to_append)} articles to Daily Memory.")
+        print(f"[SHEETS] Successfully appended {len(rows_to_append)} entities to Daily Memory.")
         
     except gspread.exceptions.WorksheetNotFound:
         print("[WARNING] 'Daily Memory' tab not found. Could not save memory.")
