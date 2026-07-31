@@ -71,7 +71,7 @@ class IssuerMemory:
     def size(self):
         return len(self._issuers)
 
-def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False, funnel_metrics=None, issuer_memory=None, document_type=None, country=None, language=None):
+def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False, funnel_metrics=None, issuer_memory=None, document_type=None, country=None, language=None, document_type_scores=None, ontology_stats=None):
     if global_exclusions is None:
         global_exclusions = []
         
@@ -129,8 +129,8 @@ def _process_article(source_name, article_id, title, url, published, body, rules
     print(f"  -> Processing: {title}")
 
     # Cash Event Detection (Stage 1)
-    from src.normalizers import get_normalizer
-    normalizer = get_normalizer(country)
+    from src.ontology import get_ontology
+    normalizer, version = get_ontology(country)
     
     raw_text = f"{title}\n\n{body}"
     normalized_terms = []
@@ -139,14 +139,22 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         try:
             normalized_terms = normalizer(raw_text)
             
-            # Continuous Learning: Log foreign OAM articles that yielded 0 canonical terms
-            if not normalized_terms and "Google News" not in source_name and "Nasdaq" not in source_name and "London Stock" not in source_name:
+            if ontology_stats is not None:
+                ontology_stats["total"] += 1
+                if normalized_terms:
+                    ontology_stats["extracted"] += 1
+                else:
+                    ontology_stats["missed"] += 1
+            
+            # Continuous Learning: Log foreign OAM articles to Ontology Review for audit
+            if "Google News" not in source_name and "Nasdaq" not in source_name and "London Stock" not in source_name:
                 from src.sheets import log_normalization_review
                 from src.config.settings import SHEET_URL
+                concepts_str = ", ".join(normalized_terms) if normalized_terms else "None"
                 log_normalization_review(SHEET_URL, source_name, language, document_type, title, url)
                 
         except Exception as e:
-            print(f"    [WARNING] Normalization failed for {country}: {e}")
+            print(f"    [WARNING] Ontology extraction failed for {country}: {e}")
             
     article_obj = {
         "raw_text": raw_text,
@@ -154,7 +162,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         "document_type": document_type
     }
     
-    matches = evaluate(article_obj, rules, threshold=10)
+    matches = evaluate(article_obj, rules, document_type_scores if document_type_scores else {}, threshold=10)
 
     if matches:
         if funnel_metrics: funnel_metrics[5] += 1
@@ -577,6 +585,10 @@ def main():
 
     print(f"[LOADED] {len(sources)} Sources | {len(rules)} Rules | {len(playbooks)} Playbooks")
 
+    from src.sheets import load_document_type_scores
+    document_type_scores = load_document_type_scores(SHEET_URL)
+    ontology_stats = {"total": 0, "extracted": 0, "missed": 0}
+
     all_new_articles = []
     source_stats = {}
 
@@ -647,7 +659,9 @@ def main():
             issuer_memory=issuer_memory,
             document_type=primary.get("document_type"),
             country=primary.get("country"),
-            language=primary.get("language")
+            language=primary.get("language"),
+            document_type_scores=document_type_scores,
+            ontology_stats=ontology_stats
         )
         
         # Quietly archive the syndicated clones to prevent fetching them again
