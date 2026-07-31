@@ -64,3 +64,18 @@ class Edgar13DScraper(EdgarScraper):
 
 class EdgarForm10Scraper(EdgarScraper):
     FILING_TYPE = "10-12B"
+
+class EdgarTenderOfferScraper(EdgarScraper):
+    FILING_TYPE = "SC TO"
+
+class Edgar14D9Scraper(EdgarScraper):
+    FILING_TYPE = "SC 14D9"
+
+class EdgarMergerProxyScraper(EdgarScraper):
+    FILING_TYPE = "PREM14A"
+
+class EdgarDefinitiveProxyScraper(EdgarScraper):
+    FILING_TYPE = "DEFM14A"
+
+class EdgarS4Scraper(EdgarScraper):
+    FILING_TYPE = "S-4"
