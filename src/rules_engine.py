@@ -18,7 +18,7 @@ def evaluate(article_text, rules, threshold=15):
         exclusions_raw = str(rule.get("Exclusions", "")).strip()
         if exclusions_raw:
             exclusions = [x.strip().lower() for x in re.split(r'[,|]', exclusions_raw) if x.strip()]
-            if any(exc in text for exc in exclusions):
+            if any(re.search(r'\b' + re.escape(exc) + r'\b', text) for exc in exclusions):
                 # An exclusion was hit, disqualify this rule
                 continue
 
@@ -28,7 +28,7 @@ def evaluate(article_text, rules, threshold=15):
         if keywords_raw:
             keywords = [x.strip().lower() for x in re.split(r'[,|]', keywords_raw) if x.strip()]
             for kw in keywords:
-                if kw in text:
+                if re.search(r'\b' + re.escape(kw) + r'\b', text):
                     score += 5  # Base points for a keyword
                     evidence_log.append(f"Keyword: {kw} (+5)")
 
@@ -44,7 +44,7 @@ def evaluate(article_text, rules, threshold=15):
                 if match:
                     phrase = match.group(1).strip()
                     points = int(match.group(2))
-                    if phrase and phrase in text:
+                    if phrase and re.search(r'\b' + re.escape(phrase) + r'\b', text):
                         score += points
                         evidence_log.append(f"Modifier: {phrase} (+{points})")
 
