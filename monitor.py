@@ -439,10 +439,10 @@ def process_rss_feed(rss_url, source_name, triage_all=False, needs_translation=F
         
     return parsed_articles, len(feed.entries)
 
-def process_custom_scraper(scraper, source_name, triage_all=False, needs_translation=False):
+def process_custom_scraper(scraper, source_name, rss_url=None, triage_all=False, needs_translation=False):
     print(f"\n[INGESTION] Polling Custom Scraper: {source_name}")
     try:
-        articles = scraper.get_latest_articles()
+        articles = scraper.get_latest_articles(rss_url=rss_url)
     except Exception as e:
         print(f"[ERROR] Scraper {source_name} failed: {e}")
         return [], 0
@@ -572,7 +572,7 @@ def main():
             # 1. Attempt HTML Custom Scraper First
             if scraper:
                 try:
-                    parsed, parsed_count = process_custom_scraper(scraper, source_name, triage_all, needs_translation)
+                    parsed, parsed_count = process_custom_scraper(scraper, source_name, rss_url=rss_url, triage_all=triage_all, needs_translation=needs_translation)
                     if parsed_count > 0:
                         method_used = "HTML"
                         all_new_articles.extend(parsed)
