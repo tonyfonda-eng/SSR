@@ -8,7 +8,8 @@ from src.config.settings import USER_AGENT
 
 class GoogleNewsScraper(SourceScraper):
     def get_latest_articles(self, **kwargs):
-        query = 'merger OR acquisition OR buyout OR "tender offer" OR "special dividend" OR "stock buyback" OR "take-private"'
+        # Allow subclasses to define their own query
+        query = getattr(self, 'query', 'merger OR acquisition OR buyout OR "tender offer" OR "special dividend" OR "stock buyback" OR "take-private"')
         encoded_query = urllib.parse.quote(query)
         url = f"https://news.google.com/rss/search?q={encoded_query}&hl=en-US&gl=US&ceid=US:en"
         
