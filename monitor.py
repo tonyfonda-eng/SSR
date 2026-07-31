@@ -176,6 +176,44 @@ def _process_article(source_name, article_id, title, url, published, body, rules
             )
             return 1
             
+        if event_family == "Resumption of Trading":
+            from src.financials import get_t12_metrics
+            from src.ai import extract_halt_date
+            
+            halt_date_str = extract_halt_date(body)
+            print(f"    [T12 METRICS] Calculating structural floor for {ticker} (Halt Date: {halt_date_str})...")
+            
+            # Using current_price as proxy for pre-halt price if yfinance has it cached, else None
+            pre_halt = None
+            if ticker != "UNKNOWN":
+                try:
+                    import yfinance as yf
+                    pre_halt = yf.Ticker(ticker).info.get('previousClose')
+                except:
+                    pass
+                    
+            t12_data = get_t12_metrics(ticker, pre_halt_price=pre_halt, halt_date_str=halt_date_str)
+            
+            if not t12_data['valid']:
+                print(f"    [T12 REJECTED] {t12_data.get('reason')}")
+                save_article(
+                    source=source_name, article_id=article_id, title=title,
+                    url=url, published=published, body=body
+                )
+                return 1
+                
+            print(f"    [T12 APPROVED] Net Cash/Share: ${t12_data['net_cash_per_share']:.2f} | Shares: {t12_data['shares_outstanding']:,} | Short: {t12_data['short_percent_of_float']*100:.1f}%")
+            
+            # Format market_data_str specifically for T12
+            market_data_str = f"Net Cash Per Share (Discounted for {t12_data['halt_duration_days']} days halted): ${t12_data['net_cash_per_share']:.2f}\n"
+            market_data_str += f"Total Shares Outstanding: {t12_data['shares_outstanding']:,}\n"
+            market_data_str += f"Short Percent of Float: {t12_data['short_percent_of_float']*100:.1f}%\n"
+            market_data_str += f"Previous Close (Pre-halt): ${t12_data['reference_price']}\n"
+            if t12_data['gap_down_target_50'] > 0:
+                market_data_str += f"50% Gap Down Target: ${t12_data['gap_down_target_50']:.2f}\n"
+                market_data_str += f"70% Gap Down Target: ${t12_data['gap_down_target_70']:.2f}\n"
+            market_data_str += "STRUCTURAL FLOOR VALIDATED: Gap down targets hit or breach Net Cash per share.\n\n"
+
         if funnel_metrics: funnel_metrics[7] += 1
         
         is_update = False
@@ -208,6 +246,9 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         research_summary = "Playbook not found."
 
         playbook_steps = playbook_map.get(event_family, "")
+        if event_family == "Resumption of Trading":
+            playbook_steps += "\nCRITICAL T12 INSTRUCTIONS: You MUST answer the following in the memo: Why did the halt occur? How long did it last? Why was it lifted? Does anything look fishy? Is the stock expected to gap down?"
+            
         gold_standard = gold_standards.get(event_family) if gold_standards else None
         print(f"    [AI RESEARCH] Generating Investment Memo...")
         research_summary = execute_playbook(body, playbook_steps, event_family, gold_standard, market_data_str=market_data_str)

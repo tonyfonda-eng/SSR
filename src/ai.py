@@ -256,3 +256,29 @@ Return NOTHING ELSE besides the ticker or 'PRIVATE'.
     except Exception as e:
         print(f"[AI ERROR] Ticker Extraction failed: {e}")
         return "UNKNOWN"
+
+def extract_halt_date(article_text):
+    """
+    Extracts the original trading halt date from a resumption article.
+    """
+    if not clients:
+        return None
+
+    prompt = f"""
+You are an analyst reviewing a press release about a stock resuming trading after a halt.
+When did the original trading halt begin?
+
+Article:
+{article_text[:6000]}
+
+Return ONLY the date in YYYY-MM-DD format. If you cannot determine the date, return exactly 'UNKNOWN'.
+"""
+    try:
+        text = _generate_with_retry(prompt)
+        if "UNKNOWN" in text:
+            return None
+        return text.strip()
+    except Exception as e:
+        print(f"[AI ERROR] Halt Date Extraction failed: {e}")
+        return None
+
