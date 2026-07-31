@@ -28,47 +28,47 @@ from src.options_calc import calculate_naked_call_roi
 SHEET_URL = "https://docs.google.com/spreadsheets/d/1YDOyc8WReBei-7LKPLiXZtmOGCmoY7zuyTvyfMHeL4E/edit#gid=0"
 
 # ---------------------------------------------------------------------------
-# Daily Title Memory — fast in-memory dedup that persists across the pipeline
+# Daily Event Memory — fast in-memory dedup that persists across the pipeline
 # ---------------------------------------------------------------------------
-class EntityMemory:
+class EventMemory:
     """
-    In-memory cache of all publishing entities (tickers/companies) processed today.
+    In-memory cache of all high-signal events (event_key) processed today.
     Loaded from Google Sheets at startup.
-    Grows during the run as articles are processed, then flushed to Sheets.
+    Grows during the run as valid alerts are generated, then flushed to Sheets.
     """
     def __init__(self):
-        self._entities = set()
-        self._new_additions = set() # using set to avoid duplicate appends in one run
+        self._events = set()
+        self._new_additions = list() # stores (event_key, company, event_family)
 
     def load_from_db(self):
-        """Load all entities from the Daily Memory Google Sheet tab."""
-        entities = load_daily_memory(SHEET_URL)
-        self._entities = set([str(e).lower() for e in entities if e])
-        print(f"[DAILY MEMORY] Loaded {len(self._entities)} entities from Google Sheets cache.")
+        """Load all event keys from the Daily Memory Google Sheet tab."""
+        event_keys = load_daily_memory(SHEET_URL)
+        self._events = set([str(k).lower() for k in event_keys if k])
+        print(f"[DAILY MEMORY] Loaded {len(self._events)} events from Google Sheets cache.")
 
-    def is_duplicate(self, entity):
-        """Check if this entity was already processed today."""
-        if not entity or entity == "UNKNOWN":
+    def is_duplicate(self, event_key):
+        """Check if this exact event was already processed today."""
+        if not event_key:
             return False
-        return entity.lower() in self._entities
+        return event_key.lower() in self._events
 
-    def add(self, entity):
-        """Register an entity as processed and queue it for Google Sheets append."""
-        if entity and entity != "UNKNOWN":
-            entity_lower = entity.lower()
-            if entity_lower not in self._entities:
-                self._entities.add(entity_lower)
-                self._new_additions.add(entity)
+    def add(self, event_key, company, event_family):
+        """Register an event as processed and queue it for Google Sheets append."""
+        if event_key:
+            key_lower = event_key.lower()
+            if key_lower not in self._events:
+                self._events.add(key_lower)
+                self._new_additions.append((event_key, company, event_family))
 
     def flush_to_sheets(self):
-        """Push all newly processed entities to the Google Sheet tab."""
+        """Push all newly generated events to the Google Sheet tab."""
         if self._new_additions:
-            batch_append_daily_memory(SHEET_URL, list(self._new_additions))
+            batch_append_daily_memory(SHEET_URL, self._new_additions)
             self._new_additions.clear()
 
     @property
     def size(self):
-        return len(self._entities)
+        return len(self._events)
 
 def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False, funnel_metrics=None, entity_memory=None):
     if global_exclusions is None:
