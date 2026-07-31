@@ -48,11 +48,29 @@ class TitleMemory:
         self._titles = [str(t).lower() for t in titles if t]
         print(f"[DAILY MEMORY] Loaded {len(self._titles)} titles from Google Sheets cache.")
 
+    def _normalize(self, title):
+        """Strips reporting noise, timestamps, and small words to expose the core entities (e.g. Vantiva)."""
+        import re
+        s = title.lower()
+        noise_words = [
+            r'\bq[1-4]\b', r'\bquarter\b', r'\bresults\b', r'\bearnings\b', 
+            r'\breports\b', r'\bannounces\b', r'\bfinancial\b', r'\bfiscal\b',
+            r'\bupdate\b', r'\bconference call\b', r'\bwebcast\b',
+            r'\b[0-9]{4}\b', r'\b[0-9]{1,2}:[0-9]{2}\b', r'\bam\b', r'\bpm\b', r'\bedt\b', r'\best\b'
+        ]
+        for nw in noise_words:
+            s = re.sub(nw, ' ', s)
+        s = re.sub(r'[^a-z]+', ' ', s)
+        # Keep words longer than 3 chars (drops a, the, to, of, etc)
+        s = ' '.join([w for w in s.split() if len(w) > 3])
+        return s.strip()
+
     def is_duplicate(self, title):
         """Check if this title (or something very similar) was already seen today."""
         if not title:
             return False
         title_lower = title.lower()
+        title_norm = self._normalize(title)
 
         for cached in self._titles:
             # Fast exact match
@@ -62,8 +80,13 @@ class TitleMemory:
             if len(title_lower) > 30 and len(cached) > 30:
                 if title_lower in cached or cached in title_lower:
                     return True
-            # Fuzzy match
-            if SequenceMatcher(None, title_lower, cached).ratio() > self.SIMILARITY_THRESHOLD:
+            
+            # Fuzzy match on normalized core words
+            cached_norm = self._normalize(cached)
+            if not title_norm or not cached_norm:
+                continue
+                
+            if SequenceMatcher(None, title_norm, cached_norm).ratio() > self.SIMILARITY_THRESHOLD:
                 return True
 
         return False
