@@ -159,11 +159,11 @@ def track_company(ticker):
 
 def create_event_if_new(event_family, ticker):
     """
-    Creates an event ID formatted as EventFamily_Ticker_YYYY_MM.
+    Creates an event ID formatted as Ticker_YYYY_MM_DD to enforce a strict 1-alert-per-company-per-day limit.
     Returns (event_id, is_new) where is_new is a boolean.
     """
     now = datetime.datetime.now()
-    event_id = f"{event_family.replace(' ', '_')}_{ticker}_{now.year}_{now.month:02d}"
+    event_id = f"{ticker}_{now.year}_{now.month:02d}_{now.day:02d}"
     
     conn = get_connection()
     cursor = conn.cursor()

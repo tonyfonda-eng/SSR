@@ -307,8 +307,8 @@ Article:
 
 If the primary subject company is publicly traded on a global stock exchange, return ONLY its primary ticker symbol. 
 If it is an international stock, use the standard Yahoo Finance suffix (e.g., 'VOD.L' for London, '005930.KS' for Korea).
-If the company is private, or if you cannot determine the ticker, return exactly 'PRIVATE'.
-Return NOTHING ELSE besides the ticker or 'PRIVATE'.
+If the company is private, or if you cannot determine the ticker, return ONLY the company's clean, formal name (e.g., 'LECTRA', 'VANTIVA', 'SPACE X'). 
+Return NOTHING ELSE besides the ticker or the company name. Do NOT return 'PRIVATE' or 'UNKNOWN'.
 """
     try:
         text = _generate_with_retry(prompt)
