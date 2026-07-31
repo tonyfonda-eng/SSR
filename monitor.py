@@ -17,7 +17,7 @@ from src.database import (
 
 from src.scrapers.prnewswire import download_article
 from src.scrapers import get_scraper_for_source
-from src.sheets import load_rules, load_sources, load_playbooks, append_to_research_queue, update_last_checked, load_global_exclusions, load_gold_standards
+from src.sheets import load_rules, load_sources, load_playbooks, append_to_research_queue, update_last_checked, load_global_exclusions, load_gold_standards, log_unknown_event
 from src.rules_engine import evaluate
 from src.ai import classify_event, execute_playbook, check_material_update
 from src.alerts.email import send_alert
@@ -50,28 +50,6 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         if ex in title_lower or ex in body_lower:
             print(f"    [GLOBAL EXCLUSION] Match found for '{ex}'. Skipping article.")
             # Save it so we don't scan it again
-            save_article(
-                source=source_name,
-                article_id=article_id,
-                title=title,
-                url=url,
-                published=published,
-                body=body,
-            )
-            return 1
-            
-    # Regex Public Ticker Pre-Filter (Skip for EDGAR)
-    if "edgar" not in source_name.lower():
-        exchanges = (
-            r"(NYSE|NASDAQ|OTC|OTCQX|OTCQB|AMEX|BATS|ARCA|NYSEMKT|TSX|TSXV|CSE|NEO|CBOE|"
-            r"LSE|LON|FRA|ETR|XETRA|EPA|PAR|AMS|BRU|LIS|SWX|SIX|STO|CPH|HEL|OSL|VIE|MAD|BME|MIL|BIT|WSE|PRA|EURONEXT|"
-            r"ASX|NZX|TYO|TSE|HKEX|HKG|SHG|SHE|SZSE|SSE|SGX|KRX|KOSPI|KOSDAQ|TWSE|TPE|BOM|BSE|NSE|"
-            r"JSE|TASE|DFM|ADX|BOVESPA|B3|BMV|BCS)"
-        )
-        pattern = r'\b' + exchanges + r'(?:\s+[-A-Z]+)?\s*:\s*[A-Z0-9\.]+\b'
-        matches = re.findall(pattern, body, re.IGNORECASE)
-        if len(matches) == 0:
-            print(f"    [REGEX REJECTED] No public tickers found. Likely a private company or noise.")
             save_article(
                 source=source_name,
                 article_id=article_id,
@@ -141,8 +119,8 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         event_family = classify_event(body, matches, ticker=ticker, market_cap=market_cap)
         print(f"    [AI CLASSIFICATION] {event_family}")
 
-        if "false positive" in event_family.lower() or event_family.strip().lower() == "unknown":
-            print("    [AI REJECTED] Article flagged as noise/false positive or failed quantitative filters.")
+        if "false positive" in event_family.lower():
+            print("    [AI REJECTED] Article flagged as false positive.")
             if triage_all:
                 print(f"    [BYPASS] Source '{source_name}' has Triage All enabled. Bypassing rejection for analysis.")
                 event_family = "Triage Rejection"
@@ -156,6 +134,26 @@ def _process_article(source_name, article_id, title, url, published, body, rules
                     body=body,
                 )
                 return 1
+                
+        if event_family.strip().lower() == "unknown":
+            print("    [UNKNOWN EVENT] Logging to Knowledge Base for review (Principle #6).")
+            log_unknown_event(
+                sheet_url=SHEET_URL,
+                source=source_name,
+                article_title=title,
+                article_url=url,
+                rules_score=matches[0]["_Score"],
+                ai_response=event_family
+            )
+            save_article(
+                source=source_name,
+                article_id=article_id,
+                title=title,
+                url=url,
+                published=published,
+                body=body,
+            )
+            return 1
             
         if event_family == "M&A Naked Call Strategy" and not options_available:
             print(f"    [AI REJECTED] Strategy requires tradable options, but none found for {ticker}.")

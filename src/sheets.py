@@ -81,6 +81,26 @@ def append_to_research_queue(sheet_url, article_title, article_url, event_family
         print(f"[WARNING] 'AI Research Queue' tab not found in the workbook.")
         return False
 
+def log_unknown_event(sheet_url, source, article_title, article_url, rules_score, ai_response):
+    """
+    Logs an unclassified event to the 'Unknown Events' tab.
+    Architecture Principle #6: Unknown events are never ignored.
+    Headers: Timestamp, Source, Article Title, URL, Rules Score, AI Response
+    """
+    client = get_client()
+    sheet = client.open_by_url(sheet_url)
+    try:
+        worksheet = sheet.worksheet("Unknown Events")
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        row_data = [timestamp, source, article_title, article_url, str(rules_score), ai_response]
+        worksheet.append_row(row_data)
+        print(f"[SHEETS] Logged unknown event to 'Unknown Events' tab for review.")
+        return True
+    except gspread.exceptions.WorksheetNotFound:
+        print(f"[WARNING] 'Unknown Events' tab not found in the workbook. Please create it with headers: Timestamp | Source | Article Title | URL | Rules Score | AI Response")
+        return False
+
+
 def update_last_checked(sheet_url, source_stats, timestamp_str):
     """
     Batch updates the timestamp, parsed counts, and ingestion method for the given source names.
