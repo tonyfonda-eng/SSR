@@ -18,11 +18,12 @@ api_keys = list(set(api_keys))
 clients = [genai.Client(api_key=k) for k in api_keys]
 print(f"[AI INFO] Initialized {len(clients)} Gemini API clients.")
 
-def _generate_with_retry(prompt, max_retries=3):
+def _generate_with_retry(prompt, max_retries=6):
     if not clients:
         raise ValueError("GEMINI_API_KEY not set")
     
     import time
+    import re
     available_clients = list(clients)
     random.shuffle(available_clients)
     
@@ -39,8 +40,15 @@ def _generate_with_retry(prompt, max_retries=3):
             last_error = e
             error_str = str(e)
             if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str:
-                print(f"[AI RETRY] Key rate-limited (429). Sleeping 15s before next attempt...")
-                time.sleep(15)
+                # Try to extract exact wait time if provided, else default to 20s
+                wait_time = 20
+                match = re.search(r'retry in (\d+(?:\.\d+)?)s', error_str)
+                if match:
+                    # Add a 2 second buffer to the requested wait time
+                    wait_time = max(20, int(float(match.group(1))) + 2)
+                
+                print(f"[AI RETRY] Key rate-limited (429). Sleeping {wait_time}s before next attempt...")
+                time.sleep(wait_time)
                 continue
             else:
                 print(f"[AI RETRY] Error: {e}. Trying next key...")
