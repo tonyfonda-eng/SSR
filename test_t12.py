@@ -21,7 +21,7 @@ def test_t12():
     
     _process_article(
         source_name="Mock Source",
-        article_id="mock_inno_t12",
+        article_id="mock_inno_t12_v2",
         title="Inno Holdings Inc. Announces Resumption of Trading on Nasdaq",
         url="http://mock.com",
         published="2024-04-10",
