@@ -111,6 +111,40 @@ def article_count():
     conn.close()
     return count
 
+def is_title_duplicate_in_db(title, days=3):
+    """
+    Checks if a highly similar title was already processed in the last X days.
+    This prevents cross-provider duplicates that arrive hours/days apart.
+    """
+    conn = get_connection()
+    cursor = conn.cursor()
+    cutoff_date = (datetime.datetime.now() - datetime.timedelta(days=days)).isoformat()
+    
+    # Only pull recent titles to keep it fast
+    cursor.execute("SELECT title FROM articles WHERE processed_at >= ?", (cutoff_date,))
+    rows = cursor.fetchall()
+    conn.close()
+    
+    from difflib import SequenceMatcher
+    title_lower = title.lower()
+    
+    for row in rows:
+        db_title = row[0]
+        if not db_title:
+            continue
+            
+        db_title_lower = db_title.lower()
+        similarity = SequenceMatcher(None, title_lower, db_title_lower).ratio()
+        if similarity > 0.85:
+            return True
+            
+        # Substring match for truncated RSS titles (minimum 30 chars to avoid generic false positives)
+        if len(title_lower) > 30 and len(db_title_lower) > 30:
+            if title_lower in db_title_lower or db_title_lower in title_lower:
+                return True
+            
+    return False
+
 def track_company(ticker):
     conn = get_connection()
     cursor = conn.cursor()
@@ -158,6 +192,18 @@ def log_research(event_id, article_id, rules_score, ai_summary):
     """, (event_id, article_id, rules_score, ai_summary, now))
     conn.commit()
     conn.close()
+
+def get_latest_research_summary(event_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT ai_summary FROM research_logs
+        WHERE event_id = ?
+        ORDER BY processed_at DESC LIMIT 1
+    """, (event_id,))
+    row = cursor.fetchone()
+    conn.close()
+    return row[0] if row else None
 
 def save_reminder(event_id, ticker, reminder_date, message):
     conn = get_connection()

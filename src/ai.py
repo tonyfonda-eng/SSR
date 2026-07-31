@@ -28,32 +28,42 @@ def _generate_with_retry(prompt, max_retries=6):
     random.shuffle(available_clients)
     
     last_error = None
-    for attempt in range(max_retries * len(available_clients)):
-        client = available_clients[attempt % len(available_clients)]
-        try:
-            response = client.models.generate_content(
-                model='gemini-flash-latest',
-                contents=prompt,
-            )
-            return response.text.strip()
-        except Exception as e:
-            last_error = e
-            error_str = str(e)
-            if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str:
-                # Try to extract exact wait time if provided, else default to 20s
-                wait_time = 20
-                match = re.search(r'retry in (\d+(?:\.\d+)?)s', error_str)
-                if match:
-                    # Add a 2 second buffer to the requested wait time
-                    wait_time = max(20, int(float(match.group(1))) + 2)
+    for attempt in range(max_retries):
+        for client in list(available_clients):
+            try:
+                response = client.models.generate_content(
+                    model='gemini-flash-latest',
+                    contents=prompt,
+                )
+                return response.text.strip()
+            except Exception as e:
+                last_error = e
+                error_str = str(e)
+                if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str:
+                    if "GenerateRequestsPerDay" in error_str:
+                        print("[AI RETRY] Key hit absolute daily quota. Removing from pool.")
+                        available_clients.remove(client)
+                        if not available_clients:
+                            raise ValueError("CRITICAL: All API keys have exhausted their daily Free Tier quota.")
+                        continue # Swap to next key instantly
+                        
+                    # Standard RPM rate limit, swap to next key instantly
+                    continue
+                else:
+                    # Other API error, swap to next key instantly
+                    continue
+                    
+        # If we reach here, we've looped through ALL available keys and they ALL failed.
+        # Now we must sleep before trying the next cycle.
+        wait_time = 20
+        if last_error:
+            match = re.search(r'retry in (\d+(?:\.\d+)?)s', str(last_error))
+            if match:
+                wait_time = max(20, int(float(match.group(1))) + 2)
                 
-                print(f"[AI RETRY] Key rate-limited (429). Sleeping {wait_time}s before next attempt...")
-                time.sleep(wait_time)
-                continue
-            else:
-                print(f"[AI RETRY] Error: {e}. Trying next key...")
-                continue
-                
+        print(f"[AI RETRY] All available keys rate-limited. Sleeping {wait_time}s before next cycle (Attempt {attempt+1}/{max_retries})...")
+        time.sleep(wait_time)
+        
     raise last_error
 
 def classify_event(article_text, candidate_rules, ticker='UNKNOWN', market_cap=None):
@@ -174,17 +184,20 @@ Article text:
         print(f"[AI ERROR] All keys exhausted or failed: {e}")
         return f"[AI ERROR] {e}"
 
-def check_material_update(article_text, event_family, ticker):
+def check_material_update(article_text, event_family, ticker, previous_summary=None):
     """
-    Checks if a duplicate article contains material new information.
+    Checks if a duplicate article contains material new information compared to what we already know.
     """
     if not clients:
         return False
         
+    context_str = ""
+    if previous_summary:
+        context_str = f"\n\n--- WHAT WE ALREADY KNOW (Previous AI Summary) ---\n{previous_summary}\n----------------------------------------------------\n\n"
+        
     prompt = f"""
 You are an expert financial analyst. 
-We are already tracking a '{event_family}' involving the target company '{ticker}'.
-
+We are already tracking a '{event_family}' involving the target company '{ticker}'.{context_str}
 Read the following new article. Does it contain NEW, material information that warrants updating our case file?
 Examples of material updates:
 - A competing bidder has emerged.
@@ -195,8 +208,10 @@ Examples of material updates:
 
 Examples of non-material updates (syndicated noise):
 - Law firms announcing "investigations" into the merger.
-- Another news outlet just repeating the original announcement facts.
+- Another news outlet just repeating the exact same original announcement facts that we already know.
 - Generic PR boilerplate about the merger that contains no new milestones.
+
+CRITICAL: If the new article contains the exact same information as "WHAT WE ALREADY KNOW" (e.g. it's just the same press release published on a different newswire), you MUST answer NO.
 
 Answer strictly with YES or NO on the first line. 
 On the second line, provide a 1-sentence explanation.

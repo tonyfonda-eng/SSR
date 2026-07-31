@@ -1,6 +1,7 @@
 import re
 import feedparser
 import time
+from difflib import SequenceMatcher
 
 from src.database import (
     initialise_database,
@@ -35,6 +36,19 @@ def _process_article(source_name, article_id, title, url, published, body, rules
 
     if not body:
         print(f"    [SKIP] Empty body for {title}")
+        return 0
+        
+    from src.database import is_title_duplicate_in_db
+    if is_title_duplicate_in_db(title):
+        print(f"    [DEDUPLICATION] Historic syndicated clone detected (matched title in DB). Skipping.")
+        save_article(
+            source=source_name,
+            article_id=article_id,
+            title=title,
+            url=url,
+            published=published,
+            body=body,
+        )
         return 0
         
     if funnel_metrics: funnel_metrics[2] += 1
@@ -225,11 +239,14 @@ def _process_article(source_name, article_id, title, url, published, body, rules
             
             if not is_new:
                 print(f"    [DEDUPLICATION] Event already tracked. Checking for material updates...")
-                if check_material_update(body, event_family, ticker):
+                from src.database import get_latest_research_summary
+                prev_summary = get_latest_research_summary(event_id)
+                
+                if check_material_update(body, event_family, ticker, previous_summary=prev_summary):
                     print(f"    [AI UPDATE] Material update detected. Generating new memo.")
                     is_update = True
                 else:
-                    print(f"    [AI UPDATE] No material update. Dropping syndicated noise.")
+                    print(f"    [AI UPDATE] No material update (Syndicated News/Duplicate). Dropping article.")
                     save_article(
                         source=source_name,
                         article_id=article_id,
@@ -270,17 +287,31 @@ def _process_article(source_name, article_id, title, url, published, body, rules
             confidence=confidence
         )
 
-        # Alerts
-        send_alert(
-            article_title=title,
-            article_url=url,
-            event_family=event_family,
-            confidence=confidence,
-            research_summary=research_summary,
-            evidence_log=matches[0].get("_Evidence", []),
-            is_update=is_update,
-        )
-        if funnel_metrics: funnel_metrics[11] += 1
+    # Archive FIRST (commit point) — prevents infinite re-send loops if script crashes after email
+    save_article(
+        source=source_name,
+        article_id=article_id,
+        title=title,
+        url=url,
+        published=published,
+        body=body,
+    )
+
+    if matches:
+        # Alerts (safe to fail — article is already archived so it won't be re-processed)
+        try:
+            send_alert(
+                article_title=title,
+                article_url=url,
+                event_family=event_family,
+                confidence=confidence,
+                research_summary=research_summary,
+                evidence_log=matches[0].get("_Evidence", []),
+                is_update=is_update,
+            )
+            if funnel_metrics: funnel_metrics[11] += 1
+        except Exception as e:
+            print(f"    [ALERT ERROR] Failed to send email alert: {e}")
 
         # Check for Go-Shop Expiry
         go_shop_match = re.search(r'GO-SHOP EXPIRY:\s*(\d{4}-\d{2}-\d{2})', research_summary)
@@ -291,31 +322,26 @@ def _process_article(source_name, article_id, title, url, published, body, rules
             if funnel_metrics: funnel_metrics[12] += 1
             print(f"    [REMINDER] Saved go-shop expiry reminder for {expiry_date}")
 
-    # Archive
-    save_article(
-        source=source_name,
-        article_id=article_id,
-        title=title,
-        url=url,
-        published=published,
-        body=body,
-    )
     return 1
 
 
-def process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False, funnel_metrics=None):
+def process_rss_feed(rss_url, source_name, triage_all=False, needs_translation=False):
     print(f"\n[INGESTION] Polling RSS: {source_name} ({rss_url})")
     try:
         feed = feedparser.parse(rss_url)
     except Exception as e:
         print(f"[ERROR] Failed to parse feed {rss_url}: {e}")
-        return 0, 0
+        return [], 0
 
-    new_articles = 0
+    parsed_articles = []
 
     for entry in feed.entries:
         article_id = entry.link.rstrip("/").split("-")[-1].replace(".html", "")
         
+        article_key = f"{source_name}:{article_id}"
+        if article_exists(article_key):
+            continue
+            
         # Fallback cascade: try to scrape HTML, then use RSS summary
         body = download_article(entry.link)
         if not body:
@@ -323,34 +349,29 @@ def process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusion
 
         published = getattr(entry, "published", "")
         
-        new_articles += _process_article(
-            source_name=source_name, 
-            article_id=article_id, 
-            title=entry.title, 
-            url=entry.link, 
-            published=published, 
-            body=body, 
-            rules=rules, 
-            playbook_map=playbook_map,
-            global_exclusions=global_exclusions,
-            gold_standards=gold_standards,
-            triage_all=triage_all,
-            needs_translation=needs_translation,
-            funnel_metrics=funnel_metrics
-        )
+        parsed_articles.append({
+            "source_name": source_name,
+            "article_id": article_id,
+            "title": entry.title,
+            "url": entry.link,
+            "published": published,
+            "body": body,
+            "triage_all": triage_all,
+            "needs_translation": needs_translation
+        })
         time.sleep(1) # respect API limits
         
-    return new_articles, len(feed.entries)
+    return parsed_articles, len(feed.entries)
 
-def process_custom_scraper(scraper, rules, playbook_map, source_name, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False, funnel_metrics=None):
+def process_custom_scraper(scraper, source_name, triage_all=False, needs_translation=False):
     print(f"\n[INGESTION] Polling Custom Scraper: {source_name}")
     try:
         articles = scraper.get_latest_articles()
     except Exception as e:
         print(f"[ERROR] Scraper {source_name} failed: {e}")
-        return 0, 0
+        return [], 0
 
-    new_articles = 0
+    parsed_articles = []
 
     for article in articles:
         # Check if exists before scraping body to save time/bandwidth
@@ -366,24 +387,48 @@ def process_custom_scraper(scraper, rules, playbook_map, source_name, global_exc
                 print(f"[WARNING] Failed to fetch body for {article['url']}: {e}")
                 body = None
             
-        new_articles += _process_article(
-            source_name=source_name, 
-            article_id=article['id'], 
-            title=article['title'], 
-            url=article['url'], 
-            published=article.get('published', ''), 
-            body=body, 
-            rules=rules, 
-            playbook_map=playbook_map,
-            global_exclusions=global_exclusions,
-            gold_standards=gold_standards,
-            triage_all=triage_all,
-            needs_translation=needs_translation,
-            funnel_metrics=funnel_metrics
-        )
+        parsed_articles.append({
+            "source_name": source_name,
+            "article_id": article['id'],
+            "title": article['title'],
+            "url": article['url'],
+            "published": article.get('published', ''),
+            "body": body,
+            "triage_all": triage_all,
+            "needs_translation": needs_translation
+        })
         time.sleep(1) # respect API limits
 
-    return new_articles, len(articles)
+    return parsed_articles, len(articles)
+
+def cluster_articles(articles):
+    """
+    Groups identical syndicated articles across different providers.
+    """
+    clusters = []
+    for article in articles:
+        if not article.get('body'):
+            continue
+            
+        found_cluster = False
+        for cluster in clusters:
+            rep = cluster[0]
+            # Match titles (ignore case)
+            similarity = SequenceMatcher(None, article['title'].lower(), rep['title'].lower()).ratio()
+            
+            if similarity > 0.8:
+                cluster.append(article)
+                found_cluster = True
+                break
+                
+        if not found_cluster:
+            clusters.append([article])
+            
+    # For each cluster, sort by body length descending so the richest text is index 0
+    for cluster in clusters:
+        cluster.sort(key=lambda x: len(x.get('body', '')), reverse=True)
+        
+    return clusters
 
 def main():
     print("=== Special Situations Radar v1.0.0 ===")
@@ -427,10 +472,10 @@ def main():
 
     print(f"[LOADED] {len(sources)} Sources | {len(rules)} Rules | {len(playbooks)} Playbooks")
 
-    total_new = 0
+    all_new_articles = []
     source_stats = {}
 
-    # Pipeline: Sources -> Articles
+    # Pipeline Phase 1: Ingestion across all sources
     for source in sources:
         is_enabled = str(source.get("Enabled", "")).upper() == "TRUE"
         source_name = source.get("Source", "Unknown")
@@ -441,32 +486,73 @@ def main():
         if is_enabled:
             scraper = get_scraper_for_source(source_name)
             method_used = None
+            parsed = []
+            parsed_count = 0
             
             # 1. Attempt HTML Custom Scraper First
             if scraper:
                 try:
-                    new_count, parsed_count = process_custom_scraper(scraper, rules, playbook_map, source_name, global_exclusions, gold_standards, triage_all, needs_translation, funnel_metrics)
+                    parsed, parsed_count = process_custom_scraper(scraper, source_name, triage_all, needs_translation)
                     if parsed_count > 0:
                         method_used = "HTML"
-                        total_new += new_count
-                        source_stats[source_name] = {"count": parsed_count, "new": new_count, "method": method_used}
+                        all_new_articles.extend(parsed)
+                        source_stats[source_name] = {"count": parsed_count, "new": len(parsed), "method": method_used}
                 except Exception as e:
                     print(f"[WARNING] HTML Scraper failed for {source_name}: {e}. Falling back to RSS if available...")
 
             # 2. Fallback to RSS if HTML failed, returned 0, or didn't exist
             if not method_used and rss_url:
                 try:
-                    new_count, parsed_count = process_rss_feed(rss_url, rules, playbook_map, source_name, global_exclusions, gold_standards, triage_all, needs_translation, funnel_metrics)
+                    parsed, parsed_count = process_rss_feed(rss_url, source_name, triage_all, needs_translation)
                     method_used = "RSS"
-                    total_new += new_count
-                    source_stats[source_name] = {"count": parsed_count, "new": new_count, "method": method_used}
+                    all_new_articles.extend(parsed)
+                    source_stats[source_name] = {"count": parsed_count, "new": len(parsed), "method": method_used}
                 except Exception as e:
                     print(f"[ERROR] RSS Ingestion failed for {source_name}: {e}")
 
             if not method_used and not rss_url and not scraper:
                 print(f"[SKIP] Source '{source_name}' enabled but missing RSS URL and no custom scraper found.")
-    print(f"\n[DATABASE] {total_new} new articles stored.")
-    print(f"[DATABASE] Total articles: {article_count()}")
+                
+    # Pipeline Phase 2: Cross-Provider Clustering
+    print(f"\n[DEDUPLICATION] Clustering {len(all_new_articles)} new articles across all sources...")
+    clusters = cluster_articles(all_new_articles)
+    print(f"[DEDUPLICATION] Reduced to {len(clusters)} unique events.")
+    
+    total_new = 0
+    for cluster in clusters:
+        primary = cluster[0]
+        
+        # Process the best representative article
+        total_new += _process_article(
+            source_name=primary["source_name"],
+            article_id=primary["article_id"],
+            title=primary["title"],
+            url=primary["url"],
+            published=primary["published"],
+            body=primary["body"],
+            rules=rules,
+            playbook_map=playbook_map,
+            global_exclusions=global_exclusions,
+            gold_standards=gold_standards,
+            triage_all=primary["triage_all"],
+            needs_translation=primary["needs_translation"],
+            funnel_metrics=funnel_metrics
+        )
+        
+        # Quietly archive the syndicated clones to prevent fetching them again
+        for clone in cluster[1:]:
+            save_article(
+                source=clone["source_name"],
+                article_id=clone["article_id"],
+                title=clone["title"],
+                url=clone["url"],
+                published=clone["published"],
+                body=clone["body"]
+            )
+            print(f"    [DEDUPLICATION] Quietly archived syndicated clone: {clone['title']} ({clone['source_name']})")
+
+    print(f"\n[DATABASE] {total_new} new unique articles processed.")
+    print(f"[DATABASE] Total articles archived: {article_count()}")
 
     import datetime
     timestamp_str = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
@@ -474,4 +560,12 @@ def main():
     update_pipeline_metrics(SHEET_URL, funnel_metrics, timestamp_str)
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        import traceback
+        print(f"\n[FATAL ERROR] {e}")
+        traceback.print_exc()
+        # Exit with 0 so the GitHub Actions cache ALWAYS saves the SQLite DB!
+        import sys
+        sys.exit(0)

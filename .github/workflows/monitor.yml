@@ -14,10 +14,10 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Restore database
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: ssr_cache.sqlite
-          key: ssr-database-${{ github.run_id }}
+          key: ssr-database-
           restore-keys: |
             ssr-database-
 
@@ -32,6 +32,7 @@ jobs:
           pip install -r requirements.txt
 
       - name: Run monitor
+        continue-on-error: true
         env:
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
@@ -51,3 +52,10 @@ jobs:
           KEDM_PASS: ${{ secrets.KEDM_PASS }}
         run: |
           python monitor.py
+
+      - name: Save database cache
+        uses: actions/cache/save@v4
+        if: always()
+        with:
+          path: ssr_cache.sqlite
+          key: ssr-database-${{ github.run_id }}
