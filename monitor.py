@@ -71,7 +71,7 @@ class IssuerMemory:
     def size(self):
         return len(self._issuers)
 
-def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False, funnel_metrics=None, issuer_memory=None):
+def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False, funnel_metrics=None, issuer_memory=None, document_type=None):
     if global_exclusions is None:
         global_exclusions = []
         
@@ -129,7 +129,9 @@ def _process_article(source_name, article_id, title, url, published, body, rules
     print(f"  -> Processing: {title}")
 
     # Cash Event Detection (Stage 1)
-    matches = evaluate(body, rules, threshold=10)
+    from src.normalization import normalize_text
+    normalized_body = normalize_text(body)
+    matches = evaluate(normalized_body, rules, threshold=10, document_type=document_type)
 
     if matches:
         if funnel_metrics: funnel_metrics[5] += 1
@@ -611,7 +613,8 @@ def main():
             triage_all=primary["triage_all"],
             needs_translation=primary["needs_translation"],
             funnel_metrics=funnel_metrics,
-            issuer_memory=issuer_memory
+            issuer_memory=issuer_memory,
+            document_type=primary.get("document_type")
         )
         
         # Quietly archive the syndicated clones to prevent fetching them again
