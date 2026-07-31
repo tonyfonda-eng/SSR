@@ -71,7 +71,7 @@ class IssuerMemory:
     def size(self):
         return len(self._issuers)
 
-def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False, funnel_metrics=None, issuer_memory=None, document_type=None):
+def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False, funnel_metrics=None, issuer_memory=None, document_type=None, country=None, language=None):
     if global_exclusions is None:
         global_exclusions = []
         
@@ -388,7 +388,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
     return 1
 
 
-def process_rss_feed(rss_url, source_name, triage_all=False, needs_translation=False):
+def process_rss_feed(rss_url, source_name, triage_all=False, needs_translation=False, country=None, language=None):
     print(f"\n[INGESTION] Polling RSS: {source_name} ({rss_url})")
     try:
         # Use requests with a timeout to prevent feedparser from hanging indefinitely
@@ -429,13 +429,16 @@ def process_rss_feed(rss_url, source_name, triage_all=False, needs_translation=F
             "published": published,
             "body": body,
             "triage_all": triage_all,
-            "needs_translation": needs_translation
+            "needs_translation": needs_translation,
+            "document_type": None,
+            "country": country,
+            "language": language
         })
         time.sleep(1) # respect API limits
         
     return parsed_articles, len(feed.entries)
 
-def process_custom_scraper(scraper, source_name, rss_url=None, triage_all=False, needs_translation=False):
+def process_custom_scraper(scraper, source_name, rss_url=None, triage_all=False, needs_translation=False, country=None, language=None):
     print(f"\n[INGESTION] Polling Custom Scraper: {source_name}")
     try:
         articles = scraper.get_latest_articles(rss_url=rss_url)
