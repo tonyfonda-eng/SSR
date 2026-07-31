@@ -3,52 +3,66 @@ Investment playbook engine based on Evidence Scoring.
 """
 import re
 
-def evaluate(article_text, rules, threshold=15, document_type=None):
+DOCUMENT_TYPE_SCORES = {
+    "ad-hoc": 40,
+    "inside information": 40,
+    "información privilegiada": 40,
+    "price sensitive": 35,
+    "regulated information": 30,
+    "regulatory": 30,
+    "corporate news": 5,
+    "press release": 0
+}
+
+def evaluate(article_obj, rules, threshold=15):
     """
-    Evaluates an article against the point-based Evidence Scoring rules.
-    Returns a list of candidate rules that met or exceeded the threshold, sorted by score.
+    Evaluates a structured article against the point-based Evidence Scoring rules.
+    article_obj should contain: raw_text, normalized_terms (list), document_type
+    Returns a list of candidate rules that met or exceeded the threshold.
     """
     matches = []
     
-    if document_type:
-        article_text = f"DOCUMENT_TYPE: {document_type}\n\n" + article_text
-        
-    text = article_text.lower()
-
+    text = str(article_obj.get("raw_text", "")).lower()
+    normalized_terms = [t.lower() for t in article_obj.get("normalized_terms", [])]
+    doc_type = str(article_obj.get("document_type", "")).lower()
+    
+    # Pre-calculate document type score
+    doc_score = DOCUMENT_TYPE_SCORES.get(doc_type, 0)
+    
     for rule in rules:
-        score = 0
+        score = doc_score
+        evidence_log = []
         
+        if doc_score > 0:
+            evidence_log.append(f"Document Type: {doc_type} (+{doc_score})")
+            
         # 1. Check Exclusions (instant disqualification)
         exclusions_raw = str(rule.get("Exclusions", "")).strip()
         if exclusions_raw:
             exclusions = [x.strip().lower() for x in re.split(r'[,|]', exclusions_raw) if x.strip()]
-            if any(re.search(r'\b' + re.escape(exc) + r'\b', text) for exc in exclusions):
-                # An exclusion was hit, disqualify this rule
+            if any(re.search(r'\b' + re.escape(exc) + r'\b', text) for exc in exclusions) or any(exc in normalized_terms for exc in exclusions):
                 continue
 
         # 2. Accumulate base points from Keywords
         keywords_raw = str(rule.get("Keywords", "")).strip()
-        evidence_log = []
         if keywords_raw:
             keywords = [x.strip().lower() for x in re.split(r'[,|]', keywords_raw) if x.strip()]
             for kw in keywords:
-                if re.search(r'\b' + re.escape(kw) + r'\b', text):
+                # Check both raw text and normalized semantic concepts
+                if kw in normalized_terms or re.search(r'\b' + re.escape(kw) + r'\b', text):
                     score += 5  # Base points for a keyword
-                    evidence_log.append(f"Keyword: {kw} (+5)")
+                    evidence_log.append(f"Keyword/Concept: {kw} (+5)")
 
         # 3. Accumulate points from Confidence Modifiers
-        # e.g., "all cash +10, board approved +5"
         modifiers_raw = str(rule.get("Confidence Modifiers", "")).strip()
         if modifiers_raw:
-            # Split by comma or pipe
             mods = [x.strip().lower() for x in re.split(r'[,|]', modifiers_raw) if x.strip()]
             for mod in mods:
-                # Regex to extract phrase and points: e.g. "all cash +10" -> "all cash", "10"
                 match = re.match(r"^(.+?)\s*\+(\d+)$", mod)
                 if match:
                     phrase = match.group(1).strip()
                     points = int(match.group(2))
-                    if phrase and re.search(r'\b' + re.escape(phrase) + r'\b', text):
+                    if phrase and (phrase in normalized_terms or re.search(r'\b' + re.escape(phrase) + r'\b', text)):
                         score += points
                         evidence_log.append(f"Modifier: {phrase} (+{points})")
 
@@ -59,6 +73,5 @@ def evaluate(article_text, rules, threshold=15, document_type=None):
             candidate["_Evidence"] = evidence_log
             matches.append(candidate)
 
-    # Sort matches by score descending
     matches.sort(key=lambda x: x["_Score"], reverse=True)
     return matches
