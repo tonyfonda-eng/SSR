@@ -490,7 +490,10 @@ def process_custom_scraper(scraper, source_name, rss_url=None, triage_all=False,
 
     parsed_articles = []
 
-    for article in articles:
+    for i, article in enumerate(articles):
+        if (i + 1) % 50 == 0:
+            print(f"    [PROGRESS] Processed {i + 1}/{len(articles)} articles...")
+            
         # Check if exists before scraping body to save time/bandwidth
         article_key = f"{source_name}:{article['id']}"
         if article_exists(article_key):

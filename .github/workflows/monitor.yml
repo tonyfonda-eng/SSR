@@ -62,7 +62,7 @@ jobs:
           KEDM_USER: ${{ secrets.KEDM_USER }}
           KEDM_PASS: ${{ secrets.KEDM_PASS }}
         run: |
-          python monitor.py
+          python -u monitor.py
 
       - name: Save database cache
         uses: actions/cache/save@v4
