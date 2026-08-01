@@ -541,13 +541,15 @@ def process_custom_scraper(scraper, source_name, rss_url=None, triage_all=False,
         if article_exists(article_key):
             continue
 
-        body = article.get("body")
-        if not body:
+        original_body = article.get("body", "")
+        body = original_body
+        if not body or len(body) < 100:
             try:
-                body = scraper.get_article_body(article['url'])
+                fetched_body = scraper.get_article_body(article['url'])
+                if fetched_body and len(fetched_body) > 100:
+                    body = fetched_body
             except Exception as e:
                 print(f"[WARNING] Failed to fetch body for {article['url']}: {e}")
-                body = None
             
         parsed_articles.append({
             "source_name": source_name,
