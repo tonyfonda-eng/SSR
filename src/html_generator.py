@@ -144,13 +144,14 @@ def generate_dashboard_html(logs, output_path="docs/index.html", metrics=None, a
                         <tr>
                             <th class="py-2 px-3">Timestamp</th>
                             <th class="py-2 px-3">Source</th>
+                            <th class="py-2 px-3">Issuer</th>
                             <th class="py-2 px-3">Title</th>
                             <th class="py-2 px-3">Event Family</th>
                             <th class="py-2 px-3">Outcome</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {"".join([f"<tr class='border-b border-gray-700 hover:bg-gray-750'><td class='py-2 px-3'>{log.get('timestamp')}</td><td class='py-2 px-3'>{log.get('source')}</td><td class='py-2 px-3'><a href='{log.get('url', '#')}' class='text-blue-400 hover:underline' target='_blank'>{log.get('title')}</a></td><td class='py-2 px-3'>{log.get('event_family')}</td><td class='py-2 px-3'>{log.get('outcome')}</td></tr>" for log in logs]) if logs else "<tr><td colspan='5' class='text-center py-4 text-gray-400 italic'>No recent activity logged.</td></tr>"}
+                        {"".join([f"<tr class='border-b border-gray-700'><td class='py-2 px-3'>{log.get('timestamp')}</td><td class='py-2 px-3'>{log.get('source')}</td><td class='py-2 px-3 font-semibold text-blue-300'>{log.get('issuer')}</td><td class='py-2 px-3'><a href='{log.get('url', '#')}' class='text-blue-400 hover:underline' target='_blank'>{log.get('title')}</a></td><td class='py-2 px-3'>{log.get('event_family')}</td><td class='py-2 px-3'>{log.get('outcome')}</td></tr>" for log in logs]) if logs else "<tr><td colspan='6' class='text-center py-4 text-gray-400 italic'>No recent activity logged.</td></tr>"}
                     </tbody>
                 </table>
             </div>
