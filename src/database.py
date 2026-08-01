@@ -16,7 +16,6 @@ def get_connection():
 
 def initialise_database():
     with get_connection() as conn:
-        # 1. Create the tables if it is a completely fresh run
         conn.execute("""
             CREATE TABLE IF NOT EXISTS articles (
                 article_key TEXT PRIMARY KEY,
@@ -71,6 +70,7 @@ def initialise_database():
             )
         """)
 
+        conn.execute("DROP TABLE IF EXISTS article_lifecycle_log") # Dropping old schema
         conn.execute("""
             CREATE TABLE IF NOT EXISTS article_lifecycle_log (
                 log_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -84,14 +84,116 @@ def initialise_database():
                 document_type TEXT,
                 issuer TEXT,
                 event_family TEXT,
-                stage TEXT,
-                final_status TEXT,
-                drop_reason TEXT,
+                pipeline_stage TEXT,
+                outcome TEXT,
+                reason TEXT,
+                ai_invoked INTEGER,
                 processing_time_ms INTEGER
             )
         """)
 
-        # 2. Force a schema upgrade if it's loading an old cached database
+        # Operational Datastore Tables
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS run_metrics_log (
+                run_id TEXT PRIMARY KEY,
+                timestamp TEXT,
+                downloaded INTEGER,
+                unique_articles INTEGER,
+                duplicates INTEGER,
+                passed_regex INTEGER,
+                failed_regex INTEGER,
+                global_exclusions INTEGER,
+                ontology_matches INTEGER,
+                rules_passes INTEGER,
+                rules_failures INTEGER,
+                ai_calls INTEGER,
+                ai_successes INTEGER,
+                ai_failures INTEGER,
+                playbooks_executed INTEGER,
+                emails_sent INTEGER,
+                rules_score_sum REAL,
+                ai_confidence_sum REAL,
+                articles_processed_count INTEGER,
+                total_runtime_s REAL
+            )
+        """)
+
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS ai_usage_log (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                run_id TEXT,
+                timestamp TEXT,
+                provider TEXT,
+                key_id TEXT,
+                requests INTEGER,
+                success INTEGER,
+                failures INTEGER,
+                errors_429 INTEGER,
+                errors_503 INTEGER,
+                timeouts INTEGER,
+                retries INTEGER,
+                fallbacks INTEGER,
+                response_time_sum REAL,
+                max_latency REAL,
+                last_success_ts TEXT,
+                last_failure_ts TEXT
+            )
+        """)
+
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS source_stats_log (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                run_id TEXT,
+                timestamp TEXT,
+                source TEXT,
+                downloaded INTEGER,
+                survived_regex INTEGER,
+                survived_ontology INTEGER,
+                survived_rules INTEGER,
+                reached_ai INTEGER,
+                alerts INTEGER,
+                processing_time_sum REAL,
+                processed_count INTEGER
+            )
+        """)
+
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS workflow_health (
+                run_id TEXT PRIMARY KEY,
+                date TEXT,
+                timestamp TEXT,
+                success INTEGER,
+                failed INTEGER,
+                runtime REAL,
+                articles INTEGER,
+                emails INTEGER,
+                git_commit TEXT,
+                branch TEXT,
+                python_version TEXT,
+                exception TEXT
+            )
+        """)
+
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS exceptions_log (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                run_id TEXT,
+                timestamp TEXT,
+                exc_type TEXT,
+                stack_trace TEXT,
+                module TEXT,
+                func_name TEXT,
+                article_url TEXT
+            )
+        """)
+
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS sheets_sync_log (
+                date TEXT PRIMARY KEY,
+                synced_at TEXT
+            )
+        """)
+
         try:
             conn.execute("ALTER TABLE articles ADD COLUMN body TEXT")
             print("[DATABASE] Upgraded schema: added 'body' column.")
@@ -139,13 +241,8 @@ def track_company(ticker):
         """, (ticker, now))
 
 def create_event_if_new(event_family, ticker):
-    """
-    Creates an event ID formatted as Ticker_YYYY_MM_DD to enforce a strict 1-alert-per-company-per-day limit.
-    Returns (event_id, is_new) where is_new is a boolean.
-    """
     now = datetime.datetime.now()
     event_id = f"{ticker}_{now.year}_{now.month:02d}_{now.day:02d}"
-    
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("SELECT 1 FROM events WHERE event_id = ?", (event_id,))
@@ -192,6 +289,8 @@ def mark_reminder_sent(reminder_id):
         cursor = conn.cursor()
         cursor.execute("UPDATE reminders SET sent = 1 WHERE reminder_id = ?", (reminder_id,))
 
+# --- Operational Data Sink ---
+
 def save_lifecycle_logs(logs):
     if not logs: return
     with get_connection() as conn:
@@ -199,8 +298,8 @@ def save_lifecycle_logs(logs):
         cursor.executemany("""
             INSERT INTO article_lifecycle_log (
                 article_id, timestamp, source, title, url, country, language, 
-                document_type, issuer, event_family, stage, final_status, drop_reason, processing_time_ms
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                document_type, issuer, event_family, pipeline_stage, outcome, reason, ai_invoked, processing_time_ms
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, logs)
 
 def prune_lifecycle_logs(days=14):
@@ -208,31 +307,156 @@ def prune_lifecycle_logs(days=14):
         cursor = conn.cursor()
         cutoff = (datetime.datetime.utcnow() - datetime.timedelta(days=days)).isoformat()
         cursor.execute("DELETE FROM article_lifecycle_log WHERE timestamp < ?", (cutoff,))
+        # Also prune operational logs older than 30 days to save space
+        cutoff_op = (datetime.datetime.utcnow() - datetime.timedelta(days=30)).isoformat()
+        cursor.execute("DELETE FROM run_metrics_log WHERE timestamp < ?", (cutoff_op,))
+        cursor.execute("DELETE FROM ai_usage_log WHERE timestamp < ?", (cutoff_op,))
+        cursor.execute("DELETE FROM source_stats_log WHERE timestamp < ?", (cutoff_op,))
+        cursor.execute("DELETE FROM workflow_health WHERE timestamp < ?", (cutoff_op,))
+        cursor.execute("DELETE FROM exceptions_log WHERE timestamp < ?", (cutoff_op,))
 
 def get_recent_lifecycle_logs():
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT timestamp, source, title, url, country, language, document_type, issuer, event_family, stage, final_status, drop_reason, processing_time_ms
+            SELECT timestamp, source, title, url, country, language, document_type, issuer, event_family, pipeline_stage, outcome, reason, ai_invoked, processing_time_ms
             FROM article_lifecycle_log
             ORDER BY timestamp DESC
         """)
         rows = cursor.fetchall()
-        
-        # Convert to dicts for HTML generator
         return [{
-            "timestamp": r[0],
-            "source": r[1],
-            "title": r[2],
-            "url": r[3],
-            "country": r[4],
-            "language": r[5],
-            "document_type": r[6],
-            "issuer": r[7],
-            "event_family": r[8],
-            "stage": r[9],
-            "final_status": r[10],
-            "drop_reason": r[11],
-            "processing_time_ms": r[12]
+            "timestamp": r[0], "source": r[1], "title": r[2], "url": r[3], "country": r[4], 
+            "language": r[5], "document_type": r[6], "issuer": r[7], "event_family": r[8], 
+            "pipeline_stage": r[9], "outcome": r[10], "reason": r[11], "ai_invoked": r[12], "processing_time_ms": r[13]
         } for r in rows]
 
+def save_run_metrics(run_metrics):
+    with get_connection() as conn:
+        conn.cursor().execute("""
+            INSERT INTO run_metrics_log (
+                run_id, timestamp, downloaded, unique_articles, duplicates, passed_regex, failed_regex, 
+                global_exclusions, ontology_matches, rules_passes, rules_failures, ai_calls, ai_successes, 
+                ai_failures, playbooks_executed, emails_sent, rules_score_sum, ai_confidence_sum, 
+                articles_processed_count, total_runtime_s
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            run_metrics["run_id"], run_metrics["timestamp"], run_metrics["downloaded"], run_metrics["unique"],
+            run_metrics["duplicates"], run_metrics["passed_regex"], run_metrics["failed_regex"], 
+            run_metrics["global_exclusions"], run_metrics["ontology_matches"], run_metrics["rules_passes"], 
+            run_metrics["rules_failures"], run_metrics["ai_calls"], run_metrics["ai_successes"], 
+            run_metrics["ai_failures"], run_metrics["playbooks_executed"], run_metrics["emails_sent"], 
+            run_metrics["rules_score_sum"], run_metrics["ai_confidence_sum"], run_metrics["articles_processed_count"], 
+            run_metrics["total_runtime_s"]
+        ))
+
+def save_ai_usage(ai_usage_rows):
+    if not ai_usage_rows: return
+    with get_connection() as conn:
+        conn.cursor().executemany("""
+            INSERT INTO ai_usage_log (
+                run_id, timestamp, provider, key_id, requests, success, failures, errors_429, errors_503,
+                timeouts, retries, fallbacks, response_time_sum, max_latency, last_success_ts, last_failure_ts
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, ai_usage_rows)
+
+def save_source_stats(source_stats_rows):
+    if not source_stats_rows: return
+    with get_connection() as conn:
+        conn.cursor().executemany("""
+            INSERT INTO source_stats_log (
+                run_id, timestamp, source, downloaded, survived_regex, survived_ontology, survived_rules,
+                reached_ai, alerts, processing_time_sum, processed_count
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, source_stats_rows)
+
+def save_workflow_health(wh):
+    with get_connection() as conn:
+        conn.cursor().execute("""
+            INSERT INTO workflow_health (
+                run_id, date, timestamp, success, failed, runtime, articles, emails, git_commit, branch, python_version, exception
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            wh["run_id"], wh["date"], wh["timestamp"], wh["success"], wh["failed"], wh["runtime"],
+            wh["articles"], wh["emails"], wh["git_commit"], wh["branch"], wh["python_version"], wh["exception"]
+        ))
+
+def save_exception_log(run_id, timestamp, exc_type, stack_trace, module, func_name, article_url):
+    with get_connection() as conn:
+        conn.cursor().execute("""
+            INSERT INTO exceptions_log (
+                run_id, timestamp, exc_type, stack_trace, module, func_name, article_url
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (run_id, timestamp, exc_type, stack_trace, module, func_name, article_url))
+
+def is_yesterday_synced():
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        yesterday = (datetime.datetime.utcnow() - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        cursor.execute("SELECT 1 FROM sheets_sync_log WHERE date = ?", (yesterday,))
+        return cursor.fetchone() is not None
+
+def mark_yesterday_synced():
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        yesterday = (datetime.datetime.utcnow() - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        now = datetime.datetime.utcnow().isoformat()
+        cursor.execute("INSERT OR REPLACE INTO sheets_sync_log (date, synced_at) VALUES (?, ?)", (yesterday, now))
+
+def get_yesterdays_metrics():
+    """Aggregates all metrics for yesterday from SQLite to sync to Google Sheets."""
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        yesterday = (datetime.datetime.utcnow() - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
+        
+        # 1. Daily Stats Aggregation
+        cursor.execute("""
+            SELECT 
+                SUM(downloaded), SUM(unique_articles), SUM(duplicates), SUM(passed_regex), SUM(failed_regex),
+                SUM(global_exclusions), SUM(ontology_matches), SUM(rules_passes), SUM(rules_failures),
+                SUM(ai_calls), SUM(ai_successes), SUM(ai_failures), SUM(playbooks_executed), SUM(emails_sent),
+                SUM(rules_score_sum), SUM(ai_confidence_sum), SUM(articles_processed_count),
+                MAX(total_runtime_s), SUM(total_runtime_s)
+            FROM run_metrics_log
+            WHERE date(timestamp) = ?
+        """, (yesterday,))
+        daily = cursor.fetchone()
+        
+        # 2. AI Usage Aggregation
+        cursor.execute("""
+            SELECT 
+                provider, key_id, SUM(requests), SUM(success), SUM(failures), SUM(errors_429), SUM(errors_503),
+                SUM(timeouts), SUM(retries), SUM(fallbacks), SUM(response_time_sum), MAX(max_latency),
+                MAX(last_success_ts), MAX(last_failure_ts)
+            FROM ai_usage_log
+            WHERE date(timestamp) = ?
+            GROUP BY provider, key_id
+        """, (yesterday,))
+        ai = cursor.fetchall()
+        
+        # 3. Source Stats Aggregation
+        cursor.execute("""
+            SELECT 
+                source, SUM(downloaded), SUM(survived_regex), SUM(survived_ontology), SUM(survived_rules),
+                SUM(reached_ai), SUM(alerts), SUM(processing_time_sum), SUM(processed_count)
+            FROM source_stats_log
+            WHERE date(timestamp) = ?
+            GROUP BY source
+        """, (yesterday,))
+        sources = cursor.fetchall()
+        
+        # 4. Workflow Health Aggregation
+        cursor.execute("""
+            SELECT 
+                COUNT(*) as runs, SUM(success), SUM(failed), SUM(runtime), SUM(articles), SUM(emails)
+            FROM workflow_health
+            WHERE date(timestamp) = ?
+        """, (yesterday,))
+        workflow = cursor.fetchone()
+        
+        return {
+            "date": yesterday,
+            "daily_stats": daily,
+            "ai_usage": ai,
+            "source_stats": sources,
+            "workflow_health": workflow
+        }
