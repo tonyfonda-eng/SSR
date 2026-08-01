@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSR Database Archive</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    
+    <style>
+        :root {
+            --bg-gradient: radial-gradient(circle at 10% 20%, rgb(14, 20, 31) 0%, rgb(8, 11, 17) 90%);
+            --panel-bg: rgba(17, 24, 39, 0.7);
+            --panel-border: rgba(255, 255, 255, 0.08);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #3b82f6;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-main);
+            margin: 0;
+            padding: 30px;
+            min-height: 100vh;
+            background-attachment: fixed;
+        }
+
+        h1 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 2.2rem;
+            font-weight: 700;
+            background: linear-gradient(90deg, #f8fafc, #94a3b8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0;
+        }
+        
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid var(--panel-border);
+        }
+
+        .panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--panel-border);
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.3);
+        }
+
+        /* DataTables Custom Overrides for Dark Mode */
+        .dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing, .dataTables_wrapper .dataTables_paginate {
+            color: var(--text-muted) !important;
+            margin-bottom: 15px;
+        }
+        .dataTables_wrapper .dataTables_filter input {
+            border: 1px solid rgba(255,255,255,0.2) !important;
+            border-radius: 6px;
+            padding: 5px 10px;
+            color: white;
+            background: rgba(0,0,0,0.2);
+            margin-left: 10px;
+        }
+        table.dataTable {
+            border-collapse: collapse !important;
+            border-bottom: 1px solid var(--panel-border);
+        }
+        table.dataTable thead th, table.dataTable thead td {
+            padding: 15px 10px;
+            border-bottom: 2px solid rgba(255,255,255,0.1) !important;
+            color: #e2e8f0;
+        }
+        table.dataTable tbody tr {
+            background-color: transparent !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        table.dataTable tbody tr:hover {
+            background-color: rgba(255, 255, 255, 0.05) !important;
+        }
+        table.dataTable tbody td {
+            padding: 12px 10px;
+            color: var(--text-muted);
+            border-top: none;
+        }
+        table.dataTable a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        table.dataTable a:hover {
+            text-decoration: underline;
+            color: #60a5fa;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            color: var(--text-main) !important;
+            border: 1px solid rgba(255,255,255,0.2) !important;
+            border-radius: 6px;
+        }
+        .dataTables_wrapper .dataTables_paginate .paginate_button.current, .dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+            color: #fff !important;
+            background: rgba(255, 255, 255, 0.1) !important;
+            border-color: rgba(255, 255, 255, 0.3) !important;
+        }
+        
+    </style>
+</head>
+<body>
+    <div class="header-row">
+        <div>
+            <h1>SSR Database Archive</h1>
+            <div style="color: var(--text-muted); margin-top: 5px; font-size: 0.95rem; font-weight: 500;">Interactive view of up to 10,000 archived articles</div>
+        </div>
+        <div>
+            <a href="index.html" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-family: 'Outfit', sans-serif;">
+                ⬅ Back to Dashboard
+            </a>
+        </div>
+    </div>
+    
+    <div class="panel">
+        <table id="archiveTable" class="display" style="width:100%">
+            <thead>
+                <tr>
+                    <th>Processed Date</th>
+                    <th>Source</th>
+                    <th>Headline</th>
+                    <th>Published</th>
+                </tr>
+            </thead>
+        </table>
+    </div>
+
+    <!-- jQuery & DataTables JS -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#archiveTable').DataTable({
+                ajax: { 
+                    url: 'archive_data.json', 
+                    dataSrc: ''
+                },
+                columns: [
+                    { data: 'processed_at', render: function(data) { return data ? data.replace('T', ' ').substring(0, 19) : ''; } },
+                    { data: 'source' },
+                    { data: 'title', render: function(data, type, row) { 
+                        return row.url ? '<a href="'+row.url+'" target="_blank">'+data+'</a>' : data; 
+                    } },
+                    { data: 'published' }
+                ],
+                deferRender: true,
+                order: [[0, 'desc']],
+                pageLength: 50,
+                language: {
+                    search: "Filter records:"
+                }
+            });
+        });
+    </script>
+</body>
+</html>
