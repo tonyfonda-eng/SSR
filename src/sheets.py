@@ -329,23 +329,88 @@ def load_daily_memory(sheet_url):
     except Exception as e:
         print(f"[ERROR] Failed to load Daily Memory from Sheets: {e}")
 
-def log_normalization_review(sheet_url, source, language, document_type, title, url):
+def load_semantic_concepts(sheet_url):
     """
-    Logs an un-normalized foreign article to the Normalization Review tab.
+    Loads semantic concepts from the 'Semantic Concepts' tab.
+    Returns a list of dicts with keys: Concept_ID, Description, Score, Countries, Languages, Examples
+    """
+    client = get_client()
+    sheet = client.open_by_url(sheet_url)
+    try:
+        worksheet = sheet.worksheet("Semantic Concepts")
+        return worksheet.get_all_records()
+    except gspread.exceptions.WorksheetNotFound:
+        print("[WARNING] 'Semantic Concepts' tab not found. Returning empty list.")
+        return []
+    except Exception as e:
+        print(f"[ERROR] Failed to load Semantic Concepts: {e}")
+        return []
+
+
+def load_event_statuses(sheet_url):
+    """
+    Loads event statuses from the 'Event Status' tab.
+    Returns a list of dicts with keys: Status_ID, Score, Languages
+    """
+    client = get_client()
+    sheet = client.open_by_url(sheet_url)
+    try:
+        worksheet = sheet.worksheet("Event Status")
+        return worksheet.get_all_records()
+    except gspread.exceptions.WorksheetNotFound:
+        print("[WARNING] 'Event Status' tab not found. Returning empty list.")
+        return []
+    except Exception as e:
+        print(f"[ERROR] Failed to load Event Statuses: {e}")
+        return []
+
+
+def load_source_reliability(sheet_url):
+    """
+    Loads source reliability scores from the 'Sources' tab.
+    Reads the 'Reliability' column if it exists.
+    Returns a dict mapping source name -> int score.
+    """
+    client = get_client()
+    sheet = client.open_by_url(sheet_url)
+    scores = {}
+    try:
+        worksheet = sheet.worksheet("Sources")
+        records = worksheet.get_all_records()
+        for r in records:
+            source_name = str(r.get('Source', '')).strip()
+            reliability = r.get('Reliability', '')
+            if source_name and reliability != '':
+                try:
+                    scores[source_name] = int(reliability)
+                except (ValueError, TypeError):
+                    pass
+    except Exception as e:
+        print(f"[WARNING] Failed to load Source Reliability scores: {e}")
+    
+    return scores
+
+
+def log_ontology_review(sheet_url, country, source, language, document_type, raw_terms, title, url, detected_concepts):
+    """
+    Logs an article to the 'Ontology Review' tab for continuous learning.
+    Every foreign article is logged, not just those with zero concepts.
     """
     try:
         sh = get_client().open_by_url(sheet_url)
-        ws = sh.worksheet("Normalization Review")
+        ws = sh.worksheet("Ontology Review")
         
-        # [Date, Source, Language, Document Type, Title, URL]
-        import datetime
         now_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-        row = [now_str, source, language, document_type, title, url]
+        raw_terms_str = ", ".join(raw_terms) if raw_terms else "None"
+        concepts_str = ", ".join(detected_concepts) if detected_concepts else "None"
+        
+        # [Date, Country, Source, Language, Document Type, Raw Terms, Article Title, URL, Detected Concepts, Suggested Concept, Status]
+        row = [now_str, country or "", source, language or "", document_type or "",
+               raw_terms_str, title, url, concepts_str, "", ""]
         ws.append_row(row)
-        print(f"[NORMALIZATION] Logged un-normalized article to Review tab: {title}")
+        print(f"[ONTOLOGY REVIEW] Logged article to review: {title}")
     except Exception as e:
-        print(f"[ERROR] Failed to log normalization review: {e}")
-        return []
+        print(f"[ERROR] Failed to log ontology review: {e}")
 
 def batch_append_daily_memory(sheet_url, new_issuers):
     """

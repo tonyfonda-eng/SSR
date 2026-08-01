@@ -19,7 +19,7 @@ from src.database import (
 
 from src.scrapers.prnewswire import download_article
 from src.scrapers import get_scraper_for_source
-from src.sheets import load_rules, load_sources, load_playbooks, append_to_research_queue, update_last_checked, load_global_exclusions, load_gold_standards, log_unknown_event, update_pipeline_metrics, load_daily_memory, batch_append_daily_memory, prune_daily_memory
+from src.sheets import load_rules, load_sources, load_playbooks, append_to_research_queue, update_last_checked, load_global_exclusions, load_gold_standards, log_unknown_event, update_pipeline_metrics, load_daily_memory, batch_append_daily_memory, prune_daily_memory, load_source_reliability, log_ontology_review
 from src.rules_engine import evaluate
 from src.ai import classify_event, execute_playbook, clients
 from src.alerts.email import send_alert
@@ -71,7 +71,7 @@ class IssuerMemory:
     def size(self):
         return len(self._issuers)
 
-def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False, funnel_metrics=None, issuer_memory=None, document_type=None, country=None, language=None, document_type_scores=None, ontology_stats=None):
+def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None, gold_standards=None, triage_all=False, needs_translation=False, funnel_metrics=None, issuer_memory=None, document_type=None, country=None, language=None, document_type_scores=None, ontology_stats=None, source_reliability_scores=None):
     if global_exclusions is None:
         global_exclusions = []
         
@@ -128,41 +128,50 @@ def _process_article(source_name, article_id, title, url, published, body, rules
     if funnel_metrics: funnel_metrics[4] += 1
     print(f"  -> Processing: {title}")
 
-    # Cash Event Detection (Stage 1)
-    from src.ontology import get_ontology
-    normalizer, version = get_ontology(country)
+    # Cash Event Detection (Stage 1) — Language-Agnostic Ontology Extraction
+    from src.ontology import extract_concepts, extract_statuses, get_all_matched_terms
     
     raw_text = f"{title}\n\n{body}"
-    normalized_terms = []
     
-    if normalizer:
-        try:
-            normalized_terms = normalizer(raw_text)
-            
-            if ontology_stats is not None:
-                ontology_stats["total"] += 1
-                if normalized_terms:
-                    ontology_stats["extracted"] += 1
-                else:
-                    ontology_stats["missed"] += 1
-            
-            # Continuous Learning: Log foreign OAM articles to Ontology Review for audit
-            if "Google News" not in source_name and "Nasdaq" not in source_name and "London Stock" not in source_name:
-                from src.sheets import log_normalization_review
-                from src.config.settings import SHEET_URL
-                concepts_str = ", ".join(normalized_terms) if normalized_terms else "None"
-                log_normalization_review(SHEET_URL, source_name, language, document_type, title, url)
+    # Every article worldwide goes through the same ontology extraction
+    ontology_concepts = []
+    ontology_statuses = []
+    try:
+        ontology_concepts = extract_concepts(raw_text)
+        ontology_statuses = extract_statuses(raw_text)
+        
+        if ontology_stats is not None:
+            ontology_stats["total"] += 1
+            if ontology_concepts:
+                ontology_stats["extracted"] += 1
+            else:
+                ontology_stats["missed"] += 1
+        
+        # Continuous Learning: Log ALL non-US articles to Ontology Review
+        if country and country.lower() not in ("us", "usa", "united states"):
+            try:
+                raw_terms = get_all_matched_terms(raw_text)
+                concept_ids = [cid for cid, _ in ontology_concepts]
+                log_ontology_review(SHEET_URL, country, source_name, language, document_type, raw_terms, title, url, concept_ids)
+            except Exception as e:
+                print(f"    [WARNING] Ontology review logging failed: {e}")
                 
-        except Exception as e:
-            print(f"    [WARNING] Ontology extraction failed for {country}: {e}")
-            
+    except Exception as e:
+        print(f"    [WARNING] Ontology extraction failed: {e}")
+        
     article_obj = {
         "raw_text": raw_text,
-        "normalized_terms": normalized_terms,
         "document_type": document_type
     }
     
-    matches = evaluate(article_obj, rules, document_type_scores if document_type_scores else {}, threshold=10)
+    # Source Reliability channel
+    source_rel = 0
+    if source_reliability_scores:
+        source_rel = source_reliability_scores.get(source_name, 0)
+    
+    matches = evaluate(article_obj, rules, document_type_scores if document_type_scores else {},
+                        ontology_concepts=ontology_concepts, ontology_statuses=ontology_statuses,
+                        source_reliability=source_rel, threshold=10)
 
     if matches:
         if funnel_metrics: funnel_metrics[5] += 1
@@ -587,6 +596,12 @@ def main():
 
     from src.sheets import load_document_type_scores
     document_type_scores = load_document_type_scores(SHEET_URL)
+    source_reliability_scores = load_source_reliability(SHEET_URL)
+    
+    # Load ontology from Google Sheets (once at startup — all languages)
+    from src.ontology import load_ontology
+    load_ontology(SHEET_URL)
+    
     ontology_stats = {"total": 0, "extracted": 0, "missed": 0}
 
     all_new_articles = []
@@ -661,7 +676,8 @@ def main():
             country=primary.get("country"),
             language=primary.get("language"),
             document_type_scores=document_type_scores,
-            ontology_stats=ontology_stats
+            ontology_stats=ontology_stats,
+            source_reliability_scores=source_reliability_scores
         )
         
         # Quietly archive the syndicated clones to prevent fetching them again
