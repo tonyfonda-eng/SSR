@@ -24,20 +24,20 @@ for i in range(1, 11):
 or_keys = list(set(or_keys))
 
 # --- 3. Initialize Unified Client Pool ---
-# Pool stores tuples: (provider_name, client_instance)
+# Pool stores tuples: (provider_name, client_instance, masked_key)
 clients = []
 
-for k in or_keys:
+for idx, k in enumerate(or_keys):
     # OpenRouter uses the OpenAI SDK structure
     client = openai.Client(
         base_url="https://openrouter.ai/api/v1",
         api_key=k,
     )
-    clients.append(("openrouter", client))
+    clients.append(("openrouter", client, f"OpenRouter-{idx+1:02d}"))
 
-for k in gemini_keys:
+for idx, k in enumerate(gemini_keys):
     client = genai.Client(api_key=k)
-    clients.append(("gemini", client))
+    clients.append(("gemini", client, f"Gemini-{idx+1:02d}"))
 
 print(f"[AI INFO] Initialized {len(or_keys)} OpenRouter clients and {len(gemini_keys)} Gemini clients.")
 
@@ -62,7 +62,10 @@ def _generate_with_retry(prompt, max_retries=6):
     last_error = None
     for attempt in range(max_retries):
         for client_tuple in list(available_clients):
-            provider, client = client_tuple
+            provider, client, masked_key = client_tuple
+            start_t = time.perf_counter()
+            is_retry = attempt > 0
+            
             try:
                 if provider == "openrouter":
                     response = client.chat.completions.create(
@@ -79,18 +82,34 @@ def _generate_with_retry(prompt, max_retries=6):
                             ]
                         }
                     )
-                    return response.choices[0].message.content.strip()
+                    txt = response.choices[0].message.content.strip()
+                    rt = time.perf_counter() - start_t
+                    from src.monitoring import MetricsCollector
+                    MetricsCollector.get_instance().log_ai_usage(provider, masked_key, True, response_time=rt, is_retry=is_retry, is_fallback=True)
+                    return txt
                     
                 elif provider == "gemini":
                     response = client.models.generate_content(
                         model='gemini-flash-latest',
                         contents=prompt,
                     )
-                    return response.text.strip()
+                    txt = response.text.strip()
+                    rt = time.perf_counter() - start_t
+                    from src.monitoring import MetricsCollector
+                    MetricsCollector.get_instance().log_ai_usage(provider, masked_key, True, response_time=rt, is_retry=is_retry)
+                    return txt
                     
             except Exception as e:
+                rt = time.perf_counter() - start_t
                 last_error = e
                 error_str = str(e)
+                
+                is_429 = "429" in error_str
+                is_503 = "503" in error_str or "502" in error_str
+                is_timeout = "timeout" in error_str.lower()
+                
+                from src.monitoring import MetricsCollector
+                MetricsCollector.get_instance().log_ai_usage(provider, masked_key, False, is_429=is_429, is_503=is_503, is_timeout=is_timeout, is_retry=is_retry, response_time=rt)
                 
                 # Handle provider-specific rate limits and auth errors
                 is_fatal_or = provider == "openrouter" and any(x in error_str for x in ["401", "404", "402"])
