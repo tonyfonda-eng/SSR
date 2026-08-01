@@ -941,12 +941,20 @@ def main():
         print("[MONITORING] Generating HTML Dashboard...")
         logs = get_recent_lifecycle_logs()
         metrics.calculate_health_score(total_runtime)
-        from src.html_generator import generate_dashboard_html
+        from src.html_generator import generate_dashboard_html, generate_archive_html
         
         avg_30 = get_30_day_average()
         src_30 = get_30_day_source_averages()
         
         generate_dashboard_html(logs, output_path=docs_path, metrics=metrics, avg_30=avg_30, src_30=src_30)
+        
+        # Also generate the DataTables Archive
+        from src.database import export_archive_json
+        archive_json_path = docs_dir / "archive_data.json"
+        archive_html_path = docs_dir / "archive.html"
+        export_archive_json(filepath=str(archive_json_path))
+        generate_archive_html(output_path=str(archive_html_path))
+        
         set_dashboard_state("last_publish", time.time())
     else:
         print("[MONITORING] Skipping HTML Dashboard generation (throttle).")
