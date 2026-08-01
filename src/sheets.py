@@ -495,6 +495,11 @@ def prune_daily_memory(sheet_url, max_age_hours=48):
             worksheet.clear()
             worksheet.append_rows(valid_rows, value_input_option='RAW')
             print(f"[SHEETS] Daily Memory pruned successfully. Kept {len(valid_rows)-1} recent articles.")
+        elif rows_to_delete:
+            # Delete one by one from the bottom up to avoid index shifting
+            for row_idx in rows_to_delete:
+                worksheet.delete_rows(row_idx)
+            print(f"[SHEETS] Pruned {len(rows_to_delete)} old rows from Daily Memory.")
             
     except gspread.exceptions.WorksheetNotFound:
         pass
