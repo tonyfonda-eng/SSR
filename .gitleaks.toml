@@ -1,0 +1,5 @@
+[allowlist]
+description = "Ignore detect-secrets baseline metadata file"
+paths = [
+    '''\.secrets\.baseline$''',
+]
