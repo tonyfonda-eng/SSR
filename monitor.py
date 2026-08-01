@@ -487,3 +487,324 @@ def process_custom_scraper(scraper, source_name, rss_url=None, triage_all=False,
         body = article.get("body", "")
         parsed_articles.append({
             "source_name": source_name,
+            "article_id": article['id'],
+            "title": article['title'],
+            "url": article['url'],
+            "published": article.get('published', ''),
+            "body": body,
+            "triage_all": triage_all,
+            "document_type": article.get("document_type"),
+            "country": country,
+            "language": language
+        })
+    return parsed_articles, len(articles)
+
+
+def cluster_articles(articles):
+    clusters = []
+    for article in articles:
+        if not article.get('body'):
+            continue
+        found_cluster = False
+        for cluster in clusters:
+            rep = cluster[0]
+            similarity = SequenceMatcher(None, article['title'].lower(), rep['title'].lower()).ratio()
+            if similarity > 0.8:
+                cluster.append(article)
+                found_cluster = True
+                break
+        if not found_cluster:
+            clusters.append([article])
+            
+    for cluster in clusters:
+        cluster.sort(key=lambda x: len(x.get('body', '')), reverse=True)
+    return clusters
+
+
+def main():
+    import traceback
+    from src.monitoring import MetricsCollector
+    from src.sheets import get_system_settings
+    
+    try:
+        from src.config.settings import SHEET_URL
+        settings = get_system_settings(SHEET_URL)
+    except Exception:
+        settings = {}
+        
+    metrics = MetricsCollector.get_instance()
+    metrics.set_settings(settings)
+    print("=== Special Situations Radar v1.0.0 ===")
+    metrics.reset()
+    initialise_database()
+    
+    issuer_memory = IssuerMemory()
+    issuer_memory.load_from_db()
+    funnel_metrics = {i: 0 for i in range(1, 13)}
+    
+    pending = get_pending_reminders()
+    for rem in pending:
+        print(f"[REMINDER] Sending scheduled alert for {rem['event_id']}")
+        roi_table = ""
+        if rem.get('ticker') and rem['ticker'] != 'UNKNOWN':
+            roi_table = calculate_naked_call_roi(rem['ticker'])
+        full_message = rem['message'] + "\n\n" + roi_table
+        send_alert(
+            article_title=f"ACTION REQUIRED: Go-Shop Expiry for {rem['event_id']}",
+            article_url="",
+            event_family="SYSTEM ALERT",
+            confidence=100,
+            research_summary=full_message,
+            evidence_log=[],
+            is_update=False
+        )
+        mark_reminder_sent(rem['id'])
+
+    rules = load_rules(SHEET_URL)
+    sources = load_sources(SHEET_URL)
+    playbooks = load_playbooks(SHEET_URL)
+    global_exclusions = load_global_exclusions(SHEET_URL)
+    gold_standards = load_gold_standards(SHEET_URL)
+    playbook_map = {p['Playbook']: p.get('Questions/Research Steps', '') for p in playbooks}
+    
+    from src.sheets import load_document_type_scores
+    document_type_scores = load_document_type_scores(SHEET_URL)
+    source_reliability_scores = load_source_reliability(SHEET_URL)
+    
+    from src.ontology import load_ontology
+    load_ontology(SHEET_URL)
+    ontology_stats = {"total": 0, "extracted": 0, "missed": 0}
+    all_new_articles = []
+    source_stats = {}
+
+    for source in sources:
+        is_enabled = str(source.get("Enabled", "")).upper() == "TRUE"
+        source_name = source.get("Source", "Unknown")
+        rss_url = source.get("RSS URL", "")
+        triage_all = str(source.get("Triage All (Email Rejections)", "")).strip().upper() == "TRUE"
+        country = source.get("Country", "")
+        language = source.get("Language", "")
+        
+        if is_enabled:
+            scraper = get_scraper_for_source(source_name)
+            method_used = None
+            parsed = []
+            parsed_count = 0
+            if scraper:
+                try:
+                    parsed, parsed_count = process_custom_scraper(
+                        scraper, source_name, rss_url=rss_url,
+                        triage_all=triage_all, country=country, language=language
+                    )
+                    if funnel_metrics: 
+                        funnel_metrics[1] += parsed_count
+                    if parsed_count > 0:
+                        method_used = "HTML"
+                        all_new_articles.extend(parsed)
+                    source_stats[source_name] = {"count": parsed_count, "new": len(parsed), "method": method_used}
+                except Exception as e:
+                    print(f"[WARNING] HTML Scraper failed for {source_name}: {e}. Falling back to RSS...")
+
+            if not method_used and rss_url:
+                try:
+                    parsed, parsed_count = process_1_feed(rss_url, source_name, triage_all, country, language)
+                    if funnel_metrics: 
+                        funnel_metrics[1] += parsed_count
+                    method_used = "RSS"
+                    all_new_articles.extend(parsed)
+                    source_stats[source_name] = {"count": parsed_count, "new": len(parsed), "method": method_used}
+                except Exception as e:
+                    print(f"[ERROR] RSS Ingestion failed for {source_name}: {e}")
+
+    clusters = cluster_articles(all_new_articles)
+    
+    from collections import defaultdict
+    clusters_by_source = defaultdict(list)
+    for cluster in clusters:
+        clusters_by_source[cluster[0]["source_name"]].append(cluster)
+    
+    MAX_AI_EVALS = 50
+    active_sources = list(clusters_by_source.keys())
+    source_quotas = {}
+    for src in active_sources:
+        source_quotas[src] = max(1, MAX_AI_EVALS // max(1, len(active_sources)))
+        
+    final_clusters = []
+    for src in active_sources:
+        src_clusters = clusters_by_source[src]
+        quota = source_quotas[src]
+        final_clusters.extend(src_clusters[:quota])
+        
+    clusters = final_clusters
+    total_new = 0
+    
+    for cluster in clusters:
+        primary = cluster[0]
+        body = primary.get("body", "")
+        if not body or len(body) < 100:
+            try:
+                scraper = get_scraper_for_source(primary["source_name"])
+                if scraper:
+                    fetched = scraper.get_article_body(primary["url"])
+                else:
+                    fetched = download_article(primary["url"])
+                if fetched and len(fetched) > 100:
+                    primary["body"] = fetched
+            except Exception as e:
+                print(f"[WARNING] Lazy fetch failed: {e}")
+            time.sleep(1)
+
+        res = _process_article(
+            source_name=primary["source_name"],
+            article_id=primary["article_id"],
+            title=primary["title"],
+            url=primary["url"],
+            published=primary["published"],
+            body=primary["body"],
+            rules=rules,
+            playbook_map=playbook_map,
+            global_exclusions=global_exclusions,
+            gold_standards=gold_standards,
+            triage_all=primary["triage_all"],
+            funnel_metrics=funnel_metrics,
+            issuer_memory=issuer_memory,
+            document_type=primary.get("document_type"),
+            country=primary.get("country"),
+            language=primary.get("language"),
+            document_type_scores=document_type_scores,
+            ontology_stats=ontology_stats,
+            source_reliability_scores=source_reliability_scores
+        )
+        if res == "ABORT":
+            break
+        total_new += res
+
+    issuer_memory.flush_to_sheets()
+    prune_daily_memory(SHEET_URL)
+    
+    total_runtime = time.perf_counter() - metrics.workflow_start
+    metrics.daily["total_runtime_s"] = total_runtime
+    
+    print("[MONITORING] Writing operational statistics to SQLite...")
+    from src.database import (
+        save_lifecycle_logs, get_recent_lifecycle_logs, save_run_metrics, 
+        save_ai_usage, save_source_stats, save_workflow_health, save_exception_log,
+        perform_housekeeping, get_dashboard_state, set_dashboard_state,
+        get_30_day_average, get_30_day_source_averages
+    )
+    
+    log_rows = []
+    for art_id, trace in metrics.article_traces.items():
+        log_rows.append((
+            art_id, trace["timestamp"], trace["source"], trace["title"],
+            trace["url"], trace["country"], trace["language"], trace["document_type"],
+            trace["issuer"], trace["event_family"], trace["pipeline_stage"],
+            trace["outcome"], trace["reason"], trace["ai_invoked"],
+            trace["processing_time_ms"], trace["slowest_stage"]
+        ))
+    save_lifecycle_logs(log_rows)
+    perform_housekeeping()
+    
+    metrics.daily["run_id"] = metrics.run_id
+    metrics.daily["timestamp"] = datetime.datetime.utcnow().isoformat()
+    save_run_metrics(metrics.daily)
+    
+    ai_rows = []
+    for key_id, ai in metrics.ai_telemetry.items():
+        ai_rows.append((
+            metrics.run_id, metrics.daily["timestamp"], ai["provider"],
+            ai["key_id"], ai["requests"], ai["success"], ai["failures"], ai["errors_429"],
+            ai["errors_503"], ai["timeouts"], ai["retries"], ai["fallbacks"], ai["response_time_sum"],
+            ai["max_latency"], ai["last_success_ts"], ai["last_failure_ts"]
+        ))
+    save_ai_usage(ai_rows)
+    
+    src_rows = []
+    for src, st in metrics.source_stats.items():
+        src_rows.append((
+            metrics.run_id, metrics.daily["timestamp"], src,
+            st["downloaded"], st["survived_regex"], st["survived_ontology"], st["survived_rules"],
+            st["reached_ai"], st["alerts"], st["processing_time_sum"], st["processed_count"]
+        ))
+    save_source_stats(src_rows)
+    
+    wh = {
+        "run_id": metrics.run_id,
+        "date": datetime.datetime.utcnow().strftime("%Y-%m-%d"),
+        "timestamp": metrics.daily["timestamp"],
+        "success": 1 if not metrics.exceptions else 0,
+        "failed": 1 if metrics.exceptions else 0,
+        "runtime": total_runtime,
+        "articles": metrics.daily["articles_processed_count"],
+        "emails": metrics.daily["emails_sent"],
+        "git_commit": os.environ.get("GITHUB_SHA", "unknown"),
+        "branch": os.environ.get("GITHUB_REF_NAME", "unknown"),
+        "python_version": sys.version.split()[0],
+        "exception": metrics.exceptions[-1]["exc_type"] if metrics.exceptions else "",
+        "workflow_version": "1.0",
+        "run_number": os.environ.get("GITHUB_RUN_NUMBER", "1")
+    }
+    save_workflow_health(wh)
+    
+    for exc in metrics.exceptions:
+        save_exception_log(metrics.run_id, exc["timestamp"], exc["exc_type"], exc["stack_trace"], exc["module"], exc["func_name"], exc["article_url"], exc["severity"])
+
+    # --- THROTTLED DASHBOARD & ARCHIVE PUBLISHING ---
+    from pathlib import Path
+    docs_dir = Path("docs")
+    docs_dir.mkdir(exist_ok=True)
+    docs_path = str(docs_dir / "index.html")
+    
+    last_publish = get_dashboard_state("last_publish")
+    generate_html = False
+    pub_interval = metrics.settings.get("Dashboard Publish Interval", 60) * 60
+    
+    if last_publish:
+        age = time.time() - float(last_publish)
+        if age > pub_interval:
+            generate_html = True
+    else:
+        generate_html = True
+        
+    if metrics.exceptions or os.environ.get("FORCE_DASHBOARD") == "true":
+        generate_html = True
+        
+    if generate_html:
+        print("[MONITORING] Generating HTML Dashboard and Archive...")
+        logs = get_recent_lifecycle_logs()
+        metrics.calculate_health_score(total_runtime)
+        from src.html_generator import generate_dashboard_html, generate_archive_html
+        
+        avg_30 = get_30_day_average()
+        src_30 = get_30_day_source_averages()
+        
+        generate_dashboard_html(logs, output_path=docs_path, metrics=metrics, avg_30=avg_30, src_30=src_30)
+        
+        from src.database import export_archive_json
+        archive_json_path = docs_dir / "archive_data.json"
+        archive_html_path = docs_dir / "archive.html"
+        
+        export_archive_json(filepath=str(archive_json_path))
+        generate_archive_html(output_path=str(archive_html_path))
+        
+        set_dashboard_state("last_publish", time.time())
+    else:
+        print("[MONITORING] Skipping HTML Dashboard generation (throttle).")
+
+    print("[MONITORING] Checking if yesterday's data needs syncing to Google Sheets...")
+    from src.sheets import aggregate_and_sync_yesterday
+    aggregate_and_sync_yesterday(SHEET_URL)
+    
+    print(f"[DAILY MEMORY] Session ended with {issuer_memory.size} issuers cached.")
+
+
+if __name__ == "__main__":
+    import sys
+    import os
+    try:
+        main()
+    except Exception as e:
+        import traceback
+        print(f"\n[FATAL ERROR] {e}")
+        traceback.print_exc()
+        sys.exit(1)
