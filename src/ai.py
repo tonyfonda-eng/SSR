@@ -41,7 +41,7 @@ for idx, k in enumerate(gemini_keys):
 
 print(f"[AI INFO] Initialized {len(or_keys)} OpenRouter clients and {len(gemini_keys)} Gemini clients.")
 
-def _generate_with_retry(prompt, max_retries=6):
+def _generate_with_retry(prompt, max_retries=3):
     if not clients:
         raise ValueError("No API keys (OpenRouter or Gemini) set in environment.")
     
@@ -109,7 +109,7 @@ def _generate_with_retry(prompt, max_retries=6):
                 MetricsCollector.get_instance().log_ai_usage(provider, masked_key, False, is_429=is_429, is_503=is_503, is_timeout=is_timeout, is_retry=is_retry, response_time=rt)
                 
                 # Handle provider-specific rate limits and auth errors
-                is_fatal_or = provider == "openrouter" and any(x in error_str for x in ["401", "404", "402"])
+                is_fatal_or = provider == "openrouter" and any(x in error_str for x in ["401", "404", "402", "400"])
                 is_fatal_gemini = provider == "gemini" and "GenerateRequestsPerDay" in error_str
                 
                 if is_fatal_or:
