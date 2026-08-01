@@ -460,7 +460,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
 
         return conclude(1, 'Alert', 'Alert Sent', 'Email Dispatched', issuer, event_family)
     
-    return conclude(1, 'Rules Engine', 'Dropped', 'Failed Rules Threshold', issuer, event_family)
+    return conclude(1, 'Rules Engine', 'Dropped', 'Failed Rules Threshold', issuer, 'Unknown')
 
 
 def process_rss_feed(rss_url, source_name, triage_all=False, country=None, language=None):
