@@ -11,6 +11,10 @@ from .europe import (
     EQSScraper, BorsaItalianaScraper, AMFScraper, CNMVScraper, 
     FIScraper, NewsWebScraper, AFMScraper, SIXScraper
 )
+from .tsx import TSXScraper
+from .asx import ASXScraper
+from .sedar import SedarScraper
+from .hkex import HKEXScraper
 
 SCRAPER_REGISTRY = {
     "Business Wire": BusinessWireScraper,
@@ -37,6 +41,10 @@ SCRAPER_REGISTRY = {
     "NewsWeb (Norway)": NewsWebScraper,
     "AFM (Netherlands)": AFMScraper,
     "SIX Exchange (Switzerland)": SIXScraper,
+    "TSX News": TSXScraper,
+    "ASX": ASXScraper,
+    "SEDAR+": SedarScraper,
+    "HKEX": HKEXScraper,
 }
 
 def get_scraper_for_source(source_name):
