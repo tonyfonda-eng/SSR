@@ -6,6 +6,9 @@
   <title>SSR Data Archive</title>
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+  <!-- NOTE: Static files served from GitHub Pages or static hosting cannot set HTTP headers like CSP here.
+       Configure your hosting to add a Content-Security-Policy that disallows inline scripts and unsafe-eval
+       where possible. Treat archive_data.json as untrusted input. -->
 </head>
 <body class="bg-gray-900 text-gray-100 p-6">
   <nav class="flex justify-between items-center mb-6">
@@ -34,49 +37,98 @@
   </div>
 
   <script>
-    // Lightweight client-side renderer. Loads archive_data.json from same directory.
+    // Lightweight, safer client-side renderer.
+    // - Avoids innerHTML for rows
+    // - Validates URL schemes with URL()
+    // - Adds rel="noopener noreferrer" to target="_blank"
+    // - Uses fetch with credentials omitted explicitly
+
     let archiveData = [];
 
     function formatTime(ts) {
       if (!ts) return "";
-      let s = String(ts);
-      if (s.includes("T")) {
-        const parts = s.split("T");
-        const date = parts[0];
-        const time = (parts[1] || '').split('.')[0].replace('Z','');
-        return (date + ' ' + time).trim();
+      try {
+        // Try to parse ISO-like strings
+        if (typeof ts === 'string' && ts.includes('T')) {
+          const d = new Date(ts);
+          if (!isNaN(d)) return d.toISOString().replace('T',' ').split('.')[0].replace('Z','');
+        }
+        return String(ts).replace('Z','').replace('UTC','').trim();
+      } catch (e) {
+        return String(ts);
       }
-      return s.replace('Z','').replace('UTC','').trim();
     }
 
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+    function isSafeUrl(href) {
+      if (!href) return false;
+      try {
+        // Resolve relative URLs against the current location
+        const u = new URL(href, window.location.href);
+        // Allow only http, https, mailto
+        return (u.protocol === 'http:' || u.protocol === 'https:' || u.protocol === 'mailto:');
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function makeRow(row) {
+      const tr = document.createElement('tr');
+      tr.className = 'hover:bg-gray-700';
+
+      const tdProcessed = document.createElement('td');
+      tdProcessed.className = 'p-2 align-top';
+      tdProcessed.textContent = formatTime(row.processed_at || row.processed || '');
+      tr.appendChild(tdProcessed);
+
+      const tdSource = document.createElement('td');
+      tdSource.className = 'p-2 align-top';
+      tdSource.textContent = row.source || '';
+      tr.appendChild(tdSource);
+
+      const tdTitle = document.createElement('td');
+      tdTitle.className = 'p-2 align-top';
+      if (row.url && isSafeUrl(row.url)) {
+        const a = document.createElement('a');
+        a.setAttribute('href', row.url);
+        a.setAttribute('target', '_blank');
+        a.setAttribute('rel', 'noopener noreferrer');
+        a.className = 'text-blue-400 hover:underline';
+        a.textContent = row.title || row.url;
+        tdTitle.appendChild(a);
+      } else {
+        // Render as plain text if no URL or unsafe URL
+        tdTitle.textContent = row.title || (row.url ? '[invalid link]' : '');
+      }
+      tr.appendChild(tdTitle);
+
+      const tdPublished = document.createElement('td');
+      tdPublished.className = 'p-2 align-top';
+      tdPublished.textContent = row.published || '';
+      tr.appendChild(tdPublished);
+
+      return tr;
     }
 
     function renderTable(data) {
       const tbody = document.getElementById('tableBody');
-      tbody.innerHTML = '';
+      // Remove existing rows safely
+      while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
+
       if (!data || data.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" class="p-2 text-gray-400">No records</td></tr>';
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.setAttribute('colspan', '4');
+        td.className = 'p-2 text-gray-400';
+        td.textContent = 'No records';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
         return;
       }
-      data.forEach(row => {
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-gray-700';
-        const processed = formatTime(row.processed_at || row.processed || '');
-        const title = escapeHtml(row.title || '');
-        const url = row.url ? escapeHtml(row.url) : '#';
-        const published = escapeHtml(row.published || '');
-        const source = escapeHtml(row.source || '');
-        tr.innerHTML = `
-          <td class="p-2 align-top">${escapeHtml(processed)}</td>
-          <td class="p-2 align-top">${source}</td>
-          <td class="p-2 align-top"><a href="${url}" target="_blank" class="text-blue-400 hover:underline">${title}</a></td>
-          <td class="p-2 align-top">${published}</td>
-        `;
-        tbody.appendChild(tr);
-      });
+
+      // Append rows
+      for (let i = 0; i < data.length; i++) {
+        tbody.appendChild(makeRow(data[i]));
+      }
     }
 
     function filterTable() {
@@ -91,21 +143,35 @@
 
     document.getElementById('searchInput').addEventListener('input', filterTable);
 
-    fetch('archive_data.json')
+    // Explicitly omit credentials so cookies / auth headers are not sent to the static JSON
+    fetch('archive_data.json', { credentials: 'omit' })
       .then(resp => {
         if (!resp.ok) throw new Error('Network response not OK: ' + resp.status);
         return resp.json();
       })
       .then(data => {
+        if (!Array.isArray(data)) {
+          document.getElementById('status').textContent = 'Unexpected archive format';
+          console.error('archive_data.json is not an array', data);
+          return;
+        }
         archiveData = data;
         document.getElementById('status').textContent = `Loaded ${data.length} records.`;
         renderTable(archiveData);
       })
       .catch(err => {
         document.getElementById('status').textContent = 'Error loading data: ' + err.message;
-        document.getElementById('tableBody').innerHTML = '<tr><td colspan="4">Error loading data.</td></tr>';
+        const tbody = document.getElementById('tableBody');
+        while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.setAttribute('colspan', '4');
+        td.textContent = 'Error loading data.';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
         console.error(err);
       });
+
   </script>
 </body>
 </html>
