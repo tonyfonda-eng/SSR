@@ -70,7 +70,6 @@ def initialise_database():
             )
         """)
 
-        conn.execute("DROP TABLE IF EXISTS article_lifecycle_log") # Upgrading schema
         conn.execute("""
             CREATE TABLE IF NOT EXISTS article_lifecycle_log (
                 log_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -164,7 +163,6 @@ def initialise_database():
             )
         """)
 
-        conn.execute("DROP TABLE IF EXISTS workflow_health")
         conn.execute("""
             CREATE TABLE IF NOT EXISTS workflow_health (
                 run_id TEXT PRIMARY KEY,
@@ -184,7 +182,6 @@ def initialise_database():
             )
         """)
 
-        conn.execute("DROP TABLE IF EXISTS exceptions_log")
         conn.execute("""
             CREATE TABLE IF NOT EXISTS exceptions_log (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -326,8 +323,6 @@ def mark_reminder_sent(reminder_id):
         cursor = conn.cursor()
         cursor.execute("UPDATE reminders SET sent = 1 WHERE reminder_id = ?", (reminder_id,))
 
-# --- Operational Data Sink ---
-
 def get_dashboard_state(key, default=None):
     with get_connection() as conn:
         cursor = conn.cursor()
@@ -369,8 +364,6 @@ def perform_housekeeping():
         cursor.execute("DELETE FROM run_metrics_log WHERE timestamp < ?", (cutoff_365,))
         # also clean source stats
         cursor.execute("DELETE FROM source_stats_log WHERE timestamp < ?", (cutoff_365,))
-        
-        # ai_usage_log and workflow_health kept forever as requested.
         
     set_dashboard_state('last_cleanup', now.isoformat())
 
@@ -471,7 +464,6 @@ def get_yesterdays_metrics():
         cursor = conn.cursor()
         yesterday = (datetime.datetime.utcnow() - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
         
-        # 1. Daily Stats Aggregation
         cursor.execute("""
             SELECT 
                 SUM(downloaded), SUM(unique_articles), SUM(duplicates), SUM(passed_regex), SUM(failed_regex),
@@ -484,7 +476,6 @@ def get_yesterdays_metrics():
         """, (yesterday,))
         daily = cursor.fetchone()
         
-        # 2. AI Usage Aggregation
         cursor.execute("""
             SELECT 
                 provider, key_id, SUM(requests), SUM(success), SUM(failures), SUM(errors_429), SUM(errors_503),
@@ -496,7 +487,6 @@ def get_yesterdays_metrics():
         """, (yesterday,))
         ai = cursor.fetchall()
         
-        # 3. Source Stats Aggregation
         cursor.execute("""
             SELECT 
                 source, SUM(downloaded), SUM(survived_regex), SUM(survived_ontology), SUM(survived_rules),
@@ -507,7 +497,6 @@ def get_yesterdays_metrics():
         """, (yesterday,))
         sources = cursor.fetchall()
         
-        # 4. Workflow Health Aggregation
         cursor.execute("""
             SELECT 
                 COUNT(*) as runs, SUM(success), SUM(failed), SUM(runtime), SUM(articles), SUM(emails)
@@ -583,12 +572,10 @@ def get_30_day_source_averages():
 def update_hourly_volume(source_counts, hour_utc, alpha=0.1):
     """
     Updates the historical exponential moving average of article volume per source per hour.
-    source_counts: dict of {source_name: new_article_count}
     """
     with get_connection() as conn:
         cursor = conn.cursor()
         for source, count in source_counts.items():
-            # Get existing average if any
             cursor.execute("SELECT avg_volume FROM source_hourly_heatmap WHERE source = ? AND hour_utc = ?", (source, hour_utc))
             row = cursor.fetchone()
             
@@ -596,7 +583,7 @@ def update_hourly_volume(source_counts, hour_utc, alpha=0.1):
                 old_avg = row[0]
                 new_avg = (old_avg * (1.0 - alpha)) + (count * alpha)
             else:
-                new_avg = float(count) # First time seeing this source at this hour, start average here
+                new_avg = float(count)
                 
             cursor.execute("""
                 INSERT OR REPLACE INTO source_hourly_heatmap (source, hour_utc, avg_volume)
@@ -606,7 +593,6 @@ def update_hourly_volume(source_counts, hour_utc, alpha=0.1):
 def get_hourly_heatmap(hour_utc=None):
     """
     Returns a dictionary of {source: avg_volume} for the specified UTC hour.
-    If hour_utc is None, uses the current UTC hour.
     """
     if hour_utc is None:
         hour_utc = datetime.datetime.utcnow().hour
@@ -626,7 +612,6 @@ def export_archive_json(filepath="docs/archive_data.json", limit=10000):
     
     with get_connection() as conn:
         cursor = conn.cursor()
-        # We select specific columns to keep the payload lightweight. No 'body'.
         cursor.execute("""
             SELECT source, title, url, published, processed_at
             FROM articles

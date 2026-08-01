@@ -1,10 +1,13 @@
 import datetime
 import sqlite3
+import os
+import json
 from src.config.settings import SHEET_URL
+from src.database import DB_PATH
 
 def get_latest_run_from_db():
     """Fetches the most recent run metrics from the local SQLite observability database."""
-    conn = sqlite3.connect("ssr_observability.db")
+    conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
@@ -23,7 +26,6 @@ def get_latest_run_from_db():
     finally:
         conn.close()
 
-
 def sync_metrics_to_google_sheets(sheet_url=SHEET_URL):
     """Pushes the latest run metrics to the 'Metrics' tab of the Google Sheet."""
     metrics_data = get_latest_run_from_db()
@@ -34,9 +36,8 @@ def sync_metrics_to_google_sheets(sheet_url=SHEET_URL):
     try:
         import gspread
         from google.oauth2.service_account import Credentials
-        import os
-        import json
 
+        # Load credentials from environment variable or standard service account file
         creds_json = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON")
         if creds_json:
             creds_dict = json.loads(creds_json)
@@ -44,19 +45,23 @@ def sync_metrics_to_google_sheets(sheet_url=SHEET_URL):
             creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
             client = gspread.authorize(creds)
         else:
+            # Fallback to default local auth file if configured in project
             client = gspread.service_account(filename="credentials.json")
 
         spreadsheet = client.open_by_url(sheet_url)
         
+        # Ensure 'Metrics' tab exists, create if missing
         try:
             worksheet = spreadsheet.worksheet("Metrics")
         except gspread.exceptions.WorksheetNotFound:
             worksheet = spreadsheet.add_worksheet(title="Metrics", rows=1000, cols=10)
+            # Add header row if newly created
             worksheet.append_row([
                 "Run ID", "Timestamp", "Success", "Failed", "Runtime (s)", 
                 "Articles Processed", "Emails Sent", "Exception", "Workflow Version", "Run Number"
             ])
 
+        # Format row data
         row_values = [
             metrics_data.get("run_id"),
             metrics_data.get("timestamp"),
