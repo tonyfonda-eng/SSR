@@ -1,19 +1,111 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SSR Data Archive</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SSR Data Archive</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
 </head>
 <body class="bg-gray-900 text-gray-100 p-6">
-    <nav class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">SSR Historical Archive</h1>
-        <a href="index.html" class="bg-blue-600 px-4 py-2 rounded text-sm font-semibold hover:bg-blue-500">Back to Cockpit</a>
-    </nav>
-    <div class="bg-gray-800 p-6 rounded-lg shadow">
-        <p class="text-gray-400">Loading ingested data records from archive_data.json...</p>
+  <nav class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">SSR Historical Archive</h1>
+    <a href="index.html" class="bg-blue-600 px-4 py-2 rounded text-sm font-semibold hover:bg-blue-500">Back to Cockpit</a>
+  </nav>
+
+  <div class="bg-gray-800 p-6 rounded-lg shadow">
+    <p id="status" class="text-gray-400">Loading ingested data records from archive_data.json...</p>
+    <input id="searchInput" class="mt-4 p-2 w-full bg-gray-900 text-gray-100 rounded" placeholder="Search archive by title, source, or date...">
+    <div class="mt-4 overflow-auto">
+      <table id="archiveTable" class="min-w-full bg-gray-800 text-sm">
+        <thead>
+          <tr>
+            <th class="text-left p-2 text-gray-400">Processed At</th>
+            <th class="text-left p-2 text-gray-400">Source</th>
+            <th class="text-left p-2 text-gray-400">Title</th>
+            <th class="text-left p-2 text-gray-400">Published</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr><td colspan="4">Loading data...</td></tr>
+        </tbody>
+      </table>
     </div>
+  </div>
+
+  <script>
+    // Lightweight client-side renderer. Loads archive_data.json from same directory.
+    let archiveData = [];
+
+    function formatTime(ts) {
+      if (!ts) return "";
+      let s = String(ts);
+      if (s.includes("T")) {
+        const parts = s.split("T");
+        const date = parts[0];
+        const time = (parts[1] || '').split('.')[0].replace('Z','');
+        return (date + ' ' + time).trim();
+      }
+      return s.replace('Z','').replace('UTC','').trim();
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+    }
+
+    function renderTable(data) {
+      const tbody = document.getElementById('tableBody');
+      tbody.innerHTML = '';
+      if (!data || data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" class="p-2 text-gray-400">No records</td></tr>';
+        return;
+      }
+      data.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-gray-700';
+        const processed = formatTime(row.processed_at || row.processed || '');
+        const title = escapeHtml(row.title || '');
+        const url = row.url ? escapeHtml(row.url) : '#';
+        const published = escapeHtml(row.published || '');
+        const source = escapeHtml(row.source || '');
+        tr.innerHTML = `
+          <td class="p-2 align-top">${escapeHtml(processed)}</td>
+          <td class="p-2 align-top">${source}</td>
+          <td class="p-2 align-top"><a href="${url}" target="_blank" class="text-blue-400 hover:underline">${title}</a></td>
+          <td class="p-2 align-top">${published}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function filterTable() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = archiveData.filter(r =>
+        (r.title || '').toLowerCase().includes(q) ||
+        (r.source || '').toLowerCase().includes(q) ||
+        (r.processed_at || '').toLowerCase().includes(q)
+      );
+      renderTable(filtered);
+    }
+
+    document.getElementById('searchInput').addEventListener('input', filterTable);
+
+    fetch('archive_data.json')
+      .then(resp => {
+        if (!resp.ok) throw new Error('Network response not OK: ' + resp.status);
+        return resp.json();
+      })
+      .then(data => {
+        archiveData = data;
+        document.getElementById('status').textContent = `Loaded ${data.length} records.`;
+        renderTable(archiveData);
+      })
+      .catch(err => {
+        document.getElementById('status').textContent = 'Error loading data: ' + err.message;
+        document.getElementById('tableBody').innerHTML = '<tr><td colspan="4">Error loading data.</td></tr>';
+        console.error(err);
+      });
+  </script>
 </body>
 </html>
