@@ -685,6 +685,17 @@ def main():
     print("[MONITORING] Checking if yesterday's data needs syncing to Google Sheets...")
     aggregate_and_sync_yesterday(SHEET_URL)
     
+    # Check if we should generate the Weekly Operations Report (runs on Saturdays)
+    if datetime.datetime.utcnow().weekday() == 5:
+        try:
+            last_report = get_dashboard_state("last_weekly_report")
+            today_str = datetime.datetime.utcnow().strftime("%Y-%m-%d")
+            if last_report != today_str:
+                from src.reporting import generate_weekly_report
+                generate_weekly_report()
+                set_dashboard_state("last_weekly_report", today_str)
+        except Exception as e:
+            print(f"[WARNING] Failed to generate weekly report: {e}")
     print(f"[DAILY MEMORY] Session ended with {issuer_memory.size} issuers cached.")
 
 if __name__ == "__main__":

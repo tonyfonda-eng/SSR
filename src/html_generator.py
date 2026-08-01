@@ -1,192 +1,340 @@
-import os
-import json
 import datetime
 
-def generate_dashboard_html(logs, output_path="docs/index.html", metrics=None, avg_30=None, src_30=None):
-    """Generates the comprehensive Operations Centre dashboard combining Vitals, Funnels, and Surprises."""
+def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None):
+    """Generates the institutional-grade Operations Centre dashboard."""
     
-    # Extract operational metrics
-    total_runtime = metrics.daily.get("total_runtime_s", 0) if metrics else 0
-    articles_downloaded = metrics.daily.get("downloaded", 0) if metrics else 0
-    emails_sent = metrics.daily.get("emails_sent", 0) if metrics else 0
-    ai_calls = metrics.daily.get("ai_calls", 0) if metrics else 0
-    ai_successes = metrics.daily.get("ai_successes", 0) if metrics else 0
-    exceptions = metrics.exceptions if metrics else []
+    now_str = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+    health_score = metrics.calculate_health_score(metrics.daily.get("total_runtime_s", 0))
     
-    # Calculate Health Score (0-100)
-    health_score = 100
-    if exceptions:
-        health_score -= (len(exceptions) * 15)
-    if ai_calls > 0 and (ai_successes / ai_calls) < 0.8:
-        health_score -= 20
-    health_score = max(0, health_score)
+    # Determine Health Color
+    if health_score >= 90:
+        health_color = "#2ea043" # Green
+        health_status = "HEALTHY"
+    elif health_score >= 75:
+        health_color = "#dbab0a" # Yellow
+        health_status = "DEGRADED"
+    else:
+        health_color = "#cb2431" # Red
+        health_status = "CRITICAL"
 
-    # Funnel metrics extraction
-    funnel = metrics.daily.get("funnel", {}) if metrics else {}
-    
-    # Deterministic "Surprises" Engine
-    surprises = []
-    if articles_downloaded > 500 and emails_sent == 0:
-        surprises.append("⚠️ High ingestion volume today, but zero email alerts generated (High noise or strict filtering).")
-    if exceptions:
-        surprises.append(f"⚠️ System encountered {len(exceptions)} runtime exception(s) during execution.")
-    if total_runtime > 600:
-        surprises.append("⚠️ Pipeline runtime exceeded 10 minutes, indicating potential network throttling.")
-    if not surprises:
-        surprises.append("✅ All deterministic checks nominal. No unusual anomalies detected today.")
-
-    html_content = f"""<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SSR Operations Centre Cockpit</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-</head>
-<body class="bg-gray-900 text-gray-100 font-sans leading-normal tracking-normal">
-
-    <nav class="bg-gray-800 border-b border-gray-700 px-6 py-4 flex justify-between items-center">
-        <div class="flex items-center space-x-3">
-            <i class="fa-solid fa-radar text-blue-500 text-2xl"></i>
-            <span class="text-xl font-bold tracking-wider">SSR OPERATIONS CENTRE</span>
-        </div>
-        <div class="flex space-x-4">
-            <a href="index.html" class="bg-blue-600 px-4 py-2 rounded text-sm font-semibold hover:bg-blue-500 transition">Cockpit</a>
-            <a href="archive.html" class="bg-gray-700 px-4 py-2 rounded text-sm font-semibold hover:bg-gray-600 transition">Data Archive</a>
-        </div>
-    </nav>
-
-    <div class="container mx-auto px-6 py-8">
-
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-            <div class="bg-gray-800 border border-gray-700 rounded-lg p-5 shadow">
-                <div class="text-gray-400 text-xs font-bold uppercase tracking-wider">Overall Health Score</div>
-                <div class="text-4xl font-extrabold mt-2 {'text-green-400' if health_score > 80 else 'text-yellow-400' if health_score > 50 else 'text-red-500'}">
-                    {health_score}/100
+    html = f"""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>SSR Operations Centre</title>
+        <style>
+            :root {{
+                --bg: #0d1117;
+                --surface: #161b22;
+                --border: #30363d;
+                --text: #c9d1d9;
+                --muted: #8b949e;
+                --green: #2ea043;
+                --red: #cb2431;
+                --yellow: #dbab0a;
+                --blue: #58a6ff;
+            }}
+            body {{
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+                background-color: var(--bg);
+                color: var(--text);
+                margin: 0;
+                padding: 20px;
+                line-height: 1.5;
+            }}
+            .container {{ max-width: 1400px; margin: 0 auto; }}
+            h1, h2, h3 {{ color: #ffffff; border-bottom: 1px solid var(--border); padding-bottom: 8px; }}
+            .header-panel {{
+                display: flex; justify-content: space-between; align-items: center;
+                background: var(--surface); padding: 20px; border: 1px solid var(--border); border-radius: 6px;
+                margin-bottom: 20px;
+            }}
+            .health-score {{ font-size: 2.5em; font-weight: bold; color: {health_color}; }}
+            .grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; margin-bottom: 20px; }}
+            .card {{ background: var(--surface); padding: 20px; border: 1px solid var(--border); border-radius: 6px; }}
+            table {{ width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9em; }}
+            th, td {{ padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }}
+            th {{ color: var(--muted); font-weight: 600; text-transform: uppercase; font-size: 0.8em; }}
+            tr:hover {{ background-color: #1c2128; }}
+            .badge {{ padding: 3px 8px; border-radius: 12px; font-size: 0.8em; font-weight: 600; }}
+            .badge.success {{ background: rgba(46,160,67,0.15); color: var(--green); border: 1px solid rgba(46,160,67,0.4); }}
+            .badge.danger {{ background: rgba(203,36,49,0.15); color: var(--red); border: 1px solid rgba(203,36,49,0.4); }}
+            .badge.warning {{ background: rgba(219,171,10,0.15); color: var(--yellow); border: 1px solid rgba(219,171,10,0.4); }}
+            .badge.info {{ background: rgba(88,166,255,0.15); color: var(--blue); border: 1px solid rgba(88,166,255,0.4); }}
+            .trend-up {{ color: var(--green); }}
+            .trend-down {{ color: var(--red); }}
+            .drift-warning {{ color: var(--yellow); font-weight: bold; }}
+            a {{ color: var(--blue); text-decoration: none; }}
+            a:hover {{ text-decoration: underline; }}
+            .footer {{ text-align: center; margin-top: 40px; color: var(--muted); font-size: 0.8em; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header-panel">
+                <div>
+                    <h1 style="border: none; padding: 0; margin: 0;">Special Situations Radar</h1>
+                    <div style="color: var(--muted); margin-top: 5px;">Operations Centre | Phase 3 Architecture</div>
                 </div>
-                <div class="text-xs text-gray-400 mt-2">Based on exceptions & API success rates</div>
-            </div>
-
-            <div class="bg-gray-800 border border-gray-700 rounded-lg p-5 shadow">
-                <div class="text-gray-400 text-xs font-bold uppercase tracking-wider">Pipeline Runtime</div>
-                <div class="text-3xl font-bold mt-2 text-blue-400">{total_runtime:.1f}s</div>
-                <div class="text-xs text-gray-400 mt-2">Execution timestamp: {datetime.datetime.utcnow().strftime('%Y-%m-%d %H:%M UTC')}</div>
-            </div>
-
-            <div class="bg-gray-800 border border-gray-700 rounded-lg p-5 shadow">
-                <div class="text-gray-400 text-xs font-bold uppercase tracking-wider">Articles Downloaded</div>
-                <div class="text-3xl font-bold mt-2 text-purple-400">{articles_downloaded:,}</div>
-                <div class="text-xs text-gray-400 mt-2">Filtered through global rules</div>
-            </div>
-
-            <div class="bg-gray-800 border border-gray-700 rounded-lg p-5 shadow">
-                <div class="text-gray-400 text-xs font-bold uppercase tracking-wider">Alerts Dispatched</div>
-                <div class="text-3xl font-bold mt-2 text-green-400">{emails_sent}</div>
-                <div class="text-xs text-gray-400 mt-2">Actionable special situations</div>
-            </div>
-        </div>
-
-        <div class="bg-gray-800 border-l-4 border-blue-500 p-5 rounded-r-lg mb-8 shadow">
-            <h2 class="text-lg font-bold text-blue-400 mb-2"><i class="fa-solid fa-bolt mr-2"></i>What surprises me today? (Daily Briefing)</h2>
-            <ul class="list-disc list-inside space-y-1 text-gray-300 text-sm">
-                {"".join([f"<li>{s}</li>" for s in surprises])}
-            </ul>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-            <div class="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow">
-                <h2 class="text-xl font-bold mb-4 text-gray-200"><i class="fa-solid fa-filter mr-2 text-blue-400"></i>Pipeline Conversion Funnel</h2>
-                <div class="space-y-4">
-                    <div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <span>Raw Articles Downloaded</span>
-                            <span class="font-bold">{articles_downloaded}</span>
-                        </div>
-                        <div class="w-full bg-gray-700 rounded-full h-2.5">
-                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: 100%"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <span>Reached AI Verification</span>
-                            <span class="font-bold">{ai_calls}</span>
-                        </div>
-                        <div class="w-full bg-gray-700 rounded-full h-2.5">
-                            <div class="bg-purple-600 h-2.5 rounded-full" style="width: {min(100, (ai_calls / max(1, articles_downloaded)) * 100):.1f}%"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between text-sm mb-1">
-                            <span>Actionable Alerts Generated</span>
-                            <span class="font-bold">{emails_sent}</span>
-                        </div>
-                        <div class="w-full bg-gray-700 rounded-full h-2.5">
-                            <div class="bg-green-600 h-2.5 rounded-full" style="width: {min(100, (emails_sent / max(1, articles_downloaded)) * 100 * 10):.1f}%"></div>
-                        </div>
-                    </div>
+                <div style="text-align: right;">
+                    <div class="health-score">{health_score}/100</div>
+                    <div>System Status: <strong>{health_status}</strong></div>
+                    <div style="color: var(--muted); font-size: 0.8em; margin-top: 5px;">Last Updated: {now_str}</div>
                 </div>
             </div>
 
-            <div class="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow">
-                <h2 class="text-xl font-bold mb-4 text-gray-200"><i class="fa-solid fa-triangle-exclamation mr-2 text-yellow-400"></i>Recent Exceptions & Errors</h2>
-                <div class="overflow-y-auto max-h-48 space-y-2 text-sm">
-                    {"".join([f"<div class='bg-gray-700 p-2 rounded text-red-300'><strong>{exc.get('exc_type')}</strong>: {exc.get('module')}</div>" for exc in exceptions]) if exceptions else "<div class='text-gray-400 italic'>No exceptions recorded in this session. System running cleanly.</div>"}
+            <div class="grid">
+                <div class="card">
+                    <h2>Pipeline Funnel</h2>
+                    <table>
+                        <tr><th>Stage</th><th>Volume</th><th>30d Avg</th><th>Drift</th></tr>
+    """
+    
+    # Render Funnel Data
+    funnel = metrics.funnel
+    
+    def render_funnel_row(stage_name, current_val, avg_val=None):
+        drift_html = "-"
+        avg_str = "-"
+        if avg_val and avg_val > 0:
+            avg_str = f"{avg_val:.1f}"
+            drift_pct = ((current_val - avg_val) / avg_val) * 100
+            drift_class = "trend-up" if drift_pct > 0 else "trend-down"
+            # Warn if drift is massive
+            if abs(drift_pct) > 50 and current_val > 10:
+                drift_html = f"<span class='drift-warning'>{drift_pct:+.1f}% ⚠</span>"
+            else:
+                drift_html = f"<span class='{drift_class}'>{drift_pct:+.1f}%</span>"
+                
+        return f"<tr><td>{stage_name}</td><td>{current_val}</td><td>{avg_str}</td><td>{drift_html}</td></tr>"
+
+    # Map the exact funnel sequence
+    html += render_funnel_row("1. Downloaded", funnel.get("downloaded", 0), avg_30.get("downloaded", 0) if avg_30 else None)
+    html += render_funnel_row("2. Survived Deduplication", funnel.get("downloaded", 0) - funnel.get("duplicate_id", 0) - funnel.get("duplicate_issuer", 0))
+    html += render_funnel_row("3. Passed Global Exclusions", funnel.get("downloaded", 0) - funnel.get("global_exclusion", 0))
+    html += render_funnel_row("4. Reached Rules Engine", funnel.get("downloaded", 0) - funnel.get("regex_rejected", 0) - funnel.get("ontology_rejected", 0))
+    html += render_funnel_row("5. Reached AI", funnel.get("reached_ai", 0), avg_30.get("ai_calls", 0) if avg_30 else None)
+    html += render_funnel_row("6. Playbook Validated", funnel.get("reached_ai", 0) - funnel.get("ai_rejected_private", 0) - funnel.get("ai_rejected_false_positive", 0) - funnel.get("playbook_rejected", 0))
+    html += render_funnel_row("7. Alerts Sent", funnel.get("alerts_sent", 0), avg_30.get("emails_sent", 0) if avg_30 else None)
+
+    html += """
+                    </table>
+                </div>
+
+                <div class="card">
+                    <h2>AI Telemetry</h2>
+                    <table>
+                        <tr><th>Provider</th><th>Reqs</th><th>Success</th><th>Max Latency</th><th>429s</th></tr>
+    """
+    
+    for key, ai in metrics.ai_telemetry.items():
+        provider = ai.get("provider", "Unknown")
+        reqs = ai.get("requests", 0)
+        success = ai.get("success", 0)
+        latency = ai.get("max_latency", 0.0)
+        rate_limits = ai.get("errors_429", 0)
+        
+        success_rate = (success / reqs * 100) if reqs > 0 else 0
+        rate_class = "danger" if success_rate < 90 else "success"
+        
+        html += f"""
+            <tr>
+                <td>{provider}</td>
+                <td>{reqs}</td>
+                <td><span class='badge {rate_class}'>{success_rate:.1f}%</span></td>
+                <td>{latency:.2f}s</td>
+                <td>{rate_limits}</td>
+            </tr>
+        """
+        
+    if not metrics.ai_telemetry:
+        html += "<tr><td colspan='5' style='text-align:center;'>No AI calls this run</td></tr>"
+
+    html += """
+                    </table>
+                    
+                    <h3 style="margin-top: 20px;">System Exceptions</h3>
+    """
+    
+    if metrics.exceptions:
+        for exc in metrics.exceptions:
+            html += f"<div style='color: var(--red); font-family: monospace; font-size: 0.8em; margin-bottom: 5px;'>[{exc['severity']}] {exc['exc_type']} in {exc['module']}</div>"
+    else:
+        html += "<div style='color: var(--green); font-family: monospace; font-size: 0.8em;'>Zero runtime exceptions detected.</div>"
+
+    html += """
                 </div>
             </div>
-        </div>
 
-        <div class="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow mb-8">
-            <h2 class="text-xl font-bold mb-4 text-gray-200"><i class="fa-solid fa-list mr-2 text-blue-400"></i>Recent Ingested Activity</h2>
-            <div class="overflow-x-auto">
-                <table class="min-w-full text-left text-sm text-gray-300">
-                    <thead class="bg-gray-700 text-gray-200 uppercase text-xs">
-                        <tr>
-                            <th class="py-2 px-3">Timestamp</th>
-                            <th class="py-2 px-3">Source</th>
-                            <th class="py-2 px-3">Issuer</th>
-                            <th class="py-2 px-3">Title</th>
-                            <th class="py-2 px-3">Event Family</th>
-                            <th class="py-2 px-3">Outcome</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {"".join([f"<tr class='border-b border-gray-700'><td class='py-2 px-3'>{log.get('timestamp')}</td><td class='py-2 px-3'>{log.get('source')}</td><td class='py-2 px-3 font-semibold text-blue-300'>{log.get('issuer')}</td><td class='py-2 px-3'><a href='{log.get('url', '#')}' class='text-blue-400 hover:underline' target='_blank'>{log.get('title')}</a></td><td class='py-2 px-3'>{log.get('event_family')}</td><td class='py-2 px-3'>{log.get('outcome')}</td></tr>" for log in logs]) if logs else "<tr><td colspan='6' class='text-center py-4 text-gray-400 italic'>No recent activity logged.</td></tr>"}
-                    </tbody>
+            <div class="card" style="margin-bottom: 20px;">
+                <h2>Source Quality Matrix</h2>
+                <table>
+                    <tr><th>Source</th><th>Volume</th><th>To AI</th><th>Alerts</th><th>Signal Rate</th><th>Processing (ms)</th></tr>
+    """
+    
+    # Sort sources by Signal Rate descending
+    sorted_sources = sorted(
+        metrics.source_stats.items(), 
+        key=lambda item: (item[1]["alerts"] / item[1]["downloaded"]) if item[1]["downloaded"] > 0 else 0, 
+        reverse=True
+    )
+    
+    for src, st in sorted_sources:
+        vol = st.get("downloaded", 0)
+        to_ai = st.get("reached_ai", 0)
+        alerts = st.get("alerts", 0)
+        proc_time = st.get("processing_time_sum", 0) / max(1, st.get("processed_count", 1))
+        
+        signal_rate = (alerts / vol * 100) if vol > 0 else 0.0
+        
+        if signal_rate > 5.0: sig_class = "success"
+        elif signal_rate > 0.0: sig_class = "info"
+        else: sig_class = "muted"
+        
+        html += f"""
+            <tr>
+                <td>{src}</td>
+                <td>{vol}</td>
+                <td>{to_ai}</td>
+                <td>{alerts}</td>
+                <td><span class='badge {sig_class}'>{signal_rate:.2f}%</span></td>
+                <td>{proc_time:.0f}ms</td>
+            </tr>
+        """
+        
+    if not sorted_sources:
+        html += "<tr><td colspan='6' style='text-align:center;'>No sources processed this run</td></tr>"
+        
+    html += """
                 </table>
             </div>
+
+            <div class="card">
+                <h2>Lifecycle Telemetry (Last 100)</h2>
+                <table>
+                    <tr><th>Time (UTC)</th><th>Source</th><th>Event Family</th><th>Issuer</th><th>Outcome</th><th>Slowest Stage</th></tr>
+    """
+    
+    for log in logs[:100]:
+        outcome = log.get("outcome", "Unknown")
+        if "Alert Sent" in outcome: badge = "success"
+        elif "Archived" in outcome: badge = "warning"
+        elif "Dropped" in outcome: badge = "danger"
+        else: badge = "info"
+        
+        title_truncated = log.get("title", "")[:40] + "..." if len(log.get("title", "")) > 40 else log.get("title", "")
+        
+        html += f"""
+            <tr>
+                <td>{log.get('timestamp', '').split()[-2]}</td>
+                <td>{log.get('source', 'Unknown')}</td>
+                <td>{log.get('event_family', '-')}</td>
+                <td title="{log.get('title', '')}"><a href="{log.get('url', '#')}" target="_blank">{log.get('issuer', 'Unknown')}</a></td>
+                <td><span class='badge {badge}'>{outcome}</span></td>
+                <td>{log.get('slowest_stage', '-')}</td>
+            </tr>
+        """
+
+    html += """
+                </table>
+            </div>
+            
+            <div class="footer">
+                SSR Operations Centre &bull; Institutional Monitoring &bull; Deterministic Execution
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    import os
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(html)
+        
+
+def generate_archive_html(output_path):
+    """Generates the static lightweight archive index for searching past events."""
+    html = """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>SSR Document Archive</title>
+        <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0d1117; color: #c9d1d9; padding: 20px; }
+            .container { max-width: 1200px; margin: 0 auto; background: #161b22; padding: 20px; border: 1px solid #30363d; border-radius: 6px; }
+            h1 { border-bottom: 1px solid #30363d; padding-bottom: 10px; }
+            input { width: 100%; padding: 10px; margin-bottom: 20px; background: #0d1117; color: #c9d1d9; border: 1px solid #30363d; border-radius: 4px; }
+            table { width: 100%; border-collapse: collapse; }
+            th, td { padding: 10px; text-align: left; border-bottom: 1px solid #30363d; }
+            th { color: #8b949e; }
+            a { color: #58a6ff; text-decoration: none; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Document Archive</h1>
+            <p style="color: #8b949e;">A complete ledger of ingested articles. Data is loaded dynamically.</p>
+            <input type="text" id="searchInput" placeholder="Search archive by title, source, or date..." onkeyup="filterTable()">
+            
+            <table id="archiveTable">
+                <thead>
+                    <tr><th>Processed At</th><th>Source</th><th>Title</th><th>Published</th></tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="4">Loading data...</td></tr>
+                </tbody>
+            </table>
         </div>
 
-    </div>
-</body>
-</html>
-"""
-    
-    with open(output_path, "w", encoding="utf-8") as f:
-        f.write(html_content)
-    print(f"[MONITORING] Operations Centre cockpit successfully generated at {output_path}")
+        <script>
+            // Extremely lightweight deterministic script purely for rendering the local JSON payload. No frameworks.
+            let archiveData = [];
+            
+            fetch('archive_data.json')
+                .then(response => response.json())
+                .then(data => {
+                    archiveData = data;
+                    renderTable(archiveData);
+                })
+                .catch(error => {
+                    document.getElementById('tableBody').innerHTML = "<tr><td colspan='4'>Error loading data.</td></tr>";
+                });
 
-def generate_archive_html(output_path="docs/archive.html"):
-    """Generates the DataTables archive front-end page."""
-    html_content = """<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SSR Data Archive</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
-</head>
-<body class="bg-gray-900 text-gray-100 p-6">
-    <nav class="flex justify-between items-center mb-6">
-        <h1 class="text-2xl font-bold">SSR Historical Archive</h1>
-        <a href="index.html" class="bg-blue-600 px-4 py-2 rounded text-sm font-semibold hover:bg-blue-500">Back to Cockpit</a>
-    </nav>
-    <div class="bg-gray-800 p-6 rounded-lg shadow">
-        <p class="text-gray-400">Loading ingested data records from archive_data.json...</p>
-    </div>
-</body>
-</html>
-"""
+            function renderTable(data) {
+                const tbody = document.getElementById('tableBody');
+                tbody.innerHTML = '';
+                data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${row.processed_at.split('.')[0].replace('T', ' ')}</td>
+                        <td>${row.source}</td>
+                        <td><a href="${row.url}" target="_blank">${row.title}</a></td>
+                        <td>${row.published}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            function filterTable() {
+                const query = document.getElementById('searchInput').value.toLowerCase();
+                const filtered = archiveData.filter(row => 
+                    row.title.toLowerCase().includes(query) || 
+                    row.source.toLowerCase().includes(query) ||
+                    row.processed_at.includes(query)
+                );
+                renderTable(filtered);
+            }
+        </script>
+    </body>
+    </html>
+    """
+    
+    import os
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f:
-        f.write(html_content)
+        f.write(html)
