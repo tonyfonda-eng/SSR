@@ -4,8 +4,9 @@ import os
 
 def get_google_service_account():
     # Production / GitHub Actions: Load from Environment
-    if "GOOGLE_SERVICE_ACCOUNT_JSON" in os.environ:
-        return json.loads(os.environ["GOOGLE_SERVICE_ACCOUNT_JSON"])
+    env_json = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON", "").strip()
+    if env_json:
+        return json.loads(env_json)
     
     # Local / Agent Fallback: Load from ignored JSON file
     local_key_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "google_credentials.json")
