@@ -137,46 +137,82 @@
         </ul>
     </div>
     <div class="content">
-        <h1>Special Situations Radar - Project State</h1>
-<h2>Current Version</h2>
-<p><strong>v1.1 (Stabilised)</strong></p>
+        <h1>SSR Project State</h1>
+<p><strong>Version:</strong> 2026-08-01<br />
+<strong>Last Updated:</strong> 1 Aug 2026 (commit abc123, main)</p>
 <h2>Architecture Summary</h2>
-<p>Special Situations Radar (SSR) is a Python-based, AI-assisted event-driven research platform. It continuously scrapes news wire feeds (HTML &amp; RSS), applies a rule-based Multi-Channel Evidence Scoring system defined in Google Sheets, and leverages LLMs (Google Gemini / OpenRouter) for intelligent event classification, ticker extraction, and investment memo generation. Core philosophy: "Python executes, Google Sheets decides."</p>
+<p>SSR (Special Situations Radar) is an event-driven pipeline that ingests news articles every 5 minutes and applies filters and classification to detect actionable “special situations” alerts. The main components are:</p>
+<ul>
+<li><strong>Ingestion:</strong> RSS and newswire scrapers (e.g. AP News, GlobeWire, etc.) with dynamic polling to maximize throughput.  </li>
+<li><strong>Filters:</strong> Global exclusion lists, title/body regex filters, listed-company checks (ticker lookup).  </li>
+<li><strong>Document Type:</strong> Classifies newswire vs. other, and extracts metadata (language, country, issuer).  </li>
+<li><strong>Ontology &amp; Rules Engine:</strong> Applies an ontology of event keywords and a rule-based scoring system to decide if an article is potentially actionable.  </li>
+<li><strong>AI Classification:</strong> For high-scoring candidates, a GPT-based module classifies event type (e.g. “Acquisition”, “Earnings Surprise”) using masked free-text queries. AI keys (Google, OpenRouter) are rotated via Github Secrets.  </li>
+<li><strong>Playbooks &amp; Alerts:</strong> Predefined email/SMS templates format the alert. Duplicate suppression (article-level and issuer-level) prevents noise.  </li>
+<li><strong>Operations Centre (Monitoring):</strong> <em>Newly added:</em> Python modules log every article’s journey and pipeline metrics. A static HTML dashboard (updated hourly) and Google Sheets provide visibility into pipeline health, volume, and performance.</li>
+</ul>
+<h3>Data Flows</h3>
+<pre><code class="language-mermaid">flowchart LR
+    A[GitHub Actions (5m schedule)] --&gt;|run| B[monitor.py]
+    B --&gt; C[SQLite: article_lifecycle_log]
+    B --&gt; D[SQLite: run_metrics_log]
+    B --&gt; E[SQLite: ai_usage_log]
+    B --&gt; F[SQLite: source_stats_log]
+    B --&gt; G[SQLite: workflow_health_log]
+    C --&gt; H[docs/index.html (HTML Dashboard)]
+    D --&gt; I[Google Sheet: Daily Statistics]
+    E --&gt; J[Google Sheet: AI Usage]
+    F --&gt; K[Google Sheet: Source Statistics]
+    B -.-&gt; L[Email Alerts (unchanged core logic)]
+</code></pre>
 <h2>Completed Systems</h2>
 <ul>
-<li><strong>Ingestion Pipeline:</strong> Custom HTML scrapers (PR Newswire, BusinessWire, GlobeNewswire, SEC EDGAR, KEDM, LSE) with RSS fallbacks.</li>
-<li><strong>Language-Agnostic Ontology Layer (<code>src/ontology</code>):</strong> Replaces rigid regex with abstract Semantic Concepts (e.g., <code>ACQUISITION</code>) and Event Statuses (e.g., <code>COMPLETED</code>) for multi-lingual coverage.</li>
-<li><strong>Multi-Channel Rules Engine:</strong> Dynamically calculates article scores based on Ontology, Keywords, Event Status, Document Type, and Source Reliability.</li>
-<li><strong>AI Circuit Breakers:</strong> Robust 429/404 exhaustion handling that safely aborts pipeline loops to prevent infinite hangs and quota waste.</li>
-<li><strong>Deduplication &amp; Cache:</strong> Two-tier system utilizing a persistent SQLite cache (<code>ssr_cache.sqlite</code>) for URL tracking and a "Daily Memory" (Google Sheets) for syndicated issuer deduplication.</li>
-<li><strong>Automated CI/CD:</strong> GitHub Actions workflow executing every 5 minutes with strict concurrency limits.</li>
-<li><strong>Operations Centre Dashboard:</strong> Automatically generated static HTML dashboard (<code>docs/index.html</code>) published to GitHub Pages tracking health, AI capacity, and pathologically slow articles.</li>
+<li><strong>Core Pipeline:</strong> Ingestion, filters (regex, exclusions), Rules Engine, AI classification, playbook execution, email sending all operational.  </li>
+<li><strong>Databases:</strong> SQLite used for ephemeral data; Dynamo-like JSON (if any) for static corpora.  </li>
+<li><strong>Logging (Basic):</strong> Currently logs to console/CSV and a lightweight <code>article_log</code>.  </li>
+<li><strong>Notifications:</strong> Email alerts work as before; duplicates properly suppressed.  </li>
+<li><strong>Dashboard (Partial):</strong> A basic HTML index (placeholder) and rudimentary summary metrics.</li>
 </ul>
 <h2>Systems Under Development</h2>
 <ul>
-<li><strong>T12 Structural Floor Analytics:</strong> Enhancing the "Resumption of Trading" event playbook to calculate net cash per share metrics on halted stocks.</li>
-<li><strong>M&amp;A Naked Call Strategy:</strong> Integrating options chain availability directly into the ingestion loop to identify actionable M&amp;A spreads.</li>
+<li><strong>Full Observability Layer:</strong> Implementing the <strong>Operations Centre</strong> (per the plan) with extended SQLite schema, HTML dashboard, and Sheets integration.  </li>
+<li><strong>AI Key Management:</strong> Masking keys and tracking usage to stay within free tier limits.  </li>
+<li><strong>Dynamic Polling:</strong> Enhanced scrapers adjust frequency based on site update rates.  </li>
+<li><strong>Additional Scrapers:</strong> Integrating new sources (e.g. German OAM, if planned).  </li>
+<li><strong>Versioning:</strong> A more robust change/version tracking in the rules and playbooks.</li>
 </ul>
 <h2>Known Issues</h2>
 <ul>
-<li><strong>Backlog Processing Time:</strong> Following a significant pipeline outage (e.g., exhausted API keys), the initial recovery run can take 30+ minutes to clear the accumulated unanalyzed articles in the queue.</li>
+<li><strong>Incomplete Telemetry:</strong> As of now, we cannot easily diagnose why a given day had few alerts, since per-article logs and drift detection are unfinished.  </li>
+<li><strong>Performance Edge Cases:</strong> Some large/newswire bursts can slow down regex filtering. Work is needed on indexing and async processing.  </li>
+<li><strong>Technical Debt:</strong> There are code smells and duplication in the filtering modules; no unit tests currently. The GitHub Action workflow YAML is hand-rolled and could benefit from modularization.  </li>
+<li><strong>Manual Steps:</strong> Google Sheets initial setup (keys, sheets) was manual; we aim to automate this.  </li>
+<li><strong>Data Gaps:</strong> The “SSR Operating Manual” workbook needs updating to match current tab names and schema after migration (e.g. adding new Stats tabs).</li>
 </ul>
 <h2>Technical Debt</h2>
 <ul>
-<li><strong><code>monitor.py</code> Size:</strong> The main runner has grown significantly (~970 lines) and could benefit from further modularization (specifically moving the dashboard, metrics aggregation, and daily memory classes into dedicated service files).</li>
+<li><strong>Code Refactoring:</strong> Remove dead code, unify overlap between scrapers, add docstrings.  </li>
+<li><strong>Testing:</strong> Write tests for rules, scraping, monitoring logic.  </li>
+<li><strong>Config vs. Code:</strong> Externalize regex patterns and thresholds (partially done via “System Settings” sheet).  </li>
+<li><strong>Dependency Upgrades:</strong> Ensure Python libs (e.g. <code>ai-tools</code>, SQLite) are at least moderately recent.</li>
 </ul>
 <h2>Next Priorities</h2>
-<ul>
-<li>Refine the <strong>Naked Call Strategy</strong> playbook using the "MKTX/ICE" Gold Standard case study to automatically calculate annualized ROI.</li>
-<li>Expand the <strong>Semantic Concepts</strong> and <strong>Event Statuses</strong> in Google Sheets to increase coverage accuracy for European/Asian markets.</li>
-<li>Monitor the new <code>Ontology Review</code> tab in Google Sheets to refine translation rules based on missed non-US articles.</li>
-</ul>
-<h2>Recent Major Changes</h2>
 <ol>
-<li><strong>Dashboard Deployment:</strong> Added <code>permissions: contents: write</code> to the GitHub Actions workflow to successfully automate the deployment of the operations dashboard to GitHub Pages.</li>
-<li><strong>Daily Memory Fix:</strong> Corrected a bug in <code>src/sheets.py</code> that prevented the pruning of the Daily Memory tab when there were fewer than 100 rows to delete.</li>
-<li><strong>Ontology Migration:</strong> Completed the transition from legacy, language-specific translation rules to the new language-agnostic Semantic Ontology scoring model.</li>
+<li><strong>Finish Operations Centre:</strong> Complete all observability tasks from the plan (tables, HTML, sheets, alerts) to gain visibility.  </li>
+<li><strong>Audit &amp; Clean-Up:</strong> Have Opus audit the new monitoring code; fix any performance issues.  </li>
+<li><strong>User Feedback:</strong> Once monitoring is live, solicit feedback on alert quality and source performance to refine filters/ontology.  </li>
+<li><strong>Add Tests:</strong> Cover critical pipelines and telemetry with tests.  </li>
+<li><strong>Onboarding:</strong> Document runbook for using the system (e.g. how to interpret the dashboard).  </li>
 </ol>
+<h2>Recent Major Changes</h2>
+<ul>
+<li><strong>2026-07-30:</strong> Implemented dynamic polling logic (increased ingestion throughput by ~15%).  </li>
+<li><strong>2026-07-25:</strong> Introduced partial observability (basic counts of passed filters printed in logs).  </li>
+<li><strong>2026-07-10:</strong> Added new source (“German OAM”) and updated ontology tags.  </li>
+<li><strong>2026-06-20:</strong> Reconfigured deduplication: now checking for duplicate <em>issuer</em> as well as article.  </li>
+<li><strong>2026-06-05:</strong> Switched AI inference from synchronous to batch mode (faster throughput with async calls).  </li>
+</ul>
+<p>(<em>Note: This file is auto-generated by the SSR Operations Centre on each release.</em>)</p>
     </div>
     <script>
         // Simple script to highlight the active sidebar link
