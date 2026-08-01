@@ -921,7 +921,12 @@ def main():
     for exc in metrics.exceptions:
         save_exception_log(metrics.run_id, exc["timestamp"], exc["exc_type"], exc["stack_trace"], exc["module"], exc["func_name"], exc["article_url"], exc["severity"])
         
-    docs_path = "docs/index.html"
+from pathlib import Path
+    
+    docs_dir = Path("docs")
+    docs_dir.mkdir(exist_ok=True)
+    docs_path = str(docs_dir / "index.html")
+    
     last_publish = get_dashboard_state("last_publish")
     generate_html = False
     
@@ -952,6 +957,7 @@ def main():
         from src.database import export_archive_json
         archive_json_path = docs_dir / "archive_data.json"
         archive_html_path = docs_dir / "archive.html"
+        
         export_archive_json(filepath=str(archive_json_path))
         generate_archive_html(output_path=str(archive_html_path))
         
