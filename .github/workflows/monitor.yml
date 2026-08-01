@@ -5,6 +5,10 @@ on:
   schedule:
     - cron: '*/5 * * * *'
 
+concurrency:
+  group: "monitor-pipeline"
+  cancel-in-progress: false
+
 jobs:
   monitor:
     runs-on: ubuntu-latest
