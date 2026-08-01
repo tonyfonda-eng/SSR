@@ -146,7 +146,30 @@ def generate_dashboard_html(log_records, output_path="docs/index.html", metrics=
         rows_html += f'<td>{r.get("reason", "")}</td>'
         rows_html += f'<td>{ai_badge}</td>'
         rows_html += f'<td>{r.get("processing_time_ms", 0)}</td>'
-        rows_html += "</tr>\\n"
+        rows_html += "</tr>\n"
+
+    # 6. Dynamic Priority Queue
+    from src.database import get_dashboard_state
+    queue_json = get_dashboard_state("priority_queue", "[]")
+    queue_data = json.loads(queue_json) if queue_json else []
+    
+    # Aggregate counts by source for the queue table
+    queue_counts = {}
+    for item in queue_data:
+        src = item.get("source", "Unknown")
+        pri = item.get("priority", 0.0)
+        if src not in queue_counts:
+            queue_counts[src] = {"count": 0, "priority": pri}
+        queue_counts[src]["count"] += 1
+        
+    queue_html = ""
+    for src, data in sorted(queue_counts.items(), key=lambda x: x[1]["priority"], reverse=True):
+        p_val = data["priority"]
+        badge_class = "status-alert" if p_val > 10 else ("status-archived" if p_val < 1 else "status-drop")
+        queue_html += f"<tr><td>{src}</td><td>{data['count']}</td><td><span class='badge {badge_class}'>{p_val:.1f} (avg/hr)</span></td></tr>"
+
+    if not queue_html:
+        queue_html = "<tr><td colspan='3'>No priority data available for current window.</td></tr>"
 
     html_template = f"""<!DOCTYPE html>
 <html lang="en">
@@ -334,6 +357,17 @@ def generate_dashboard_html(log_records, output_path="docs/index.html", metrics=
                 <table>
                     <thead><tr><th>Source</th><th>Downloaded</th><th>Alerts</th><th>Signal Rate</th></tr></thead>
                     <tbody>{source_html}</tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Priority Queue Heatmap -->
+        <div class="panel panel-full">
+            <h2>Dynamic Priority Allocation (Current Hour Peak)</h2>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Source</th><th>Articles Allocated (Max 50)</th><th>Priority Score (Avg Historical Vol)</th></tr></thead>
+                    <tbody>{queue_html}</tbody>
                 </table>
             </div>
         </div>

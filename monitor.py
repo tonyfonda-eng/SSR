@@ -704,10 +704,35 @@ def main():
             if not method_used and not rss_url and not scraper:
                 print(f"[SKIP] Source '{source_name}' enabled but missing RSS URL and no custom scraper found.")
                 
-    # Pipeline Phase 2: Cross-Provider Clustering
+    # Update Hourly Heatmap (Continuous Learning)
+    from src.database import update_hourly_volume, get_hourly_heatmap
+    import datetime
+    
+    current_hour = datetime.datetime.utcnow().hour
+    source_volumes = {src: stats["count"] for src, stats in source_stats.items()}
+    if source_volumes:
+        update_hourly_volume(source_volumes, current_hour)
+        
+    heatmap = get_hourly_heatmap(current_hour)
+
+    # Pipeline Phase 2: Cross-Provider Clustering & Dynamic Priority Queue
     print(f"\n[DEDUPLICATION] Clustering {len(all_new_articles)} new articles across all sources...")
     clusters = cluster_articles(all_new_articles)
     print(f"[DEDUPLICATION] Reduced to {len(clusters)} unique events.")
+    
+    # Sort clusters dynamically by historical peak volume of the source
+    def get_cluster_priority(cluster):
+        primary_source = cluster[0]["source_name"]
+        return heatmap.get(primary_source, 0.0)
+        
+    clusters.sort(key=get_cluster_priority, reverse=True)
+    
+    # Save the allocation for dashboard visualization
+    allocated_queue = [{"source": c[0]["source_name"], "priority": get_cluster_priority(c)} for c in clusters]
+    from src.database import set_dashboard_state
+    import json
+    set_dashboard_state("priority_queue", json.dumps(allocated_queue[:50])) # only save what we process
+
     MAX_AI_EVALS = 50
     if len(clusters) > MAX_AI_EVALS:
         print(f"\n[THROTTLING] Truncating massive backlog down to {MAX_AI_EVALS} events to prevent pipeline timeouts! The remaining {len(clusters) - MAX_AI_EVALS} events will roll over and process in the next 5-minute schedule.")

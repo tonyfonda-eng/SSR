@@ -207,6 +207,15 @@ def initialise_database():
         """)
 
         conn.execute("""
+            CREATE TABLE IF NOT EXISTS source_hourly_heatmap (
+                source TEXT,
+                hour_utc INTEGER,
+                avg_volume REAL DEFAULT 0.0,
+                PRIMARY KEY (source, hour_utc)
+            )
+        """)
+
+        conn.execute("""
             CREATE TABLE IF NOT EXISTS dashboard_state (
                 key TEXT PRIMARY KEY,
                 value TEXT
@@ -569,3 +578,39 @@ def get_30_day_source_averages():
                 "avg_alerts": row[2] or 0.0
             }
         return averages
+
+def update_hourly_volume(source_counts, hour_utc, alpha=0.1):
+    """
+    Updates the historical exponential moving average of article volume per source per hour.
+    source_counts: dict of {source_name: new_article_count}
+    """
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        for source, count in source_counts.items():
+            # Get existing average if any
+            cursor.execute("SELECT avg_volume FROM source_hourly_heatmap WHERE source = ? AND hour_utc = ?", (source, hour_utc))
+            row = cursor.fetchone()
+            
+            if row:
+                old_avg = row[0]
+                new_avg = (old_avg * (1.0 - alpha)) + (count * alpha)
+            else:
+                new_avg = float(count) # First time seeing this source at this hour, start average here
+                
+            cursor.execute("""
+                INSERT OR REPLACE INTO source_hourly_heatmap (source, hour_utc, avg_volume)
+                VALUES (?, ?, ?)
+            """, (source, hour_utc, new_avg))
+
+def get_hourly_heatmap(hour_utc=None):
+    """
+    Returns a dictionary of {source: avg_volume} for the specified UTC hour.
+    If hour_utc is None, uses the current UTC hour.
+    """
+    if hour_utc is None:
+        hour_utc = datetime.datetime.utcnow().hour
+        
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT source, avg_volume FROM source_hourly_heatmap WHERE hour_utc = ?", (hour_utc,))
+        return {row[0]: row[1] for row in cursor.fetchall()}
