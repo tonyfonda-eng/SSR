@@ -738,7 +738,6 @@ def main():
         body = primary.get("body", "")
         if not body or len(body) < 100:
             import time
-            from src.scrapers import get_scraper_for_source
             scraper = get_scraper_for_source(primary["source_name"])
             try:
                 if scraper:
