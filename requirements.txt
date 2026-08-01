@@ -9,3 +9,4 @@ openai
 PyPDF2
 pandas
 tabulate
+markdown

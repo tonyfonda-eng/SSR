@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project State - SSR Living Documentation</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-color: #f1f5f9;
+            --border-color: #334155;
+            --accent: #3b82f6;
+            --sidebar-width: 250px;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--panel-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            position: fixed;
+            height: 100%;
+            overflow-y: auto;
+        }
+        .sidebar h2 {
+            color: var(--accent);
+            font-size: 1.2rem;
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar li {
+            margin-bottom: 10px;
+        }
+        .sidebar a {
+            color: var(--text-color);
+            text-decoration: none;
+            display: block;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--accent);
+        }
+        .content {
+            margin-left: var(--sidebar-width);
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            line-height: 1.6;
+        }
+        h1, h2, h3, h4 {
+            color: #ffffff;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+        h1 { font-size: 2.2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        code {
+            background-color: rgba(0,0,0,0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        pre code {
+            display: block;
+            padding: 15px;
+            overflow-x: auto;
+            background-color: #000;
+            border: 1px solid var(--border-color);
+        }
+        blockquote {
+            border-left: 4px solid var(--accent);
+            margin: 0;
+            padding-left: 15px;
+            color: #cbd5e1;
+            background-color: rgba(59, 130, 246, 0.05);
+            padding: 10px 15px;
+            border-radius: 0 4px 4px 0;
+        }
+        ul, ol { margin-top: 0.5em; margin-bottom: 1.5em; padding-left: 25px; }
+        li { margin-bottom: 0.5em; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 10px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        th {
+            background-color: rgba(0,0,0,0.2);
+            font-weight: 600;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 20px 0;
+            background: white; /* For SVG contrast if needed */
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>SSR Manual</h2>
+        <ul>
+            <li><a href="PROJECT_STATE.html" id="link-PROJECT_STATE">Project State</a></li>
+            <li><a href="ARCHITECTURE.html" id="link-ARCHITECTURE">Architecture</a></li>
+            <li><a href="PIPELINE.html" id="link-PIPELINE">The Pipeline</a></li>
+            <li><a href="WORKBOOK.html" id="link-WORKBOOK">Workbook Schema</a></li>
+            <li><a href="OPERATIONS.html" id="link-OPERATIONS">Operations</a></li>
+            <li><a href="CHANGELOG.html" id="link-CHANGELOG">Changelog</a></li>
+            <li style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="index.html">Live Dashboard</a>
+            </li>
+        </ul>
+    </div>
+    <div class="content">
+        <h1>Special Situations Radar - Project State</h1>
+<h2>Current Version</h2>
+<p><strong>v1.1 (Stabilised)</strong></p>
+<h2>Architecture Summary</h2>
+<p>Special Situations Radar (SSR) is a Python-based, AI-assisted event-driven research platform. It continuously scrapes news wire feeds (HTML &amp; RSS), applies a rule-based Multi-Channel Evidence Scoring system defined in Google Sheets, and leverages LLMs (Google Gemini / OpenRouter) for intelligent event classification, ticker extraction, and investment memo generation. Core philosophy: "Python executes, Google Sheets decides."</p>
+<h2>Completed Systems</h2>
+<ul>
+<li><strong>Ingestion Pipeline:</strong> Custom HTML scrapers (PR Newswire, BusinessWire, GlobeNewswire, SEC EDGAR, KEDM, LSE) with RSS fallbacks.</li>
+<li><strong>Language-Agnostic Ontology Layer (<code>src/ontology</code>):</strong> Replaces rigid regex with abstract Semantic Concepts (e.g., <code>ACQUISITION</code>) and Event Statuses (e.g., <code>COMPLETED</code>) for multi-lingual coverage.</li>
+<li><strong>Multi-Channel Rules Engine:</strong> Dynamically calculates article scores based on Ontology, Keywords, Event Status, Document Type, and Source Reliability.</li>
+<li><strong>AI Circuit Breakers:</strong> Robust 429/404 exhaustion handling that safely aborts pipeline loops to prevent infinite hangs and quota waste.</li>
+<li><strong>Deduplication &amp; Cache:</strong> Two-tier system utilizing a persistent SQLite cache (<code>ssr_cache.sqlite</code>) for URL tracking and a "Daily Memory" (Google Sheets) for syndicated issuer deduplication.</li>
+<li><strong>Automated CI/CD:</strong> GitHub Actions workflow executing every 5 minutes with strict concurrency limits.</li>
+<li><strong>Operations Centre Dashboard:</strong> Automatically generated static HTML dashboard (<code>docs/index.html</code>) published to GitHub Pages tracking health, AI capacity, and pathologically slow articles.</li>
+</ul>
+<h2>Systems Under Development</h2>
+<ul>
+<li><strong>T12 Structural Floor Analytics:</strong> Enhancing the "Resumption of Trading" event playbook to calculate net cash per share metrics on halted stocks.</li>
+<li><strong>M&amp;A Naked Call Strategy:</strong> Integrating options chain availability directly into the ingestion loop to identify actionable M&amp;A spreads.</li>
+</ul>
+<h2>Known Issues</h2>
+<ul>
+<li><strong>Backlog Processing Time:</strong> Following a significant pipeline outage (e.g., exhausted API keys), the initial recovery run can take 30+ minutes to clear the accumulated unanalyzed articles in the queue.</li>
+</ul>
+<h2>Technical Debt</h2>
+<ul>
+<li><strong><code>monitor.py</code> Size:</strong> The main runner has grown significantly (~970 lines) and could benefit from further modularization (specifically moving the dashboard, metrics aggregation, and daily memory classes into dedicated service files).</li>
+</ul>
+<h2>Next Priorities</h2>
+<ul>
+<li>Refine the <strong>Naked Call Strategy</strong> playbook using the "MKTX/ICE" Gold Standard case study to automatically calculate annualized ROI.</li>
+<li>Expand the <strong>Semantic Concepts</strong> and <strong>Event Statuses</strong> in Google Sheets to increase coverage accuracy for European/Asian markets.</li>
+<li>Monitor the new <code>Ontology Review</code> tab in Google Sheets to refine translation rules based on missed non-US articles.</li>
+</ul>
+<h2>Recent Major Changes</h2>
+<ol>
+<li><strong>Dashboard Deployment:</strong> Added <code>permissions: contents: write</code> to the GitHub Actions workflow to successfully automate the deployment of the operations dashboard to GitHub Pages.</li>
+<li><strong>Daily Memory Fix:</strong> Corrected a bug in <code>src/sheets.py</code> that prevented the pruning of the Daily Memory tab when there were fewer than 100 rows to delete.</li>
+<li><strong>Ontology Migration:</strong> Completed the transition from legacy, language-specific translation rules to the new language-agnostic Semantic Ontology scoring model.</li>
+</ol>
+    </div>
+    <script>
+        // Simple script to highlight the active sidebar link
+        const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
+        const activeLink = document.getElementById('link-' + currentPage);
+        if (activeLink) {
+            activeLink.classList.add('active');
+        }
+    </script>
+</body>
+</html>
