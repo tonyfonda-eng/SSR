@@ -615,3 +615,38 @@ def get_hourly_heatmap(hour_utc=None):
         cursor = conn.cursor()
         cursor.execute("SELECT source, avg_volume FROM source_hourly_heatmap WHERE hour_utc = ?", (hour_utc,))
         return {row[0]: row[1] for row in cursor.fetchall()}
+
+def export_archive_json(filepath="docs/archive_data.json", limit=10000):
+    """
+    Exports the latest archived articles (excluding body text) to a JSON file 
+    for the DataTables web frontend.
+    """
+    import json
+    import os
+    
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        # We select specific columns to keep the payload lightweight. No 'body'.
+        cursor.execute("""
+            SELECT source, title, url, published, processed_at
+            FROM articles
+            ORDER BY processed_at DESC
+            LIMIT ?
+        """, (limit,))
+        
+        rows = cursor.fetchall()
+        data = []
+        for r in rows:
+            data.append({
+                "source": r[0] or "",
+                "title": r[1] or "",
+                "url": r[2] or "",
+                "published": r[3] or "",
+                "processed_at": r[4] or ""
+            })
+            
+    os.makedirs(os.path.dirname(filepath), exist_ok=True)
+    with open(filepath, 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False)
+        
+    print(f"[DATABASE] Exported {len(data)} articles to {filepath} for Web Archive.")
