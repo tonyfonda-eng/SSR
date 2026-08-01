@@ -19,19 +19,38 @@ def load_rules(sheet_url):
     """Loads operational rules from the Google Sheet."""
     client = get_client()
     spreadsheet = client.open_by_url(sheet_url)
-    worksheet = spreadsheet.worksheet("Rules")
-    return worksheet.get_all_records()
+    try:
+        worksheet = spreadsheet.worksheet("Rules")
+        return worksheet.get_all_records()
+    except gspread.exceptions.WorksheetNotFound:
+        return []
 
 def load_document_type_scores(sheet_url):
     """Loads document type scores from the Google Sheet."""
     client = get_client()
     spreadsheet = client.open_by_url(sheet_url)
-    worksheet = spreadsheet.worksheet("DocumentScores")
-    return worksheet.get_all_records()
+    try:
+        worksheet = spreadsheet.worksheet("DocumentScores")
+        return worksheet.get_all_records()
+    except gspread.exceptions.WorksheetNotFound:
+        return []
 
 def load_sources(sheet_url):
     """Loads operational sources from the Google Sheet."""
     client = get_client()
     spreadsheet = client.open_by_url(sheet_url)
-    worksheet = spreadsheet.worksheet("Sources")
-    return worksheet.get_all_records()
+    try:
+        worksheet = spreadsheet.worksheet("Sources")
+        return worksheet.get_all_records()
+    except gspread.exceptions.WorksheetNotFound:
+        return []
+
+def load_playbooks(sheet_url):
+    """Loads operational playbooks from the Google Sheet."""
+    client = get_client()
+    spreadsheet = client.open_by_url(sheet_url)
+    try:
+        worksheet = spreadsheet.worksheet("Playbooks")
+        return worksheet.get_all_records()
+    except gspread.exceptions.WorksheetNotFound:
+        return []
