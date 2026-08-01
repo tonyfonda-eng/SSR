@@ -97,18 +97,6 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         metrics.log_article(article_id, source_name, url, title, country, language, document_type, issuer_name, event_family, pipeline_stage, outcome, reason, ai_invoked, elapsed_ms, slowest_stage)
         return ret_val
 
-    import time
-    start_time = time.perf_counter()
-    from src.monitoring import MetricsCollector
-    metrics = MetricsCollector.get_instance()
-    metrics.daily["downloaded"] += 1
-    metrics.source_stats[source_name]["downloaded"] += 1
-    
-    def conclude(ret_val, stage, final_status, drop_reason, issuer_name="Unknown", event_family="Unknown"):
-        elapsed_ms = (time.perf_counter() - start_time) * 1000
-        metrics.log_article(article_id, source_name, url, title, country, language, document_type, issuer_name, event_family, stage, final_status, drop_reason, elapsed_ms)
-        return ret_val
-
     if global_exclusions is None:
         global_exclusions = []
         
