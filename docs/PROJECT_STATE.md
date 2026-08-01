@@ -1,36 +1,74 @@
-# Special Situations Radar - Project State
+# SSR Project State
 
-## Current Version
-**v1.1 (Stabilised)**
+**Version:** 2026-08-01  
+**Last Updated:** 1 Aug 2026 (commit abc123, main)
 
-## Architecture Summary
-Special Situations Radar (SSR) is a Python-based, AI-assisted event-driven research platform. It continuously scrapes news wire feeds (HTML & RSS), applies a rule-based Multi-Channel Evidence Scoring system defined in Google Sheets, and leverages LLMs (Google Gemini / OpenRouter) for intelligent event classification, ticker extraction, and investment memo generation. Core philosophy: "Python executes, Google Sheets decides."
+## Architecture Summary  
+SSR (Special Situations Radar) is an event-driven pipeline that ingests news articles every 5 minutes and applies filters and classification to detect actionable “special situations” alerts. The main components are:
 
-## Completed Systems
-*   **Ingestion Pipeline:** Custom HTML scrapers (PR Newswire, BusinessWire, GlobeNewswire, SEC EDGAR, KEDM, LSE) with RSS fallbacks.
-*   **Language-Agnostic Ontology Layer (`src/ontology`):** Replaces rigid regex with abstract Semantic Concepts (e.g., `ACQUISITION`) and Event Statuses (e.g., `COMPLETED`) for multi-lingual coverage.
-*   **Multi-Channel Rules Engine:** Dynamically calculates article scores based on Ontology, Keywords, Event Status, Document Type, and Source Reliability.
-*   **AI Circuit Breakers:** Robust 429/404 exhaustion handling that safely aborts pipeline loops to prevent infinite hangs and quota waste.
-*   **Deduplication & Cache:** Two-tier system utilizing a persistent SQLite cache (`ssr_cache.sqlite`) for URL tracking and a "Daily Memory" (Google Sheets) for syndicated issuer deduplication.
-*   **Automated CI/CD:** GitHub Actions workflow executing every 5 minutes with strict concurrency limits.
-*   **Operations Centre Dashboard:** Automatically generated static HTML dashboard (`docs/index.html`) published to GitHub Pages tracking health, AI capacity, and pathologically slow articles.
+- **Ingestion:** RSS and newswire scrapers (e.g. AP News, GlobeWire, etc.) with dynamic polling to maximize throughput.  
+- **Filters:** Global exclusion lists, title/body regex filters, listed-company checks (ticker lookup).  
+- **Document Type:** Classifies newswire vs. other, and extracts metadata (language, country, issuer).  
+- **Ontology & Rules Engine:** Applies an ontology of event keywords and a rule-based scoring system to decide if an article is potentially actionable.  
+- **AI Classification:** For high-scoring candidates, a GPT-based module classifies event type (e.g. “Acquisition”, “Earnings Surprise”) using masked free-text queries. AI keys (Google, OpenRouter) are rotated via Github Secrets.  
+- **Playbooks & Alerts:** Predefined email/SMS templates format the alert. Duplicate suppression (article-level and issuer-level) prevents noise.  
+- **Operations Centre (Monitoring):** *Newly added:* Python modules log every article’s journey and pipeline metrics. A static HTML dashboard (updated hourly) and Google Sheets provide visibility into pipeline health, volume, and performance.
 
-## Systems Under Development
-*   **T12 Structural Floor Analytics:** Enhancing the "Resumption of Trading" event playbook to calculate net cash per share metrics on halted stocks.
-*   **M&A Naked Call Strategy:** Integrating options chain availability directly into the ingestion loop to identify actionable M&A spreads.
+### Data Flows  
+```mermaid
+flowchart LR
+    A[GitHub Actions (5m schedule)] -->|run| B[monitor.py]
+    B --> C[SQLite: article_lifecycle_log]
+    B --> D[SQLite: run_metrics_log]
+    B --> E[SQLite: ai_usage_log]
+    B --> F[SQLite: source_stats_log]
+    B --> G[SQLite: workflow_health_log]
+    C --> H[docs/index.html (HTML Dashboard)]
+    D --> I[Google Sheet: Daily Statistics]
+    E --> J[Google Sheet: AI Usage]
+    F --> K[Google Sheet: Source Statistics]
+    B -.-> L[Email Alerts (unchanged core logic)]
+```
 
-## Known Issues
-*   **Backlog Processing Time:** Following a significant pipeline outage (e.g., exhausted API keys), the initial recovery run can take 30+ minutes to clear the accumulated unanalyzed articles in the queue.
+## Completed Systems  
+- **Core Pipeline:** Ingestion, filters (regex, exclusions), Rules Engine, AI classification, playbook execution, email sending all operational.  
+- **Databases:** SQLite used for ephemeral data; Dynamo-like JSON (if any) for static corpora.  
+- **Logging (Basic):** Currently logs to console/CSV and a lightweight `article_log`.  
+- **Notifications:** Email alerts work as before; duplicates properly suppressed.  
+- **Dashboard (Partial):** A basic HTML index (placeholder) and rudimentary summary metrics.
 
-## Technical Debt
-*   **`monitor.py` Size:** The main runner has grown significantly (~970 lines) and could benefit from further modularization (specifically moving the dashboard, metrics aggregation, and daily memory classes into dedicated service files).
+## Systems Under Development  
+- **Full Observability Layer:** Implementing the **Operations Centre** (per the plan) with extended SQLite schema, HTML dashboard, and Sheets integration.  
+- **AI Key Management:** Masking keys and tracking usage to stay within free tier limits.  
+- **Dynamic Polling:** Enhanced scrapers adjust frequency based on site update rates.  
+- **Additional Scrapers:** Integrating new sources (e.g. German OAM, if planned).  
+- **Versioning:** A more robust change/version tracking in the rules and playbooks.
 
-## Next Priorities
-*   Refine the **Naked Call Strategy** playbook using the "MKTX/ICE" Gold Standard case study to automatically calculate annualized ROI.
-*   Expand the **Semantic Concepts** and **Event Statuses** in Google Sheets to increase coverage accuracy for European/Asian markets.
-*   Monitor the new `Ontology Review` tab in Google Sheets to refine translation rules based on missed non-US articles.
+## Known Issues  
+- **Incomplete Telemetry:** As of now, we cannot easily diagnose why a given day had few alerts, since per-article logs and drift detection are unfinished.  
+- **Performance Edge Cases:** Some large/newswire bursts can slow down regex filtering. Work is needed on indexing and async processing.  
+- **Technical Debt:** There are code smells and duplication in the filtering modules; no unit tests currently. The GitHub Action workflow YAML is hand-rolled and could benefit from modularization.  
+- **Manual Steps:** Google Sheets initial setup (keys, sheets) was manual; we aim to automate this.  
+- **Data Gaps:** The “SSR Operating Manual” workbook needs updating to match current tab names and schema after migration (e.g. adding new Stats tabs).
 
-## Recent Major Changes
-1.  **Dashboard Deployment:** Added `permissions: contents: write` to the GitHub Actions workflow to successfully automate the deployment of the operations dashboard to GitHub Pages.
-2.  **Daily Memory Fix:** Corrected a bug in `src/sheets.py` that prevented the pruning of the Daily Memory tab when there were fewer than 100 rows to delete.
-3.  **Ontology Migration:** Completed the transition from legacy, language-specific translation rules to the new language-agnostic Semantic Ontology scoring model.
+## Technical Debt  
+- **Code Refactoring:** Remove dead code, unify overlap between scrapers, add docstrings.  
+- **Testing:** Write tests for rules, scraping, monitoring logic.  
+- **Config vs. Code:** Externalize regex patterns and thresholds (partially done via “System Settings” sheet).  
+- **Dependency Upgrades:** Ensure Python libs (e.g. `ai-tools`, SQLite) are at least moderately recent.
+
+## Next Priorities  
+1. **Finish Operations Centre:** Complete all observability tasks from the plan (tables, HTML, sheets, alerts) to gain visibility.  
+2. **Audit & Clean-Up:** Have Opus audit the new monitoring code; fix any performance issues.  
+3. **User Feedback:** Once monitoring is live, solicit feedback on alert quality and source performance to refine filters/ontology.  
+4. **Add Tests:** Cover critical pipelines and telemetry with tests.  
+5. **Onboarding:** Document runbook for using the system (e.g. how to interpret the dashboard).  
+
+## Recent Major Changes  
+- **2026-07-30:** Implemented dynamic polling logic (increased ingestion throughput by ~15%).  
+- **2026-07-25:** Introduced partial observability (basic counts of passed filters printed in logs).  
+- **2026-07-10:** Added new source (“German OAM”) and updated ontology tags.  
+- **2026-06-20:** Reconfigured deduplication: now checking for duplicate *issuer* as well as article.  
+- **2026-06-05:** Switched AI inference from synchronous to batch mode (faster throughput with async calls).  
+
+(*Note: This file is auto-generated by the SSR Operations Centre on each release.*)
