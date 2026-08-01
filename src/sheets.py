@@ -165,3 +165,27 @@ def get_system_settings(sheet_url):
             return spreadsheet.worksheet("SystemSettings").get_all_records()
         except gspread.exceptions.WorksheetNotFound:
             return []
+
+def load_semantic_concepts(sheet_url):
+    """Loads semantic concepts from the Google Sheet."""
+    client = get_client()
+    spreadsheet = client.open_by_url(sheet_url)
+    try:
+        return spreadsheet.worksheet("Semantic Concepts").get_all_records()
+    except gspread.exceptions.WorksheetNotFound:
+        try:
+            return spreadsheet.worksheet("SemanticConcepts").get_all_records()
+        except gspread.exceptions.WorksheetNotFound:
+            return []
+
+def load_event_statuses(sheet_url):
+    """Loads event statuses from the Google Sheet."""
+    client = get_client()
+    spreadsheet = client.open_by_url(sheet_url)
+    try:
+        return spreadsheet.worksheet("Event Status").get_all_records()
+    except gspread.exceptions.WorksheetNotFound:
+        try:
+            return spreadsheet.worksheet("EventStatus").get_all_records()
+        except gspread.exceptions.WorksheetNotFound:
+            return []
