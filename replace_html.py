@@ -1,177 +1,12 @@
-import json
-import datetime
-import os
+import re
 
-def generate_dashboard_html(log_records, output_path="docs/index.html", metrics=None, avg_30=None, src_30=None):
-    """
-    Generates a static HTML dashboard organized into 5 logical sections.
-    """
-    
-    # 1. Daily Report Card Stats
-    health_score = 100
-    total_runtime = 0
-    total_dl = 0
-    total_ai = 0
-    total_alerts = 0
-    total_exc = 0
-    avoided_pct = 0.0
-    status_text = "Healthy"
-    status_color = "var(--success)"
-    
-    if metrics:
-        total_runtime = metrics.daily.get("total_runtime_s", 0)
-        health_score = metrics.calculate_health_score(total_runtime)
-        total_dl = metrics.daily.get("downloaded", 0)
-        total_ai = metrics.daily.get("ai_calls", 0)
-        total_alerts = metrics.daily.get("emails_sent", 0)
-        total_exc = len(metrics.exceptions)
-        
-        avoided = metrics.daily.get("rejected_before_regex", 0) + metrics.daily.get("rejected_by_regex", 0) + \
-                  metrics.daily.get("rejected_by_exclusions", 0) + metrics.daily.get("rejected_by_ontology", 0) + \
-                  metrics.daily.get("rejected_by_rules", 0)
-        
-        if total_dl > 0:
-            avoided_pct = (avoided / total_dl) * 100
-            
-        if health_score < 80:
-            status_text = "Warning"
-            status_color = "var(--warning)"
-        if health_score < 50 or total_exc > 0:
-            status_text = "Critical"
-            status_color = "var(--danger)"
-            
-        # Expected Alerts Logic
-        avg_alerts = 0
-        if avg_30:
-            avg_alerts = avg_30.get("emails_sent", 0)
-            if avg_alerts < 1.0 and total_alerts == 0:
-                status_text = "Expected Low Alerts"
-                status_color = "var(--gray)"
-            elif avg_alerts > 1.0 and total_alerts == 0:
-                status_text = "Unexpected 0 Alerts"
-                status_color = "var(--danger)"
-                
-    rt_mins = int(total_runtime // 60)
-    rt_secs = int(total_runtime % 60)
+with open("src/html_generator.py", "r", encoding="utf-8") as f:
+    content = f.read()
 
-    # 2. Pipeline Funnel
-    funnel_html = ""
-    if metrics:
-        f_steps = [
-            ("Downloaded", total_dl),
-            ("Rejected Pre-Regex", metrics.daily.get("rejected_before_regex", 0)),
-            ("Rejected by Regex", metrics.daily.get("rejected_by_regex", 0)),
-            ("Rejected by Exclusions", metrics.daily.get("rejected_by_exclusions", 0)),
-            ("Rejected by Ontology", metrics.daily.get("rejected_by_ontology", 0)),
-            ("Rejected by Rules", metrics.daily.get("rejected_by_rules", 0)),
-            ("Reached AI", metrics.daily.get("reached_ai", 0)),
-            ("Alerts Sent", total_alerts)
-        ]
-        for name, val in f_steps:
-            pct = f"{(val/total_dl)*100:.1f}%" if total_dl > 0 else "0%"
-            funnel_html += f"<tr><td>{name}</td><td>{val}</td><td>{pct}</td></tr>"
+start_marker = 'html_template = f"""<!DOCTYPE html>'
+end_marker = '</html>"""'
 
-    # 3. AI Capacity
-    ai_html = ""
-    if metrics:
-        # Simple estimates based on typical daily quotas
-        g_usage = 0
-        o_usage = 0
-        for key_id, ai in metrics.ai_telemetry.items():
-            if "gemini" in ai.get("provider", "").lower():
-                g_usage += ai.get("requests", 0)
-            else:
-                o_usage += ai.get("requests", 0)
-                
-        # Approx 1500 per day for Google free tier (per key, if 7 keys = 10500)
-        g_quota = 10500 
-        o_quota = 5000 # Example
-        
-        g_rem = max(0, g_quota - g_usage)
-        o_rem = max(0, o_quota - o_usage)
-        
-        ai_html += f"<tr><td>Google Gemini</td><td>{g_usage}</td><td>{(g_rem/g_quota)*100:.1f}%</td></tr>"
-        ai_html += f"<tr><td>OpenRouter</td><td>{o_usage}</td><td>{(o_rem/o_quota)*100:.1f}%</td></tr>"
-
-    # 4. Source Health
-    source_html = ""
-    if metrics and src_30:
-        # Sort by Signal Rate
-        sorted_sources = sorted(metrics.source_stats.items(), 
-                              key=lambda x: (x[1]["alerts"] / x[1]["downloaded"]) if x[1]["downloaded"] > 0 else 0, 
-                              reverse=True)
-                              
-        for src, st in sorted_sources:
-            dl = st["downloaded"]
-            alerts = st["alerts"]
-            sig_rate = (alerts / dl) * 100 if dl > 0 else 0
-            
-            avg_dl = 0
-            deg_warn = ""
-            if src in src_30:
-                avg_dl = src_30[src].get("avg_downloaded", 0)
-                if avg_dl > 50 and dl < (avg_dl * 0.5):
-                    deg_warn = f'<span style="color:var(--danger)">⚠ Degraded (Avg: {avg_dl:.0f})</span>'
-            
-            source_html += f"<tr><td>{src} {deg_warn}</td><td>{dl}</td><td>{alerts}</td><td>{sig_rate:.3f}%</td></tr>"
-
-    # 5. Pathological & Recent Events
-    sorted_logs = sorted(log_records, key=lambda x: x.get("processing_time_ms", 0), reverse=True)
-    top_10 = sorted_logs[:10]
-    top_10_html = ""
-    for r in top_10:
-        top_10_html += f"<tr><td>{r.get('source','')}</td><td>{r.get('title','')[:50]}...</td><td>{r.get('slowest_stage','Unknown')}</td><td style='color: var(--danger); font-weight: bold;'>{r.get('processing_time_ms',0)} ms</td></tr>"
-
-    rows_html = ""
-    for r in log_records:
-        title = r.get("title", "")
-        url = r.get("url", "")
-        title_html = f'<a href="{url}" target="_blank">{title[:50]}...</a>' if url and title else title[:50]
-        
-        outcome = r.get("outcome", "")
-        outcome_class = "status-archived"
-        if "Alert" in outcome or "Success" in outcome: outcome_class = "status-alert"
-        elif "Drop" in outcome or "Reject" in outcome or "Abort" in outcome: outcome_class = "status-drop"
-        
-        ai_inv = r.get("ai_invoked", 0)
-        ai_badge = '<span class="badge status-drop">NO</span>' if not ai_inv else '<span class="badge status-alert">YES</span>'
-        
-        rows_html += "<tr>"
-        rows_html += f'<td>{r.get("timestamp", "")}</td>'
-        rows_html += f'<td>{r.get("source", "")}</td>'
-        rows_html += f'<td>{title_html}</td>'
-        rows_html += f'<td>{r.get("issuer", "")}</td>'
-        rows_html += f'<td class="stage-cell">{r.get("pipeline_stage", "")}</td>'
-        rows_html += f'<td><span class="badge {outcome_class}">{outcome}</span></td>'
-        rows_html += f'<td>{r.get("reason", "")}</td>'
-        rows_html += f'<td>{ai_badge}</td>'
-        rows_html += f'<td>{r.get("processing_time_ms", 0)}</td>'
-        rows_html += "</tr>\n"
-
-    # 6. Dynamic Priority Queue
-    from src.database import get_dashboard_state
-    queue_json = get_dashboard_state("priority_queue", "[]")
-    queue_data = json.loads(queue_json) if queue_json else []
-    
-    # Aggregate counts by source for the queue table
-    queue_counts = {}
-    for item in queue_data:
-        src = item.get("source", "Unknown")
-        pri = item.get("priority", 0.0)
-        if src not in queue_counts:
-            queue_counts[src] = {"count": 0, "priority": pri}
-        queue_counts[src]["count"] += 1
-        
-    queue_html = ""
-    for src, data in sorted(queue_counts.items(), key=lambda x: x[1]["priority"], reverse=True):
-        p_val = data["priority"]
-        badge_class = "status-alert" if p_val > 10 else ("status-archived" if p_val < 1 else "status-drop")
-        queue_html += f"<tr><td>{src}</td><td>{data['count']}</td><td><span class='badge {badge_class}'>{p_val:.1f} (avg/hr)</span></td></tr>"
-
-    if not queue_html:
-        queue_html = "<tr><td colspan='3'>No priority data available for current window.</td></tr>"
-
-    html_template = f"""<!DOCTYPE html>
+new_template = '''html_template = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -542,10 +377,15 @@ def generate_dashboard_html(log_records, output_path="docs/index.html", metrics=
         }});
     </script>
 </body>
-</html>"""
+</html>"""'''
 
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    with open(output_path, "w", encoding="utf-8") as f:
-        f.write(html_template)
-        
-    print(f"[MONITORING] Dashboard generated at {output_path} with {len(log_records)} records.")
+start_idx = content.find(start_marker)
+end_idx = content.find(end_marker, start_idx) + len(end_marker)
+
+if start_idx != -1 and end_idx != -1:
+    new_content = content[:start_idx] + new_template + content[end_idx:]
+    with open("src/html_generator.py", "w", encoding="utf-8") as f:
+        f.write(new_content)
+    print("Replaced successfully")
+else:
+    print("Could not find markers")
