@@ -71,6 +71,26 @@ def initialise_database():
             )
         """)
 
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS article_lifecycle_log (
+                log_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                article_id TEXT,
+                timestamp TEXT,
+                source TEXT,
+                title TEXT,
+                url TEXT,
+                country TEXT,
+                language TEXT,
+                document_type TEXT,
+                issuer TEXT,
+                event_family TEXT,
+                stage TEXT,
+                final_status TEXT,
+                drop_reason TEXT,
+                processing_time_ms INTEGER
+            )
+        """)
+
         # 2. Force a schema upgrade if it's loading an old cached database
         try:
             conn.execute("ALTER TABLE articles ADD COLUMN body TEXT")
@@ -171,3 +191,48 @@ def mark_reminder_sent(reminder_id):
     with get_connection() as conn:
         cursor = conn.cursor()
         cursor.execute("UPDATE reminders SET sent = 1 WHERE reminder_id = ?", (reminder_id,))
+
+def save_lifecycle_logs(logs):
+    if not logs: return
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.executemany("""
+            INSERT INTO article_lifecycle_log (
+                article_id, timestamp, source, title, url, country, language, 
+                document_type, issuer, event_family, stage, final_status, drop_reason, processing_time_ms
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, logs)
+
+def prune_lifecycle_logs(days=14):
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cutoff = (datetime.datetime.utcnow() - datetime.timedelta(days=days)).isoformat()
+        cursor.execute("DELETE FROM article_lifecycle_log WHERE timestamp < ?", (cutoff,))
+
+def get_recent_lifecycle_logs():
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT timestamp, source, title, url, country, language, document_type, issuer, event_family, stage, final_status, drop_reason, processing_time_ms
+            FROM article_lifecycle_log
+            ORDER BY timestamp DESC
+        """)
+        rows = cursor.fetchall()
+        
+        # Convert to dicts for HTML generator
+        return [{
+            "timestamp": r[0],
+            "source": r[1],
+            "title": r[2],
+            "url": r[3],
+            "country": r[4],
+            "language": r[5],
+            "document_type": r[6],
+            "issuer": r[7],
+            "event_family": r[8],
+            "stage": r[9],
+            "final_status": r[10],
+            "drop_reason": r[11],
+            "processing_time_ms": r[12]
+        } for r in rows]
+
