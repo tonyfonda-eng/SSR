@@ -71,7 +71,6 @@ def update_last_checked(sheet_url, *args, **kwargs):
     spreadsheet = client.open_by_url(sheet_url)
     try:
         worksheet = spreadsheet.worksheet("Sources")
-        # Safe dummy or update logic placeholder
     except gspread.exceptions.WorksheetNotFound:
         pass
 
@@ -154,3 +153,15 @@ def load_document_type_scores(sheet_url):
 def aggregate_and_sync_yesterday(sheet_url, *args, **kwargs):
     """Aggregates and syncs previous day telemetry."""
     pass
+
+def get_system_settings(sheet_url):
+    """Loads system settings from the Google Sheet."""
+    client = get_client()
+    spreadsheet = client.open_by_url(sheet_url)
+    try:
+        return spreadsheet.worksheet("Settings").get_all_records()
+    except gspread.exceptions.WorksheetNotFound:
+        try:
+            return spreadsheet.worksheet("SystemSettings").get_all_records()
+        except gspread.exceptions.WorksheetNotFound:
+            return []
