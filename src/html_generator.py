@@ -407,6 +407,11 @@ def generate_dashboard_html(log_records, output_path="docs/index.html", metrics=
             <h1>SSR Operations Centre</h1>
             <div class="subtitle">Generated: {datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")}</div>
         </div>
+        <div>
+            <a href="archive.html" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-family: 'Outfit', sans-serif; transition: all 0.2s;">
+                📂 Database Archive
+            </a>
+        </div>
     </div>
     
     <!-- 1. Daily Report Card -->
