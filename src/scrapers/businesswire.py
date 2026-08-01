@@ -61,7 +61,8 @@ class BusinessWireScraper(SourceScraper):
                             "id": article_id,
                             "title": entry.title,
                             "url": clean_url,
-                            "published": getattr(entry, "published", "")
+                            "published": getattr(entry, "published", ""),
+                            "body": getattr(entry, "summary", getattr(entry, "description", ""))
                         })
                         new_in_feed += 1
 

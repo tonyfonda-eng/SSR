@@ -328,6 +328,7 @@ def load_daily_memory(sheet_url):
         return []
     except Exception as e:
         print(f"[ERROR] Failed to load Daily Memory from Sheets: {e}")
+        return []
 
 def load_semantic_concepts(sheet_url):
     """

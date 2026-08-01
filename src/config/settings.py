@@ -3,9 +3,7 @@ Special Situations Radar
 Configuration
 """
 
-RSS_FEED = "https://www.prnewswire.com/rss/news-releases-list.rss"
-
-MAX_ARTICLES_PER_RUN = 20
+SHEET_URL = "https://docs.google.com/spreadsheets/d/1YDOyc8WReBei-7LKPLiXZtmOGCmoY7zuyTvyfMHeL4E/edit#gid=0"
 
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "

@@ -4,235 +4,170 @@ import datetime
 
 DB_PATH = Path(__file__).resolve().parent.parent / "ssr_cache.sqlite"
 
-def get_connection():
-    return sqlite3.connect(DB_PATH)
+import contextlib
 
-def initialise_database():
-    conn = get_connection()
-
-    # 1. Create the tables if it is a completely fresh run
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS articles (
-            article_key TEXT PRIMARY KEY,
-            source TEXT NOT NULL,
-            article_id TEXT NOT NULL,
-            title TEXT,
-            url TEXT,
-            published TEXT,
-            body TEXT,
-            processed_at TEXT
-        )
-    """)
-
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS companies (
-            ticker TEXT PRIMARY KEY,
-            first_seen TEXT,
-            alert_count INTEGER DEFAULT 0
-        )
-    """)
-
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS events (
-            event_id TEXT PRIMARY KEY,
-            event_family TEXT,
-            target_ticker TEXT,
-            status TEXT,
-            created_at TEXT,
-            updated_at TEXT
-        )
-    """)
-
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS research_logs (
-            log_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            event_id TEXT,
-            article_id TEXT,
-            rules_score INTEGER,
-            ai_summary TEXT,
-            processed_at TEXT
-        )
-    """)
-
-    conn.execute("""
-        CREATE TABLE IF NOT EXISTS reminders (
-            reminder_id INTEGER PRIMARY KEY AUTOINCREMENT,
-            event_id TEXT,
-            ticker TEXT,
-            reminder_date TEXT,
-            message TEXT,
-            sent INTEGER DEFAULT 0
-        )
-    """)
-
-    # 2. Force a schema upgrade if it's loading an old cached database
+@contextlib.contextmanager
+def get_connection():    conn = sqlite3.connect(DB_PATH, timeout=30.0)
     try:
-        conn.execute("ALTER TABLE articles ADD COLUMN body TEXT")
-        print("[DATABASE] Upgraded schema: added 'body' column.")
-    except sqlite3.OperationalError:
-        pass
-        
-    try:
-        conn.execute("ALTER TABLE reminders ADD COLUMN ticker TEXT")
-        print("[DATABASE] Upgraded schema: added 'ticker' column to reminders.")
-    except sqlite3.OperationalError:
-        pass
+        yield conn
+    finally:
 
-    conn.commit()
-    conn.close()
+def initialise_database():    with get_connection() as conn:
 
-    print("[DATABASE] Ready")
+        # 1. Create the tables if it is a completely fresh run
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS articles (
+                article_key TEXT PRIMARY KEY,
+                source TEXT NOT NULL,
+                article_id TEXT NOT NULL,
+                title TEXT,
+                url TEXT,
+                published TEXT,
+                body TEXT,
+                processed_at TEXT
+            )
+        """)
 
-def article_exists(article_key):
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT 1 FROM articles WHERE article_key = ?", (article_key,))
-    exists = cursor.fetchone() is not None
-    conn.close()
-    return exists
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS companies (
+                ticker TEXT PRIMARY KEY,
+                first_seen TEXT,
+                alert_count INTEGER DEFAULT 0
+            )
+        """)
 
-def save_article(source, article_id, title, url, published, body):
-    conn = get_connection()
-    cursor = conn.cursor()
-    article_key = f"{source}:{article_id}"
-    processed_at = datetime.datetime.now().isoformat()
-    cursor.execute("""
-        INSERT OR REPLACE INTO articles (article_key, source, article_id, title, url, published, body, processed_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    """, (article_key, source, article_id, title, url, published, body, processed_at))
-    conn.commit()
-    conn.close()
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS events (
+                event_id TEXT PRIMARY KEY,
+                event_family TEXT,
+                target_ticker TEXT,
+                status TEXT,
+                created_at TEXT,
+                updated_at TEXT
+            )
+        """)
 
-def article_count():
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT COUNT(*) FROM articles")
-    count = cursor.fetchone()[0]
-    conn.close()
-    return count
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS research_logs (
+                log_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                event_id TEXT,
+                article_id TEXT,
+                rules_score INTEGER,
+                ai_summary TEXT,
+                processed_at TEXT
+            )
+        """)
 
-def is_title_duplicate_in_db(title, days=3):
-    """
-    Checks if a highly similar title was already processed in the last X days.
-    This prevents cross-provider duplicates that arrive hours/days apart.
-    """
-    conn = get_connection()
-    cursor = conn.cursor()
-    cutoff_date = (datetime.datetime.now() - datetime.timedelta(days=days)).isoformat()
-    
-    # Only pull recent titles to keep it fast
-    cursor.execute("SELECT title FROM articles WHERE processed_at >= ?", (cutoff_date,))
-    rows = cursor.fetchall()
-    conn.close()
-    
-    from difflib import SequenceMatcher
-    title_lower = title.lower()
-    
-    for row in rows:
-        db_title = row[0]
-        if not db_title:
-            continue
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS reminders (
+                reminder_id INTEGER PRIMARY KEY AUTOINCREMENT,
+                event_id TEXT,
+                ticker TEXT,
+                reminder_date TEXT,
+                message TEXT,
+                sent INTEGER DEFAULT 0
+            )
+        """)
+
+        # 2. Force a schema upgrade if it's loading an old cached database
+        try:
+            conn.execute("ALTER TABLE articles ADD COLUMN body TEXT")
+            print("[DATABASE] Upgraded schema: added 'body' column.")
+        except sqlite3.OperationalError:
+            pass
             
-        db_title_lower = db_title.lower()
-        similarity = SequenceMatcher(None, title_lower, db_title_lower).ratio()
-        if similarity > 0.85:
-            return True
-            
-        # Substring match for truncated RSS titles (minimum 30 chars to avoid generic false positives)
-        if len(title_lower) > 30 and len(db_title_lower) > 30:
-            if title_lower in db_title_lower or db_title_lower in title_lower:
-                return True
-            
-    return False
+        try:
+            conn.execute("ALTER TABLE reminders ADD COLUMN ticker TEXT")
+            print("[DATABASE] Upgraded schema: added 'ticker' column to reminders.")
+        except sqlite3.OperationalError:
+            pass
 
-def track_company(ticker):
-    conn = get_connection()
-    cursor = conn.cursor()
-    now = datetime.datetime.now().isoformat()
-    cursor.execute("""
-        INSERT INTO companies (ticker, first_seen, alert_count)
-        VALUES (?, ?, 1)
-        ON CONFLICT(ticker) DO UPDATE SET alert_count = alert_count + 1
-    """, (ticker, now))
-    conn.commit()
-    conn.close()
 
-def create_event_if_new(event_family, ticker):
-    """
+        print("[DATABASE] Ready")
+
+def article_exists(article_key):    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT 1 FROM articles WHERE article_key = ?", (article_key,))
+        exists = cursor.fetchone() is not None
+        return exists
+
+def save_article(source, article_id, title, url, published, body):    with get_connection() as conn:
+        cursor = conn.cursor()
+        article_key = f"{source}:{article_id}"
+        processed_at = datetime.datetime.now().isoformat()
+        cursor.execute("""
+            INSERT OR REPLACE INTO articles (article_key, source, article_id, title, url, published, body, processed_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (article_key, source, article_id, title, url, published, body, processed_at))
+
+def article_count():    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM articles")
+        count = cursor.fetchone()[0]
+        return count
+
+
+
+def track_company(ticker):    with get_connection() as conn:
+        cursor = conn.cursor()
+        now = datetime.datetime.now().isoformat()
+        cursor.execute("""
+            INSERT INTO companies (ticker, first_seen, alert_count)
+            VALUES (?, ?, 1)
+            ON CONFLICT(ticker) DO UPDATE SET alert_count = alert_count + 1
+        """, (ticker, now))
+
+def create_event_if_new(event_family, ticker):    """
     Creates an event ID formatted as Ticker_YYYY_MM_DD to enforce a strict 1-alert-per-company-per-day limit.
     Returns (event_id, is_new) where is_new is a boolean.
     """
     now = datetime.datetime.now()
     event_id = f"{ticker}_{now.year}_{now.month:02d}_{now.day:02d}"
     
-    conn = get_connection()
-    cursor = conn.cursor()
-    
-    cursor.execute("SELECT 1 FROM events WHERE event_id = ?", (event_id,))
-    if cursor.fetchone() is not None:
-        conn.close()
-        return event_id, False
+    with get_connection() as conn:
+        cursor = conn.cursor()
         
-    cursor.execute("""
-        INSERT INTO events (event_id, event_family, target_ticker, status, created_at, updated_at)
-        VALUES (?, ?, ?, 'Announced', ?, ?)
-    """, (event_id, event_family, ticker, now.isoformat(), now.isoformat()))
-    
-    conn.commit()
-    conn.close()
-    return event_id, True
+        cursor.execute("SELECT 1 FROM events WHERE event_id = ?", (event_id,))
+        if cursor.fetchone() is not None:
+            return event_id, False
+            
+        cursor.execute("""
+            INSERT INTO events (event_id, event_family, target_ticker, status, created_at, updated_at)
+            VALUES (?, ?, ?, 'Announced', ?, ?)
+        """, (event_id, event_family, ticker, now.isoformat(), now.isoformat()))
+        
+        return event_id, True
 
-def log_research(event_id, article_id, rules_score, ai_summary):
-    conn = get_connection()
-    cursor = conn.cursor()
-    now = datetime.datetime.now().isoformat()
-    cursor.execute("""
-        INSERT INTO research_logs (event_id, article_id, rules_score, ai_summary, processed_at)
-        VALUES (?, ?, ?, ?, ?)
-    """, (event_id, article_id, rules_score, ai_summary, now))
-    conn.commit()
-    conn.close()
+def log_research(event_id, article_id, rules_score, ai_summary):    with get_connection() as conn:
+        cursor = conn.cursor()
+        now = datetime.datetime.now().isoformat()
+        cursor.execute("""
+            INSERT INTO research_logs (event_id, article_id, rules_score, ai_summary, processed_at)
+            VALUES (?, ?, ?, ?, ?)
+        """, (event_id, article_id, rules_score, ai_summary, now))
 
-def get_latest_research_summary(event_id):
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        SELECT ai_summary FROM research_logs
-        WHERE event_id = ?
-        ORDER BY processed_at DESC LIMIT 1
-    """, (event_id,))
-    row = cursor.fetchone()
-    conn.close()
-    return row[0] if row else None
 
-def save_reminder(event_id, ticker, reminder_date, message):
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        INSERT INTO reminders (event_id, ticker, reminder_date, message)
-        VALUES (?, ?, ?, ?)
-    """, (event_id, ticker, reminder_date, message))
-    conn.commit()
-    conn.close()
 
-def get_pending_reminders():
-    conn = get_connection()
-    cursor = conn.cursor()
-    # Find reminders where reminder_date <= today and sent = 0
-    today = datetime.datetime.now().strftime('%Y-%m-%d')
-    cursor.execute("""
-        SELECT reminder_id, event_id, ticker, reminder_date, message 
-        FROM reminders 
-        WHERE reminder_date <= ? AND sent = 0
-    """, (today,))
-    reminders = cursor.fetchall()
-    conn.close()
-    return [{'id': r[0], 'event_id': r[1], 'ticker': r[2], 'date': r[3], 'message': r[4]} for r in reminders]
+def save_reminder(event_id, ticker, reminder_date, message):    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO reminders (event_id, ticker, reminder_date, message)
+            VALUES (?, ?, ?, ?)
+        """, (event_id, ticker, reminder_date, message))
 
-def mark_reminder_sent(reminder_id):
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("UPDATE reminders SET sent = 1 WHERE reminder_id = ?", (reminder_id,))
-    conn.commit()
-    conn.close()
+def get_pending_reminders():    with get_connection() as conn:
+        cursor = conn.cursor()
+        # Find reminders where reminder_date <= today and sent = 0
+        today = datetime.datetime.now().strftime('%Y-%m-%d')
+        cursor.execute("""
+            SELECT reminder_id, event_id, ticker, reminder_date, message 
+            FROM reminders 
+            WHERE reminder_date <= ? AND sent = 0
+        """, (today,))
+        reminders = cursor.fetchall()
+        return [{'id': r[0], 'event_id': r[1], 'ticker': r[2], 'date': r[3], 'message': r[4]} for r in reminders]
+
+def mark_reminder_sent(reminder_id):    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("UPDATE reminders SET sent = 1 WHERE reminder_id = ?", (reminder_id,))
 

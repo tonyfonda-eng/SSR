@@ -229,68 +229,6 @@ Article text:
         print(f"[AI ERROR] All keys exhausted or failed: {e}")
         return f"[AI ERROR] {e}"
 
-def check_material_update(article_text, event_family, ticker, previous_summary=None):
-    """
-    Checks if a duplicate article contains material new information compared to what we already know.
-    """
-    if not clients:
-        return False
-        
-    context_str = ""
-    if previous_summary:
-        context_str = f"\n\n--- WHAT WE ALREADY KNOW (Previous AI Summary) ---\n{previous_summary}\n----------------------------------------------------\n\n"
-        
-    prompt = f"""
-You are an expert financial analyst. 
-We are already tracking a '{event_family}' involving the target company '{ticker}'.{context_str}
-Read the following new article. Does it contain NEW, material information that warrants updating our case file?
-Examples of material updates:
-- A competing bidder has emerged.
-- The deal price/premium has been bumped.
-- A major regulatory approval or block was announced.
-- Shareholder vote results.
-- Deal termination or broken deal.
-
-Examples of non-material updates (syndicated noise):
-- Law firms announcing "investigations" into the merger.
-- Another news outlet just repeating the exact same original announcement facts that we already know.
-- Generic PR boilerplate about the merger that contains no new milestones.
-
-CRITICAL: If the new article contains the exact same information as "WHAT WE ALREADY KNOW" (e.g. it's just the same press release published on a different newswire), you MUST answer NO.
-
-Answer strictly with YES or NO on the first line. 
-On the second line, provide a 1-sentence explanation.
-
-Article text:
-{article_text[:6000]}
-"""
-    try:
-        text = _generate_with_retry(prompt).upper()
-        return text.startswith("YES")
-    except Exception as e:
-        print(f"[AI ERROR] All keys exhausted or failed: {e}")
-        return False
-
-def translate_to_english(text):
-    """
-    Translates foreign language financial text to English using Gemini Flash.
-    Used for European/International sources before they hit the Rules Engine.
-    """
-    if not clients:
-        return text
-        
-    prompt = f"""
-Translate the following financial text into English. 
-Return ONLY the English translation. Maintain all financial terminology, company names, and ticker symbols exactly as they appear conceptually. Do not summarize or add commentary.
-
-Text:
-{text[:6000]}
-"""
-    try:
-        return _generate_with_retry(prompt)
-    except Exception as e:
-        print(f"[AI ERROR] Translation failed: {e}")
-        return text
 
 def extract_target_ticker(article_text):
     """
