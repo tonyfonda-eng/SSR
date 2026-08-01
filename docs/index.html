@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSR Operations Centre</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-color: #f1f5f9;
+            --border-color: #334155;
+            --accent: #3b82f6;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray: #64748b;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+        .header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        h1 { font-size: 1.8rem; margin: 0; }
+        .subtitle { color: var(--gray); font-size: 0.9rem; margin-bottom: 20px; }
+        
+        .report-card {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .metric-box {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .metric-val {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        .metric-lbl {
+            font-size: 0.75rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .panel {
+            background-color: var(--panel-bg);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 15px;
+        }
+        .panel-full { grid-column: 1 / -1; }
+        .panel h2 {
+            font-size: 1.1rem;
+            margin-top: 0;
+            margin-bottom: 15px;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .table-container { overflow-x: auto; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+        th, td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        th {
+            background-color: rgba(0,0,0,0.2);
+            font-weight: 600;
+            color: var(--gray);
+        }
+        tr:hover td { background-color: rgba(255,255,255,0.02); }
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .badge {
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        .status-alert { background-color: rgba(16, 185, 129, 0.2); color: var(--success); }
+        .status-drop { background-color: rgba(239, 68, 68, 0.2); color: var(--danger); }
+        .status-archived { background-color: rgba(100, 116, 139, 0.2); color: var(--gray); }
+    </style>
+</head>
+<body>
+    <div class="header-row">
+        <div>
+            <h1>SSR Operations Centre</h1>
+            <div class="subtitle">Generated: 2026-08-01 07:33:04 UTC</div>
+        </div>
+    </div>
+    
+    <!-- 1. Daily Report Card -->
+    <div class="report-card">
+        <div class="metric-box">
+            <div class="metric-val" style="color: var(--success)">100</div>
+            <div class="metric-lbl">Health Score</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-val">0</div>
+            <div class="metric-lbl">Articles</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-val">0</div>
+            <div class="metric-lbl">AI Calls</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-val">0.00%</div>
+            <div class="metric-lbl">Avoided AI %</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-val">0</div>
+            <div class="metric-lbl">Alerts</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-val">0m 0s</div>
+            <div class="metric-lbl">Runtime</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-val" style="color: inherit">0</div>
+            <div class="metric-lbl">Exceptions</div>
+        </div>
+        <div class="metric-box">
+            <div class="metric-val" style="color: var(--success); font-size: 1.2rem; display: flex; align-items: center; justify-content: center; height: 100%;">Healthy</div>
+            <div class="metric-lbl">Status</div>
+        </div>
+    </div>
+    
+    <div class="grid-2">
+        <!-- 2. Pipeline Funnel -->
+        <div class="panel">
+            <h2>Pipeline Funnel</h2>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Stage</th><th>Count</th><th>% of Total</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- 3. AI Capacity -->
+        <div class="panel">
+            <h2>AI Capacity Forecast</h2>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Provider</th><th>Usage Today</th><th>Est. Remaining</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- 4. Source Health -->
+        <div class="panel panel-full">
+            <h2>Source Health & Signal Rates</h2>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Source</th><th>Downloaded</th><th>Alerts</th><th>Signal Rate</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- 5. Pathological Cases -->
+        <div class="panel panel-full">
+            <h2>Pathological Cases (Top 10 Slowest Articles)</h2>
+            <div class="table-container">
+                <table>
+                    <thead><tr><th>Source</th><th>Headline</th><th>Slowest Stage</th><th>Total Time</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Execution Log -->
+        <div class="panel panel-full">
+            <h2>Pipeline Execution Log (Rolling 14-Day)</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th><th>Source</th><th>Headline</th><th>Issuer</th>
+                            <th>Pipeline Stage</th><th>Outcome</th><th>Reason</th><th>AI Invoked</th><th>Time (ms)</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
