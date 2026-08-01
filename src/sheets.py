@@ -505,116 +505,78 @@ def prune_daily_memory(sheet_url, max_age_hours=48):
 # Operational Monitoring (Google Sheets Backend)
 # ---------------------------------------------------------------------------
 
-def update_daily_statistics(sheet_url, daily_stats):
+def aggregate_and_sync_yesterday(sheet_url):
+    from src.database import is_yesterday_synced, get_yesterdays_metrics, mark_yesterday_synced
+    import gspread
+    
+    if is_yesterday_synced():
+        print("[SHEETS] Yesterday's metrics are already synced. Skipping.")
+        return
+        
+    metrics = get_yesterdays_metrics()
+    if not metrics["daily_stats"] or metrics["daily_stats"][0] is None:
+        print("[SHEETS] No metrics found for yesterday. Marking as synced.")
+        mark_yesterday_synced()
+        return
+        
+    print("[SHEETS] Aggregating and syncing yesterday's operational data...")
     client = get_client()
     sheet = client.open_by_url(sheet_url)
+    
+    # 1. Daily Statistics
     try:
-        ws = sheet.worksheet("Daily Statistics")
+        ws_daily = sheet.worksheet("Daily Statistics")
+        daily = metrics["daily_stats"]
+        count = daily[16]
+        avg_score = daily[14] / count if count > 0 else 0
+        avg_conf = daily[15] / count if count > 0 else 0
+        avg_time = daily[18] / count if count > 0 else 0
+        max_time = daily[17] if daily[17] else 0
+        
+        row = [metrics["date"]] + list(daily[:14]) + [
+            f"{avg_score:.2f}", f"{avg_conf:.2f}", f"{avg_time:.1f}", f"{max_time:.1f}"
+        ]
+        ws_daily.append_row(row)
     except gspread.exceptions.WorksheetNotFound:
         print("[WARNING] 'Daily Statistics' tab not found.")
-        return
-
-    today_str = datetime.datetime.utcnow().strftime("%Y-%m-%d")
-    all_values = ws.get_all_values()
-    
-    headers = all_values[0] if all_values else []
-    
-    # We will simply append a new row for the run to prevent complex updates.
-    # The prompt allows either, but appending one row per run is safer and gives more granularity.
-    # Wait, the prompt says "Each day append one row. Never overwrite history."
-    # Let's find if today's date exists.
-    row_idx_to_update = -1
-    for i, row in enumerate(all_values):
-        if i > 0 and row and row[0] == today_str:
-            row_idx_to_update = i + 1
-            break
-            
-    # Calculate averages
-    count = daily_stats["articles_processed_count"]
-    avg_score = daily_stats["rules_score_sum"] / count if count > 0 else 0
-    avg_conf = daily_stats["ai_confidence_sum"] / count if count > 0 else 0
-    avg_time = sum(daily_stats["article_times"]) / count if count > 0 else 0
-    max_time = max(daily_stats["article_times"]) if daily_stats["article_times"] else 0
-    
-    anomalies_str = " | ".join(daily_stats["anomalies"])
-    
-    new_data = [
-        daily_stats["downloaded"], daily_stats["unique"], daily_stats["duplicates"],
-        daily_stats["passed_regex"], daily_stats["failed_regex"], daily_stats["global_exclusions"],
-        daily_stats["ontology_matches"], daily_stats["rules_passes"], daily_stats["rules_failures"],
-        daily_stats["ai_calls"], daily_stats["ai_successes"], daily_stats["ai_failures"],
-        daily_stats["playbooks_executed"], daily_stats["emails_sent"],
-        f"{avg_score:.2f}", f"{avg_conf:.2f}", f"{avg_time:.1f}", f"{max_time:.1f}",
-        f"{daily_stats['total_runtime_s']:.1f}", anomalies_str
-    ]
-    
-    if row_idx_to_update > 0:
-        # Upsert
-        existing_row = all_values[row_idx_to_update - 1]
-        # We add the counts to the existing counts
-        merged_data = [today_str]
-        for idx in range(1, 15): # The count columns
-            try:
-                prev_val = int(existing_row[idx]) if idx < len(existing_row) and existing_row[idx] else 0
-            except ValueError:
-                prev_val = 0
-            merged_data.append(prev_val + new_data[idx - 1])
-            
-        # For averages and max, we just overwrite with the latest run's stats for simplicity, 
-        # or we could do proper rolling. Overwrite is fine for operational health.
-        for idx in range(15, len(new_data) + 1):
-            merged_data.append(new_data[idx - 1])
-            
-        ws.update(f"A{row_idx_to_update}:T{row_idx_to_update}", [merged_data])
-    else:
-        # Append
-        ws.append_row([today_str] + new_data)
-
-
-def append_ai_usage(sheet_url, telemetry_data):
-    if not telemetry_data: return
-    client = get_client()
-    sheet = client.open_by_url(sheet_url)
+        
+    # 2. AI Usage
     try:
-        ws = sheet.worksheet("AI Usage")
+        ws_ai = sheet.worksheet("AI Usage")
+        ai_rows = []
+        for ai in metrics["ai_usage"]:
+            reqs = ai[2]
+            avg_rt = ai[10] / reqs if reqs > 0 else 0
+            ai_rows.append([metrics["date"], ai[0], ai[1], reqs, ai[3], ai[4], ai[5], ai[6], ai[7], ai[8], ai[9], f"{avg_rt:.2f}", f"{ai[11]:.2f}", ai[12], ai[13]])
+        if ai_rows:
+            ws_ai.append_rows(ai_rows)
     except gspread.exceptions.WorksheetNotFound:
         print("[WARNING] 'AI Usage' tab not found.")
-        return
         
-    rows = []
-    run_ts = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
-    for key_id, stats in telemetry_data.items():
-        avg_rt = stats["response_time_sum"] / stats["requests"] if stats["requests"] > 0 else 0
-        rows.append([
-            run_ts, stats["provider"], key_id, stats["requests"], stats["success"], stats["failures"],
-            stats["429_errors"], stats["503_errors"], stats["timeouts"], stats["retries"], stats["fallbacks"],
-            f"{avg_rt:.2f}", stats["last_used"]
-        ])
-    if rows:
-        ws.append_rows(rows)
-
-
-def update_source_statistics(sheet_url, source_stats):
-    if not source_stats: return
-    client = get_client()
-    sheet = client.open_by_url(sheet_url)
+    # 3. Source Statistics
     try:
-        ws = sheet.worksheet("Source Statistics")
+        ws_src = sheet.worksheet("Source Statistics")
+        src_rows = []
+        for src in metrics["source_stats"]:
+            dl = src[1]
+            conv = src[6] / dl if dl > 0 else 0
+            avg_rt = src[7] / src[8] if src[8] > 0 else 0
+            src_rows.append([metrics["date"], src[0], dl, src[2], src[3], src[4], src[5], src[6], f"{conv:.2%}", f"{avg_rt:.1f}"])
+        if src_rows:
+            ws_src.append_rows(src_rows)
     except gspread.exceptions.WorksheetNotFound:
         print("[WARNING] 'Source Statistics' tab not found.")
-        return
         
-    # Simply append for the run
-    rows = []
-    run_ts = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
-    for source, stats in source_stats.items():
-        dl = stats["downloaded"]
-        avg_time = stats["processing_time_sum"] / stats["processed_count"] if stats["processed_count"] > 0 else 0
-        dupe_rate = (stats["downloaded"] - stats["survived_regex"]) / dl if dl > 0 else 0 # approximate
-        rows.append([
-            run_ts, source, stats["downloaded"], stats["survived_regex"], stats["survived_rules"],
-            stats["reached_ai"], stats["alerts"], f"{dupe_rate:.1%}", f"{avg_time:.1f}"
-        ])
-    if rows:
-        ws.append_rows(rows)
+    # 4. Workflow Health
+    try:
+        ws_health = sheet.worksheet("Workflow Health")
+        wh = metrics["workflow_health"]
+        runs = wh[0]
+        avg_rt = wh[3] / runs if runs > 0 else 0
+        ws_health.append_row([metrics["date"], runs, wh[1], wh[2], f"{avg_rt:.1f}", wh[4], wh[5]])
+    except gspread.exceptions.WorksheetNotFound:
+        print("[WARNING] 'Workflow Health' tab not found.")
+        
+    mark_yesterday_synced()
+    print("[SHEETS] Yesterday's sync complete.")
 
