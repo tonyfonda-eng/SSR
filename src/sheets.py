@@ -28,3 +28,10 @@ def load_document_type_scores(sheet_url):
     spreadsheet = client.open_by_url(sheet_url)
     worksheet = spreadsheet.worksheet("DocumentScores")
     return worksheet.get_all_records()
+
+def load_sources(sheet_url):
+    """Loads operational sources from the Google Sheet."""
+    client = get_client()
+    spreadsheet = client.open_by_url(sheet_url)
+    worksheet = spreadsheet.worksheet("Sources")
+    return worksheet.get_all_records()
