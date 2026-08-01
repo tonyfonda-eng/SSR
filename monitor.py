@@ -1,38 +1,46 @@
 import re
-import feedparser
-from src.config.settings import SHEET_URL
 import time
 import datetime
+import os
+import sys
+import requests
+import feedparser
+import yfinance as yf
+import traceback
+from collections import defaultdict
 from difflib import SequenceMatcher
+
+from src.config.settings import SHEET_URL
 from src.database import (
-    initialise_database,
-    article_exists,
-    save_article,
-    article_count,
-    track_company,
-    create_event_if_new,
-    log_research,
-    save_reminder,
-    get_pending_reminders,
-    mark_reminder_sent,
+    initialise_database, article_exists, save_article, article_count,
+    track_company, create_event_if_new, log_research, save_reminder,
+    get_pending_reminders, mark_reminder_sent, save_lifecycle_logs, 
+    get_recent_lifecycle_logs, save_run_metrics, save_ai_usage, 
+    save_source_stats, save_workflow_health, save_exception_log,
+    perform_housekeeping, get_dashboard_state, set_dashboard_state,
+    get_30_day_average, get_30_day_source_averages, export_archive_json
 )
 from src.scrapers.prnewswire import download_article
 from src.scrapers import get_scraper_for_source
 from src.sheets import (
-    load_rules, load_sources, load_playbooks,
-    append_to_research_queue, update_last_checked, load_global_exclusions,
-    load_gold_standards, log_unknown_event, update_pipeline_metrics,
-    load_daily_memory, batch_append_daily_memory, prune_daily_memory,
-    load_source_reliability, log_ontology_review
+    load_rules, load_sources, load_playbooks, append_to_research_queue, 
+    update_last_checked, load_global_exclusions, load_gold_standards, 
+    log_unknown_event, update_pipeline_metrics, load_daily_memory, 
+    batch_append_daily_memory, prune_daily_memory, load_source_reliability, 
+    log_ontology_review, load_document_type_scores, aggregate_and_sync_yesterday, 
+    get_system_settings
 )
 from src.rules_engine import evaluate
-from src.ai import classify_event, execute_playbook, clients
+from src.ai import classify_event, execute_playbook, clients, extract_target_ticker, extract_halt_date
 from src.alerts.email import send_alert
 from src.issuer import extract_issuing_company
 from src.options_calc import calculate_naked_call_roi
 from src.drift_monitor import check_pipeline_drift
+from src.ontology import extract_concepts, extract_statuses, get_all_matched_terms, load_ontology
+from src.financials import get_t12_metrics
+from src.monitoring import MetricsCollector
+from src.html_generator import generate_dashboard_html, generate_archive_html
 
-# --- Daily Issuer Memory ---
 class IssuerMemory:
     """In-memory cache of all issuing companies processed today."""
     def __init__(self):
@@ -66,19 +74,11 @@ class IssuerMemory:
         return len(self.issuers)
 
 
-def _process_article(source_name, article_id, title, url, published,
-                    body, rules, playbook_map, global_exclusions=None, gold_standards=None,
-                    triage_all=False, funnel_metrics=None, issuer_memory=None,
-                    document_type=None, country=None, language=None,
-                    document_type_scores=None, ontology_stats=None,
-                    source_reliability_scores=None):
-    import time
+def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None, gold_standards=None, triage_all=False, issuer_memory=None, document_type=None, country=None, language=None, document_type_scores=None, ontology_stats=None, source_reliability_scores=None):
     start_time = time.perf_counter()
-    from src.monitoring import MetricsCollector
     metrics = MetricsCollector.get_instance()
     metrics.daily["downloaded"] += 1
     metrics.source_stats[source_name]["downloaded"] += 1
-    
     ai_invoked = False
     stage_times = {}
     last_stage_time = start_time
@@ -89,31 +89,24 @@ def _process_article(source_name, article_id, title, url, published,
         stage_times[stage_name] = stage_times.get(stage_name, 0) + (now - last_stage_time)
         last_stage_time = now
 
-    def conclude(ret_val, pipeline_stage, outcome, reason,
-                issuer_name="Unknown", event_family="Unknown"):
+    def conclude(ret_val, pipeline_stage, outcome, reason, issuer_name="Unknown", event_family="Unknown"):
         mark_stage(pipeline_stage)
         elapsed_ms = (time.perf_counter() - start_time) * 1000
         slowest_stage = max(stage_times, key=stage_times.get) if stage_times else pipeline_stage
-        metrics.log_article(article_id, source_name, url, title,
-                            country, language, document_type, issuer_name, event_family,
-                            pipeline_stage, outcome, reason, ai_invoked, elapsed_ms, slowest_stage)
+        metrics.log_article(article_id, source_name, url, title, country, language, document_type, issuer_name, event_family, pipeline_stage, outcome, reason, ai_invoked, elapsed_ms, slowest_stage)
         return ret_val
 
     if global_exclusions is None:
         global_exclusions = []
-        
+
     article_key = f"{source_name}:{article_id}"
-    
     if article_exists(article_key):
+        metrics.track_funnel("duplicate_id")
         return conclude(0, 'Database', 'Dropped', 'Duplicate Article')
 
     if not body:
-        if funnel_metrics:
-            funnel_metrics[3] += 1
+        metrics.track_funnel("empty_body")
         return conclude(0, 'Download', 'Dropped', 'Empty Body')
-
-    if funnel_metrics: 
-        funnel_metrics[2] += 1
 
     issuer = extract_issuing_company(source_name, title, body)
     if issuer == "EXHAUSTED":
@@ -122,43 +115,27 @@ def _process_article(source_name, article_id, title, url, published,
 
     if issuer_memory and issuer_memory.is_duplicate(issuer):
         print(f"[DAILY MEMORY] Issuer '{issuer}' already processed today. Dropping duplicate syndicated news.")
-        save_article(
-            source=source_name,
-            article_id=article_id,
-            title=title,
-            url=url,
-            published=published,
-            body=body,
-        )
+        metrics.track_funnel("duplicate_issuer")
+        save_article(source=source_name, article_id=article_id, title=title, url=url, published=published, body=body)
         return conclude(1, 'Daily Memory', 'Dropped', 'Duplicate Issuer', issuer)
 
     title_lower = title.lower()
     body_lower = body.lower()
-    for ex in global_exclusions:
-        import re
-        ex_lower = ex.lower()
-        if re.search(r'\b' + re.escape(ex_lower) + r'\b', title_lower) \
-           or re.search(r'\b' + re.escape(ex_lower) + r'\b', body_lower):
-            print(f"[GLOBAL EXCLUSION] Match found for '{ex}'. Skipping article.")
-            save_article(
-                source=source_name,
-                article_id=article_id,
-                title=title,
-                url=url,
-                published=published,
-                body=body,
-            )
-            return conclude(1, 'Global Exclusions', 'Dropped', 'Regex Failed', issuer)
 
-    if funnel_metrics: 
-        funnel_metrics[4] += 1
+    for ex in global_exclusions:
+        ex_lower = str(ex).lower()
+        if re.search(r'\b' + re.escape(ex_lower) + r'\b', title_lower) or re.search(r'\b' + re.escape(ex_lower) + r'\b', body_lower):
+            print(f"[GLOBAL EXCLUSION] Match found for '{ex}'. Skipping article.")
+            metrics.track_funnel("global_exclusion")
+            save_article(source=source_name, article_id=article_id, title=title, url=url, published=published, body=body)
+            return conclude(1, 'Global Exclusions', 'Dropped', 'Regex Failed', issuer)
 
     print(f" -> Processing: {title}")
 
-    from src.ontology import extract_concepts, extract_statuses, get_all_matched_terms
     raw_text = f"{title}\n\n{body}"
     ontology_concepts = []
     ontology_statuses = []
+
     try:
         ontology_concepts = extract_concepts(raw_text)
         ontology_statuses = extract_statuses(raw_text)
@@ -173,267 +150,200 @@ def _process_article(source_name, article_id, title, url, published,
             try:
                 raw_terms = get_all_matched_terms(raw_text)
                 concept_ids = [cid for cid, _ in ontology_concepts]
-                log_ontology_review(SHEET_URL, country, source_name,
-                                  language, document_type, raw_terms, title, url, concept_ids)
+                log_ontology_review(SHEET_URL, country, source_name, language, document_type, raw_terms, title, url, concept_ids)
             except Exception as e:
                 print(f"[WARNING] Ontology review logging failed: {e}")
     except Exception as e:
         print(f"[WARNING] Ontology extraction failed: {e}")
 
     mark_stage('Ontology')
-    article_obj = {
-        "raw_text": raw_text,
-        "document_type": document_type
-    }
 
+    article_obj = {"raw_text": raw_text, "document_type": document_type}
     source_rel = 0
     if source_reliability_scores:
         source_rel = source_reliability_scores.get(source_name, 0)
 
-    matches = evaluate(article_obj, rules, document_type_scores if document_type_scores else {},
-                       ontology_concepts=ontology_concepts,
-                       ontology_statuses=ontology_statuses,
-                       source_reliability=source_rel, threshold=10)
+    matches = evaluate(article_obj, rules, document_type_scores if document_type_scores else [], ontology_concepts=ontology_concepts, ontology_statuses=ontology_statuses, source_reliability=source_rel, threshold=10)
+
     mark_stage('Rules')
 
-    if matches:
-        if funnel_metrics: 
-            funnel_metrics[5] += 1
-        print("[MATCH] High confidence event signals detected!")
+    if not matches:
+        metrics.track_funnel("rules_rejected")
+        return conclude(1, 'Rules Engine', 'Dropped', 'Failed Rules Threshold', issuer, 'Unknown')
 
-        from src.ai import extract_target_ticker
-        ai_invoked = True
-        ticker = extract_target_ticker(body)
-        print(f"[AI TICKER] {ticker}")
+    metrics.track_funnel("reached_ai")
+    print("[MATCH] High confidence event signals detected!")
+    ai_invoked = True
+    ticker = extract_target_ticker(body)
+    print(f"[AI TICKER] {ticker}")
 
-        if "MOCK AI" in ticker or "ERROR" in ticker or ticker == "UNKNOWN" or ticker == "EXHAUSTED":
-            print("[CRITICAL] AI Providers are exhausted or unavailable.")
-            return conclude("ABORT", 'Rules Engine', 'Dropped', 'AI Exhausted', issuer)
+    if "MOCK AI" in ticker or "ERROR" in ticker or ticker == "UNKNOWN" or ticker == "EXHAUSTED":
+        print("[CRITICAL] AI Providers are exhausted or unavailable.")
+        metrics.track_funnel("ai_exhausted")
+        return conclude("ABORT", 'Rules Engine', 'Dropped', 'AI Exhausted', issuer)
 
-        if ticker == "PRIVATE":
-            print("[AI REJECTED] Target is a private company.")
-            save_article(
-                source=source_name,
-                article_id=article_id,
-                title=title,
-                url=url,
-                published=published,
-                body=body,
-            )
-            return conclude(1, 'AI Classification', 'Dropped', 'Private Company', ticker)
+    if ticker == "PRIVATE":
+        print("[AI REJECTED] Target is a private company.")
+        metrics.track_funnel("ai_rejected_private")
+        save_article(source=source_name, article_id=article_id, title=title, url=url, published=published, body=body)
+        return conclude(1, 'AI Classification', 'Dropped', 'Private Company', ticker)
 
-        if funnel_metrics: 
-            funnel_metrics[6] += 1
+    options_available = False
+    market_cap = None
+    market_data_str = ""
 
-        options_available = False
-        market_cap = None
-        market_data_str = ""
-
-        if ticker != "UNKNOWN" and "MOCK AI" not in ticker:
-            import yfinance as yf
-            try:
-                yf_ticker = yf.Ticker(ticker)
-                mc = yf_ticker.info.get('marketCap')
-                if mc:
-                    market_cap = mc
-                    print(f"[FINANCIALS] Market Cap: ${market_cap:,.2f}")
-                
-                current_price = yf_ticker.info.get('currentPrice', yf_ticker.info.get('regularMarketPrice'))
-                if current_price:
-                    market_data_str += f"Current Share Price: ${current_price}\n\n"
-
-                options = yf_ticker.options
-                if options and len(options) > 0:
-                    options_available = True
-                    print(f"[OPTIONS] Options chain available. Earliest exp: {options[0]}")
-                    market_data_str += f"Exchange-listed Options Available: YES\n"
-                else:
-                    print(f"[OPTIONS] No options chain found for {ticker}.")
-                    market_data_str += f"Exchange-listed Options Available: NO\n"
-            except Exception as e:
-                print(f"[WARNING] Failed to fetch financial data for {ticker}: {e}")
-
-        event_family = classify_event(body, matches, ticker=ticker, market_cap=market_cap)
-        print(f"[AI CLASSIFICATION] {event_family}")
-
-        if "Unknown" in event_family or event_family == "EXHAUSTED":
-            print("[CRITICAL] AI Providers are exhausted. Aborting ingestion loop.")
-            return conclude("ABORT", 'AI Classification', 'Dropped', 'AI Exhausted', ticker, event_family)
-
-        if "false positive" in event_family.lower():
-            print("[AI REJECTED] Article flagged as false positive.")
-            if triage_all:
-                print(f"[BYPASS] Source '{source_name}' has Triage All enabled.")
-                event_family = "Triage Rejection"
+    if ticker != "UNKNOWN" and "MOCK AI" not in ticker:
+        try:
+            yf_ticker = yf.Ticker(ticker)
+            mc = yf_ticker.info.get('marketCap')
+            if mc:
+                market_cap = mc
+                print(f"[FINANCIALS] Market Cap: ${market_cap:,.2f}")
+            
+            current_price = yf_ticker.info.get('currentPrice', yf_ticker.info.get('regularMarketPrice'))
+            if current_price:
+                market_data_str += f"Current Share Price: ${current_price}\n\n"
+            
+            options = yf_ticker.options
+            if options and len(options) > 0:
+                options_available = True
+                print(f"[OPTIONS] Options chain available. Earliest exp: {options[0]}")
+                market_data_str += "Exchange-listed Options Available: YES\n"
             else:
-                save_article(
-                    source=source_name,
-                    article_id=article_id,
-                    title=title,
-                    url=url,
-                    published=published,
-                    body=body,
-                )
-                return conclude(1, 'AI Classification', 'Dropped', 'AI False Positive', ticker, event_family)
+                print(f"[OPTIONS] No options chain found for {ticker}.")
+                market_data_str += "Exchange-listed Options Available: NO\n"
+        except Exception as e:
+            print(f"[WARNING] Failed to fetch financial data for {ticker}: {e}")
 
-        if event_family.strip().lower() == "unknown":
-            print("[UNKNOWN EVENT] Logging to Knowledge Base for review.")
-            log_unknown_event(
-                sheet_url=SHEET_URL,
-                source=source_name,
-                article_title=title,
-                article_url=url,
-                rules_score=matches[0]["Score"],
-                ai_response=event_family
-            )
-            save_article(
-                source=source_name,
-                article_id=article_id,
-                title=title,
-                url=url,
-                published=published,
-                body=body,
-            )
-            return conclude(1, 'AI Classification', 'Archived', 'Unknown Event', ticker, event_family)
+    event_family = classify_event(body, matches, ticker=ticker, market_cap=market_cap)
+    print(f"[AI CLASSIFICATION] {event_family}")
 
-        if event_family == "M&A Naked Call Strategy" and not options_available:
-            print(f"[AI REJECTED] Strategy requires tradable options, but none found for {ticker}.")
-            save_article(
-                source=source_name,
-                article_id=article_id,
-                title=title,
-                url=url,
-                published=published,
-                body=body,
-            )
-            return conclude(1, 'AI Classification', 'Dropped', 'No Options Available', ticker, event_family)
+    if "Unknown" in event_family or event_family == "EXHAUSTED":
+        print("[CRITICAL] AI Providers are exhausted. Aborting ingestion loop.")
+        metrics.track_funnel("ai_exhausted")
+        return conclude("ABORT", 'AI Classification', 'Dropped', 'AI Exhausted', ticker, event_family)
 
-        if event_family == "Resumption of Trading":
-            from src.financials import get_t12_metrics
-            from src.ai import extract_halt_date
-            halt_date_str = extract_halt_date(body)
-            print(f"[T12 METRICS] Calculating structural floor for {ticker} (Halt Date: {halt_date_str})...")
-            
-            pre_halt = None
-            if ticker != "UNKNOWN":
-                try:
-                    import yfinance as yf
-                    pre_halt = yf.Ticker(ticker).info.get('previousClose')
-                except:
-                    pass
-
-            t12_data = get_t12_metrics(ticker, pre_halt_price=pre_halt, halt_date_str=halt_date_str)
-            if not t12_data['valid']:
-                print(f"[T12 REJECTED] {t12_data.get('reason')}")
-                save_article(
-                    source=source_name, article_id=article_id,
-                    url=url, published=published, body=body
-                )
-                return conclude(1, 'Playbook', 'Dropped', 'T12 Structural Floor Failed', ticker, event_family)
-            
-            print(f"[T12 APPROVED] Net Cash/Share: ${t12_data['net_cash_per_share']:.2f}")
-            market_data_str = f"Net Cash Per Share: ${t12_data['net_cash_per_share']:.2f}\n"
-
-        if funnel_metrics and options_available: 
-            funnel_metrics[7] += 1
-
-        is_update = False
-        if ticker != "UNKNOWN" and "MOCK AI" not in ticker:
-            print(f"[AI TICKER VERIFIED] Public ticker extracted: {ticker}")
-            track_company(ticker)
-            event_id, is_new = create_event_if_new(event_family, ticker)
-            if not is_new:
-                print(f"[DEDUPLICATION] Event already tracked. Checking for material updates...")
-                material_keywords = ["bump", "increase", "amend", "terminate", "cancel", "revised", "superior proposal", "competing", "regulatory approval", "blocked"]
-                body_lower = body.lower()
-                title_lower = title.lower()
-                is_material = any(kw in body_lower or kw in title_lower for kw in material_keywords)
-                if is_material:
-                    print(f"[PYTHON UPDATE] Material update keywords detected. Generating new memo.")
-                    is_update = True
-                else:
-                    print(f"[PYTHON UPDATE] No material keywords found. Dropping duplicate.")
-                    save_article(
-                        source=source_name,
-                        article_id=article_id,
-                        title=title,
-                        url=url,
-                        published=published,
-                        body=body,
-                    )
-                    return conclude(1, 'Deduplication', 'Dropped', 'No Material Update', ticker, event_family)
+    if "false positive" in event_family.lower():
+        metrics.track_funnel("ai_rejected_false_positive")
+        print("[AI REJECTED] Article flagged as false positive.")
+        if triage_all:
+            print(f"[BYPASS] Source '{source_name}' has Triage All enabled.")
+            event_family = "Triage Rejection"
         else:
-            event_id = f"UNKNOWN_{article_id}"
+            save_article(source=source_name, article_id=article_id, title=title, url=url, published=published, body=body)
+            return conclude(1, 'AI Classification', 'Dropped', 'AI False Positive', ticker, event_family)
 
-        confidence = matches[0]["Score"]
-        research_summary = "Playbook not found."
-        playbook_steps = playbook_map.get(event_family, "")
-        if event_family == "Resumption of Trading":
-            playbook_steps += "\nCRITICAL T12 INSTRUCTIONS: Why did the halt occur? How long did it last?"
+    if event_family.strip().lower() == "unknown":
+        print("[UNKNOWN EVENT] Logging to Knowledge Base for review.")
+        log_unknown_event(sheet_url=SHEET_URL, source=source_name, article_title=title, article_url=url, rules_score=matches[0]["Score"], ai_response=event_family)
+        save_article(source=source_name, article_id=article_id, title=title, url=url, published=published, body=body)
+        return conclude(1, 'AI Classification', 'Archived', 'Unknown Event', ticker, event_family)
+
+    if event_family == "M&A Naked Call Strategy" and not options_available:
+        print(f"[AI REJECTED] Strategy requires tradable options, but none found for {ticker}.")
+        metrics.track_funnel("playbook_rejected")
+        save_article(source=source_name, article_id=article_id, title=title, url=url, published=published, body=body)
+        return conclude(1, 'AI Classification', 'Dropped', 'No Options Available', ticker, event_family)
+
+    if event_family == "Resumption of Trading":
+        halt_date_str = extract_halt_date(body)
+        print(f"[T12 METRICS] Calculating structural floor for {ticker} (Halt Date: {halt_date_str})...")
+        pre_halt = None
+        if ticker != "UNKNOWN":
+            try:
+                pre_halt = yf.Ticker(ticker).info.get('previousClose')
+            except:
+                pass
+        t12_data = get_t12_metrics(ticker, pre_halt_price=pre_halt, halt_date_str=halt_date_str)
         
-        gold_standard = gold_standards.get(event_family) if gold_standards else None
-        print(f"[AI RESEARCH] Generating Investment Memo...")
-        research_summary = execute_playbook(body, playbook_steps, event_family, gold_standard, market_data_str=market_data_str)
-        print(f"[AI RESEARCH] Done.")
+        if not t12_data['valid']:
+            print(f"[T12 REJECTED] {t12_data.get('reason')}")
+            metrics.track_funnel("playbook_rejected")
+            save_article(source=source_name, article_id=article_id, url=url, published=published, body=body, title=title)
+            return conclude(1, 'Playbook', 'Dropped', 'T12 Structural Floor Failed', ticker, event_family)
+            
+        print(f"[T12 APPROVED] Net Cash/Share: ${t12_data['net_cash_per_share']:.2f}")
+        market_data_str += f"Net Cash Per Share: ${t12_data['net_cash_per_share']:.2f}\n"
 
-        if funnel_metrics and is_update: 
-            funnel_metrics[9] += 1
+    is_update = False
+    if ticker != "UNKNOWN" and "MOCK AI" not in ticker:
+        print(f"[AI TICKER VERIFIED] Public ticker extracted: {ticker}")
+        track_company(ticker)
+        event_id, is_new = create_event_if_new(event_family, ticker)
+        
+        if not is_new:
+            print(f"[DEDUPLICATION] Event already tracked. Checking for material updates...")
+            material_keywords = ["bump", "increase", "amend", "terminate", "cancel", "regulatory approval", "revised", "superior proposal", "competing", "blocked"]
+            is_material = any(kw in body_lower or kw in title_lower for kw in material_keywords)
+            
+            if is_material:
+                print(f"[PYTHON UPDATE] Material update keywords detected. Generating new memo.")
+                is_update = True
+            else:
+                print(f"[PYTHON UPDATE] No material keywords found. Dropping duplicate.")
+                metrics.track_funnel("duplicate_event")
+                save_article(source=source_name, article_id=article_id, title=title, url=url, published=published, body=body)
+                return conclude(1, 'Deduplication', 'Dropped', 'No Material Update', ticker, event_family)
+    else:
+        event_id = f"UNKNOWN_{article_id}"
 
-        log_research(event_id, article_id, confidence, research_summary)
-        if funnel_metrics: 
-            funnel_metrics[10] += 1
+    confidence = matches[0]["Score"]
+    research_summary = "Playbook not found."
+    playbook_steps = playbook_map.get(event_family, "")
+    
+    if event_family == "Resumption of Trading":
+        playbook_steps += "\nCRITICAL T12 INSTRUCTIONS: Why did the halt occur? How long did it last?"
+        
+    gold_standard = gold_standards.get(event_family) if gold_standards else None
+    print(f"[AI RESEARCH] Generating Investment Memo...")
+    research_summary = execute_playbook(body, playbook_steps, event_family, gold_standard, market_data_str=market_data_str)
+    print(f"[AI RESEARCH] Done.")
 
-        append_to_research_queue(
-            sheet_url=SHEET_URL,
+    log_research(event_id, article_id, confidence, research_summary)
+    
+    append_to_research_queue(
+        sheet_url=SHEET_URL,
+        data_row={
+            "timestamp": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"),
+            "ticker": ticker,
+            "issuer": issuer,
+            "event_family": event_family,
+            "url": url,
+            "status": "Pending"
+        }
+    )
+    
+    save_article(source=source_name, article_id=article_id, title=title, url=url, published=published, body=body)
+
+    try:
+        send_alert(
             article_title=title,
             article_url=url,
             event_family=event_family,
-            confidence=confidence
+            confidence=confidence,
+            research_summary=research_summary,
+            evidence_log=matches[0].get("Evidence", []),
+            is_update=is_update
         )
-        
-        save_article(
-            source=source_name,
-            article_id=article_id,
-            title=title,
-            url=url,
-            published=published,
-            body=body,
-        )
+        metrics.track_funnel("alerts_sent")
+    except Exception as e:
+        print(f"[ALERT ERROR] Failed to send email alert: {e}")
 
-        try:
-            send_alert(
-                article_title=title,
-                article_url=url,
-                event_family=event_family,
-                confidence=confidence,
-                research_summary=research_summary,
-                evidence_log=matches[0].get("_Evidence", []),
-                is_update=is_update,
-            )
-            if funnel_metrics: 
-                funnel_metrics[11] += 1
-        except Exception as e:
-            print(f"[ALERT ERROR] Failed to send email alert: {e}")
+    go_shop_match = re.search(r'GO-SHOP EXPIRY:\s*(\d{4}-\d{2}-\d{2})', research_summary)
+    if go_shop_match:
+        expiry_date = go_shop_match.group(1)
+        msg = f"Go-Shop period for {ticker} expires TODAY ({expiry_date})."
+        save_reminder(event_id, ticker, expiry_date, msg)
 
-        go_shop_match = re.search(r'GO-SHOP EXPIRY:\s*(\d{4}-\d{2}-\d{2})', research_summary)
-        if go_shop_match:
-            expiry_date = go_shop_match.group(1)
-            msg = f"Go-Shop period for {ticker} expires TODAY ({expiry_date})."
-            save_reminder(event_id, ticker, expiry_date, msg)
-            if funnel_metrics: 
-                funnel_metrics[12] += 1
+    if issuer_memory and issuer != "UNKNOWN":
+        issuer_memory.add(issuer)
 
-        if issuer_memory and issuer != "UNKNOWN":
-            issuer_memory.add(issuer)
-
-        return conclude(1, 'Alert', 'Alert Sent', 'Email Dispatched', issuer, event_family)
-
-    return conclude(1, 'Rules Engine', 'Dropped', 'Failed Rules Threshold', issuer, 'Unknown')
+    return conclude(1, 'Alert', 'Alert Sent', 'Email Dispatched', issuer, event_family)
 
 
 def process_1_feed(rss_url, source_name, triage_all=False, country=None, language=None):
     print(f"\n[INGESTION] Polling RSS: {source_name} ({rss_url})")
-    import requests
+    metrics = MetricsCollector.get_instance()
     try:
         headers = {"User-Agent": "Mozilla/5.0"}
         response = requests.get(rss_url, headers=headers, timeout=15)
@@ -448,7 +358,9 @@ def process_1_feed(rss_url, source_name, triage_all=False, country=None, languag
         article_id = entry.link.rstrip("/").split("-")[-1].replace(".html", "")
         article_key = f"{source_name}:{article_id}"
         if article_exists(article_key):
+            metrics.track_funnel("duplicate_id")
             continue
+
         body = getattr(entry, "summary", getattr(entry, "description", ""))
         published = getattr(entry, "published", "")
         parsed_articles.append({
@@ -468,6 +380,7 @@ def process_1_feed(rss_url, source_name, triage_all=False, country=None, languag
 
 def process_custom_scraper(scraper, source_name, rss_url=None, triage_all=False, country=None, language=None):
     print(f"\n[INGESTION] Polling Custom Scraper: {source_name}")
+    metrics = MetricsCollector.get_instance()
     try:
         articles = scraper.get_latest_articles(rss_url=rss_url)
     except Exception as e:
@@ -478,7 +391,9 @@ def process_custom_scraper(scraper, source_name, rss_url=None, triage_all=False,
     for i, article in enumerate(articles):
         article_key = f"{source_name}:{article['id']}"
         if article_exists(article_key):
+            metrics.track_funnel("duplicate_id")
             continue
+
         body = article.get("body", "")
         parsed_articles.append({
             "source_name": source_name,
@@ -510,19 +425,14 @@ def cluster_articles(articles):
                 break
         if not found_cluster:
             clusters.append([article])
-            
+    
     for cluster in clusters:
         cluster.sort(key=lambda x: len(x.get('body', '')), reverse=True)
     return clusters
 
 
 def main():
-    import traceback
-    from src.monitoring import MetricsCollector
-    from src.sheets import get_system_settings
-    
     try:
-        from src.config.settings import SHEET_URL
         settings = get_system_settings(SHEET_URL)
     except Exception:
         settings = {}
@@ -535,7 +445,6 @@ def main():
     
     issuer_memory = IssuerMemory()
     issuer_memory.load_from_db()
-    funnel_metrics = {i: 0 for i in range(1, 13)}
     
     pending = get_pending_reminders()
     for rem in pending:
@@ -562,11 +471,9 @@ def main():
     gold_standards = load_gold_standards(SHEET_URL)
     playbook_map = {p['Playbook']: p.get('Questions/Research Steps', '') for p in playbooks}
     
-    from src.sheets import load_document_type_scores
     document_type_scores = load_document_type_scores(SHEET_URL)
     source_reliability_scores = load_source_reliability(SHEET_URL)
     
-    from src.ontology import load_ontology
     load_ontology(SHEET_URL)
     ontology_stats = {"total": 0, "extracted": 0, "missed": 0}
     all_new_articles = []
@@ -591,8 +498,7 @@ def main():
                         scraper, source_name, rss_url=rss_url,
                         triage_all=triage_all, country=country, language=language
                     )
-                    if funnel_metrics: 
-                        funnel_metrics[1] += parsed_count
+                    metrics.track_funnel("downloaded", parsed_count)
                     if parsed_count > 0:
                         method_used = "HTML"
                         all_new_articles.extend(parsed)
@@ -603,8 +509,7 @@ def main():
             if not method_used and rss_url:
                 try:
                     parsed, parsed_count = process_1_feed(rss_url, source_name, triage_all, country, language)
-                    if funnel_metrics: 
-                        funnel_metrics[1] += parsed_count
+                    metrics.track_funnel("downloaded", parsed_count)
                     method_used = "RSS"
                     all_new_articles.extend(parsed)
                     source_stats[source_name] = {"count": parsed_count, "new": len(parsed), "method": method_used}
@@ -613,7 +518,6 @@ def main():
 
     clusters = cluster_articles(all_new_articles)
     
-    from collections import defaultdict
     clusters_by_source = defaultdict(list)
     for cluster in clusters:
         clusters_by_source[cluster[0]["source_name"]].append(cluster)
@@ -661,7 +565,6 @@ def main():
             global_exclusions=global_exclusions,
             gold_standards=gold_standards,
             triage_all=primary["triage_all"],
-            funnel_metrics=funnel_metrics,
             issuer_memory=issuer_memory,
             document_type=primary.get("document_type"),
             country=primary.get("country"),
@@ -681,12 +584,6 @@ def main():
     metrics.daily["total_runtime_s"] = total_runtime
     
     print("[MONITORING] Writing operational statistics to SQLite...")
-    from src.database import (
-        save_lifecycle_logs, get_recent_lifecycle_logs, save_run_metrics, 
-        save_ai_usage, save_source_stats, save_workflow_health, save_exception_log,
-        perform_housekeeping, get_dashboard_state, set_dashboard_state,
-        get_30_day_average, get_30_day_source_averages
-    )
     
     log_rows = []
     for art_id, trace in metrics.article_traces.items():
@@ -744,7 +641,6 @@ def main():
     for exc in metrics.exceptions:
         save_exception_log(metrics.run_id, exc["timestamp"], exc["exc_type"], exc["stack_trace"], exc["module"], exc["func_name"], exc["article_url"], exc["severity"])
 
-    # Run automated statistical drift analysis post-execution
     check_pipeline_drift()
 
     from pathlib import Path
@@ -770,14 +666,12 @@ def main():
         print("[MONITORING] Generating HTML Dashboard and Archive...")
         logs = get_recent_lifecycle_logs()
         metrics.calculate_health_score(total_runtime)
-        from src.html_generator import generate_dashboard_html, generate_archive_html
         
         avg_30 = get_30_day_average()
         src_30 = get_30_day_source_averages()
         
         generate_dashboard_html(logs, output_path=docs_path, metrics=metrics, avg_30=avg_30, src_30=src_30)
         
-        from src.database import export_archive_json
         archive_json_path = docs_dir / "archive_data.json"
         archive_html_path = docs_dir / "archive.html"
         
@@ -789,19 +683,14 @@ def main():
         print("[MONITORING] Skipping HTML Dashboard generation (throttle).")
 
     print("[MONITORING] Checking if yesterday's data needs syncing to Google Sheets...")
-    from src.sheets import aggregate_and_sync_yesterday
     aggregate_and_sync_yesterday(SHEET_URL)
     
     print(f"[DAILY MEMORY] Session ended with {issuer_memory.size} issuers cached.")
 
-
 if __name__ == "__main__":
-    import sys
-    import os
     try:
         main()
     except Exception as e:
-        import traceback
-        print(f"\n[FATAL ERROR] {e}")
         traceback.print_exc()
+        print(f"\n[FATAL ERROR] {e}")
         sys.exit(1)
