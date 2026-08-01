@@ -118,6 +118,14 @@ def update_last_checked(sheet_url, source_stats, timestamp_str):
         return
         
     header = all_values[0]
+    
+    # Ensure physical grid has enough columns before we append new headers
+    if worksheet.col_count < len(header) + 4:
+        try:
+            worksheet.add_cols(4)
+        except Exception:
+            pass
+            
     updates = []
     
     # 1. Ensure columns exist and get their indices
@@ -218,6 +226,13 @@ def update_pipeline_metrics(sheet_url, funnel_metrics, timestamp_str):
         return
         
     header = all_values[0]
+    
+    if worksheet.col_count < len(header) + 3:
+        try:
+            worksheet.add_cols(3)
+        except Exception:
+            pass
+            
     updates = []
     
     # 1. Ensure columns exist and get indices
