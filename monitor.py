@@ -708,6 +708,10 @@ def main():
     print(f"\n[DEDUPLICATION] Clustering {len(all_new_articles)} new articles across all sources...")
     clusters = cluster_articles(all_new_articles)
     print(f"[DEDUPLICATION] Reduced to {len(clusters)} unique events.")
+    MAX_AI_EVALS = 50
+    if len(clusters) > MAX_AI_EVALS:
+        print(f"\n[THROTTLING] Truncating massive backlog down to {MAX_AI_EVALS} events to prevent pipeline timeouts! The remaining {len(clusters) - MAX_AI_EVALS} events will roll over and process in the next 5-minute schedule.")
+        clusters = clusters[:MAX_AI_EVALS]
     
     total_new = 0
     for cluster in clusters:
