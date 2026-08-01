@@ -580,3 +580,40 @@ def aggregate_and_sync_yesterday(sheet_url):
     mark_yesterday_synced()
     print("[SHEETS] Yesterday's sync complete.")
 
+def get_system_settings(sheet_url):
+    client = get_client()
+    sheet = client.open_by_url(sheet_url)
+    try:
+        ws = sheet.worksheet("System Settings")
+    except gspread.exceptions.WorksheetNotFound:
+        print("[SHEETS] 'System Settings' tab not found. Provisioning default settings...")
+        ws = sheet.add_worksheet(title="System Settings", rows="20", cols="2")
+        ws.update("A1:B6", [
+            ["Setting", "Value"],
+            ["Download Drift Threshold", 20],
+            ["Alert Drift Threshold", 50],
+            ["AI Success Threshold", 80],
+            ["Maximum Runtime Seconds", 240],
+            ["Dashboard Publish Interval", 60]
+        ])
+        ws.format("A1:B1", {"textFormat": {"bold": True}})
+        
+    records = ws.get_all_records()
+    settings = {
+        "Download Drift Threshold": 20,
+        "Alert Drift Threshold": 50,
+        "AI Success Threshold": 80,
+        "Maximum Runtime Seconds": 240,
+        "Dashboard Publish Interval": 60
+    }
+    for row in records:
+        key = row.get("Setting")
+        val = row.get("Value")
+        if key in settings and val != "":
+            try:
+                settings[key] = int(val)
+            except ValueError:
+                pass
+                
+    return settings
+
