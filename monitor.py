@@ -802,7 +802,7 @@ def main():
     metrics.daily["total_runtime_s"] = total_runtime
     
     print("[MONITORING] Writing operational statistics to SQLite...")
-    from src.database import save_lifecycle_logs, prune_lifecycle_logs, get_recent_lifecycle_logs, save_run_metrics, save_ai_usage, save_source_stats, save_workflow_health, save_exception_log, perform_housekeeping, get_dashboard_state, set_dashboard_state, get_30_day_average, get_30_day_source_averages
+    from src.database import save_lifecycle_logs, get_recent_lifecycle_logs, save_run_metrics, save_ai_usage, save_source_stats, save_workflow_health, save_exception_log, perform_housekeeping, get_dashboard_state, set_dashboard_state, get_30_day_average, get_30_day_source_averages
     
     log_rows = []
     for art_id, trace in metrics.article_traces.items():
@@ -932,40 +932,6 @@ def main():
             except Exception as e:
                 print(f"Failed to send critical drift email: {e}")
 
-    print(f"[DAILY MEMORY] Session ended with {issuer_memory.size} issuers cached.")
-
-    
-    import time
-    metrics.daily["total_runtime_s"] = time.perf_counter() - metrics.workflow_start
-    if metrics.daily["total_runtime_s"] > 240:
-        metrics.daily["anomalies"].add(f"Runtime > 4 mins ({metrics.daily['total_runtime_s']:.1f}s)")
-        
-    print("[MONITORING] Writing operational statistics to Google Sheets...")
-    from src.sheets import update_daily_statistics, append_ai_usage, update_source_statistics
-    update_daily_statistics(SHEET_URL, metrics.daily)
-    append_ai_usage(SHEET_URL, dict(metrics.ai_telemetry))
-    update_source_statistics(SHEET_URL, dict(metrics.source_stats))
-    
-    print("[MONITORING] Generating HTML Dashboard...")
-    from src.database import save_lifecycle_logs, prune_lifecycle_logs, get_recent_lifecycle_logs
-    
-    # Extract just the values from the dict mapping
-    log_rows = []
-    for art_id, trace in metrics.article_traces.items():
-        log_rows.append((
-            art_id, trace["timestamp"], trace["source"], trace["title"], trace["url"], 
-            trace["country"], trace["language"], trace["document_type"], trace["issuer"], 
-            trace["event_family"], trace["stage"], trace["final_status"], trace["drop_reason"], 
-            trace["processing_time_ms"]
-        ))
-        
-    save_lifecycle_logs(log_rows)
-    prune_lifecycle_logs(days=14)
-    logs = get_recent_lifecycle_logs()
-    
-    from src.html_generator import generate_dashboard_html
-    generate_dashboard_html(logs, output_path="docs/index.html")
-    
     print(f"[DAILY MEMORY] Session ended with {issuer_memory.size} issuers cached.")
 
     if source_stats:
