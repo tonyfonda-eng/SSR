@@ -3,375 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SSR Operations Centre</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-gradient: radial-gradient(circle at 10% 20%, rgb(14, 20, 31) 0%, rgb(8, 11, 17) 90%);
-            --panel-bg: rgba(23, 32, 51, 0.6);
-            --panel-border: rgba(255, 255, 255, 0.08);
-            --panel-hover-bg: rgba(30, 41, 59, 0.8);
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent: #38bdf8;
-            --accent-glow: rgba(56, 189, 248, 0.4);
-            --success: #10b981;
-            --success-glow: rgba(16, 185, 129, 0.2);
-            --warning: #f59e0b;
-            --danger: #ef4444;
-            --danger-glow: rgba(239, 68, 68, 0.2);
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: var(--bg-gradient);
-            color: var(--text-main);
-            margin: 0;
-            padding: 30px;
-            min-height: 100vh;
-            background-attachment: fixed;
-        }
-
-        /* Typography */
-        h1, h2, h3 {
-            font-family: 'Outfit', sans-serif;
-            margin: 0;
-        }
-        h1 {
-            font-size: 2.2rem;
-            font-weight: 700;
-            background: linear-gradient(90deg, #f8fafc, #94a3b8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            letter-spacing: -0.02em;
-        }
-        .header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--panel-border);
-        }
-        .subtitle {
-            color: var(--text-muted);
-            font-size: 0.95rem;
-            margin-top: 5px;
-            font-weight: 500;
-        }
-
-        /* Glassmorphic Panels */
-        .panel, .metric-box {
-            background: var(--panel-bg);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--panel-border);
-            border-radius: 16px;
-            box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.3);
-            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
-        }
-        .metric-box {
-            padding: 20px;
-            text-align: center;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-        .metric-box:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.4);
-            background: var(--panel-hover-bg);
-        }
-        .metric-val {
-            font-family: 'Outfit', sans-serif;
-            font-size: 2.2rem;
-            font-weight: 800;
-            margin-bottom: 8px;
-            color: var(--text-main);
-        }
-        .metric-lbl {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            font-weight: 600;
-        }
-
-        /* Layouts */
-        .report-card {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 20px;
-            margin-bottom: 40px;
-        }
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-            margin-bottom: 30px;
-        }
-        .panel {
-            padding: 24px;
-        }
-        .panel-full {
-            grid-column: 1 / -1;
-        }
-        .panel h2 {
-            font-size: 1.25rem;
-            margin-bottom: 20px;
-            color: var(--text-main);
-            letter-spacing: 0.02em;
-            display: flex;
-            align-items: center;
-        }
-        .panel h2::before {
-            content: '';
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            background: var(--accent);
-            border-radius: 50%;
-            margin-right: 12px;
-            box-shadow: 0 0 10px var(--accent-glow);
-        }
-
-        /* Tables & Lists */
-        .table-container {
-            overflow-x: auto;
-            border-radius: 8px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.9rem;
-            white-space: nowrap;
-        }
-        th, td {
-            padding: 12px 16px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-        }
-        th {
-            font-family: 'Outfit', sans-serif;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.05em;
-            cursor: pointer;
-            transition: color 0.2s ease;
-        }
-        th:hover {
-            color: var(--text-main);
-        }
-        tr {
-            transition: background 0.2s ease;
-        }
-        tbody tr:hover {
-            background: rgba(255, 255, 255, 0.03);
-        }
-        
-        /* Links and Badges */
-        a {
-            color: var(--accent);
-            text-decoration: none;
-            transition: color 0.2s ease, text-shadow 0.2s ease;
-        }
-        a:hover {
-            color: #7dd3fc;
-            text-shadow: 0 0 8px var(--accent-glow);
-        }
-        .badge {
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            font-family: 'Outfit', sans-serif;
-            display: inline-block;
-            letter-spacing: 0.02em;
-            border: 1px solid transparent;
-        }
-        .status-alert {
-            background-color: var(--success-glow);
-            color: #34d399;
-            border-color: rgba(52, 211, 153, 0.2);
-        }
-        .status-drop {
-            background-color: var(--danger-glow);
-            color: #f87171;
-            border-color: rgba(248, 113, 113, 0.2);
-        }
-        .status-archived {
-            background-color: rgba(148, 163, 184, 0.15);
-            color: #cbd5e1;
-            border-color: rgba(203, 213, 225, 0.15);
-        }
-        .stage-cell {
-            color: var(--text-muted);
-            font-family: monospace;
-            font-size: 0.85rem;
-        }
-
-        /* Scrollbar styling */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-    </style>
+    <title>SSR Operations Centre Cockpit</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-<body>
-    <div class="header-row">
-        <div>
-            <h1>SSR Operations Centre</h1>
-            <div class="subtitle">Generated: 2026-08-01 16:36:46 UTC</div>
+<body class="bg-gray-900 text-gray-100 font-sans leading-normal tracking-normal">
+
+    <nav class="bg-gray-800 border-b border-gray-700 px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center space-x-3">
+            <i class="fa-solid fa-radar text-blue-500 text-2xl"></i>
+            <span class="text-xl font-bold tracking-wider">SSR OPERATIONS CENTRE</span>
         </div>
-        <div>
-            <a href="archive.html" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 600; font-family: 'Outfit', sans-serif; transition: all 0.2s;">
-                📂 Database Archive
-            </a>
+        <div class="flex space-x-4">
+            <a href="index.html" class="bg-blue-600 px-4 py-2 rounded text-sm font-semibold hover:bg-blue-500 transition">Cockpit</a>
+            <a href="archive.html" class="bg-gray-700 px-4 py-2 rounded text-sm font-semibold hover:bg-gray-600 transition">Data Archive</a>
         </div>
-    </div>
-    
-    <!-- 1. Daily Report Card -->
-    <div class="report-card">
-        <div class="metric-box">
-            <div class="metric-val" style="color: var(--success); text-shadow: 0 0 15px var(--success)40;">100</div>
-            <div class="metric-lbl">Health Score</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-val">0</div>
-            <div class="metric-lbl">Articles</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-val">0</div>
-            <div class="metric-lbl">AI Calls</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-val">0.00%</div>
-            <div class="metric-lbl">Avoided AI %</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-val" style="color: var(--accent); text-shadow: 0 0 15px var(--accent-glow);">0</div>
-            <div class="metric-lbl">Alerts Generated</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-val">2m 10s</div>
-            <div class="metric-lbl">Pipeline Runtime</div>
-        </div>
-        <div class="metric-box">
-            <div class="metric-val" style="color: inherit">0</div>
-            <div class="metric-lbl">Exceptions</div>
-        </div>
-        <div class="metric-box" style="background: rgba(255,255,255,0.03);">
-            <div class="metric-val" style="color: var(--success); font-size: 1.4rem; height: 100%; display: flex; align-items: center; justify-content: center;">Healthy</div>
-            <div class="metric-lbl">System Status</div>
-        </div>
-    </div>
-    
-    <div class="grid-2">
-        <!-- 2. Pipeline Funnel -->
-        <div class="panel">
-            <h2>Pipeline Funnel</h2>
-            <div class="table-container">
-                <table class="sortable">
-                    <thead><tr><th>Stage</th><th>Count</th><th>% of Total</th></tr></thead>
-                    <tbody><tr><td>Downloaded</td><td>0</td><td>0%</td></tr><tr><td>Rejected Pre-Regex</td><td>0</td><td>0%</td></tr><tr><td>Rejected by Regex</td><td>0</td><td>0%</td></tr><tr><td>Rejected by Exclusions</td><td>0</td><td>0%</td></tr><tr><td>Rejected by Ontology</td><td>0</td><td>0%</td></tr><tr><td>Rejected by Rules</td><td>0</td><td>0%</td></tr><tr><td>Reached AI</td><td>0</td><td>0%</td></tr><tr><td>Alerts Sent</td><td>0</td><td>0%</td></tr></tbody>
-                </table>
+    </nav>
+
+    <div class="container mx-auto px-6 py-8">
+
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="bg-gray-800 border border-gray-700 rounded-lg p-5 shadow">
+                <div class="text-gray-400 text-xs font-bold uppercase tracking-wider">Overall Health Score</div>
+                <div class="text-4xl font-extrabold mt-2 text-green-400">
+                    100/100
+                </div>
+                <div class="text-xs text-gray-400 mt-2">Based on exceptions & API success rates</div>
+            </div>
+
+            <div class="bg-gray-800 border border-gray-700 rounded-lg p-5 shadow">
+                <div class="text-gray-400 text-xs font-bold uppercase tracking-wider">Pipeline Runtime</div>
+                <div class="text-3xl font-bold mt-2 text-blue-400">126.1s</div>
+                <div class="text-xs text-gray-400 mt-2">Execution timestamp: 2026-08-01 17:52 UTC</div>
+            </div>
+
+            <div class="bg-gray-800 border border-gray-700 rounded-lg p-5 shadow">
+                <div class="text-gray-400 text-xs font-bold uppercase tracking-wider">Articles Downloaded</div>
+                <div class="text-3xl font-bold mt-2 text-purple-400">0</div>
+                <div class="text-xs text-gray-400 mt-2">Filtered through global rules</div>
+            </div>
+
+            <div class="bg-gray-800 border border-gray-700 rounded-lg p-5 shadow">
+                <div class="text-gray-400 text-xs font-bold uppercase tracking-wider">Alerts Dispatched</div>
+                <div class="text-3xl font-bold mt-2 text-green-400">0</div>
+                <div class="text-xs text-gray-400 mt-2">Actionable special situations</div>
             </div>
         </div>
-        
-        <!-- 3. AI Capacity -->
-        <div class="panel">
-            <h2>AI Capacity Forecast</h2>
-            <div class="table-container">
-                <table class="sortable">
-                    <thead><tr><th>Provider</th><th>Usage Today</th><th>Est. Remaining</th></tr></thead>
-                    <tbody><tr><td>Google Gemini</td><td>0</td><td>100.0%</td></tr><tr><td>OpenRouter</td><td>0</td><td>100.0%</td></tr></tbody>
-                </table>
+
+        <div class="bg-gray-800 border-l-4 border-blue-500 p-5 rounded-r-lg mb-8 shadow">
+            <h2 class="text-lg font-bold text-blue-400 mb-2"><i class="fa-solid fa-bolt mr-2"></i>What surprises me today? (Daily Briefing)</h2>
+            <ul class="list-disc list-inside space-y-1 text-gray-300 text-sm">
+                <li>✅ All deterministic checks nominal. No unusual anomalies detected today.</li>
+            </ul>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <div class="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow">
+                <h2 class="text-xl font-bold mb-4 text-gray-200"><i class="fa-solid fa-filter mr-2 text-blue-400"></i>Pipeline Conversion Funnel</h2>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>Raw Articles Downloaded</span>
+                            <span class="font-bold">0</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2.5">
+                            <div class="bg-blue-600 h-2.5 rounded-full" style="width: 100%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>Reached AI Verification</span>
+                            <span class="font-bold">0</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2.5">
+                            <div class="bg-purple-600 h-2.5 rounded-full" style="width: 0.0%"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>Actionable Alerts Generated</span>
+                            <span class="font-bold">0</span>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2.5">
+                            <div class="bg-green-600 h-2.5 rounded-full" style="width: 0.0%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow">
+                <h2 class="text-xl font-bold mb-4 text-gray-200"><i class="fa-solid fa-triangle-exclamation mr-2 text-yellow-400"></i>Recent Exceptions & Errors</h2>
+                <div class="overflow-y-auto max-h-48 space-y-2 text-sm">
+                    <div class='text-gray-400 italic'>No exceptions recorded in this session. System running cleanly.</div>
+                </div>
             </div>
         </div>
-        
-        <!-- 4. Source Health -->
-        <div class="panel panel-full">
-            <h2>Source Health & Signal Rates</h2>
-            <div class="table-container">
-                <table class="sortable">
-                    <thead><tr><th>Source</th><th>Downloaded</th><th>Alerts</th><th>Signal Rate</th></tr></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-        
-        <!-- Priority Queue Heatmap -->
-        <div class="panel panel-full">
-            <h2>Dynamic Priority Allocation (Current Hour Peak)</h2>
-            <div class="table-container">
-                <table class="sortable">
-                    <thead><tr><th>Source</th><th>Quota Allocated / Backlog</th><th>Priority Weight (EMA)</th></tr></thead>
-                    <tbody><tr><td colspan='3'>No priority data available for current window.</td></tr></tbody>
-                </table>
-            </div>
-        </div>
-        
-        <!-- 5. Pathological Cases -->
-        <div class="panel panel-full">
-            <h2>Pathological Cases (Top 10 Slowest Articles)</h2>
-            <div class="table-container">
-                <table class="sortable">
-                    <thead><tr><th>Source</th><th>Headline</th><th>Slowest Stage</th><th>Total Time</th></tr></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-        
-        <!-- Execution Log -->
-        <div class="panel panel-full">
-            <h2>Pipeline Execution Log (Rolling 14-Day)</h2>
-            <div class="table-container" style="max-height: 500px;">
-                <table class="sortable">
-                    <thead style="position: sticky; top: 0; background: rgba(23, 32, 51, 0.95); z-index: 10;">
+
+        <div class="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow mb-8">
+            <h2 class="text-xl font-bold mb-4 text-gray-200"><i class="fa-solid fa-list mr-2 text-blue-400"></i>Recent Ingested Activity</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-left text-sm text-gray-300">
+                    <thead class="bg-gray-700 text-gray-200 uppercase text-xs">
                         <tr>
-                            <th>Timestamp</th><th>Source</th><th>Headline</th><th>Issuer</th>
-                            <th>Pipeline Stage</th><th>Outcome</th><th>Reason</th><th>AI Invoked</th><th>Time (ms)</th>
+                            <th class="py-2 px-3">Timestamp</th>
+                            <th class="py-2 px-3">Source</th>
+                            <th class="py-2 px-3">Issuer</th>
+                            <th class="py-2 px-3">Title</th>
+                            <th class="py-2 px-3">Event Family</th>
+                            <th class="py-2 px-3">Outcome</th>
                         </tr>
                     </thead>
-                    <tbody></tbody>
+                    <tbody>
+                        <tr><td colspan='6' class='text-center py-4 text-gray-400 italic'>No recent activity logged.</td></tr>
+                    </tbody>
                 </table>
             </div>
         </div>
+
     </div>
-    
-    <script>
-        // Simple Vanilla JS Table Sorter
-        document.addEventListener('DOMContentLoaded', () => {
-            const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;
-            
-            const comparer = (idx, asc) => (a, b) => ((v1, v2) => 
-                v1 !== '' && v2 !== '' && !isNaN(v1) && !isNaN(v2) ? v1 - v2 : v1.toString().localeCompare(v2)
-                )(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
-                
-            document.querySelectorAll('th').forEach(th => th.addEventListener('click', (() => {
-                const table = th.closest('table');
-                const tbody = table.querySelector('tbody');
-                Array.from(tbody.querySelectorAll('tr'))
-                    .sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc))
-                    .forEach(tr => tbody.appendChild(tr));
-            })));
-        });
-    </script>
 </body>
 </html>
