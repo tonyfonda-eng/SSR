@@ -237,34 +237,34 @@
     <div class="header-row">
         <div>
             <h1>SSR Operations Centre</h1>
-            <div class="subtitle">Generated: 2026-08-01 09:45:01 UTC</div>
+            <div class="subtitle">Generated: 2026-08-01 10:12:31 UTC</div>
         </div>
     </div>
     
     <!-- 1. Daily Report Card -->
     <div class="report-card">
         <div class="metric-box">
-            <div class="metric-val" style="color: var(--success); text-shadow: 0 0 15px var(--success)40;">80</div>
+            <div class="metric-val" style="color: var(--success); text-shadow: 0 0 15px var(--success)40;">82</div>
             <div class="metric-lbl">Health Score</div>
         </div>
         <div class="metric-box">
-            <div class="metric-val">3,450</div>
+            <div class="metric-val">2</div>
             <div class="metric-lbl">Articles</div>
         </div>
         <div class="metric-box">
-            <div class="metric-val">450</div>
+            <div class="metric-val">18</div>
             <div class="metric-lbl">AI Calls</div>
         </div>
         <div class="metric-box">
-            <div class="metric-val">62.32%</div>
+            <div class="metric-val">0.00%</div>
             <div class="metric-lbl">Avoided AI %</div>
         </div>
         <div class="metric-box">
-            <div class="metric-val" style="color: var(--accent); text-shadow: 0 0 15px var(--accent-glow);">12</div>
+            <div class="metric-val" style="color: var(--accent); text-shadow: 0 0 15px var(--accent-glow);">0</div>
             <div class="metric-lbl">Alerts Generated</div>
         </div>
         <div class="metric-box">
-            <div class="metric-val">2m 0s</div>
+            <div class="metric-val">1m 26s</div>
             <div class="metric-lbl">Pipeline Runtime</div>
         </div>
         <div class="metric-box">
@@ -284,7 +284,7 @@
             <div class="table-container">
                 <table class="sortable">
                     <thead><tr><th>Stage</th><th>Count</th><th>% of Total</th></tr></thead>
-                    <tbody><tr><td>Downloaded</td><td>3450</td><td>100.0%</td></tr><tr><td>Rejected Pre-Regex</td><td>1000</td><td>29.0%</td></tr><tr><td>Rejected by Regex</td><td>500</td><td>14.5%</td></tr><tr><td>Rejected by Exclusions</td><td>400</td><td>11.6%</td></tr><tr><td>Rejected by Ontology</td><td>200</td><td>5.8%</td></tr><tr><td>Rejected by Rules</td><td>50</td><td>1.4%</td></tr><tr><td>Reached AI</td><td>1300</td><td>37.7%</td></tr><tr><td>Alerts Sent</td><td>12</td><td>0.3%</td></tr></tbody>
+                    <tbody><tr><td>Downloaded</td><td>2</td><td>100.0%</td></tr><tr><td>Rejected Pre-Regex</td><td>0</td><td>0.0%</td></tr><tr><td>Rejected by Regex</td><td>0</td><td>0.0%</td></tr><tr><td>Rejected by Exclusions</td><td>0</td><td>0.0%</td></tr><tr><td>Rejected by Ontology</td><td>0</td><td>0.0%</td></tr><tr><td>Rejected by Rules</td><td>0</td><td>0.0%</td></tr><tr><td>Reached AI</td><td>1</td><td>50.0%</td></tr><tr><td>Alerts Sent</td><td>0</td><td>0.0%</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -295,7 +295,7 @@
             <div class="table-container">
                 <table class="sortable">
                     <thead><tr><th>Provider</th><th>Usage Today</th><th>Est. Remaining</th></tr></thead>
-                    <tbody><tr><td>Google Gemini</td><td>0</td><td>100.0%</td></tr><tr><td>OpenRouter</td><td>0</td><td>100.0%</td></tr></tbody>
+                    <tbody><tr><td>Google Gemini</td><td>9</td><td>99.9%</td></tr><tr><td>OpenRouter</td><td>9</td><td>99.8%</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -316,8 +316,8 @@
             <h2>Dynamic Priority Allocation (Current Hour Peak)</h2>
             <div class="table-container">
                 <table class="sortable">
-                    <thead><tr><th>Source</th><th>Articles Allocated (Max 50)</th><th>Priority Score (Avg Historical Vol)</th></tr></thead>
-                    <tbody><tr><td colspan='3'>No priority data available for current window.</td></tr></tbody>
+                    <thead><tr><th>Source</th><th>Quota Allocated / Backlog</th><th>Priority Weight (EMA)</th></tr></thead>
+                    <tbody><tr><td>Business Wire</td><td>50 / 11</td><td><span class='badge status-archived'>0.00</span></td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -328,7 +328,7 @@
             <div class="table-container">
                 <table class="sortable">
                     <thead><tr><th>Source</th><th>Headline</th><th>Slowest Stage</th><th>Total Time</th></tr></thead>
-                    <tbody></tbody>
+                    <tbody><tr><td>Business Wire</td><td>UniCredit, Accenture and IBM Collaborate to Build ...</td><td>Ontology</td><td style='color: var(--danger); font-weight: bold;'>11696 ms</td></tr><tr><td>Business Wire</td><td>TekSynap Appoints Brent Newman as Vice President o...</td><td>Ontology</td><td style='color: var(--danger); font-weight: bold;'>4238 ms</td></tr></tbody>
                 </table>
             </div>
         </div>
@@ -344,7 +344,9 @@
                             <th>Pipeline Stage</th><th>Outcome</th><th>Reason</th><th>AI Invoked</th><th>Time (ms)</th>
                         </tr>
                     </thead>
-                    <tbody></tbody>
+                    <tbody><tr><td>2026-08-01 10:12:30 UTC</td><td>Business Wire</td><td><a href="http://www.businesswire.com/news/home/20260730386590/en/TekSynap-Appoints-Brent-Newman-as-Vice-President-of-Talent-Acquisition/" target="_blank">TekSynap Appoints Brent Newman as Vice President o...</a></td><td>TEKSYNAP</td><td class="stage-cell">Rules Engine</td><td><span class="badge status-drop">Dropped</span></td><td>AI Exhausted</td><td><span class="badge status-alert">YES</span></td><td>4238</td></tr>
+<tr><td>2026-08-01 10:12:26 UTC</td><td>Business Wire</td><td><a href="http://www.businesswire.com/news/home/20260731154709/en/UniCredit-Accenture-and-IBM-Collaborate-to-Build-Europe%E2%80%99s-Next-Generation-Banking-Platform/" target="_blank">UniCredit, Accenture and IBM Collaborate to Build ...</a></td><td>UNKNOWN</td><td class="stage-cell">Rules Engine</td><td><span class="badge status-drop">Dropped</span></td><td>Failed Rules Threshold</td><td><span class="badge status-drop">NO</span></td><td>11696</td></tr>
+</tbody>
                 </table>
             </div>
         </div>
