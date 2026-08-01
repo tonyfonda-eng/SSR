@@ -21,7 +21,7 @@ def generate_dashboard_html(logs, output_path="docs/index.html", metrics=None, a
         health_score -= 20
     health_score = max(0, health_score)
 
-    # Funnel metrics extraction (Stages 1 to 12 equivalents from telemetry)
+    # Funnel metrics extraction
     funnel = metrics.daily.get("funnel", {}) if metrics else {}
     
     # Deterministic "Surprises" Engine
@@ -133,6 +133,26 @@ def generate_dashboard_html(logs, output_path="docs/index.html", metrics=None, a
                 <div class="overflow-y-auto max-h-48 space-y-2 text-sm">
                     {"".join([f"<div class='bg-gray-700 p-2 rounded text-red-300'><strong>{exc.get('exc_type')}</strong>: {exc.get('module')}</div>" for exc in exceptions]) if exceptions else "<div class='text-gray-400 italic'>No exceptions recorded in this session. System running cleanly.</div>"}
                 </div>
+            </div>
+        </div>
+
+        <div class="bg-gray-800 border border-gray-700 rounded-lg p-6 shadow mb-8">
+            <h2 class="text-xl font-bold mb-4 text-gray-200"><i class="fa-solid fa-list mr-2 text-blue-400"></i>Recent Ingested Activity</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full text-left text-sm text-gray-300">
+                    <thead class="bg-gray-700 text-gray-200 uppercase text-xs">
+                        <tr>
+                            <th class="py-2 px-3">Timestamp</th>
+                            <th class="py-2 px-3">Source</th>
+                            <th class="py-2 px-3">Title</th>
+                            <th class="py-2 px-3">Event Family</th>
+                            <th class="py-2 px-3">Outcome</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {"".join([f"<tr class='border-b border-gray-700 hover:bg-gray-750'><td class='py-2 px-3'>{log.get('timestamp')}</td><td class='py-2 px-3'>{log.get('source')}</td><td class='py-2 px-3'><a href='{log.get('url', '#')}' class='text-blue-400 hover:underline' target='_blank'>{log.get('title')}</a></td><td class='py-2 px-3'>{log.get('event_family')}</td><td class='py-2 px-3'>{log.get('outcome')}</td></tr>" for log in logs]) if logs else "<tr><td colspan='5' class='text-center py-4 text-gray-400 italic'>No recent activity logged.</td></tr>"}
+                    </tbody>
+                </table>
             </div>
         </div>
 
