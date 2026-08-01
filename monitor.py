@@ -570,6 +570,10 @@ def cluster_articles(articles):
 def main():
     print("=== Special Situations Radar v1.0.0 ===")
     
+    from src.monitoring import MetricsCollector
+    metrics = MetricsCollector.get_instance()
+    metrics.reset()
+    
     initialise_database()
     
     # Build the daily issuer memory — loaded from DB, grows during this run
@@ -722,6 +726,37 @@ def main():
     # Flush memory to sheets and prune old entries
     issuer_memory.flush_to_sheets()
     prune_daily_memory(SHEET_URL)
+    
+    import time
+    metrics.daily["total_runtime_s"] = time.perf_counter() - metrics.workflow_start
+    if metrics.daily["total_runtime_s"] > 240:
+        metrics.daily["anomalies"].add(f"Runtime > 4 mins ({metrics.daily['total_runtime_s']:.1f}s)")
+        
+    print("[MONITORING] Writing operational statistics to Google Sheets...")
+    from src.sheets import update_daily_statistics, append_ai_usage, update_source_statistics
+    update_daily_statistics(SHEET_URL, metrics.daily)
+    append_ai_usage(SHEET_URL, dict(metrics.ai_telemetry))
+    update_source_statistics(SHEET_URL, dict(metrics.source_stats))
+    
+    print("[MONITORING] Generating HTML Dashboard...")
+    from src.database import save_lifecycle_logs, prune_lifecycle_logs, get_recent_lifecycle_logs
+    
+    # Extract just the values from the dict mapping
+    log_rows = []
+    for art_id, trace in metrics.article_traces.items():
+        log_rows.append((
+            art_id, trace["timestamp"], trace["source"], trace["title"], trace["url"], 
+            trace["country"], trace["language"], trace["document_type"], trace["issuer"], 
+            trace["event_family"], trace["stage"], trace["final_status"], trace["drop_reason"], 
+            trace["processing_time_ms"]
+        ))
+        
+    save_lifecycle_logs(log_rows)
+    prune_lifecycle_logs(days=14)
+    logs = get_recent_lifecycle_logs()
+    
+    from src.html_generator import generate_dashboard_html
+    generate_dashboard_html(logs, output_path="docs/index.html")
     
     print(f"[DAILY MEMORY] Session ended with {issuer_memory.size} issuers cached.")
 
