@@ -73,6 +73,18 @@ class IssuerMemory:
         return len(self._issuers)
 
 def _process_article(source_name, article_id, title, url, published, body, rules, playbook_map, global_exclusions=None, gold_standards=None, triage_all=False, funnel_metrics=None, issuer_memory=None, document_type=None, country=None, language=None, document_type_scores=None, ontology_stats=None, source_reliability_scores=None):
+    import time
+    start_time = time.perf_counter()
+    from src.monitoring import MetricsCollector
+    metrics = MetricsCollector.get_instance()
+    metrics.daily["downloaded"] += 1
+    metrics.source_stats[source_name]["downloaded"] += 1
+    
+    def conclude(ret_val, stage, final_status, drop_reason, issuer_name="Unknown", event_family="Unknown"):
+        elapsed_ms = (time.perf_counter() - start_time) * 1000
+        metrics.log_article(article_id, source_name, url, title, country, language, document_type, issuer_name, event_family, stage, final_status, drop_reason, elapsed_ms)
+        return ret_val
+
     if global_exclusions is None:
         global_exclusions = []
         
@@ -80,12 +92,12 @@ def _process_article(source_name, article_id, title, url, published, body, rules
     
     # 1. Check persistent SQLite dedup
     if article_exists(article_key):
-        return 0
+        return conclude(0, 'Database', 'Dropped', 'Duplicate Article')
 
     if not body:
         print(f"    [SKIP] Empty body for {title}")
         if funnel_metrics: funnel_metrics[3] += 1
-        return 0
+        return conclude(0, 'Download', 'Dropped', 'Empty Body')
 
     if funnel_metrics: funnel_metrics[2] += 1
     
@@ -93,7 +105,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
     issuer = extract_issuing_company(source_name, title, body)
     if issuer == "EXHAUSTED":
         print("    [CRITICAL] AI Providers are exhausted. Aborting ingestion loop to prevent spam and save cache.")
-        return "ABORT"
+        return conclude("ABORT", 'Issuer Extraction', 'Dropped', 'AI Exhausted')
     if issuer_memory and issuer_memory.is_duplicate(issuer):
         print(f"    [DAILY MEMORY] Issuer '{issuer}' already processed today. Dropping duplicate syndicated news.")
         save_article(
@@ -104,7 +116,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
             published=published,
             body=body,
         )
-        return 1
+        return conclude(1, 'Daily Memory', 'Dropped', 'Duplicate Issuer', issuer)
         
 
         
@@ -125,7 +137,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
                 published=published,
                 body=body,
             )
-            return 1
+            return conclude(1, 'Global Exclusions', 'Dropped', 'Regex Failed', issuer)
             
     if funnel_metrics: funnel_metrics[4] += 1
     print(f"  -> Processing: {title}")
@@ -187,7 +199,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         # --- AI EXHAUSTION CIRCUIT BREAKER ---
         if "MOCK AI" in ticker or "ERROR" in ticker or ticker == "UNKNOWN" or ticker == "EXHAUSTED":
             print("    [CRITICAL] AI Providers are exhausted or unavailable. Aborting ingestion loop to prevent spam and save cache.")
-            return "ABORT"
+            return conclude("ABORT", 'Rules Engine', 'Dropped', 'AI Exhausted', issuer)
             
         if ticker == "PRIVATE":
             print("    [AI REJECTED] Target is a private company.")
@@ -199,7 +211,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
                 published=published,
                 body=body,
             )
-            return 1
+            return conclude(1, 'AI Classification', 'Dropped', 'Private Company', ticker)
             
         if funnel_metrics: funnel_metrics[6] += 1
         
@@ -239,7 +251,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         
         if "Unknown" in event_family or event_family == "EXHAUSTED":
              print("    [CRITICAL] AI Providers are exhausted. Aborting ingestion loop.")
-             return "ABORT"
+             return conclude("ABORT", 'AI Classification', 'Dropped', 'AI Exhausted', ticker, event_family)
 
         if "false positive" in event_family.lower():
             print("    [AI REJECTED] Article flagged as false positive.")
@@ -255,7 +267,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
                     published=published,
                     body=body,
                 )
-                return 1
+                return conclude(1, 'AI Classification', 'Dropped', 'AI False Positive', ticker, event_family)
                 
         if event_family.strip().lower() == "unknown":
             print("    [UNKNOWN EVENT] Logging to Knowledge Base for review (Principle #6).")
@@ -275,7 +287,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
                 published=published,
                 body=body,
             )
-            return 1
+            return conclude(1, 'AI Classification', 'Archived', 'Unknown Event', ticker, event_family)
             
         if event_family == "M&A Naked Call Strategy" and not options_available:
             print(f"    [AI REJECTED] Strategy requires tradable options, but none found for {ticker}.")
@@ -287,7 +299,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
                 published=published,
                 body=body,
             )
-            return 1
+            return conclude(1, 'AI Classification', 'Dropped', 'No Options Available', ticker, event_family)
             
         if event_family == "Resumption of Trading":
             from src.financials import get_t12_metrics
@@ -313,7 +325,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
                     source=source_name, article_id=article_id, title=title,
                     url=url, published=published, body=body
                 )
-                return 1
+                return conclude(1, 'Playbook', 'Dropped', 'T12 Structural Floor Failed', ticker, event_family)
                 
             print(f"    [T12 APPROVED] Net Cash/Share: ${t12_data['net_cash_per_share']:.2f} | Shares: {t12_data['shares_outstanding']:,} | Short: {t12_data['short_percent_of_float']*100:.1f}%")
             
@@ -359,7 +371,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
                         published=published,
                         body=body,
                     )
-                    return 1
+                    return conclude(1, 'Deduplication', 'Dropped', 'No Material Update', ticker, event_family)
         else:
             event_id = f"UNKNOWN_{article_id}"
             
@@ -431,7 +443,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         if issuer_memory and issuer != "UNKNOWN":
             issuer_memory.add(issuer)
 
-    return 1
+    return conclude(1, 'Alert', 'Alert Sent', 'Email Dispatched', issuer, event_family)
 
 
 def process_rss_feed(rss_url, source_name, triage_all=False, country=None, language=None):

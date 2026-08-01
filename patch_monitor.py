@@ -108,13 +108,12 @@ content = content.replace(
     1
 )
 
-# Final success
+# Final success (will replace the last return 1 at the end of the function)
 content = content.replace(
-    "return 1",
-    "return conclude(1, 'Alert', 'Alert Sent', 'Email Dispatched', ticker, event_family)",
+    "    return 1\n",
+    "    return conclude(1, 'Alert', 'Alert Sent', 'Email Dispatched', issuer, event_family)\n",
     1
 )
 
 with open('monitor.py', 'w') as f:
     f.write(content)
-
