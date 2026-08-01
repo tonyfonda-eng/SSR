@@ -709,8 +709,11 @@ def main():
     import datetime
     
     current_hour = datetime.datetime.utcnow().hour
+    current_weekday = datetime.datetime.utcnow().weekday() # 0 = Monday, 6 = Sunday
+    
     source_volumes = {src: stats["count"] for src, stats in source_stats.items()}
-    if source_volumes:
+    # Only train the heuristic on active market days (Monday - Friday) to avoid weekend data dragging down the averages
+    if source_volumes and current_weekday < 5:
         update_hourly_volume(source_volumes, current_hour)
         
     heatmap = get_hourly_heatmap(current_hour)
