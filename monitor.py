@@ -489,10 +489,8 @@ def process_rss_feed(rss_url, source_name, triage_all=False, country=None, langu
         if article_exists(article_key):
             continue
             
-        # Fallback cascade: try to scrape HTML, then use RSS summary
-        body = download_article(entry.link)
-        if not body:
-            body = getattr(entry, "summary", getattr(entry, "description", ""))
+        # Lazy loading: we will only fetch the HTML body in Phase 2 if it's a high priority cluster
+        body = getattr(entry, "summary", getattr(entry, "description", ""))
 
         published = getattr(entry, "published", "")
         
@@ -508,7 +506,6 @@ def process_rss_feed(rss_url, source_name, triage_all=False, country=None, langu
             "country": country,
             "language": language
         })
-        time.sleep(1) # respect API limits
         
     return parsed_articles, len(feed.entries)
 
@@ -531,15 +528,8 @@ def process_custom_scraper(scraper, source_name, rss_url=None, triage_all=False,
         if article_exists(article_key):
             continue
 
-        original_body = article.get("body", "")
-        body = original_body
-        if not body or len(body) < 100:
-            try:
-                fetched_body = scraper.get_article_body(article['url'])
-                if fetched_body and len(fetched_body) > 100:
-                    body = fetched_body
-            except Exception as e:
-                print(f"[WARNING] Failed to fetch body for {article['url']}: {e}")
+        # Lazy loading: do not eagerly fetch HTML body here
+        body = article.get("body", "")
             
         parsed_articles.append({
             "source_name": source_name,
@@ -553,7 +543,6 @@ def process_custom_scraper(scraper, source_name, rss_url=None, triage_all=False,
             "country": country,
             "language": language
         })
-        time.sleep(1) # respect API limits
 
     return parsed_articles, len(articles)
 
@@ -745,6 +734,24 @@ def main():
     for cluster in clusters:
         primary = cluster[0]
         
+        # Lazy Fetching: Fetch the full HTML body only for the top priority events
+        body = primary.get("body", "")
+        if not body or len(body) < 100:
+            import time
+            from src.scrapers import get_scraper_for_source
+            scraper = get_scraper_for_source(primary["source_name"])
+            try:
+                if scraper:
+                    fetched = scraper.get_article_body(primary["url"])
+                else:
+                    fetched = download_article(primary["url"])
+                    
+                if fetched and len(fetched) > 100:
+                    primary["body"] = fetched
+            except Exception as e:
+                print(f"    [WARNING] Lazy fetch failed for {primary['url']}: {e}")
+            time.sleep(1) # Be polite to servers since we are now making a network request
+            
         # Process the best representative article
         res = _process_article(
             source_name=primary["source_name"],
