@@ -30,6 +30,7 @@ from src.ai import classify_event, execute_playbook, clients
 from src.alerts.email import send_alert
 from src.issuer import extract_issuing_company
 from src.options_calc import calculate_naked_call_roi
+from src.drift_monitor import check_pipeline_drift
 
 # --- Daily Issuer Memory ---
 class IssuerMemory:
@@ -103,7 +104,6 @@ def _process_article(source_name, article_id, title, url, published,
         
     article_key = f"{source_name}:{article_id}"
     
-    # 1. Check persistent SQLite dedup
     if article_exists(article_key):
         return conclude(0, 'Database', 'Dropped', 'Duplicate Article')
 
@@ -115,7 +115,6 @@ def _process_article(source_name, article_id, title, url, published,
     if funnel_metrics: 
         funnel_metrics[2] += 1
 
-    # 2. Extract Issuer and Dedupe
     issuer = extract_issuing_company(source_name, title, body)
     if issuer == "EXHAUSTED":
         print("[CRITICAL] AI Providers are exhausted. Aborting ingestion loop.")
@@ -133,7 +132,6 @@ def _process_article(source_name, article_id, title, url, published,
         )
         return conclude(1, 'Daily Memory', 'Dropped', 'Duplicate Issuer', issuer)
 
-    # Global Exclusion Pre-Filter
     title_lower = title.lower()
     body_lower = body.lower()
     for ex in global_exclusions:
@@ -157,7 +155,6 @@ def _process_article(source_name, article_id, title, url, published,
 
     print(f" -> Processing: {title}")
 
-    # Cash Event Detection (Stage 1)
     from src.ontology import extract_concepts, extract_statuses, get_all_matched_terms
     raw_text = f"{title}\n\n{body}"
     ontology_concepts = []
@@ -204,7 +201,6 @@ def _process_article(source_name, article_id, title, url, published,
             funnel_metrics[5] += 1
         print("[MATCH] High confidence event signals detected!")
 
-        # Ticker Verification (Stage 2)
         from src.ai import extract_target_ticker
         ai_invoked = True
         ticker = extract_target_ticker(body)
@@ -257,7 +253,6 @@ def _process_article(source_name, article_id, title, url, published,
             except Exception as e:
                 print(f"[WARNING] Failed to fetch financial data for {ticker}: {e}")
 
-        # Classification (Stage 3)
         event_family = classify_event(body, matches, ticker=ticker, market_cap=market_cap)
         print(f"[AI CLASSIFICATION] {event_family}")
 
@@ -749,7 +744,9 @@ def main():
     for exc in metrics.exceptions:
         save_exception_log(metrics.run_id, exc["timestamp"], exc["exc_type"], exc["stack_trace"], exc["module"], exc["func_name"], exc["article_url"], exc["severity"])
 
-    # --- THROTTLED DASHBOARD & ARCHIVE PUBLISHING ---
+    # Run automated statistical drift analysis post-execution
+    check_pipeline_drift()
+
     from pathlib import Path
     docs_dir = Path("docs")
     docs_dir.mkdir(exist_ok=True)
