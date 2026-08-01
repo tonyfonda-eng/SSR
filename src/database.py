@@ -371,7 +371,8 @@ def perform_housekeeping():
         cursor.execute("DELETE FROM source_stats_log WHERE timestamp < ?", (cutoff_365,))
         
         # ai_usage_log and workflow_health kept forever as requested.
-        set_dashboard_state('last_cleanup', now.isoformat())
+        
+    set_dashboard_state('last_cleanup', now.isoformat())
 
 def get_recent_lifecycle_logs():
     with get_connection() as conn:
@@ -462,7 +463,7 @@ def mark_yesterday_synced():
         yesterday = (datetime.datetime.utcnow() - datetime.timedelta(days=1)).strftime("%Y-%m-%d")
         now = datetime.datetime.utcnow().isoformat()
         cursor.execute("INSERT OR REPLACE INTO sheets_sync_log (date, synced_at) VALUES (?, ?)", (yesterday, now))
-        set_dashboard_state('last_daily_sync', now)
+    set_dashboard_state('last_daily_sync', now)
 
 def get_yesterdays_metrics():
     """Aggregates all metrics for yesterday from SQLite to sync to Google Sheets."""
