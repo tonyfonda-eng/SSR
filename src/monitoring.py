@@ -21,13 +21,33 @@ class MetricsCollector:
         self.workflow_start = time.perf_counter()
         self.settings = {}
         
+        # --- Phase 3 Explicit Pipeline Funnel ---
+        self.funnel = {
+            "downloaded": 0,
+            "duplicate_id": 0,
+            "duplicate_issuer": 0,
+            "empty_body": 0,
+            "global_exclusion": 0,
+            "regex_rejected": 0,
+            "ontology_rejected": 0,
+            "rules_rejected": 0,
+            "reached_ai": 0,
+            "ai_rejected_private": 0,
+            "ai_rejected_false_positive": 0,
+            "ai_exhausted": 0,
+            "playbook_rejected": 0,
+            "duplicate_event": 0,
+            "alerts_sent": 0
+        }
+        
+        # Legacy daily stats (Preserved for SQLite compatibility)
         self.daily = {
             "downloaded": 0, "unique": 0, "duplicates": 0, "passed_regex": 0, "failed_regex": 0,
             "global_exclusions": 0, "ontology_matches": 0, "rules_passes": 0, "rules_failures": 0,
             "ai_calls": 0, "ai_successes": 0, "ai_failures": 0, "playbooks_executed": 0, "emails_sent": 0,
             "rules_score_sum": 0.0, "ai_confidence_sum": 0.0, "articles_processed_count": 0,
             "rejected_before_regex": 0, "rejected_by_regex": 0, "rejected_by_exclusions": 0, 
-            "rejected_by_ontology": 0, "rejected_by_rules": 0, "reached_ai": 0
+            "rejected_by_ontology": 0, "rejected_by_rules": 0, "reached_ai": 0, "total_runtime_s": 0.0
         }
         
         self.source_stats = defaultdict(lambda: {
@@ -47,6 +67,13 @@ class MetricsCollector:
     def set_settings(self, settings_dict):
         self.settings = settings_dict
 
+    def track_funnel(self, stage: str, count: int = 1):
+        """Deterministically track articles moving through the pipeline."""
+        if stage in self.funnel:
+            self.funnel[stage] += count
+        else:
+            print(f"[WARNING] Unrecognized funnel stage logged: {stage}")
+
     def log_article(self, article_id, source, url, title, country, language, document_type, issuer, event_family, pipeline_stage, outcome, reason, ai_invoked, processing_time_ms, slowest_stage):
         self.article_traces[article_id] = {
             "timestamp": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"),
@@ -63,7 +90,7 @@ class MetricsCollector:
         self.source_stats[source]["processing_time_sum"] += processing_time_ms
         self.source_stats[source]["processed_count"] += 1
         
-        # Funnel Logic
+        # Legacy Funnel Logic
         if "Reject" in outcome or "Abort" in outcome:
             if pipeline_stage in ["Download", "Database", "Daily Memory"]:
                 self.daily["rejected_before_regex"] += 1
