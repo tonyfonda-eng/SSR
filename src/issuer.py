@@ -83,4 +83,7 @@ Article Body: {body[:1500]}
         return normalize_issuer(issuer)
     except Exception as e:
         print(f"    [AI ERROR] Issuer Extraction failed: {e}")
+        error_msg = str(e).lower()
+        if "exhausted" in error_msg or "no api keys" in error_msg:
+            return "EXHAUSTED"
         return "UNKNOWN"

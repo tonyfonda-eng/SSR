@@ -66,7 +66,7 @@ def _generate_with_retry(prompt, max_retries=6):
             try:
                 if provider == "openrouter":
                     response = client.chat.completions.create(
-                        model="meta-llama/llama-3.3-70b-instruct:free",
+                        model="meta-llama/llama-3.3-70b-instruct",
                         messages=[{"role": "user", "content": prompt}],
                     )
                     return response.choices[0].message.content.strip()
@@ -83,20 +83,22 @@ def _generate_with_retry(prompt, max_retries=6):
                 error_str = str(e)
                 
                 # Handle provider-specific rate limits and auth errors
-                if "429" in error_str or "RESOURCE_EXHAUSTED" in error_str or "401" in error_str or "auth" in error_str.lower():
-                    if provider == "gemini" and "GenerateRequestsPerDay" in error_str:
-                        print("[AI RETRY] Gemini key hit absolute daily quota. Removing from pool.")
-                        available_clients.remove(client_tuple)
-                    elif provider == "openrouter" and ("429" in error_str or "401" in error_str):
-                        print(f"[AI RETRY] OpenRouter key exhausted or invalid. Removing from pool.")
-                        available_clients.remove(client_tuple)
-                        
-                    if not available_clients:
-                        raise ValueError("CRITICAL: All AI keys (OpenRouter and Gemini) have exhausted their quotas.")
-                    continue # Swap to next key instantly
-                else:
-                    # Other API error, swap to next key instantly
-                    continue
+                is_fatal_or = provider == "openrouter" and any(x in error_str for x in ["401", "404", "402"])
+                is_fatal_gemini = provider == "gemini" and "GenerateRequestsPerDay" in error_str
+                
+                if is_fatal_or:
+                    print(f"[AI RETRY] OpenRouter key exhausted, invalid, or model unavailable. Removing from pool. Error: {error_str}")
+                    if client_tuple in available_clients: available_clients.remove(client_tuple)
+                    if client_tuple in clients: clients.remove(client_tuple)
+                elif is_fatal_gemini:
+                    print("[AI RETRY] Gemini key hit absolute daily quota. Removing from pool.")
+                    if client_tuple in available_clients: available_clients.remove(client_tuple)
+                    if client_tuple in clients: clients.remove(client_tuple)
+                    
+                if not available_clients:
+                    raise ValueError("CRITICAL: All AI keys (OpenRouter and Gemini) have exhausted their quotas.")
+                    
+                continue # Swap to next key instantly
                     
         # If we reach here, we've looped through ALL available keys and they ALL failed for non-fatal reasons
         # Now we must sleep before trying the next cycle.
@@ -157,6 +159,9 @@ Otherwise, return ONLY the exact name of the Event Family.
         return _generate_with_retry(prompt)
     except Exception as e:
         print(f"[AI ERROR] All keys exhausted or failed: {e}")
+        error_msg = str(e).lower()
+        if "exhausted" in error_msg or "no api keys" in error_msg:
+            return "EXHAUSTED"
         return events[0] if events else "Unknown"
 
 
@@ -227,6 +232,9 @@ Article text:
         return _generate_with_retry(prompt)
     except Exception as e:
         print(f"[AI ERROR] All keys exhausted or failed: {e}")
+        error_msg = str(e).lower()
+        if "exhausted" in error_msg or "no api keys" in error_msg:
+            return "EXHAUSTED"
         return f"[AI ERROR] {e}"
 
 
@@ -253,6 +261,9 @@ Return NOTHING ELSE besides the ticker or the company name. Do NOT return 'PRIVA
         return text.upper()
     except Exception as e:
         print(f"[AI ERROR] Ticker Extraction failed: {e}")
+        error_msg = str(e).lower()
+        if "exhausted" in error_msg or "no api keys" in error_msg:
+            return "EXHAUSTED"
         return "UNKNOWN"
 
 def extract_halt_date(article_text):

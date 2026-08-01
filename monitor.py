@@ -91,6 +91,9 @@ def _process_article(source_name, article_id, title, url, published, body, rules
     
     # 2. Extract Issuer and Dedupe
     issuer = extract_issuing_company(source_name, title, body)
+    if issuer == "EXHAUSTED":
+        print("    [CRITICAL] AI Providers are exhausted. Aborting ingestion loop to prevent spam and save cache.")
+        return "ABORT"
     if issuer_memory and issuer_memory.is_duplicate(issuer):
         print(f"    [DAILY MEMORY] Issuer '{issuer}' already processed today. Dropping duplicate syndicated news.")
         save_article(
@@ -182,9 +185,9 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         print(f"    [AI TICKER] {ticker}")
 
         # --- AI EXHAUSTION CIRCUIT BREAKER ---
-        if "MOCK AI" in ticker or "ERROR" in ticker or ticker == "UNKNOWN":
+        if "MOCK AI" in ticker or "ERROR" in ticker or ticker == "UNKNOWN" or ticker == "EXHAUSTED":
             print("    [CRITICAL] AI Providers are exhausted or unavailable. Aborting ingestion loop to prevent spam and save cache.")
-            return 1
+            return "ABORT"
             
         if ticker == "PRIVATE":
             print("    [AI REJECTED] Target is a private company.")
@@ -234,9 +237,9 @@ def _process_article(source_name, article_id, title, url, published, body, rules
         event_family = classify_event(body, matches, ticker=ticker, market_cap=market_cap)
         print(f"    [AI CLASSIFICATION] {event_family}")
         
-        if "Unknown" in event_family:
+        if "Unknown" in event_family or event_family == "EXHAUSTED":
              print("    [CRITICAL] AI Providers are exhausted. Aborting ingestion loop.")
-             return 1
+             return "ABORT"
 
         if "false positive" in event_family.lower():
             print("    [AI REJECTED] Article flagged as false positive.")
@@ -662,7 +665,7 @@ def main():
         primary = cluster[0]
         
         # Process the best representative article
-        total_new += _process_article(
+        res = _process_article(
             source_name=primary["source_name"],
             article_id=primary["article_id"],
             title=primary["title"],
@@ -683,6 +686,10 @@ def main():
             ontology_stats=ontology_stats,
             source_reliability_scores=source_reliability_scores
         )
+        if res == "ABORT":
+            print("\n[CRITICAL] Aborting ingestion loop entirely due to AI Exhaustion.")
+            break
+        total_new += res
         
         # Quietly archive the syndicated clones to prevent fetching them again
         for clone in cluster[1:]:
