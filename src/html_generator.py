@@ -153,20 +153,15 @@ def generate_dashboard_html(log_records, output_path="docs/index.html", metrics=
     queue_json = get_dashboard_state("priority_queue", "[]")
     queue_data = json.loads(queue_json) if queue_json else []
     
-    # Aggregate counts by source for the queue table
-    queue_counts = {}
+    queue_html = ""
     for item in queue_data:
         src = item.get("source", "Unknown")
-        pri = item.get("priority", 0.0)
-        if src not in queue_counts:
-            queue_counts[src] = {"count": 0, "priority": pri}
-        queue_counts[src]["count"] += 1
+        quota = item.get("quota", 0)
+        backlog = item.get("backlog", 0)
+        p_val = item.get("priority", 0.0)
         
-    queue_html = ""
-    for src, data in sorted(queue_counts.items(), key=lambda x: x[1]["priority"], reverse=True):
-        p_val = data["priority"]
         badge_class = "status-alert" if p_val > 10 else ("status-archived" if p_val < 1 else "status-drop")
-        queue_html += f"<tr><td>{src}</td><td>{data['count']}</td><td><span class='badge {badge_class}'>{p_val:.1f} (avg/hr)</span></td></tr>"
+        queue_html += f"<tr><td>{src}</td><td>{quota} / {backlog}</td><td><span class='badge {badge_class}'>{p_val:.2f}</span></td></tr>"
 
     if not queue_html:
         queue_html = "<tr><td colspan='3'>No priority data available for current window.</td></tr>"
@@ -489,7 +484,7 @@ def generate_dashboard_html(log_records, output_path="docs/index.html", metrics=
             <h2>Dynamic Priority Allocation (Current Hour Peak)</h2>
             <div class="table-container">
                 <table class="sortable">
-                    <thead><tr><th>Source</th><th>Articles Allocated (Max 50)</th><th>Priority Score (Avg Historical Vol)</th></tr></thead>
+                    <thead><tr><th>Source</th><th>Quota Allocated / Backlog</th><th>Priority Weight (EMA)</th></tr></thead>
                     <tbody>{queue_html}</tbody>
                 </table>
             </div>

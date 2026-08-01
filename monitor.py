@@ -712,23 +712,79 @@ def main():
     clusters = cluster_articles(all_new_articles)
     print(f"[DEDUPLICATION] Reduced to {len(clusters)} unique events.")
     
-    # Sort clusters dynamically by historical peak volume of the source
-    def get_cluster_priority(cluster):
-        primary_source = cluster[0]["source_name"]
-        return heatmap.get(primary_source, 0.0)
+    # Smart Dynamic Quota Allocation
+    from collections import defaultdict
+    clusters_by_source = defaultdict(list)
+    for cluster in clusters:
+        clusters_by_source[cluster[0]["source_name"]].append(cluster)
         
-    clusters.sort(key=get_cluster_priority, reverse=True)
+    MAX_AI_EVALS = 50
+    active_sources = list(clusters_by_source.keys())
+    source_quotas = {}
     
-    # Save the allocation for dashboard visualization
-    allocated_queue = [{"source": c[0]["source_name"], "priority": get_cluster_priority(c)} for c in clusters]
+    # Calculate total weight (using 0.1 as a small baseline for sources with 0 history)
+    total_weight = sum(heatmap.get(src, 0.1) for src in active_sources)
+    
+    if total_weight > 0 and len(active_sources) <= MAX_AI_EVALS:
+        remaining_slots = MAX_AI_EVALS - len(active_sources)
+        for src in active_sources:
+            weight = heatmap.get(src, 0.1)
+            source_quotas[src] = 1 + int(remaining_slots * (weight / total_weight))
+    else:
+        for src in active_sources:
+            source_quotas[src] = max(1, MAX_AI_EVALS // max(1, len(active_sources)))
+            
+    final_clusters = []
+    allocated_queue = []
+    total_rolled_over = 0
+    
+    for src in active_sources:
+        src_clusters = clusters_by_source[src]
+        quota = source_quotas[src]
+        
+        accepted = src_clusters[:quota]
+        rolled_over = src_clusters[quota:]
+        
+        final_clusters.extend(accepted)
+        total_rolled_over += len(rolled_over)
+        
+        allocated_queue.append({
+            "source": src,
+            "quota": quota,
+            "backlog": len(src_clusters),
+            "priority": round(heatmap.get(src, 0.0), 2)
+        })
+        
+        # Log the rolled-over articles so they appear in the HTML dashboard
+        for ro_cluster in rolled_over:
+            ro_article = ro_cluster[0] # Just log the primary representative
+            metrics.log_article(
+                article_id=ro_article["article_id"],
+                source=ro_article["source_name"],
+                url=ro_article["url"],
+                title=ro_article["title"],
+                country=ro_article.get("country", ""),
+                language=ro_article.get("language", ""),
+                document_type=ro_article.get("document_type", ""),
+                issuer="",
+                event_family="",
+                pipeline_stage="Dynamic Queue",
+                outcome="Rolled Over (Quota Exhausted)",
+                reason="Truncated due to source quota limits to prevent timeouts",
+                ai_invoked=False,
+                processing_time_ms=0,
+                slowest_stage="Queue"
+            )
+
+    if total_rolled_over > 0:
+        print(f"\n[THROTTLING] Allocated proportional quotas. {len(final_clusters)} events accepted, {total_rolled_over} rolled over to next run.")
+
+    clusters = final_clusters
+    
     from src.database import set_dashboard_state
     import json
-    set_dashboard_state("priority_queue", json.dumps(allocated_queue[:50])) # only save what we process
-
-    MAX_AI_EVALS = 50
-    if len(clusters) > MAX_AI_EVALS:
-        print(f"\n[THROTTLING] Truncating massive backlog down to {MAX_AI_EVALS} events to prevent pipeline timeouts! The remaining {len(clusters) - MAX_AI_EVALS} events will roll over and process in the next 5-minute schedule.")
-        clusters = clusters[:MAX_AI_EVALS]
+    allocated_queue.sort(key=lambda x: x["priority"], reverse=True)
+    set_dashboard_state("priority_queue", json.dumps(allocated_queue))
     
     total_new = 0
     for cluster in clusters:
