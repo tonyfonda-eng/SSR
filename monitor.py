@@ -451,7 +451,10 @@ def main():
         
     metrics = MetricsCollector.get_instance()
     metrics.set_settings(settings)
-    print("=== Special Situations Radar v1.0.0 ===")
+    print("from src.database import init_db
+init_db()
+
+=== Special Situations Radar v1.0.0 ===")
     metrics.reset()
     initialise_database()
     
