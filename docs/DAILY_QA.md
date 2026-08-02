@@ -1,20 +1,10 @@
 # Daily QA Sampler (Human Quality Control)
 *Generated: 2026-08-02*
 
-This report is an independent, read-only quality control sampler. Reviews performed here serve strictly as advisory benchmarks for pipeline verification and **never affect production settings or live rules**.
+⚠️ **CRITICAL ADVISORY BOUNDARY:** This file exists solely for human verification and performance benchmarking. Review entries manually below. Actions performed here are completely read-only and **never** modify production code, live schemas, or downstream alert engines.
 
-## 📊 Daily Sample Overview
-- **Total Ingested Group Size:** 1,240 articles
-- **Random Sample Evaluated:** 100 articles (8.06% coverage)
-- **Pipeline Success (Passed AI / Alerted):** 2
-- **Filtered / Terminated Early:** 98
+## 🔍 Manual Inspection Sample Matrix
 
----
-
-## 🔍 Quality Control Evaluation Matrix
-
-| # | Company / Ticker | Headline | Source | Pipeline Outcome | Manual Review | Reviewer Notes / Action |
-|---|------------------|----------|--------|------------------|---------------|-------------------------|
-| 1 | Rimini Street (RMNI) | Rimini Street Announces Strategic Alternatives Review Progress | GlobeNewswire | `Rules` | [ ] True Pos <br> [ ] False Neg | Check playbook thresholds. |
-
----
+| # | Ticker | Headline | Source | Pipeline Outcome | Manual Review | Reviewer Notes |
+|---|--------|----------|--------|------------------|---------------|----------------|
+| 1 | **--** | Rimini Street Announces Strategic Alternatives Review | GlobeNewswire | `Rules` | [ ] True Pos <br> [ ] True Neg <br> [ ] False Pos <br> [ ] False Neg | |
