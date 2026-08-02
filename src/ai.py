@@ -5,18 +5,16 @@ import requests
 
 logger = logging.getLogger(__name__)
 
-# Scraper classification tasks require efficient, short outputs to stay within free tier limits
 MAX_TOKENS = 1024
-COOLDOWN_SECONDS = 300  # 5-minute backoff on 402/rate-limit errors instead of permanent removal
+COOLDOWN_SECONDS = 300
 
 class OpenRouterPool:
     def __init__(self):
         raw_keys = [os.environ.get("OPENROUTER_API_KEY", "")]
         for i in range(1, 8):
             raw_keys.append(os.environ.get(f"OPENROUTER_API_KEY_{i}", ""))
-        
         self.keys = [k.strip() for k in raw_keys if k and k.strip()]
-        self.cooldowns = {}  # key -> timestamp when it can be retried
+        self.cooldowns = {}
         logger.info(f"[AI INFO] Initialized OpenRouter pool with {len(self.keys)} active keys.")
 
     def get_available_key(self):
@@ -35,7 +33,6 @@ class GeminiPool:
         raw_keys = [os.environ.get("GEMINI_API_KEY", "")]
         for i in range(1, 8):
             raw_keys.append(os.environ.get(f"GEMINI_API_KEY_{i}", ""))
-        
         self.keys = [k.strip() for k in raw_keys if k and k.strip()]
         self._index = 0
         logger.info(f"[AI INFO] Initialized Gemini pool with {len(self.keys)} active keys.")
@@ -47,34 +44,72 @@ class GeminiPool:
         self._index += 1
         return key
 
-# Global singleton client pools
 or_pool = OpenRouterPool()
 gemini_pool = GeminiPool()
+clients = or_pool.keys
 
-# --- COMPATIBILITY STUBS EXPECTED BY MONITOR.PY ---
-clients = or_pool.keys  # Legacy fallback reference
+def _generate_with_retry(prompt: str, max_tokens: int = MAX_TOKENS) -> str:
+    """Shared retry generator bridging OpenRouter and Gemini key pools."""
+    while True:
+        key = or_pool.get_available_key()
+        if key is None:
+            break
+        try:
+            headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
+            payload = {
+                "model": "google/gemini-2.0-flash-exp:free",
+                "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": max_tokens
+            }
+            resp = requests.post("https://openrouter.ai/api/v1/chat/completions", json=payload, headers=headers, timeout=30)
+            if resp.status_code in (402, 429):
+                or_pool.mark_cooldown(key)
+                continue
+            resp.raise_for_status()
+            data = resp.json()
+            return data["choices"][0]["message"]["content"]
+        except Exception as e:
+            if "402" in str(e) or "429" in str(e):
+                or_pool.mark_cooldown(key)
+                continue
+            break
+
+    for _ in range(len(gemini_pool.keys)):
+        key = gemini_pool.next_key()
+        if not key:
+            break
+        try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={key}"
+            payload = {"contents": [{"parts": [{"text": prompt}]}]}
+            resp = requests.post(url, json=payload, timeout=30)
+            if resp.status_code == 429:
+                continue
+            resp.raise_for_status()
+            data = resp.json()
+            return data["candidates"][0]["content"]["parts"][0]["text"]
+        except Exception:
+            continue
+
+    raise RuntimeError("All AI clients exhausted")
 
 def extract_target_ticker(body: str) -> str:
-    """Extracts target stock ticker using available AI pools or regex fallbacks."""
     import re
-    # Simple regex heuristic search for tickers in parentheses or capital sequences if AI is bypassed
     match = re.search(r'\b(?:NYSE|NASDAQ|LON|ASX|TSX):\s*([A-Z]{1,5})\b', body)
     if match:
         return match.group(1)
     return "UNKNOWN"
 
 def extract_halt_date(body: str) -> str:
-    """Extracts trading halt date from article body text."""
     return "2026-01-01"
 
 def classify_event(body: str, matches: list, ticker: str = "UNKNOWN", market_cap: float = None) -> str:
-    """Classifies corporate action event using OpenRouter/Gemini key pools."""
-    # Fallback default classification logic leveraging rules matches
-    if matches and len(matches) > 0:
-        top_rule = matches[0].get("Name", "Unknown Event")
-        return top_rule
-    return "Unknown"
+    try:
+        prompt = f"Classify this corporate action event into a short category name:\n\n{body[:1500]}"
+        return _generate_with_retry(prompt, max_tokens=100).strip()
+    except Exception:
+        if matches and len(matches) > 0:
+            return matches[0].get("Name", "Unknown Event")
+        return "Unknown"
 
 def execute_playbook(event_family: str, ticker: str, market_data: str) -> str:
-    """Executes matching playbook for the classified event."""
     return f"Executed playbook for {event_family} on {ticker}"
