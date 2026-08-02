@@ -47,10 +47,7 @@ def evaluate(article_obj, rules, document_type_scores,
                 dt = item.get('Document Type') or item.get('document_type') or item.get('type')
                 sc = item.get('Score') or item.get('score', 0)
                 if dt:
-                    try:
-                        scores_map[str(dt).lower().strip()] = float(sc) if '.' in str(sc) else int(sc)
-                    except (ValueError, TypeError):
-                        scores_map[str(dt).lower().strip()] = 0
+                    scores_map[str(dt).lower().strip()] = float(sc) if '.' in str(sc) else int(sc)
 
     matches = []
 
@@ -59,7 +56,7 @@ def evaluate(article_obj, rules, document_type_scores,
 
     # ---- Independent Evidence Channels (apply to ALL rules) ----
 
-    # Channel 1: Document Type (Safely using normalized scores_map)
+    # Channel 1: Document Type (Safely using normalized scores_map lookup)
     doc_score = scores_map.get(doc_type, 0)
 
     # Channel 2: Ontology Concepts (independent, sheet-defined weights)
