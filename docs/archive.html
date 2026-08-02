@@ -1,120 +1,75 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>SSR Pipeline Audit Archive</title>
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #e2e8f0; margin: 0; padding: 24px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #334155; padding-bottom: 16px; margin-bottom: 24px; }
-        h1 { margin: 0; font-size: 24px; color: #38bdf8; }
-        .nav-btn { background: #1e293b; color: #38bdf8; border: 1px solid #334155; padding: 8px 16px; text-decoration: none; border-radius: 6px; font-weight: 500; }
-        .filters { display: flex; gap: 12px; margin-bottom: 20px; background: #1e293b; padding: 16px; border-radius: 8px; border: 1px solid #334155; }
-        select, input { background: #0f172a; color: #fff; border: 1px solid #475569; padding: 8px 12px; border-radius: 6px; }
-        table { width: 100%; border-collapse: collapse; background: #1e293b; border-radius: 8px; overflow: hidden; border: 1px solid #334155; }
-        th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid #334155; }
-        th { background: #334155; font-size: 14px; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; }
-        tr:hover { background: #24334a; }
-        a { color: #38bdf8; text-decoration: none; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; text-transform: uppercase; }
-        .badge-passed { background: #065f46; color: #34d399; }
-        .badge-dropped { background: #7f1d1d; color: #f87171; }
-        .badge-eval { background: #475569; color: #cbd5e1; }
-        .loading { font-style: italic; color: #94a3b8; padding: 20px; }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1>🔍 SSR Pipeline Audit Ledger</h1>
-            <a href="index.html" class="nav-btn">📊 Operational Dashboard</a>
-        </header>
 
-        <div class="filters">
-            <input type="text" id="searchBar" placeholder="Search articles..." onkeyup="filterTable()">
-            <select id="sourceFilter" onchange="filterTable()">
-                <option value="">All Sources</option>
-                <option value="PR Newswire">PR Newswire</option>
-                <option value="GlobeNewswire">GlobeNewswire</option>
-            </select>
-            <select id="statusFilter" onchange="filterTable()">
-                <option value="">All Outcomes</option>
-                <option value="PASSED">PASSED</option>
-                <option value="DROPPED">DROPPED</option>
-            </select>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>SSR Document Archive</title>
+        <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0d1117; color: #c9d1d9; padding: 20px; }
+            .container { max-width: 1200px; margin: 0 auto; background: #161b22; padding: 20px; border: 1px solid #30363d; border-radius: 6px; }
+            h1 { border-bottom: 1px solid #30363d; padding-bottom: 10px; }
+            input { width: 100%; padding: 10px; margin-bottom: 20px; background: #0d1117; color: #c9d1d9; border: 1px solid #30363d; border-radius: 4px; }
+            table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+            th, td { padding: 10px; text-align: left; border-bottom: 1px solid #30363d; }
+            th { color: #8b949e; text-transform: uppercase; font-size: 0.85em; }
+            a { color: #58a6ff; text-decoration: none; }
+            .badge { padding: 3px 8px; border-radius: 12px; font-size: 0.8em; font-weight: 600; background: rgba(139,148,158,0.15); color: #8b949e; border: 1px solid rgba(139,148,158,0.4); }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Operational Document Archive</h1>
+            <p style="color: #8b949e;">Dynamic, deterministic lookup of historically ingested documents and signal evaluations.</p>
+            <input type="text" id="searchInput" placeholder="Search archive by ticker, source, event family, or title..." onkeyup="filterTable()">
+            <table id="archiveTable">
+                <thead>
+                    <tr><th>Processed At</th><th>Source</th><th>Event Family</th><th>Title</th><th>Outcome</th></tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="5">Loading data stream...</td></tr>
+                </tbody>
+            </table>
         </div>
+        <script>
+            let archiveData = [];
+            fetch('archive_data.json')
+                .then(response => response.json())
+                .then(data => {
+                    archiveData = data;
+                    renderTable(archiveData);
+                })
+                .catch(error => {
+                    document.getElementById('tableBody').innerHTML = "<tr><td colspan='5'>Error resolving file dependencies. Check archive_data.json.</td></tr>";
+                });
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Article Filing</th>
-                    <th>Timestamp (UTC)</th>
-                    <th>Source</th>
-                    <th>Status</th>
-                    <th>Drop Stage</th>
-                    <th>Termination Reason</th>
-                    <th>Evaluator</th>
-                </tr>
-            </thead>
-            <tbody id="tableBody">
-                <tr><td colspan="7" class="loading" id="loadingText">Loading data stream...</td></tr>
-            </tbody>
-        </table>
-    </div>
-
-    <script>
-        async function loadArchive() {
-            try {
-                // Notice the path is now just 'archive_data.json' because both files are in docs/
-                const res = await fetch('archive_data.json?v=' + Date.now());
-                if (!res.ok) throw new Error("Network response was not ok");
-                const data = await res.json();
+            function renderTable(data) {
                 const tbody = document.getElementById('tableBody');
                 tbody.innerHTML = '';
-
-                data.forEach(item => {
-                    const statusStr = String(item.status || '');
-                    const isPassed = statusStr.includes('PASSED') || statusStr.includes('DISPATCHED');
+                data.forEach(row => {
                     const tr = document.createElement('tr');
-                    
                     tr.innerHTML = `
-                        <td><a href="${item.url || '#'}" target="_blank">${item.title || 'Untitled'}</a></td>
-                        <td style="white-space: nowrap;">${item.timestamp || 'N/A'}</td>
-                        <td>${item.source || 'Unknown'}</td>
-                        <td><span class="badge ${isPassed ? 'badge-passed' : 'badge-dropped'}">${isPassed ? 'PASSED' : 'DROPPED'}</span></td>
-                        <td style="color: #94a3b8; font-size: 13px;">${item.drop_stage || 'Stage 1'}</td>
-                        <td style="font-size: 13px;">${item.reason || 'None'}</td>
-                        <td><span class="badge badge-eval">${item.evaluator || 'Python'}</span></td>
+                        <td style="white-space: nowrap;">${row.processed_at ? row.processed_at.split('.')[0].replace('T', ' ') : '-'}</td>
+                        <td>${row.source || 'Unknown'}</td>
+                        <td>${row.event_family || '-'}</td>
+                        <td><a href="${row.url || '#'}" target="_blank">${row.title || 'No Title'}</a></td>
+                        <td><span class="badge">${row.outcome || 'Unknown'}</span></td>
                     `;
                     tbody.appendChild(tr);
                 });
-            } catch (err) {
-                console.error("Failed to fetch archive dataset", err);
-                document.getElementById('loadingText').innerText = "Error: Could not load data from archive_data.json";
-                document.getElementById('loadingText').style.color = "#f87171";
             }
-        }
 
-        function filterTable() {
-            const search = document.getElementById('searchBar').value.toUpperCase();
-            const source = document.getElementById('sourceFilter').value;
-            const status = document.getElementById('statusFilter').value;
-            const rows = document.getElementById('tableBody').getElementsByTagName('tr');
-
-            for (let i = 0; i < rows.length; i++) {
-                const titleText = (rows[i].getElementsByTagName('td')[0]?.innerText || '').toUpperCase();
-                const sourceText = rows[i].getElementsByTagName('td')[2]?.innerText || '';
-                const statusText = rows[i].getElementsByTagName('td')[3]?.innerText || '';
-
-                const matchSearch = titleText.includes(search);
-                const matchSource = !source || sourceText === source;
-                const matchStatus = !status || statusText.includes(status);
-
-                rows[i].style.display = (matchSearch && matchSource && matchStatus) ? "" : "none";
+            function filterTable() {
+                const query = document.getElementById('searchInput').value.toLowerCase();
+                const filtered = archiveData.filter(row => 
+                    (row.title && row.title.toLowerCase().includes(query)) || 
+                    (row.source && row.source.toLowerCase().includes(query)) ||
+                    (row.event_family && row.event_family.toLowerCase().includes(query)) ||
+                    (row.outcome && row.outcome.toLowerCase().includes(query))
+                );
+                renderTable(filtered);
             }
-        }
-
-        window.onload = loadArchive;
-    </script>
-</body>
-</html>
+        </script>
+    </body>
+    </html>
+    
