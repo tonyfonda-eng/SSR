@@ -85,7 +85,9 @@ jobs:
 
       - name: Generate HTML Dashboard
         if: always()
-        run: python src/html_generator.py
+        run: |
+          python -m src.validation.export_frontend_data
+          python src/html_generator.py
 
       - name: Commit Dashboard
         if: always()
