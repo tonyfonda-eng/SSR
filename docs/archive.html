@@ -1,75 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SSR Data Archive</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+  <!-- NOTE: Static files served from GitHub Pages or static hosting cannot set HTTP headers like CSP here.
+       Configure your hosting to add a Content-Security-Policy that disallows inline scripts and unsafe-eval
+       where possible. Treat archive_data.json as untrusted input. -->
+</head>
+<body class="bg-gray-900 text-gray-100 p-6">
+  <nav class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">SSR Historical Archive</h1>
+    <a href="index.html" class="bg-blue-600 px-4 py-2 rounded text-sm font-semibold hover:bg-blue-500">Back to Cockpit</a>
+  </nav>
 
-    <!DOCTYPE html>
-    <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>SSR Document Archive</title>
-        <style>
-            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0d1117; color: #c9d1d9; padding: 20px; }
-            .container { max-width: 1200px; margin: 0 auto; background: #161b22; padding: 20px; border: 1px solid #30363d; border-radius: 6px; }
-            h1 { border-bottom: 1px solid #30363d; padding-bottom: 10px; }
-            input { width: 100%; padding: 10px; margin-bottom: 20px; background: #0d1117; color: #c9d1d9; border: 1px solid #30363d; border-radius: 4px; }
-            table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
-            th, td { padding: 10px; text-align: left; border-bottom: 1px solid #30363d; }
-            th { color: #8b949e; text-transform: uppercase; font-size: 0.85em; }
-            a { color: #58a6ff; text-decoration: none; }
-            .badge { padding: 3px 8px; border-radius: 12px; font-size: 0.8em; font-weight: 600; background: rgba(139,148,158,0.15); color: #8b949e; border: 1px solid rgba(139,148,158,0.4); }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h1>Operational Document Archive</h1>
-            <p style="color: #8b949e;">Dynamic, deterministic lookup of historically ingested documents and signal evaluations.</p>
-            <input type="text" id="searchInput" placeholder="Search archive by ticker, source, event family, or title..." onkeyup="filterTable()">
-            <table id="archiveTable">
-                <thead>
-                    <tr><th>Processed At</th><th>Source</th><th>Event Family</th><th>Title</th><th>Outcome</th></tr>
-                </thead>
-                <tbody id="tableBody">
-                    <tr><td colspan="5">Loading data stream...</td></tr>
-                </tbody>
-            </table>
-        </div>
-        <script>
-            let archiveData = [];
-            fetch('archive_data.json')
-                .then(response => response.json())
-                .then(data => {
-                    archiveData = data;
-                    renderTable(archiveData);
-                })
-                .catch(error => {
-                    document.getElementById('tableBody').innerHTML = "<tr><td colspan='5'>Error resolving file dependencies. Check archive_data.json.</td></tr>";
-                });
+  <div class="bg-gray-800 p-6 rounded-lg shadow">
+    <p id="status" class="text-gray-400">Loading ingested data records from archive_data.json...</p>
+    <input id="searchInput" class="mt-4 p-2 w-full bg-gray-900 text-gray-100 rounded" placeholder="Search archive by title, source, or date...">
+    <div class="mt-4 overflow-auto">
+      <table id="archiveTable" class="min-w-full bg-gray-800 text-sm">
+        <thead>
+          <tr>
+            <th class="text-left p-2 text-gray-400">Processed At</th>
+            <th class="text-left p-2 text-gray-400">Source</th>
+            <th class="text-left p-2 text-gray-400">Title</th>
+            <th class="text-left p-2 text-gray-400">Published</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr><td colspan="4">Loading data...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 
-            function renderTable(data) {
-                const tbody = document.getElementById('tableBody');
-                tbody.innerHTML = '';
-                data.forEach(row => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td style="white-space: nowrap;">${row.processed_at ? row.processed_at.split('.')[0].replace('T', ' ') : '-'}</td>
-                        <td>${row.source || 'Unknown'}</td>
-                        <td>${row.event_family || '-'}</td>
-                        <td><a href="${row.url || '#'}" target="_blank">${row.title || 'No Title'}</a></td>
-                        <td><span class="badge">${row.outcome || 'Unknown'}</span></td>
-                    `;
-                    tbody.appendChild(tr);
-                });
-            }
+  <script>
+    // Lightweight, safer client-side renderer.
+    // - Avoids innerHTML for rows
+    // - Validates URL schemes with URL()
+    // - Adds rel="noopener noreferrer" to target="_blank"
+    // - Uses fetch with credentials omitted explicitly
 
-            function filterTable() {
-                const query = document.getElementById('searchInput').value.toLowerCase();
-                const filtered = archiveData.filter(row => 
-                    (row.title && row.title.toLowerCase().includes(query)) || 
-                    (row.source && row.source.toLowerCase().includes(query)) ||
-                    (row.event_family && row.event_family.toLowerCase().includes(query)) ||
-                    (row.outcome && row.outcome.toLowerCase().includes(query))
-                );
-                renderTable(filtered);
-            }
-        </script>
-    </body>
-    </html>
-    
+    let archiveData = [];
+
+    function formatTime(ts) {
+      if (!ts) return "";
+      try {
+        // Try to parse ISO-like strings
+        if (typeof ts === 'string' && ts.includes('T')) {
+          const d = new Date(ts);
+          if (!isNaN(d)) return d.toISOString().replace('T',' ').split('.')[0].replace('Z','');
+        }
+        return String(ts).replace('Z','').replace('UTC','').trim();
+      } catch (e) {
+        return String(ts);
+      }
+    }
+
+    function isSafeUrl(href) {
+      if (!href) return false;
+      try {
+        // Resolve relative URLs against the current location
+        const u = new URL(href, window.location.href);
+        // Allow only http, https, mailto
+        return (u.protocol === 'http:' || u.protocol === 'https:' || u.protocol === 'mailto:');
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function makeRow(row) {
+      const tr = document.createElement('tr');
+      tr.className = 'hover:bg-gray-700';
+
+      const tdProcessed = document.createElement('td');
+      tdProcessed.className = 'p-2 align-top';
+      tdProcessed.textContent = formatTime(row.processed_at || row.processed || '');
+      tr.appendChild(tdProcessed);
+
+      const tdSource = document.createElement('td');
+      tdSource.className = 'p-2 align-top';
+      tdSource.textContent = row.source || '';
+      tr.appendChild(tdSource);
+
+      const tdTitle = document.createElement('td');
+      tdTitle.className = 'p-2 align-top';
+      if (row.url && isSafeUrl(row.url)) {
+        const a = document.createElement('a');
+        a.setAttribute('href', row.url);
+        a.setAttribute('target', '_blank');
+        a.setAttribute('rel', 'noopener noreferrer');
+        a.className = 'text-blue-400 hover:underline';
+        a.textContent = row.title || row.url;
+        tdTitle.appendChild(a);
+      } else {
+        // Render as plain text if no URL or unsafe URL
+        tdTitle.textContent = row.title || (row.url ? '[invalid link]' : '');
+      }
+      tr.appendChild(tdTitle);
+
+      const tdPublished = document.createElement('td');
+      tdPublished.className = 'p-2 align-top';
+      tdPublished.textContent = row.published || '';
+      tr.appendChild(tdPublished);
+
+      return tr;
+    }
+
+    function renderTable(data) {
+      const tbody = document.getElementById('tableBody');
+      // Remove existing rows safely
+      while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
+
+      if (!data || data.length === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.setAttribute('colspan', '4');
+        td.className = 'p-2 text-gray-400';
+        td.textContent = 'No records';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        return;
+      }
+
+      // Append rows
+      for (let i = 0; i < data.length; i++) {
+        tbody.appendChild(makeRow(data[i]));
+      }
+    }
+
+    function filterTable() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      const filtered = archiveData.filter(r =>
+        (r.title || '').toLowerCase().includes(q) ||
+        (r.source || '').toLowerCase().includes(q) ||
+        (r.processed_at || '').toLowerCase().includes(q)
+      );
+      renderTable(filtered);
+    }
+
+    document.getElementById('searchInput').addEventListener('input', filterTable);
+
+    // Explicitly omit credentials so cookies / auth headers are not sent to the static JSON
+    fetch('archive_data.json', { credentials: 'omit' })
+      .then(resp => {
+        if (!resp.ok) throw new Error('Network response not OK: ' + resp.status);
+        return resp.json();
+      })
+      .then(data => {
+        if (!Array.isArray(data)) {
+          document.getElementById('status').textContent = 'Unexpected archive format';
+          console.error('archive_data.json is not an array', data);
+          return;
+        }
+        archiveData = data;
+        document.getElementById('status').textContent = `Loaded ${data.length} records.`;
+        renderTable(archiveData);
+      })
+      .catch(err => {
+        document.getElementById('status').textContent = 'Error loading data: ' + err.message;
+        const tbody = document.getElementById('tableBody');
+        while (tbody.firstChild) tbody.removeChild(tbody.firstChild);
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.setAttribute('colspan', '4');
+        td.textContent = 'Error loading data.';
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+        console.error(err);
+      });
+
+  </script>
+</body>
+</html>
