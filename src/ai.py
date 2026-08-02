@@ -69,13 +69,13 @@ def _generate_with_retry(prompt, max_retries=3):
             try:
                 if provider == "openrouter":
                     response = client.chat.completions.create(
-                        model="google/gemini-2.0-flash-001-001",
+                        model="google/gemini-2.5-flash-001",
                         messages=[{"role": "user", "content": prompt}],
                         extra_body={
                             "models": [
-                                "google/gemini-2.0-flash-001-001",
-                                "google/gemini-2.0-flash-001-001",
-                                "google/gemini-2.0-flash-001-001"
+                                "google/gemini-2.5-flash-001",
+                                "google/gemini-2.5-flash-001",
+                                "google/gemini-2.5-flash-001"
                             ]
                         }
                         
