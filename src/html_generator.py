@@ -9,6 +9,7 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
     # --- 1. SYSTEM HEALTH (Is it healthy?) ---
     runtime_s = metrics.daily.get("total_runtime_s", 0)
     health_score = metrics.calculate_health_score(runtime_s)
+    run_id = getattr(metrics, 'run_id', 'Unknown')
     
     if health_score >= 90 and not metrics.exceptions:
         sys_color, sys_status = "#2ea043", "HEALTHY"
@@ -18,9 +19,9 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
         sys_color, sys_status = "#cb2431", "CRITICAL"
 
     # --- 2. DEPLOYMENT HEALTH (Is it safe to deploy?) ---
-    # Fast, zero-compute checks
+    # Zero-compute compliance and local security validations
     secrets_pass = os.path.exists(".secrets.baseline") and not (os.path.exists("gitleaks-results.sarif") or os.path.exists("gitleaks-report.json"))
-    db_pass = os.path.exists("ssr_cache.sqlite")
+    db_pass = os.path.exists("ssr_cache.sqlite") or os.path.exists("ssr_observability.db")
     exceptions_pass = len(metrics.exceptions) == 0
     
     def pass_fail_badge(condition):
@@ -45,31 +46,37 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
             color = "trend-up" if pct_change > 0 else "trend-down"
             sign = "+" if pct_change > 0 else ""
             delta_html = f"<span class='{color}' style='font-size: 0.85em; margin-left: 10px;'>{sign}{pct_change:.0f}% vs 30d</span>"
-        return f"<div class='funnel-step'><strong>{name}</strong> <span>{current} {delta_html}</span></div><div class='funnel-arrow'>↓</div>"
+        return f"""
+        <div class='funnel-step'>
+            <strong>{name}</strong> 
+            <span>{current}{delta_html}</span>
+        </div>
+        <div class='funnel-arrow'>↓</div>
+        """
 
     # --- 4. ANOMALIES (Did anything unusual happen today?) ---
     anomalies = []
     
-    # Check Runtime Drift
+    # Evaluate Runtime Drift Metrics
     avg_runtime = avg.get("total_runtime_s", runtime_s)
     if avg_runtime > 0:
         runtime_drift = ((runtime_s - avg_runtime) / avg_runtime) * 100
         if runtime_drift > 25:
-            anomalies.append(f"<span class='badge warning'>RUNTIME</span> Execution took {runtime_s:.0f}s (+{runtime_drift:.0f}% over average).")
+            anomalies.append(f"<span class='badge warning'>RUNTIME</span> Execution took {runtime_s:.1f}s (+{runtime_drift:.0f}% over average).")
             
-    # Check Source Volume Drops/Spikes
+    # Trace Source Footprint Yield drops/spikes
     if src_30:
         for src, stats in metrics.source_stats.items():
             current_vol = stats.get("downloaded", 0)
             avg_vol = src_30.get(src, {}).get("downloaded", 0)
-            if avg_vol > 20: # Only care about meaningful volume
+            if avg_vol > 20: 
                 if current_vol < (avg_vol * 0.4):
-                    anomalies.append(f"<span class='badge danger'>SOURCE DROP</span> {src} volume is down 60%+ today ({current_vol} vs avg {avg_vol:.0f}).")
+                    anomalies.append(f"<span class='badge danger'>SOURCE DROP</span> {src} volume dropped 60%+ today ({current_vol} vs 30d avg {avg_vol:.0f}).")
                 elif current_vol > (avg_vol * 2.0):
-                    anomalies.append(f"<span class='badge info'>SOURCE SPIKE</span> {src} volume doubled today ({current_vol} vs avg {avg_vol:.0f}).")
+                    anomalies.append(f"<span class='badge info'>SOURCE SPIKE</span> {src} volume doubled today ({current_vol} vs 30d avg {avg_vol:.0f}).")
 
     if not anomalies:
-        anomalies.append("<span style='color: var(--muted);'>No significant anomalies detected today.</span>")
+        anomalies.append("<span style='color: var(--muted);'>No significant structural anomalies flagged this session.</span>")
 
     # --- 5. AI DIAGNOSTICS (If degraded, WHY?) ---
     ai_html = ""
@@ -82,10 +89,9 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
             ai_html += f"<div style='color: var(--red); font-size: 0.9em; margin-bottom: 5px;'>[{provider}-{key_id}] {err_429} rate limits, {err_503} 503s, {t_outs} timeouts.</div>"
     
     if not ai_html:
-        ai_html = "<div style='color: var(--green); font-size: 0.9em;'>All AI routing nominal. Zero failures.</div>"
+        ai_html = "<div style='color: var(--green); font-size: 0.9em;'>All upstream AI paths nominal. Zero drops.</div>"
 
-
-    # --- RENDER HTML ---
+    # HTML Structuring Engine
     html = f"""
     <!DOCTYPE html>
     <html lang="en">
@@ -100,25 +106,18 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
             }}
             body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 20px; }}
             .container {{ max-width: 1000px; margin: 0 auto; }}
-            
-            /* Status Banner */
             .status-banner {{ 
                 background: var(--surface); border-left: 8px solid {sys_color}; border-radius: 6px; 
                 padding: 20px 30px; display: flex; justify-content: space-between; align-items: center;
                 margin-bottom: 20px; border-top: 1px solid var(--border); border-right: 1px solid var(--border); border-bottom: 1px solid var(--border);
             }}
-            .status-banner h1 {{ margin: 0; font-size: 2.5em; color: {sys_color}; text-transform: uppercase; letter-spacing: 2px; border: none; padding: 0; }}
-            
-            /* Layout Grid */
+            .status-banner h1 {{ margin: 0; font-size: 2.5em; color: {sys_color}; text-transform: uppercase; letter-spacing: 2px; border: none; }}
             .grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }}
             .card {{ background: var(--surface); padding: 20px; border: 1px solid var(--border); border-radius: 6px; }}
             h2 {{ color: #fff; font-size: 1.1em; text-transform: uppercase; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 0; }}
-            
-            /* Funnel */
             .funnel-step {{ display: flex; justify-content: space-between; padding: 8px 12px; background: #1c2128; border-radius: 4px; border: 1px solid var(--border); }}
-            .funnel-arrow {{ text-align: center; color: var(--muted); padding: 4px 0; font-weight: bold; }}
-            
-            /* Utilities */
+            .funnel-arrow {{ text-align: center; color: var(--muted); padding: 2px 0; font-weight: bold; font-size: 0.85em; }}
+            .funnel-arrow:last-of-type {{ display: none; }}
             ul {{ list-style: none; padding: 0; margin: 0; }}
             li {{ padding: 8px 0; border-bottom: 1px solid #21262d; font-size: 0.9em; }}
             li:last-child {{ border-bottom: none; }}
@@ -135,51 +134,51 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
             
             <div class="status-banner">
                 <div>
-                    <h1 id="overall-status">{sys_status}</h1>
-                    <div style="color: var(--muted); margin-top: 5px;">Last Run: {now_str} &bull; Runtime: {runtime_s:.1f}s</div>
+                    <h1>{sys_status}</h1>
+                    <div style="color: var(--muted); margin-top: 5px;">
+                        Run ID: {run_id} &bull; Next Scheduled Run: {getattr(metrics, 'next_run_str', 'Unknown')} &bull; Latency: {runtime_s:.1f}s
+                    </div>
                 </div>
                 <div style="text-align: right;">
-                    <div style="font-size: 0.9em; margin-bottom: 5px;">Score: <strong>{health_score}/100</strong></div>
+                    <div style="font-size: 1.1em;">Operational Score: <strong>{health_score}/100</strong></div>
                 </div>
             </div>
 
             <div class="grid">
                 <div class="card" style="grid-row: span 2;">
-                    <h2>Volume & Drop-offs</h2>
-                    {render_funnel_step("Downloaded", f_down, avg.get("downloaded"))}
-                    {render_funnel_step("Passed Dedupe", f_dedupe, None)}
-                    {render_funnel_step("Passed Regex", f_regex, None)}
-                    {render_funnel_step("Passed Ontology", f_ont, None)}
-                    {render_funnel_step("Passed Rules Engine", f_rules, None)}
-                    {render_funnel_step("Reached AI", f_ai, avg.get("ai_calls"))}
-                    {render_funnel_step("Alerts Generated", f_alerts, avg.get("emails_sent"))}
-                    <div style="text-align: center; color: var(--muted); font-size: 0.8em; margin-top: 10px;">Pipeline flow top-to-bottom.</div>
+                    <h2>Volume Filter Cascade</h2>
+                    {render_funnel_step("1. Ingested (Downloaded)", f_down, avg.get("downloaded"))}
+                    {render_funnel_step("2. Passed Deduplication", f_dedupe, None)}
+                    {render_funnel_step("3. Passed Global Exclusions", f_regex, None)}
+                    {render_funnel_step("4. Survived Ontology Inferences", f_ont, None)}
+                    {render_funnel_step("5. Met Rules Engine Threshold", f_rules, None)}
+                    {render_funnel_step("6. Classified via GenAI Engine", f_ai, avg.get("ai_calls"))}
+                    {render_funnel_step("7. Investment Memos Dispatched", f_alerts, avg.get("emails_sent"))}
                 </div>
 
                 <div class="card">
-                    <h2>Today's Anomalies</h2>
+                    <h2>Volumetric & Runtime Anomalies</h2>
                     <ul>
                         {''.join(f"<li>{a}</li>" for a in anomalies)}
                     </ul>
                 </div>
 
                 <div class="card">
-                    <h2>Diagnostic Status</h2>
+                    <h2>Deployment & Diagnostic Checks</h2>
                     
-                    <div style="margin-bottom: 15px;">
-                        <strong style="color: var(--muted); font-size: 0.8em; display: block; margin-bottom: 5px;">AI NETWORK FAILURES</strong>
+                    <div style="margin-bottom: 20px;">
+                        <strong style="color: var(--muted); font-size: 0.8em; display: block; margin-bottom: 5px;">GENAI TELEMETRY DEGRADATION LOGS</strong>
                         {ai_html}
                     </div>
 
-                    <strong style="color: var(--muted); font-size: 0.8em; display: block; margin-bottom: 5px;">DEPLOYMENT HEALTH</strong>
+                    <strong style="color: var(--muted); font-size: 0.8em; display: block; margin-bottom: 5px;">INTEGRITY RUN STATE MATRIX</strong>
                     <table style="width: 100%; font-size: 0.9em;">
-                        <tr><td style="padding: 4px 0;">Secrets (Gitleaks)</td><td style="text-align: right;">{pass_fail_badge(secrets_pass)}</td></tr>
-                        <tr><td style="padding: 4px 0;">Runtime Exceptions</td><td style="text-align: right;">{pass_fail_badge(exceptions_pass)}</td></tr>
-                        <tr><td style="padding: 4px 0;">SQLite Operations</td><td style="text-align: right;">{pass_fail_badge(db_pass)}</td></tr>
+                        <tr><td style="padding: 6px 0;">Secret Screener Guardrails (Gitleaks)</td><td style="text-align: right;">{pass_fail_badge(secrets_pass)}</td></tr>
+                        <tr><td style="padding: 6px 0;">Pipeline Execution Context (No Runtime Exceptions)</td><td style="text-align: right;">{pass_fail_badge(exceptions_pass)}</td></tr>
+                        <tr><td style="padding: 6px 0;">SQLite Operational Databases Read/Write Access</td><td style="text-align: right;">{pass_fail_badge(db_pass)}</td></tr>
                     </table>
                 </div>
             </div>
-            
         </div>
     </body>
     </html>
@@ -189,8 +188,83 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
     with open(output_path, "w", encoding="utf-8") as f:
         f.write(html)
 
-
 def generate_archive_html(output_path):
-    """Generates the static lightweight archive index for searching past events."""
-    # ... [Keep your exact previous generate_archive_html implementation here] ...
-    pass
+    """Generates the searchable document archive ledger page."""
+    html = """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>SSR Document Archive</title>
+        <style>
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0d1117; color: #c9d1d9; padding: 20px; }
+            .container { max-width: 1200px; margin: 0 auto; background: #161b22; padding: 20px; border: 1px solid #30363d; border-radius: 6px; }
+            h1 { border-bottom: 1px solid #30363d; padding-bottom: 10px; }
+            input { width: 100%; padding: 10px; margin-bottom: 20px; background: #0d1117; color: #c9d1d9; border: 1px solid #30363d; border-radius: 4px; }
+            table { width: 100%; border-collapse: collapse; font-size: 0.9em; }
+            th, td { padding: 10px; text-align: left; border-bottom: 1px solid #30363d; }
+            th { color: #8b949e; text-transform: uppercase; font-size: 0.85em; }
+            a { color: #58a6ff; text-decoration: none; }
+            .badge { padding: 3px 8px; border-radius: 12px; font-size: 0.8em; font-weight: 600; background: rgba(139,148,158,0.15); color: #8b949e; border: 1px solid rgba(139,148,158,0.4); }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1>Operational Document Archive</h1>
+            <p style="color: #8b949e;">Dynamic, deterministic lookup of historically ingested documents and signal evaluations.</p>
+            <input type="text" id="searchInput" placeholder="Search archive by ticker, source, event family, or title..." onkeyup="filterTable()">
+            <table id="archiveTable">
+                <thead>
+                    <tr><th>Processed At</th><th>Source</th><th>Event Family</th><th>Title</th><th>Outcome</th></tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="5">Loading data stream...</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <script>
+            let archiveData = [];
+            fetch('archive_data.json')
+                .then(response => response.json())
+                .then(data => {
+                    archiveData = data;
+                    renderTable(archiveData);
+                })
+                .catch(error => {
+                    document.getElementById('tableBody').innerHTML = "<tr><td colspan='5'>Error resolving file dependencies. Check archive_data.json.</td></tr>";
+                });
+
+            function renderTable(data) {
+                const tbody = document.getElementById('tableBody');
+                tbody.innerHTML = '';
+                data.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td style="white-space: nowrap;">${row.processed_at ? row.processed_at.split('.')[0].replace('T', ' ') : '-'}</td>
+                        <td>${row.source || 'Unknown'}</td>
+                        <td>${row.event_family || '-'}</td>
+                        <td><a href="${row.url || '#'}" target="_blank">${row.title || 'No Title'}</a></td>
+                        <td><span class="badge">${row.outcome || 'Unknown'}</span></td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+
+            function filterTable() {
+                const query = document.getElementById('searchInput').value.toLowerCase();
+                const filtered = archiveData.filter(row => 
+                    (row.title && row.title.toLowerCase().includes(query)) || 
+                    (row.source && row.source.toLowerCase().includes(query)) ||
+                    (row.event_family && row.event_family.toLowerCase().includes(query)) ||
+                    (row.outcome && row.outcome.toLowerCase().includes(query))
+                );
+                renderTable(filtered);
+            }
+        </script>
+    </body>
+    </html>
+    """
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
+        f.write(html)
