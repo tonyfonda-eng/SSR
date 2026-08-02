@@ -17,4 +17,5 @@ def process_user_metrics(user_id, active_logs=None):
         "status": data.get("status", "unknown")
     }
 
-print(process_user_metrics("user_101"))
+if __name__ == "__main__":
+    print(process_user_metrics("user_101"))
