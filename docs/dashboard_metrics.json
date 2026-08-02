@@ -22,6 +22,20 @@
       "ontology_drops": 480,
       "ai_evals": 40,
       "captured": 12
+    },
+    "Business Wire": {
+      "scanned": 410,
+      "duplicates": 110,
+      "ontology_drops": 280,
+      "ai_evals": 20,
+      "captured": 8
+    },
+    "London Stock Exchange": {
+      "scanned": 2100,
+      "duplicates": 940,
+      "ontology_drops": 1120,
+      "ai_evals": 40,
+      "captured": 14
     }
   }
 }
