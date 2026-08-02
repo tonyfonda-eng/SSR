@@ -10,11 +10,20 @@ COOLDOWN_SECONDS = 300
 
 class OpenRouterPool:
     def __init__(self):
-        raw_keys = [os.environ.get("OPENROUTER_API_KEY", "")]
-        for i in range(1, 8):
-            raw_keys.append(os.environ.get(f"OPENROUTER_API_KEY_{i}", ""))
-        self.keys = [k.strip() for k in raw_keys if k and k.strip()]
+        raw_keys = []
+        # Pull master keys and numbered fallback variables
+        env_vars = ["OPENROUTER_API_KEY"] + [f"OPENROUTER_API_KEY_{i}" for i in range(1, 8)]
+        for var in env_vars:
+            val = os.environ.get(var, "")
+            if val:
+                # Split on commas to unpack bulk GitHub secrets cleanly
+                raw_keys.extend([k.strip() for k in val.split(",") if k.strip()])
+        
+        self.keys = raw_keys
         self.cooldowns = {}
+        print(f"\n======== AI POOL ========\nOpenRouter keys loaded: {len(self.keys)}")
+        for i, k in enumerate(self.keys):
+            print(f"  OpenRouter {i+1}: {k[:8]}...{k[-4:]}")
         logger.info(f"[AI INFO] Initialized OpenRouter pool with {len(self.keys)} active keys.")
 
     def get_available_key(self):
@@ -30,12 +39,19 @@ class OpenRouterPool:
 
 class GeminiPool:
     def __init__(self):
-        raw_keys = [os.environ.get("GEMINI_API_KEY", "")]
-        for i in range(1, 8):
-            raw_keys.append(os.environ.get(f"GEMINI_API_KEY_{i}", ""))
-        self.keys = [k.strip() for k in raw_keys if k and k.strip()]
+        raw_keys = []
+        env_vars = ["GEMINI_API_KEY"] + [f"GEMINI_API_KEY_{i}" for i in range(1, 8)]
+        for var in env_vars:
+            val = os.environ.get(var, "")
+            if val:
+                raw_keys.extend([k.strip() for k in val.split(",") if k.strip()])
+        
+        self.keys = raw_keys
         self._index = 0
-        logger.info(f"[AI INFO] Initialized Gemini pool with {len(self.keys)} active keys.")
+        print(f"Gemini keys loaded: {len(self.keys)}")
+        for i, k in enumerate(self.keys):
+            print(f"  Gemini {i+1}: {k[:8]}...{k[-4:]}")
+        logger.info(f"[AI INFO] Initialized Gemini pool with {len(self.keys)} active keys.\n")
 
     def next_key(self):
         if not self.keys:
