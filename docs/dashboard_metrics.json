@@ -1,0 +1,27 @@
+{
+  "system_status": "OPERATIONAL",
+  "uptime": "99.8%",
+  "redundancy_factor": "42.3%",
+  "llm_errors": 0,
+  "http_failures": 2,
+  "opportunity_capture_rate": 95.0,
+  "false_positives": 4.2,
+  "false_negatives": 0.0,
+  "avg_delay_mins": 8,
+  "sources": {
+    "PR Newswire": {
+      "scanned": 1420,
+      "duplicates": 612,
+      "ontology_drops": 720,
+      "ai_evals": 88,
+      "captured": 22
+    },
+    "GlobeNewswire": {
+      "scanned": 840,
+      "duplicates": 320,
+      "ontology_drops": 480,
+      "ai_evals": 40,
+      "captured": 12
+    }
+  }
+}
