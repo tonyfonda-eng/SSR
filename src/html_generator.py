@@ -498,17 +498,17 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
     )
 
     # ---- rule analytics / ontology conversion (unchanged shape, still valuable)
-    rule_rows = "".join(
-        f'<tr><td>{_esc(r.get("rule_id","\u2014"))}</td>'
-        f'<td class="metric-val">{_num(r.get("evaluated"))}</td>'
-        f'<td class="metric-val">{_num(r.get("matched"))}</td>'
-        f'<td class="metric-val">{_num(r.get("alerts"))}</td>'
-        f'<td class="metric-val">{_num(r.get("false_neg"))}</td></tr>'
-        for r in rules
-    ) or '<tr><td colspan="5" style="text-align:center; color:var(--muted); padding:16px;">No rule data yet.</td></tr>'
+rule_rows = "".join(
+    f'<tr><td>{_esc(r.get("rule_id") or "&mdash;")}</td>'
+    f'<td class="metric-val">{_num(r.get("evaluated"))}</td>'
+    f'<td class="metric-val">{_num(r.get("matched"))}</td>'
+    f'<td class="metric-val">{_num(r.get("alerts"))}</td>'
+    f'<td class="metric-val">{_num(r.get("false_neg"))}</td></tr>'
+    for r in rules
+) or '<tr><td colspan="5" style="text-align:center; color:var(--muted); padding:16px;">No rule data yet.</td></tr>'
 
-    ontology_rows = "".join(
-        f'<tr><td>{_esc(o.get("concept","\u2014"))}</td>'
+ontology_rows = "".join(
+        f'<tr><td>{_esc(o.get("concept") or "&mdash;")}</td>'
         f'<td class="metric-val">{_num(o.get("frequency"))}</td>'
         f'<td class="metric-val" style="color:{"var(--green)" if (o.get("conversion_pct") or 0) >= 20 else "var(--text)"};">'
         f'{_pct(o.get("conversion_pct"))}</td></tr>'
