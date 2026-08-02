@@ -188,7 +188,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
     ticker = extract_target_ticker(body)
     print(f"[AI TICKER] {ticker}")
 
-    if "MOCK AI" in ticker or "ERROR" in ticker or ticker == "UNKNOWN" or ticker == "EXHAUSTED":
+    if "MOCK AI" in ticker or "ERROR" in ticker or ticker == "EXHAUSTED":
         print("[CRITICAL] AI Providers are exhausted or unavailable.")
         metrics.track_funnel("ai_exhausted")
         return conclude("ABORT", 'Rules Engine', 'Dropped', 'AI Exhausted', issuer)
@@ -229,7 +229,7 @@ def _process_article(source_name, article_id, title, url, published, body, rules
     event_family = classify_event(body, matches, ticker=ticker, market_cap=market_cap)
     print(f"[AI CLASSIFICATION] {event_family}")
 
-    if "Unknown" in event_family or event_family == "EXHAUSTED":
+    if event_family == "EXHAUSTED":
         print("[CRITICAL] AI Providers are exhausted. Aborting ingestion loop.")
         metrics.track_funnel("ai_exhausted")
         return conclude("ABORT", 'AI Classification', 'Dropped', 'AI Exhausted', ticker, event_family)
@@ -418,6 +418,7 @@ def process_custom_scraper(scraper, source_name, rss_url=None, triage_all=False,
             "country": country,
             "language": language
         })
+    print(f"    [{source_name}] Fetched {len(articles)} raw articles, {len(parsed_articles)} parsed.")
     return parsed_articles, len(articles)
 
 
@@ -514,6 +515,7 @@ def main():
                         method_used = "HTML"
                         all_new_articles.extend(parsed)
                     source_stats[source_name] = {"count": parsed_count, "new": len(parsed), "method": method_used}
+        print(f"[INGESTION] {source_name}: {parsed_count} fetched, {len(parsed)} new ({method_used})")
                 except Exception as e:
                     print(f"[WARNING] HTML Scraper failed for {source_name}: {e}. Falling back to RSS...")
 
@@ -524,6 +526,7 @@ def main():
                     method_used = "RSS"
                     all_new_articles.extend(parsed)
                     source_stats[source_name] = {"count": parsed_count, "new": len(parsed), "method": method_used}
+        print(f"[INGESTION] {source_name}: {parsed_count} fetched, {len(parsed)} new ({method_used})")
                 except Exception as e:
                     print(f"[ERROR] RSS Ingestion failed for {source_name}: {e}")
 
