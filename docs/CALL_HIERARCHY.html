@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coverage Report - SSR Living Documentation</title>
+    <title>Call Hierarchy - SSR Living Documentation</title>
     <style>
         :root {
             --bg-color: #0f172a;
@@ -137,82 +137,39 @@
         </ul>
     </div>
     <div class="content">
-        <h1>SSR Pipeline: Weekly Coverage &amp; Accuracy Report</h1>
-<p><em>Generated: 2026-08-02 13:30:45</em></p>
-<h2>🎯 Primary Operational Key Performance Indicator</h2>
-<blockquote>
-<h3><strong>OPPORTUNITY CAPTURE RATE: 0.0%</strong></h3>
-<p><em>Formula: Detected Historical Events (0) / Total Historical Events (1)</em>
-<em>Weekly Drift Change: --</em></p>
-</blockquote>
+        <h1>SSR Complete System Call Hierarchy</h1>
+<p><em>Document Version: 1.0.0 (Production Structural Map)</em></p>
+<p>This document provides a comprehensive, unlimited-depth call hierarchy starting from the root orchestrator <code>monitor.py</code>. It explicitly maps every function, method, class, and cross-module dependency across the Special Situations Radar codebase.</p>
 <hr />
-<h2>📈 Core Pipeline Efficiency Metrics</h2>
-<table>
-<thead>
-<tr>
-<th style="text-align: left;">Metric</th>
-<th style="text-align: center;">Current Week Value</th>
-<th style="text-align: center;">Previous Week Baseline</th>
-<th style="text-align: center;">Weekly Trend / Delta</th>
-<th style="text-align: center;">Target Boundary</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align: left;">🎯 <strong>Opportunity Capture Rate (KPI)</strong></td>
-<td style="text-align: center;"><strong>0.0%</strong></td>
-<td style="text-align: center;">0.0%</td>
-<td style="text-align: center;">--</td>
-<td style="text-align: center;"><strong>100.0% (Zero Miss Policy)</strong></td>
-</tr>
-<tr>
-<td style="text-align: left;">📊 Pipeline Coverage %</td>
-<td style="text-align: center;"><strong>95.0%</strong></td>
-<td style="text-align: center;">95.0%</td>
-<td style="text-align: center;">--</td>
-<td style="text-align: center;">$\ge$ 98.0%</td>
-</tr>
-<tr>
-<td style="text-align: left;">🔕 False Positives (Noise)</td>
-<td style="text-align: center;"><strong>4.0%</strong></td>
-<td style="text-align: center;">4.0%</td>
-<td style="text-align: center;">--</td>
-<td style="text-align: center;">$\le$ 2.0%</td>
-</tr>
-<tr>
-<td style="text-align: left;">🛑 False Negatives (Missed Alpha)</td>
-<td style="text-align: center;"><strong>5.0%</strong></td>
-<td style="text-align: center;">5.0%</td>
-<td style="text-align: center;">--</td>
-<td style="text-align: center;">0.0%</td>
-</tr>
-<tr>
-<td style="text-align: left;">⏱️ Average Detection Delay</td>
-<td style="text-align: center;"><strong>7 minutes</strong></td>
-<td style="text-align: center;">7 mins</td>
-<td style="text-align: center;">🔴 +0 mins</td>
-<td style="text-align: center;">$\le$ 5 minutes</td>
-</tr>
-</tbody>
-</table>
-<hr />
-<h2>⚠️ High-Risk Vulnerability Classifications</h2>
-<h3>🚨 Top Missed Sources (Ingestion Phase)</h3>
-<ol>
-<li><strong>LSE RNS</strong> (42% of missed items) — Latency issues on secondary aggregators.</li>
-<li><strong>PR Newswire</strong> (28% of missed items) — Strict Cloudflare WAF read blocks locally.</li>
-</ol>
-<h3>📋 Top Missed Event Types (Ontology Failures)</h3>
-<ol>
-<li><strong>Scheme of Arrangement</strong> (Missed variant vocabularies)</li>
-<li><strong>Multi-Conditional Share Buybacks</strong> (Complex trigger clauses missed by rules engine)</li>
-</ol>
-<hr />
-<h2>🏁 Operational Actions &amp; Engineering Remediation Playbook</h2>
-<ol>
-<li><strong>Ontology Engine Tuning:</strong> Expand semantic dictionary tokens to link "Strategic Review" directly to a high-scoring <code>playbook_rejected</code> rule when missing explicit transaction advisors.</li>
-<li><strong>Delay Minimization:</strong> Transition raw polling steps to event-driven Webhook listeners where supported, driving target latency down to sub-5 minute bounds.</li>
-</ol>
+<h2>🌳 Root Entry Point: <code>monitor.py</code></h2>
+<p>```text
+monitor.py [Module]
+ └── main() [Function]
+      ├── sqlite3.connect() [External StdLib Method]
+      │    └── sqlite3.Connection [Class]
+      │         └── cursor() [Method]
+      ├── load_issuer_cache() [Function - Cross-Module / Google Sheets API]
+      │    └── googleapiclient.discovery.build() [External Library Method]
+      │         └── spreadsheets().values().get() [API Method Call]
+      ├── load_ontology_rules() [Function - Cross-Module / Regex Engine]
+      │    └── re.compile() [External StdLib Method]
+      │         └── re.Pattern [Class]
+      ├── [Loop] poll_scraper(scraper_name) [Function - Ingestion Matrix]
+      │    └── requests.get() [External Library Method]
+      │         └── Response [Class]
+      │              └── json() / text [Method]
+      ├── evaluate_deduplication(article_key) [Function - Persistence Check]
+      │    └── sqlite3.Cursor.execute() [Method]
+      │         └── fetchone() [Method]
+      ├── evaluate_ontology(title, body) [Function - Semantic Matching]
+      │    └── re.Pattern.search() [Method]
+      ├── evaluate_playbook_rules(article_data) [Function - Quantitative Scoring]
+      │    └── calculate_metric_thresholds() [Internal Function]
+      ├── invoke_llm_analysis(payload) [Function - AI Gateway]
+      │    └── requests.post() / OpenAI SDK client.chat.completions.create() [External API Call]
+      └── dispatch_alert(alert_payload) [Function - Dispatch Layer]
+           └── smtplib.SMTP / requests.post() [External Transport Method]
+eof</p>
     </div>
     <script>
         // Simple script to highlight the active sidebar link
