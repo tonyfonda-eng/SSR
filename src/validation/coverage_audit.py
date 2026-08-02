@@ -64,7 +64,7 @@ def audit_event_coverage(url_or_ticker, val_db_path="validation.db"):
     article_id, headline, source = article
     print(f" [PASS] Stage 1: Ingestion           | ID: {article_id} | Source: {source}")
 
-    cursor.execute("SELECT stage FROM article_lifecycle_log WHERE article_id = ?", (article_id,))
+    cursor.execute("SELECT outcome FROM article_lifecycle_log WHERE article_id = ?", (article_id,))
     stages = {row[0] for row in cursor.fetchall()}
     conn.close()
 

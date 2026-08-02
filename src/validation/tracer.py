@@ -27,7 +27,7 @@ def trace_missed_opportunity(url_or_ticker):
         return "Not ingested"
         
     article_id = article[0]
-    cursor.execute("SELECT stage FROM article_lifecycle_log WHERE article_id = ?", (article_id,))
+    cursor.execute("SELECT outcome FROM article_lifecycle_log WHERE article_id = ?", (article_id,))
     stages = {row[0] for row in cursor.fetchall()}
     conn.close()
 
