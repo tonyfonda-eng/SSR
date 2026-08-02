@@ -2,7 +2,9 @@
 set -e
 
 echo "📦 Step 1: Navigating to repository..."
-cd ~/special-situations-radar-main
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+repo_root="$(git -C "$script_dir" rev-parse --show-toplevel)"
+cd "$repo_root"
 
 echo "🛠️ Step 2: Scrubbing all malformed indentations..."
 python3 -c "
