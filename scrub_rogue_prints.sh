@@ -29,7 +29,8 @@ print('  [SUCCESS] Syntax compilation passed!')
 echo "🚀 Step 4: Committing and pushing..."
 git add monitor.py
 git commit -m "fix(syntax): scrub remaining malformed print injection" || echo "No changes to commit."
+branch="$(git symbolic-ref --short HEAD)"
 git pull --rebase origin main
-git push origin main
+git push origin "HEAD:${branch}"
 
 echo "✅ The codebase is scrubbed and the pipeline is clean."
