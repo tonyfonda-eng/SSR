@@ -18,7 +18,7 @@ class GlobeNewswireScraper(SourceScraper):
         for page in range(1, 51):
             url = f"https://www.globenewswire.com/NewsRoom?page={page}"
             try:
-                response = requests.get(url, headers=headers, timeout=30)
+                response = requests.get(url, headers=headers, timeout=15)
                 response.raise_for_status()
                 soup = BeautifulSoup(response.text, "html.parser")
                 
@@ -56,7 +56,7 @@ class GlobeNewswireScraper(SourceScraper):
 
     def get_article_body(self, url):
         headers = {"User-Agent": USER_AGENT}
-        response = requests.get(url, headers=headers, timeout=30)
+        response = requests.get(url, headers=headers, timeout=15)
         if response.status_code != 200:
             return None
 
