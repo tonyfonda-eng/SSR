@@ -346,7 +346,7 @@ def process_1_feed(rss_url, source_name, triage_all=False, country=None, languag
     metrics = MetricsCollector.get_instance()
     try:
         headers = {"User-Agent": "Mozilla/5.0"}
-        response = requests.get(rss_url, headers=headers, timeout=15)
+        response = requests.get(headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'}, rss_url, headers=headers, timeout=15)
         response.raise_for_status()
         feed = feedparser.parse(response.content)
     except Exception as e:
