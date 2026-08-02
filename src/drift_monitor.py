@@ -5,6 +5,13 @@ def check_pipeline_drift():
     """Compares today's run metrics against 30-day historical averages to flag anomalies and alert via email."""
     print("[DRIFT MONITOR] Analyzing pipeline metrics for statistical drift...")
     conn = sqlite3.connect("ssr_observability.db")
+
+    try:
+        conn.execute("""CREATE TABLE IF NOT EXISTS workflow_health (timestamp TEXT PRIMARY KEY, total_scanned INTEGER, errors INTEGER, drift_score REAL)""")
+        conn.commit()
+    except Exception:
+        pass
+
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
