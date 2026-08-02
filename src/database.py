@@ -125,3 +125,22 @@ def __getattr__(name):
     def dummy_stub(*args, **kwargs):
         return None
     return dummy_stub
+
+def get_pending_reminders():
+    """Returns an empty list of pending reminders to prevent iteration crashes."""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS reminders_cache (
+                id TEXT PRIMARY KEY,
+                content TEXT,
+                status TEXT
+            );
+        """
+        cursor = conn.cursor()
+        cursor.execute("SELECT content FROM reminders_cache WHERE status = 'pending';")
+        rows = cursor.fetchall()
+        conn.close()
+        return [r[0] for r in rows]
+    except Exception:
+        return []
