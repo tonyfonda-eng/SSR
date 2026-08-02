@@ -2,7 +2,7 @@ import os
 import time
 import requests
 
-def audit_ai_infrastructure(configured_model="google/gemini-flash-1.5"):
+def audit_ai_infrastructure(configured_model="google/gemini-2.0-flash-001"):
     """
     Audits the telemetry performance of your client pool dynamically 
     without purging keys or hardcoding fallback models.
