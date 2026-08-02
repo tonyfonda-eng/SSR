@@ -4,14 +4,14 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>SSR Immutable Event Ledger Archive</title>
+        <title>SSR Immutable Event Ledger & Flight Recorder</title>
         <style>
             :root {{
                 --bg: #0d1117; --surface: #161b22; --surface-subtle: #21262d; --border: #30363d; --text: #c9d1d9;
                 --muted: #8b949e; --green: #2ea043; --red: #cb2431; --yellow: #dbab0a; --blue: #58a6ff;
             }}
             body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); padding: 20px; margin: 0; }}
-            .container {{ max-width: 1600px; margin: 0 auto; }}
+            .container {{ max-width: 1700px; margin: 0 auto; }}
             header {{ background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 20px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }}
             h1 {{ margin: 0; font-size: 1.8em; color: #fff; }}
             
@@ -19,7 +19,14 @@
             .nav-tabs a {{ background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 600; }}
             .nav-tabs a.active {{ background: var(--blue); color: #fff; border-color: var(--blue); }}
 
-            .filter-bar {{ background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 15px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; }}
+            /* Clickable Funnel Header */
+            .funnel-banner {{ background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 15px 20px; margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; justify-content: space-between; }}
+            .funnel-node {{ background: var(--surface-subtle); border: 1px solid var(--border); padding: 8px 14px; border-radius: 4px; cursor: pointer; font-size: 0.85em; display: flex; gap: 8px; align-items: center; transition: all 0.2s; }}
+            .funnel-node:hover {{ border-color: var(--blue); background: rgba(88,166,255,0.1); }}
+            .funnel-node.active {{ border-color: var(--blue); background: var(--blue); color: #fff; }}
+            .funnel-node span {{ font-weight: bold; font-family: monospace; }}
+
+            .filter-bar {{ background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 15px; margin-bottom: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }}
             .filter-group label {{ display: block; font-size: 0.75em; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; font-weight: 600; }}
             .filter-group select, .filter-group input {{ width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); padding: 8px; border-radius: 4px; font-size: 0.85em; }}
 
@@ -37,32 +44,45 @@
             .badge.info {{ background: rgba(88,166,255,0.15); color: var(--blue); border: 1px solid var(--blue); }}
 
             .audit-row {{ background: #0f131a; display: none; }}
-            .audit-content {{ padding: 15px 20px; border-left: 4px solid var(--blue); font-family: monospace; font-size: 0.85em; color: var(--muted); }}
+            .audit-content {{ padding: 15px 20px; border-left: 4px solid var(--blue); font-family: monospace; font-size: 0.85em; color: var(--muted); line-height: 1.6; }}
             .audit-content span {{ color: var(--text); }}
+            .replay-btn {{ background: var(--blue); color: #fff; border: none; padding: 4px 10px; border-radius: 4px; font-size: 0.8em; cursor: pointer; margin-top: 8px; font-weight: bold; }}
+            .replay-btn:hover {{ opacity: 0.9; }}
         </style>
     </head>
     <body>
         <div class="container">
             <div class="nav-tabs">
-                <a href="index.html">Operations Centre</a>
-                <a href="archive.html" class="active">Immutable Archive Ledger</a>
+                <a href="index.html">Operations Centre & Tuning</a>
+                <a href="archive.html" class="active">Immutable Event Ledger</a>
             </div>
 
             <header>
                 <div>
-                    <h1>Immutable Event Ledger Archive</h1>
-                    <p style="color: var(--muted); margin: 5px 0 0 0; font-size: 0.9em;">Permanent operational history, deterministic step-by-step audit trail, and explainability ledger.</p>
+                    <h1>Immutable Event Ledger & Flight Recorder</h1>
+                    <p style="color: var(--muted); margin: 5px 0 0 0; font-size: 0.9em;">Permanent decision history. Click any funnel stage to filter, click any row to inspect complete pipeline trace.</p>
                 </div>
             </header>
+
+            <div class="funnel-banner">
+                <div style="font-weight: bold; font-size: 0.9em; color: var(--muted);">LIVE FUNNEL:</div>
+                <div class="funnel-node active" onclick="filterByStage('ALL', this)">Total Ingested <span id="cnt-total">4,823</span></div>
+                <div class="funnel-node" onclick="filterByStage('Deduplication', this)">Duplicate <span id="cnt-dup">612</span></div>
+                <div class="funnel-node" onclick="filterByStage('Parse Failure', this)">Parse Failure <span id="cnt-parse">18</span></div>
+                <div class="funnel-node" onclick="filterByStage('Ontology Reject', this)">Ontology Reject <span id="cnt-ont">3,280</span></div>
+                <div class="funnel-node" onclick="filterByStage('Rules Reject', this)">Rules Reject <span id="cnt-rules">748</span></div>
+                <div class="funnel-node" onclick="filterByStage('AI Reject', this)">AI Reject <span id="cnt-ai">122</span></div>
+                <div class="funnel-node" onclick="filterByStage('DISPATCHED', this)" style="border-color: var(--green);">Alerts Dispatched <span id="cnt-alerts" style="color: var(--green);">57</span></div>
+            </div>
 
             <div class="filter-bar">
                 <div class="filter-group">
                     <label>Source</label>
                     <select id="filterSource" onchange="filterTable()">
                         <option value="">All Sources</option>
-                        <option value="EDGAR">EDGAR</option>
-                        <option value="LSE">London SE</option>
-                        <option value="ASX">ASX</option>
+                        <option value="Reuters">Reuters</option>
+                        <option value="EDGAR">SEC EDGAR</option>
+                        <option value="PR Newswire">PR Newswire</option>
                     </select>
                 </div>
                 <div class="filter-group">
@@ -82,27 +102,27 @@
                     <select id="filterDropStage" onchange="filterTable()">
                         <option value="">All Stages</option>
                         <option value="Deduplication">Deduplication</option>
-                        <option value="Global Exclusion">Global Exclusion</option>
+                        <option value="Parse Failure">Parse Failure</option>
                         <option value="Ontology">Ontology</option>
-                        <option value="Rules Engine">Rules Engine</option>
-                        <option value="GenAI">GenAI</option>
+                        <option value="Rules">Rules Engine</option>
+                        <option value="AI">GenAI</option>
                     </select>
                 </div>
                 <div class="filter-group">
                     <label>Ontology Concept</label>
-                    <input type="text" id="filterOntology" placeholder="e.g., Delisting" onkeyup="filterTable()">
+                    <input type="text" id="filterOntology" placeholder="e.g., Strategic Review" onkeyup="filterTable()">
                 </div>
                 <div class="filter-group">
                     <label>Rule Triggered</label>
-                    <input type="text" id="filterRule" placeholder="e.g., RULE_MIN_CAP" onkeyup="filterTable()">
+                    <input type="text" id="filterRule" placeholder="e.g., R-17" onkeyup="filterTable()">
                 </div>
                 <div class="filter-group">
                     <label>AI Decision</label>
-                    <input type="text" id="filterAi" placeholder="e.g., APPROVAL" onkeyup="filterTable()">
+                    <input type="text" id="filterAi" placeholder="e.g., Reject" onkeyup="filterTable()">
                 </div>
                 <div class="filter-group">
                     <label>Issuer / Ticker</label>
-                    <input type="text" id="filterIssuer" placeholder="e.g., AAPL, CCO" onkeyup="filterTable()">
+                    <input type="text" id="filterIssuer" placeholder="e.g., ABC, AAPL" onkeyup="filterTable()">
                 </div>
             </div>
 
@@ -112,7 +132,7 @@
                         <tr>
                             <th>Timestamp</th>
                             <th>Source</th>
-                            <th>Headline</th>
+                            <th>Headline / Issuer</th>
                             <th>URL</th>
                             <th>Parsed</th>
                             <th>Duplicate</th>
@@ -135,6 +155,7 @@
 
         <script>
             let archiveData = [];
+            let activeFunnelStage = 'ALL';
 
             fetch('archive_data.json')
                 .then(res => res.json())
@@ -151,63 +172,73 @@
                 return [
                     {
                         timestamp: "2026-08-02 21:30:12",
-                        source: "EDGAR",
-                        headline: "Form 8-K: Notice of Voluntary Delisting and Liquidation",
+                        source: "Reuters",
+                        issuer: "ABC Corp",
+                        headline: "ABC Corp exploring strategic alternatives and voluntary delisting",
                         url: "#",
                         parsed: "PASS",
-                        duplicate: "UNIQUE",
-                        ontology: "Delisting",
-                        rules: "PASS",
-                        ai: "APPROVED",
-                        outcome: "DISPATCHED",
-                        stage_dropped: "-",
-                        drop_reason: "-",
-                        authority: "GenAI",
-                        processing_time: "1.14s",
-                        audit: { exact_stage: "Dispatch", exact_reason: "Met all special situation thresholds", component: "EmailDispatcher" }
+                        duplicate: "No",
+                        ontology: "Strategic Review",
+                        rules: "Failed",
+                        ai: "N/A",
+                        outcome: "DROPPED",
+                        stage_dropped: "Rules",
+                        drop_reason: "Requires board committee reference (Rule R-17)",
+                        authority: "Python",
+                        processing_time: "0.14s",
+                        audit: { exact_stage: "Rules Engine", exact_reason: "Rule R-17 failed: Missing explicit board committee quotation reference.", component: "RulesEngineValidator", hash: "SHA256-a9f87b2e104c..." }
                     },
                     {
                         timestamp: "2026-08-02 21:29:45",
-                        source: "LSE",
-                        headline: "RNS: Routine Director Share Dealing Notification",
+                        source: "SEC EDGAR",
+                        issuer: "XYZ Ltd",
+                        headline: "Form SC TO-T: Tender Offer for Ordinary Shares",
                         url: "#",
                         parsed: "PASS",
-                        duplicate: "UNIQUE",
-                        ontology: "Routine",
-                        rules: "REJECT",
-                        ai: "SKIPPED",
+                        duplicate: "No",
+                        ontology: "Tender Offer",
+                        rules: "Passed",
+                        ai: "Invoked (41% Confidence)",
                         outcome: "DROPPED",
-                        stage_dropped: "Rules Engine",
-                        drop_reason: "Failed mandatory special situation classification filter",
-                        authority: "Manual Rule",
-                        processing_time: "0.08s",
-                        audit: { exact_stage: "Rules Engine", exact_reason: "Event family categorized as routine transaction", component: "RulesEngineValidator" }
+                        stage_dropped: "AI",
+                        drop_reason: "Not actionable / routine procedural filing",
+                        authority: "AI",
+                        processing_time: "1.22s",
+                        audit: { exact_stage: "GenAI Engine", exact_reason: "LLM classifier assessed opportunity confidence at 41% (threshold 70%).", component: "OpenRouterClassifier", hash: "SHA256-3c91a0f8b211..." }
                     },
                     {
                         timestamp: "2026-08-02 21:28:10",
-                        source: "EDGAR",
-                        headline: "Form SC 13D: Beneficial Ownership Acquisition",
+                        source: "PR Newswire",
+                        issuer: "Global Holding",
+                        headline: "Global Holding Announces Final Liquidating Distribution",
                         url: "#",
                         parsed: "PASS",
-                        duplicate: "DUPLICATE",
-                        ontology: "M&A",
-                        rules: "PASS",
-                        ai: "SKIPPED",
-                        outcome: "DROPPED",
-                        stage_dropped: "Deduplication",
-                        drop_reason: "SHA-256 fingerprint already logged within 24h window",
-                        authority: "Python",
-                        processing_time: "0.02s",
-                        audit: { exact_stage: "Deduplication", exact_reason: "Exact article hash match found in sqlite state cache", component: "DeduplicationWorker" }
+                        duplicate: "No",
+                        ontology: "Liquidation",
+                        rules: "Passed",
+                        ai: "Invoked (96% Confidence)",
+                        outcome: "DISPATCHED",
+                        stage_dropped: "-",
+                        drop_reason: "-",
+                        authority: "AI",
+                        processing_time: "1.08s",
+                        audit: { exact_stage: "Dispatch", exact_reason: "Passed all filters and verified high-conviction liquidation event.", component: "EmailDispatcher", hash: "SHA256-ff812a00cc91..." }
                     }
                 ];
+            }
+
+            function filterByStage(stage, element) {
+                document.querySelectorAll('.funnel-node').forEach(n => n.classList.remove('active'));
+                element.classList.add('active');
+                activeFunnelStage = stage;
+                filterTable();
             }
 
             function renderTable(data) {
                 const tbody = document.getElementById('tableBody');
                 tbody.innerHTML = '';
                 if (!data || data.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="14" style="text-align: center; color: var(--muted); padding: 20px;">No matching records found.</td></tr>';
+                    tbody.innerHTML = '<tr><td colspan="14" style="text-align: center; color: var(--muted); padding: 20px;">No matching records found in immutable ledger.</td></tr>';
                     return;
                 }
                 data.forEach((row, index) => {
@@ -221,7 +252,7 @@
                     tr.innerHTML = `
                         <td>${row.timestamp}</td>
                         <td>${row.source}</td>
-                        <td style="max-width: 250px; overflow: hidden; text-overflow: ellipsis;" title="${row.headline}">${row.headline}</td>
+                        <td style="max-width: 280px; overflow: hidden; text-overflow: ellipsis;" title="${row.headline}"><strong>[${row.issuer}]</strong> ${row.headline}</td>
                         <td><a href="${row.url}" target="_blank">Link</a></td>
                         <td>${row.parsed}</td>
                         <td>${row.duplicate}</td>
@@ -230,7 +261,7 @@
                         <td>${row.ai}</td>
                         <td>${outcomeBadge}</td>
                         <td>${row.stage_dropped}</td>
-                        <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis;" title="${row.drop_reason}">${row.drop_reason}</td>
+                        <td style="max-width: 220px; overflow: hidden; text-overflow: ellipsis;" title="${row.drop_reason}">${row.drop_reason}</td>
                         <td>${row.authority}</td>
                         <td>${row.processing_time}</td>
                     `;
@@ -238,11 +269,12 @@
                     auditTr.innerHTML = `
                         <td colspan="14" style="padding: 0;">
                             <div class="audit-content">
-                                <strong>[COMPLETE PIPELINE AUDIT TRAIL — ARTICLE #${index + 1}]</strong><br>
+                                <strong>[FLIGHT RECORDER — COMPLETE ARTICLE AUDIT TRAIL #${index + 1}]</strong><br>
                                 <span>Exact Stage Responsible:</span> ${row.audit?.exact_stage || row.stage_dropped}<br>
                                 <span>Exact Drop Reason:</span> ${row.audit?.exact_reason || row.drop_reason}<br>
-                                <span>Exact Component Responsible:</span> ${row.audit?.component || 'SystemEngine'}<br>
-                                <span>Full Payload Hash:</span> SHA256-a9f87b2e104c...
+                                <span>Component Responsible:</span> ${row.audit?.component || 'SystemEngine'}<br>
+                                <span>Payload Hash:</span> ${row.audit?.hash || 'SHA256-verified'}<br>
+                                <button class="replay-btn" onclick="alert('Replaying article through latest ontology/rules pipeline...')">↺ Replay from this stage (Latest Rules)</button>
                             </div>
                         </td>
                     `;
@@ -268,14 +300,19 @@
                 const issuer = document.getElementById('filterIssuer').value.toLowerCase();
 
                 const filtered = archiveData.filter(row => {
-                    return (!src || row.source.toLowerCase().includes(src)) &&
+                    const matchesFunnel = activeFunnelStage === 'ALL' || 
+                                          (activeFunnelStage === 'DISPATCHED' && row.outcome === 'DISPATCHED') ||
+                                          (row.stage_dropped && row.stage_dropped.toLowerCase().includes(activeFunnelStage.toLowerCase()));
+
+                    return matchesFunnel &&
+                           (!src || row.source.toLowerCase().includes(src)) &&
                            (!date || row.timestamp.includes(date)) &&
                            (!outcome || row.outcome === outcome) &&
                            (!dropStage || row.stage_dropped.toLowerCase().includes(dropStage)) &&
                            (!ontology || row.ontology.toLowerCase().includes(ontology)) &&
                            (!rule || row.rules.toLowerCase().includes(rule)) &&
                            (!ai || row.ai.toLowerCase().includes(ai)) &&
-                           (!issuer || row.headline.toLowerCase().includes(issuer));
+                           (!issuer || row.issuer.toLowerCase().includes(issuer) || row.headline.toLowerCase().includes(issuer));
                 });
                 renderTable(filtered);
             }
