@@ -57,3 +57,26 @@ def init_db():
 
 # Alias for compatibility with monitor.py imports
 initialise_database = init_db
+
+
+def article_exists(identifier):
+    """Checks if an article URL or identifier already exists in SQLite tables."""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+        tables = [row[0] for row in cursor.fetchall()]
+        
+        for table in tables:
+            c_info = conn.execute(f"PRAGMA table_info({table})").fetchall()
+            cols = [col[1] for col in c_info]
+            for col in cols:
+                if col in ('url', 'link', 'article_id', 'id', 'guid'):
+                    res = conn.execute(f"SELECT 1 FROM {table} WHERE {col} = ? LIMIT 1", (identifier,)).fetchone()
+                    if res:
+                        conn.close()
+                        return True
+        conn.close()
+    except Exception:
+        pass
+    return False
