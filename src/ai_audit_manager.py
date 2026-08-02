@@ -29,7 +29,7 @@ def audit_ai_infrastructure(configured_model="google/gemini-2.0-flash"):
             res = requests.post(
                 "https://openrouter.ai/api/v1/chat/completions",
                 headers={"Authorization": f"Bearer {key}"},
-                json={"model": configured_model, "messages": [{"role": "user", "content": "ping"}], "max_tokens": 1},
+                json={"model": configured_model, "messages": [{"role": "user", "content": "ping"}], "max_tokens": 4096},
                 timeout=5
             )
             latency = time.time() - start_time
