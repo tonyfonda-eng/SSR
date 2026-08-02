@@ -1,3 +1,9 @@
+
+def _safe_json(resp):
+    try: return _safe_json(resp)
+    except Exception:
+        print("    [ASX WAF] HTML Challenge Blocked JSON payload. Skipping.")
+        return []
 import requests
 # --- WAF BYPASS WRAPPER ---
 try:
@@ -27,7 +33,7 @@ class ASXScraper:
             headers = {"User-Agent": "Mozilla/5.0"}
             resp = requests.get(url, headers=headers, timeout=15)
             if resp.status_code == 200:
-                data = resp.json()
+                data = _safe_json(resp)
                 for item in data.get("data", []):
                     title = item.get("documentHeadline", "ASX Announcement")
                     ann_id = str(item.get("announcementId", ""))
