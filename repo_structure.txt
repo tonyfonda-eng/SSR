@@ -1,0 +1,544 @@
+.
+├── AGENTS.md
+├── Knowledge
+├── README.md
+├── SSR_PROJECT_OVERVIEW.txt
+├── apply_claude_fix.sh
+├── apply_claude_fixes.sh
+├── apply_dashboard_upgrades.sh
+├── apply_definitive_fixes.sh
+├── apply_final_logic_fixes.sh
+├── apply_final_polish.sh
+├── apply_final_workflow_and_model_fix.sh
+├── apply_monitor_architecture_fixes.sh
+├── apply_surgical_fixes.sh
+├── apply_system_patches.sh
+├── apply_the_final_blow.sh
+├── architecture_repair.sh
+├── archive
+│   ├── data
+│   │   ├── codebase_for_chatgpt.txt
+│   │   ├── kedm_text.txt
+│   │   ├── snapshot_run1.json
+│   │   └── snapshot_v1.json
+│   ├── legacy_v1_src
+│   │   ├── app
+│   │   │   ├── bootstrap.py
+│   │   │   ├── config
+│   │   │   │   └── service.py
+│   │   │   ├── dependency_container.py
+│   │   │   ├── ingestion
+│   │   │   │   ├── document_store.py
+│   │   │   │   ├── idempotency.py
+│   │   │   │   ├── newswire_models.py
+│   │   │   │   ├── newswire_monitor.py
+│   │   │   │   ├── sec_adapter.py
+│   │   │   │   └── sec_poller.py
+│   │   │   ├── market
+│   │   │   │   ├── equality.py
+│   │   │   │   ├── interfaces.py
+│   │   │   │   ├── objects.py
+│   │   │   │   ├── publisher.py
+│   │   │   │   ├── registry.py
+│   │   │   │   ├── repository.py
+│   │   │   │   └── yahoo
+│   │   │   │       ├── adapter.py
+│   │   │   │       ├── poller.py
+│   │   │   │       └── validator.py
+│   │   │   ├── monitoring
+│   │   │   │   └── health.py
+│   │   │   └── scheduling
+│   │   │       └── scheduler.py
+│   │   ├── classifiers
+│   │   │   └── event_classifier.py
+│   │   ├── engine
+│   │   │   ├── adapters
+│   │   │   │   ├── sec.py
+│   │   │   │   └── yahoo.py
+│   │   │   ├── calculations.py
+│   │   │   ├── connectors.py
+│   │   │   ├── core.py
+│   │   │   ├── default_infrastructure.py
+│   │   │   ├── event_bus.py
+│   │   │   ├── extraction.py
+│   │   │   ├── infrastructure.py
+│   │   │   ├── ingestion.py
+│   │   │   ├── legacy_bridge.py
+│   │   │   ├── notifications.py
+│   │   │   ├── orchestrator.py
+│   │   │   ├── payload_validators.py
+│   │   │   ├── planner.py
+│   │   │   ├── policies.py
+│   │   │   ├── primitives.py
+│   │   │   ├── runtime.py
+│   │   │   ├── transport.py
+│   │   │   ├── transport_policy.py
+│   │   │   ├── yahoo_policy.py
+│   │   │   └── yahoo_transport.py
+│   │   ├── knowledge
+│   │   │   ├── __init__.py
+│   │   │   ├── graph
+│   │   │   │   └── seed_edges.json
+│   │   │   ├── registry
+│   │   │   │   ├── assumptions.json
+│   │   │   │   ├── calculations
+│   │   │   │   │   ├── CALC.ANALYTICS.OPT.ARB_BREAK_EVEN.json
+│   │   │   │   │   ├── CALC.ANALYTICS.OPT.ASSIGNMENT_RISK.json
+│   │   │   │   │   ├── CALC.MKT.FX_CONVERSION.json
+│   │   │   │   │   ├── CALC.MNA.ANNUALISED_RETURN.json
+│   │   │   │   │   ├── CALC.MNA.DEAL_SPREAD.json
+│   │   │   │   │   ├── CALC.MNA.OPT.MERGER_PAYOFF.json
+│   │   │   │   │   ├── CALC.OBJ.OPT.EXTRINSIC_VALUE.json
+│   │   │   │   │   ├── CALC.OBJ.OPT.INTRINSIC_VALUE.json
+│   │   │   │   │   ├── CALC.OPT.EXPECTED_SETTLEMENT.json
+│   │   │   │   │   ├── CALC.OPT.EXTRINSIC_VALUE.json
+│   │   │   │   │   ├── CALC.OPT.INTRINSIC_VALUE.json
+│   │   │   │   │   ├── CALC.OPT.MERGER_PAYOFF.json
+│   │   │   │   │   ├── CALC.PORT.POSITION_PNL.json
+│   │   │   │   │   └── CALC.TAX.NET_DIVIDEND.json
+│   │   │   │   ├── calculations.json
+│   │   │   │   ├── canonical_objects.json
+│   │   │   │   ├── entities.json
+│   │   │   │   ├── object_schemas.json
+│   │   │   │   └── relationships.json
+│   │   │   └── schemas
+│   │   │       ├── __init__.py
+│   │   │       ├── core.py
+│   │   │       ├── epistemology.py
+│   │   │       ├── execution.py
+│   │   │       └── governance.py
+│   │   ├── models
+│   │   │   ├── __init__.py
+│   │   │   └── article.py
+│   │   ├── ontology
+│   │   │   ├── data
+│   │   │   │   ├── capital_actions
+│   │   │   │   │   └── dutch.json
+│   │   │   │   ├── corporate_control
+│   │   │   │   │   └── mergers.json
+│   │   │   │   ├── distressed
+│   │   │   │   │   └── bankruptcy.json
+│   │   │   │   ├── distributions
+│   │   │   │   │   └── dividends.json
+│   │   │   │   └── liquidations
+│   │   │   │       └── corporate.json
+│   │   │   ├── engine.py
+│   │   │   └── validator.py
+│   │   ├── operational
+│   │   │   ├── config_importer.py
+│   │   │   ├── newswire_source_importer.py
+│   │   │   ├── notifications
+│   │   │   │   ├── audit_store.py
+│   │   │   │   ├── engine.py
+│   │   │   │   ├── models.py
+│   │   │   │   ├── providers.py
+│   │   │   │   └── queue.py
+│   │   │   ├── projection_builder.py
+│   │   │   ├── projection_store.py
+│   │   │   ├── publisher.py
+│   │   │   ├── publisher_task.py
+│   │   │   └── worksheet_serializer.py
+│   │   ├── parsers
+│   │   │   ├── __init__.py
+│   │   │   ├── ai_extractor.py
+│   │   │   └── document_parser.py
+│   │   ├── pipelines
+│   │   │   └── cash_detector.py
+│   │   ├── playbooks
+│   │   │   ├── modules
+│   │   │   │   ├── taxonomy.json
+│   │   │   │   └── universal_core.json
+│   │   │   ├── policies
+│   │   │   │   └── core_policies.json
+│   │   │   ├── specifications
+│   │   │   │   └── universal
+│   │   │   │       ├── SPEC_UNI_CLOSING.json
+│   │   │   │       ├── SPEC_UNI_CONSIDERATION.json
+│   │   │   │       ├── SPEC_UNI_ENTITIES.json
+│   │   │   │       ├── SPEC_UNI_GOVERNANCE.json
+│   │   │   │       ├── SPEC_UNI_SECURITIES.json
+│   │   │   │       ├── SPEC_UNI_STRUCTURE.json
+│   │   │   │       └── SPEC_UNI_TIMELINE.json
+│   │   │   └── templates
+│   │   │       ├── cash_merger.json
+│   │   │       └── etf_liquidation.json
+│   │   ├── providers
+│   │   │   ├── __init__.py
+│   │   │   ├── base_ai.py
+│   │   │   ├── base_provider.py
+│   │   │   ├── gemini.py
+│   │   │   ├── gemini_provider.py
+│   │   │   ├── openai_provider.py
+│   │   │   └── router.py
+│   │   └── utils
+│   │       ├── id_generator.py
+│   │       └── sheets_client.py
+│   ├── old_tests
+│   │   ├── test_classifiers.py
+│   │   ├── test_knowledge.py
+│   │   ├── test_newswire_ingestion.py
+│   │   ├── test_parser.py
+│   │   └── test_sheets.py
+│   ├── scratch
+│   │   ├── add_edgar_sources.py
+│   │   ├── add_euro_sources.py
+│   │   ├── add_revised_euro_sources.py
+│   │   ├── appsscript.json
+│   │   ├── articles.db
+│   │   ├── create_review_tab.py
+│   │   ├── delete_unused_tabs.py
+│   │   ├── gh_log.txt
+│   │   ├── google_credentials.json
+│   │   ├── run_replay.sh
+│   │   ├── run_replay.sh.save
+│   │   ├── ssr_cache.sqlite
+│   │   ├── ssr_database.db
+│   │   ├── ssr_database.sqlite
+│   │   ├── ssr_notifications.sqlite
+│   │   ├── ssr_projections.sqlite
+│   │   ├── ssr_projections.sqlite-journal
+│   │   ├── test_add_source.py
+│   │   ├── test_add_source2.py
+│   │   ├── test_add_source3.py
+│   │   ├── test_add_source4.py
+│   │   ├── test_add_source_final.py
+│   │   ├── test_advfn.py
+│   │   ├── test_ai_keys.py
+│   │   ├── test_clustering.py
+│   │   ├── test_edgar_hang.py
+│   │   ├── test_euro_scrapers.py
+│   │   ├── test_fix_source.py
+│   │   ├── test_fix_source2.py
+│   │   ├── test_fix_source3.py
+│   │   ├── test_fix_source4.py
+│   │   ├── test_globe_hang.py
+│   │   ├── test_inv.py
+│   │   ├── test_inv2.py
+│   │   ├── test_inv3.py
+│   │   ├── test_inv_body.py
+│   │   ├── test_inv_body2.py
+│   │   ├── test_inv_body3.py
+│   │   ├── test_inv_body4.py
+│   │   ├── test_inv_body5.py
+│   │   ├── test_inv_body6.py
+│   │   ├── test_investegate.py
+│   │   ├── test_lse.py
+│   │   ├── test_lse2.py
+│   │   ├── test_lse3.py
+│   │   ├── test_lse4.py
+│   │   ├── test_lse_co_uk.py
+│   │   ├── test_lse_final.py
+│   │   ├── test_lse_get.py
+│   │   ├── test_lse_search.py
+│   │   ├── test_monitor.py
+│   │   ├── test_pipeline.py
+│   │   ├── test_pipeline2.py
+│   │   ├── test_pipeline3.py
+│   │   ├── test_pipeline4.py
+│   │   ├── test_prn_hang.py
+│   │   ├── test_rules.py
+│   │   ├── test_rules2.py
+│   │   ├── test_rules3.py
+│   │   ├── test_scrape.py
+│   │   ├── test_t12.py
+│   │   ├── update_dedupe.py
+│   │   ├── update_rules_tab.py
+│   │   ├── update_sheets.py
+│   │   ├── update_sources_schema.py
+│   │   └── write_pipeline_to_sheet.py
+│   └── scripts
+│       ├── add_twitter_source.py
+│       ├── append_exclusions.py
+│       ├── append_gs.py
+│       ├── append_leg_pitch.py
+│       ├── append_perf_pitch.py
+│       ├── append_ssi_pitches.py
+│       ├── delete_twitter_sources.py
+│       ├── legacy_scripts
+│       │   ├── ci_runner.py
+│       │   ├── freeze_v1.py
+│       │   ├── health_check.py
+│       │   ├── init_workbook.py
+│       │   ├── prepopulate_workbook.py
+│       │   ├── run_mutation_tests.py
+│       │   ├── run_orchestrator.py
+│       │   ├── run_pipeline.py
+│       │   ├── run_regression_suite.py
+│       │   ├── seed_options_foundation.py
+│       │   ├── seed_sec_schema.py
+│       │   ├── seed_v4_architecture.py
+│       │   ├── system_check.py
+│       │   ├── test_end_to_end_radar.py
+│       │   ├── test_engine.py
+│       │   ├── test_forensic_replay.py
+│       │   ├── test_keys.py
+│       │   ├── test_live_sec_feed.py
+│       │   ├── test_notification_pipeline.py
+│       │   ├── test_payload_mutations.py
+│       │   ├── test_planner.py
+│       │   ├── test_portfolio_layer.py
+│       │   ├── test_sec_merger_cascade.py
+│       │   ├── test_transport_mutations.py
+│       │   ├── test_vertical_pipeline.py
+│       │   └── trigger_test_email.py
+│       ├── print_headers.py
+│       ├── replay.py
+│       ├── setup_kedm_playbook.py
+│       ├── setup_naked_call.py
+│       ├── setup_triage.py
+│       ├── test_models.py
+│       ├── test_raw.py
+│       ├── test_twitter_bypass.py
+│       ├── update_buyback_rule.py
+│       ├── update_naked_call_playbook.py
+│       └── update_playbook.py
+├── build_monitor.py
+├── correct_root_files.sh
+├── create_infra_branch.sh
+├── delete_rogue_line.sh
+├── deploy_bulletproof_database.sh
+├── deploy_claude_fix.sh
+├── docs
+│   ├── ARCHITECTURE.html
+│   ├── ARCHITECTURE.md
+│   ├── ARCHITECTURE.svg
+│   ├── ARCHITECTURE_REPAIR_REPORT.html
+│   ├── ARCHITECTURE_REPAIR_REPORT.md
+│   ├── ARCHITECTURE_VERIFICATION.html
+│   ├── ARCHITECTURE_VERIFICATION.md
+│   ├── BENCHMARK_REPORT.html
+│   ├── BENCHMARK_REPORT.md
+│   ├── CALL_HIERARCHY.html
+│   ├── CALL_HIERARCHY.md
+│   ├── CHANGELOG.html
+│   ├── CHANGELOG.md
+│   ├── COMPLEXITY_REPORT.html
+│   ├── COMPLEXITY_REPORT.md
+│   ├── COVERAGE_REPORT.html
+│   ├── COVERAGE_REPORT.md
+│   ├── DAILY_QA.html
+│   ├── DAILY_QA.md
+│   ├── DATA_LINEAGE.html
+│   ├── DATA_LINEAGE.md
+│   ├── DEAD_CODE_REPORT.html
+│   ├── DEAD_CODE_REPORT.md
+│   ├── EXECUTION_GRAPH.html
+│   ├── EXECUTION_GRAPH.md
+│   ├── MISSED_OPPORTUNITIES.html
+│   ├── MISSED_OPPORTUNITIES.md
+│   ├── MODULE_DEPENDENCY_GRAPH.html
+│   ├── MODULE_DEPENDENCY_GRAPH.md
+│   ├── OPERATIONS.html
+│   ├── OPERATIONS.md
+│   ├── OPERATIONS_CENTRE_DASHBOARD_AUDIT.html
+│   ├── OPERATIONS_CENTRE_DASHBOARD_AUDIT.md
+│   ├── ORCHESTRATION_REFACTOR.html
+│   ├── ORCHESTRATION_REFACTOR.md
+│   ├── PIPELINE.html
+│   ├── PIPELINE.md
+│   ├── PIPELINE_CONTRACTS.html
+│   ├── PIPELINE_CONTRACTS.md
+│   ├── PROJECT_STATE.html
+│   ├── PROJECT_STATE.md
+│   ├── SECURITY.html
+│   ├── SECURITY.md
+│   ├── VALIDATION_REPORT.html
+│   ├── VALIDATION_REPORT.md
+│   ├── WORKBOOK.html
+│   ├── WORKBOOK.md
+│   ├── archive.html
+│   ├── archive_data.json
+│   ├── dashboard_metrics.json
+│   └── index.html
+├── fix_all_imports_once.sh
+├── fix_article_exists.sh
+├── fix_db_alias.sh
+├── fix_init_db.sh
+├── fix_max_tokens_limit.sh
+├── fix_monitor_clean.sh
+├── fix_monitor_final.sh
+├── fix_monitor_syntax.sh
+├── fix_monitor_syntax_454.sh
+├── fix_openrouter_slug.sh
+├── fix_pending_reminders.sh
+├── fix_pipeline_blockers.sh
+├── fix_root_causes.sh
+├── fix_syntax_damage.sh
+├── fix_syntax_error.sh
+├── force_monitor_fix.sh
+├── force_ui_deployment.sh
+├── generate_frontend_fixed.sh
+├── google_credentials.json
+├── implement_schema_awareness.sh
+├── index.js
+├── monitor.py
+├── monitor.py.bak
+├── monitor.py.bak2
+├── patch_and_sync.sh
+├── patch_codebase_robust.sh
+├── patch_monitor.py
+├── patch_monitor2.py
+├── patch_monitor_init.sh
+├── replace_html.py
+├── repo_structure.txt
+├── requirements.txt
+├── resolve_git_conflict.sh
+├── scripts
+│   └── check_innerhtml.sh
+├── scrub_rogue_prints.sh
+├── setup_ontology_tabs.py
+├── src
+│   ├── __init__.py
+│   ├── ai.py
+│   ├── ai_audit_manager.py
+│   ├── ai_telemetry.py
+│   ├── alerts
+│   │   └── email.py
+│   ├── build_docs.py
+│   ├── config
+│   │   ├── __init__.py
+│   │   ├── secrets.py
+│   │   └── settings.py
+│   ├── database.py
+│   ├── db_health_checker.py
+│   ├── drift_monitor.py
+│   ├── financials.py
+│   ├── html_generator.py
+│   ├── ingestion
+│   ├── issuer.py
+│   ├── monitoring.py
+│   ├── ontology
+│   │   ├── __init__.py
+│   │   └── concepts.py
+│   ├── options_calc.py
+│   ├── pipeline_funnel.py
+│   ├── reporting.py
+│   ├── rules_engine.py
+│   ├── schema_utils.py
+│   ├── scrapers
+│   │   ├── __init__.py
+│   │   ├── asx.py
+│   │   ├── base.py
+│   │   ├── businesswire.py
+│   │   ├── edgar.py
+│   │   ├── edgar_items.py
+│   │   ├── europe.py
+│   │   ├── globenewswire.py
+│   │   ├── googlenews.py
+│   │   ├── hkex.py
+│   │   ├── kedm.py
+│   │   ├── lse.py
+│   │   ├── nasdaq.py
+│   │   ├── prnewswire.py
+│   │   ├── sedar.py
+│   │   └── tsx.py
+│   ├── shadow_pipeline.py
+│   ├── shadow_reviewer.py
+│   ├── sheets.py
+│   ├── sheets_sync.py
+│   ├── validation
+│   │   ├── benchmark.py
+│   │   ├── bootstrapper.py
+│   │   ├── coverage_audit.py
+│   │   ├── coverage_report.py
+│   │   ├── daily_sampler.py
+│   │   ├── db_helpers.py
+│   │   ├── evaluator.py
+│   │   ├── export_frontend_data.py
+│   │   ├── import_csv.py
+│   │   ├── missed_ops.py
+│   │   └── tracer.py
+│   └── weekly_qa.py
+├── ssd_auditor.py
+├── ssr_cache
+│   ├── dlq
+│   │   ├── DLQ_EventBusSubscriber:legacy_adapter_1785249902.txt
+│   │   ├── DLQ_EventBusSubscriber:legacy_adapter_1785249957.txt
+│   │   └── DLQ_EventBusSubscriber:legacy_adapter_1785250002.txt
+│   └── sec
+│       └── 2026
+│           └── 07
+│               ├── accession-number=0000003570-26-000025_cfb251.html
+│               ├── accession-number=0000023217-26-000032_5a51f8.html
+│               ├── accession-number=0000049826-26-000047_cfc029.html
+│               ├── accession-number=0000217346-26-000034_0fab6a.html
+│               ├── accession-number=0000825313-26-000045_41761d.html
+│               ├── accession-number=0000826675-26-000085_890787.html
+│               ├── accession-number=0000884887-26-000036_f1913e.html
+│               ├── accession-number=0000939057-26-000143_5d63aa.html
+│               ├── accession-number=0001005817-26-000105_3f7849.html
+│               ├── accession-number=0001104659-26-087256_d1ab15.html
+│               ├── accession-number=0001104659-26-087269_5529cf.html
+│               ├── accession-number=0001104659-26-087279_2e626f.html
+│               ├── accession-number=0001104659-26-087288_3548ab.html
+│               ├── accession-number=0001104659-26-087330_dc4e5d.html
+│               ├── accession-number=0001104659-26-087344_980f0a.html
+│               ├── accession-number=0001104659-26-087355_0eed52.html
+│               ├── accession-number=0001104659-26-087359_3d7c0a.html
+│               ├── accession-number=0001109448-26-000194_9986f0.html
+│               ├── accession-number=0001140361-26-029775_321270.html
+│               ├── accession-number=0001140361-26-029775_5d3062.html
+│               ├── accession-number=0001140361-26-029776_cbce50.html
+│               ├── accession-number=0001140361-26-029841_137165.html
+│               ├── accession-number=0001171843-26-004912_129c04.html
+│               ├── accession-number=0001185185-26-003142_b35971.html
+│               ├── accession-number=0001193125-26-318298_7b4c58.html
+│               ├── accession-number=0001193125-26-318759_121015.html
+│               ├── accession-number=0001193125-26-318820_04d373.html
+│               ├── accession-number=0001193125-26-318936_1b1ebf.html
+│               ├── accession-number=0001193125-26-318940_c66848.html
+│               ├── accession-number=0001193125-26-319048_31fdbf.html
+│               ├── accession-number=0001193125-26-319422_d861ca.html
+│               ├── accession-number=0001193125-26-319433_9fb644.html
+│               ├── accession-number=0001213900-26-081956_2c6568.html
+│               ├── accession-number=0001213900-26-081970_5f51f6.html
+│               ├── accession-number=0001213900-26-081974_6e2471.html
+│               ├── accession-number=0001213900-26-082007_30d97b.html
+│               ├── accession-number=0001325878-26-000147_2d5d33.html
+│               ├── accession-number=0001326771-26-000121_2bd7b8.html
+│               ├── accession-number=0001331451-26-000135_3f2d6a.html
+│               ├── accession-number=0001331451-26-000137_685553.html
+│               ├── accession-number=0001364479-26-000108_f2bb43.html
+│               ├── accession-number=0001383650-26-000025_b509d3.html
+│               ├── accession-number=0001437749-26-024597_f36b34.html
+│               ├── accession-number=0001493152-26-034858_45209c.html
+│               ├── accession-number=0001493152-26-034862_46218e.html
+│               ├── accession-number=0001493152-26-034947_231ff9.html
+│               ├── accession-number=0001493152-26-034950_063705.html
+│               ├── accession-number=0001493152-26-034956_959c8c.html
+│               ├── accession-number=0001493152-26-034964_f1b2b7.html
+│               ├── accession-number=0001552033-26-000043_02b0dc.html
+│               ├── accession-number=0001562762-26-000084_f870e7.html
+│               ├── accession-number=0001585689-26-000042_be28e6.html
+│               ├── accession-number=0001628280-26-049857_84a6ff.html
+│               ├── accession-number=0001628280-26-049911_536d5d.html
+│               ├── accession-number=0001628280-26-049912_c7fb4f.html
+│               ├── accession-number=0001628280-26-049937_0d1ce1.html
+│               ├── accession-number=0001628280-26-049952_2b7c8e.html
+│               ├── accession-number=0001628280-26-050043_73ece7.html
+│               ├── accession-number=0001640334-26-001243_fa9aec.html
+│               ├── accession-number=0001654954-26-006947_caf7fc.html
+│               ├── accession-number=0001683168-26-005791_3e0e19.html
+│               ├── accession-number=0001683168-26-005793_925105.html
+│               ├── accession-number=0001829126-26-007891_4dc1a2.html
+│               ├── accession-number=0001829126-26-007892_5c7760.html
+│               ├── accession-number=0001829126-26-007911_253263.html
+│               ├── accession-number=0001833756-26-000034_807efa.html
+│               ├── accession-number=0001895262-26-000138_722124.html
+│               └── accession-number=0001915657-26-000046_5b01b4.html
+├── ssr_observability.db
+├── task.md
+├── test.js
+├── test_events.csv
+├── test_html.py
+├── tests
+│   ├── research_review.md
+│   ├── test_database.py
+│   ├── test_monitoring.py
+│   ├── test_ontology_v3.py
+│   └── test_rss.py
+├── tools
+│   └── run_secret_scan.sh
+└── update_ai_backend.py
+
+59 directories, 483 files
