@@ -1,0 +1,36 @@
+name: Shadow Pipeline Advisory Review
+
+on:
+  schedule:
+    # Runs at 08:00 UTC every Saturday morning
+    - cron: '0 8 * * 6'
+  workflow_dispatch: # Allows manual trigger from the Actions tab
+
+jobs:
+  shadow_review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Execute Shadow Pipeline Review
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+        run: python src/shadow_reviewer.py
+
+      - name: Commit Shadow Reports
+        run: |
+          git config --global user.name "SSR Shadow Bot"
+          git config --global user.email "shadow-bot@ssr.local"
+          git add docs/SHADOW_PIPELINE_REPORT_*.md docs/SHADOW_PATCHES.md
+          git commit -m "chore(shadow): generate weekly advisory reports" || echo "No new reports to commit"
+          git push
