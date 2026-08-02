@@ -6,8 +6,7 @@ def export_data():
     os.makedirs("docs", exist_ok=True)
     
     # 1. Connect to primary database
-    from src.database import DB_PATH
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect("ssr_cache.sqlite")
     cursor = conn.cursor()
     
     # Ensure tables exist
