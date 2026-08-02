@@ -11,20 +11,17 @@ COOLDOWN_SECONDS = 300
 class OpenRouterPool:
     def __init__(self):
         raw_keys = []
-        # Pull master keys and numbered fallback variables
         env_vars = ["OPENROUTER_API_KEY"] + [f"OPENROUTER_API_KEY_{i}" for i in range(1, 8)]
         for var in env_vars:
             val = os.environ.get(var, "")
             if val:
-                # Split on commas to unpack bulk GitHub secrets cleanly
                 raw_keys.extend([k.strip() for k in val.split(",") if k.strip()])
         
         self.keys = raw_keys
         self.cooldowns = {}
-        print(f"\n======== AI POOL ========\nOpenRouter keys loaded: {len(self.keys)}")
+        logger.info(f"[AI INFO] OpenRouter keys parsed: {len(self.keys)}")
         for i, k in enumerate(self.keys):
-            print(f"  OpenRouter {i+1}: {k[:8]}...{k[-4:]}")
-        logger.info(f"[AI INFO] Initialized OpenRouter pool with {len(self.keys)} active keys.")
+            logger.info(f"[AI INFO]   Key {i+1} Signature: {k[:8]}...{k[-4:] if len(k) > 4 else ''}")
 
     def get_available_key(self):
         now = time.time()
@@ -48,10 +45,9 @@ class GeminiPool:
         
         self.keys = raw_keys
         self._index = 0
-        print(f"Gemini keys loaded: {len(self.keys)}")
+        logger.info(f"[AI INFO] Gemini keys parsed: {len(self.keys)}")
         for i, k in enumerate(self.keys):
-            print(f"  Gemini {i+1}: {k[:8]}...{k[-4:]}")
-        logger.info(f"[AI INFO] Initialized Gemini pool with {len(self.keys)} active keys.\n")
+            logger.info(f"[AI INFO]   Key {i+1} Signature: {k[:8]}...{k[-4:] if len(k) > 4 else ''}")
 
     def next_key(self):
         if not self.keys:
