@@ -527,7 +527,6 @@ def main():
                     all_new_articles.extend(parsed)
                     source_stats[source_name] = {"count": parsed_count, "new": len(parsed), "method": method_used}
                     print(f"[INGESTION] {source_name}: {parsed_count} fetched, {len(parsed)} new ({method_used})")
-        print(f"[INGESTION] {source_name}: {parsed_count} fetched, {len(parsed)} new ({method_used})")
                 except Exception as e:
                     print(f"[ERROR] RSS Ingestion failed for {source_name}: {e}")
 
