@@ -53,3 +53,7 @@ def init_db():
     
     conn.close()
     logger.info("[DATABASE] Ready and fully migrated.")
+
+
+# Alias for compatibility with monitor.py imports
+initialise_database = init_db
