@@ -22,7 +22,9 @@ jobs:
       - name: Restore database
         uses: actions/cache/restore@v4
         with:
-          path: ssr_cache.sqlite
+          path: |
+            ssr_cache.sqlite
+            ssr_observability.db
           key: ssr-database-
           restore-keys: |
             ssr-database-
@@ -76,9 +78,11 @@ jobs:
         uses: actions/cache/save@v4
         if: always()
         with:
-            path: ssr_cache.sqlite
-            key: ssr-database-${{ github.run_id }}
-            
+          path: |
+            ssr_cache.sqlite
+            ssr_observability.db
+          key: ssr-database-${{ github.run_id }}
+
       - name: Commit Dashboard
         if: always()
         run: |
