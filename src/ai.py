@@ -74,7 +74,7 @@ def _generate_with_retry(prompt, max_retries=3):
                         extra_body={
                             "models": [
                                 "meta-llama/llama-3.3-70b-instruct:free",
-                                "google/gemini-2.0-flash-lite-preview-02-05:free",
+                                "google/gemini-2.0-flash-lite:free",
                                 "google/gemini-2.0-flash-exp:free"
                             ]
                         }

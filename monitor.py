@@ -651,14 +651,13 @@ def main():
     last_publish = get_dashboard_state("last_publish")
     generate_html = False
     pub_interval = metrics.settings.get("Dashboard Publish Interval", 60) * 60
-    
     if last_publish:
         age = time.time() - float(last_publish)
         if age > pub_interval:
             generate_html = True
     else:
         generate_html = True
-        
+
     if metrics.exceptions or os.environ.get("FORCE_DASHBOARD") == "true":
         generate_html = True
         
@@ -667,14 +666,25 @@ def main():
         logs = get_recent_lifecycle_logs()
         metrics.calculate_health_score(total_runtime)
         
-        avg_30 = get_30_day_average()
-        src_30 = get_30_day_source_averages()
+        # --- NEW: Anomaly Engine Baselines ---
+        try:
+            from src.database import fetch_30_day_baselines
+            avg_30, src_30 = fetch_30_day_baselines()
+        except ImportError:
+            # Fallback if the new function isn't imported correctly yet
+            avg_30 = get_30_day_average()
+            src_30 = get_30_day_source_averages()
+
+        # --- NEW: Next Schedule Prediction ---
+        # Predicts next run based on a standard 3-hour interval
+        metrics.next_run_str = (datetime.datetime.utcnow() + datetime.timedelta(hours=3)).strftime("%Y-%m-%d %H:%M UTC")
         
+        # Generate the Executive Summary
         generate_dashboard_html(logs, output_path=docs_path, metrics=metrics, avg_30=avg_30, src_30=src_30)
         
+        # Generate the Archive
         archive_json_path = docs_dir / "archive_data.json"
         archive_html_path = docs_dir / "archive.html"
-        
         export_archive_json(filepath=str(archive_json_path))
         generate_archive_html(output_path=str(archive_html_path))
         
