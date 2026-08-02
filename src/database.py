@@ -635,3 +635,53 @@ def export_archive_json(filepath="docs/archive_data.json", limit=10000):
         json.dump(data, f, ensure_ascii=False)
         
     print(f"[DATABASE] Exported {len(data)} articles to {filepath} for Web Archive.")
+
+def fetch_30_day_baselines(db_path="ssr_observability.db"):
+    """Fetches historical 30-day volumetric baselines to back the Anomaly Engine."""
+    import sqlite3
+    from datetime import datetime, timedelta
+    
+    cutoff_date = (datetime.utcnow() - timedelta(days=30)).strftime('%Y-%m-%d')
+    avg_30 = {}
+    src_30 = {}
+    
+    try:
+        with sqlite3.connect(db_path) as conn:
+            conn.row_factory = sqlite3.Row
+            cur = conn.cursor()
+            
+            # 1. Pipeline Funnel Averages
+            cur.execute("""
+                SELECT 
+                    AVG(total_runtime_s) as avg_runtime,
+                    AVG(downloaded) as avg_downloaded,
+                    AVG(ai_calls) as avg_ai,
+                    AVG(emails_sent) as avg_alerts
+                FROM run_metrics_log 
+                WHERE timestamp >= ?
+            """, (cutoff_date,))
+            
+            row = cur.fetchone()
+            if row and row["avg_runtime"] is not None:
+                avg_30 = {
+                    "total_runtime_s": row["avg_runtime"],
+                    "downloaded": row["avg_downloaded"],
+                    "ai_calls": row["avg_ai"],
+                    "emails_sent": row["avg_alerts"]
+                }
+            
+            # 2. Source-Specific Volume Averages
+            cur.execute("""
+                SELECT source, AVG(downloaded) as avg_downloaded
+                FROM source_stats_log
+                WHERE timestamp >= ?
+                GROUP BY source
+            """, (cutoff_date,))
+            
+            for s_row in cur.fetchall():
+                src_30[s_row["source"]] = {"downloaded": s_row["avg_downloaded"]}
+                
+    except Exception as e:
+        print(f" [WARNING] Anomaly Engine baseline retrieval bypassed: {e}")
+        
+    return avg_30, src_30
