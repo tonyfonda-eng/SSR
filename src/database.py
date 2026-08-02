@@ -26,6 +26,7 @@ def init_db():
         CREATE TABLE IF NOT EXISTS workflow_health (
             timestamp TEXT PRIMARY KEY,
             total_scanned INTEGER,
+            run_id TEXT,
             articles INTEGER,
             errors INTEGER,
             drift_score REAL,
@@ -47,7 +48,7 @@ def init_db():
     conn.execute("CREATE TABLE IF NOT EXISTS dashboard_state_kv (key TEXT PRIMARY KEY, value TEXT);")
     
     conn.commit()
-    ensure_columns(conn, "workflow_health", {"failed": "INTEGER", "succeeded": "INTEGER", "skipped": "INTEGER"})
+    ensure_columns(conn, "workflow_health", {"failed": "INTEGER", "succeeded": "INTEGER", "skipped": "INTEGER", "run_id": "TEXT"})
     conn.close()
     logger.info("[DATABASE] Fully migrated canonical schema initialized.")
 
