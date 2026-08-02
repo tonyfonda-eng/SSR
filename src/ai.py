@@ -69,7 +69,7 @@ def _generate_with_retry(prompt: str, max_tokens: int = MAX_TOKENS) -> str:
         try:
             headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
             payload = {
-                "model": "google/gemini-2.0-flash-exp:free",
+                "model": "google/gemma-4-31b-it:free",
                 "messages": [{"role": "user", "content": prompt}],
                 "max_tokens": max_tokens
             }
