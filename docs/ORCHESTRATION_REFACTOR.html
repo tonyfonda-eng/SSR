@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orchestration Refactor - SSR Living Documentation</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-color: #f1f5f9;
+            --border-color: #334155;
+            --accent: #3b82f6;
+            --sidebar-width: 250px;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--panel-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            position: fixed;
+            height: 100%;
+            overflow-y: auto;
+        }
+        .sidebar h2 {
+            color: var(--accent);
+            font-size: 1.2rem;
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar li {
+            margin-bottom: 10px;
+        }
+        .sidebar a {
+            color: var(--text-color);
+            text-decoration: none;
+            display: block;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--accent);
+        }
+        .content {
+            margin-left: var(--sidebar-width);
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            line-height: 1.6;
+        }
+        h1, h2, h3, h4 {
+            color: #ffffff;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+        h1 { font-size: 2.2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        code {
+            background-color: rgba(0,0,0,0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        pre code {
+            display: block;
+            padding: 15px;
+            overflow-x: auto;
+            background-color: #000;
+            border: 1px solid var(--border-color);
+        }
+        blockquote {
+            border-left: 4px solid var(--accent);
+            margin: 0;
+            padding-left: 15px;
+            color: #cbd5e1;
+            background-color: rgba(59, 130, 246, 0.05);
+            padding: 10px 15px;
+            border-radius: 0 4px 4px 0;
+        }
+        ul, ol { margin-top: 0.5em; margin-bottom: 1.5em; padding-left: 25px; }
+        li { margin-bottom: 0.5em; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 10px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        th {
+            background-color: rgba(0,0,0,0.2);
+            font-weight: 600;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 20px 0;
+            background: white; /* For SVG contrast if needed */
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>SSR Manual</h2>
+        <ul>
+            <li><a href="PROJECT_STATE.html" id="link-PROJECT_STATE">Project State</a></li>
+            <li><a href="ARCHITECTURE.html" id="link-ARCHITECTURE">Architecture</a></li>
+            <li><a href="PIPELINE.html" id="link-PIPELINE">The Pipeline</a></li>
+            <li><a href="WORKBOOK.html" id="link-WORKBOOK">Workbook Schema</a></li>
+            <li><a href="OPERATIONS.html" id="link-OPERATIONS">Operations</a></li>
+            <li><a href="CHANGELOG.html" id="link-CHANGELOG">Changelog</a></li>
+            <li style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="index.html">Live Dashboard</a>
+            </li>
+        </ul>
+    </div>
+    <div class="content">
+        <h1>SSR Orchestration Refactor Plan</h1>
+<p><em>Phase: Architectural Decoupling</em></p>
+<p><strong>Objective:</strong> Strip all business logic, data transformations, and state mutations out of <code>monitor.py</code>. The orchestrator must be reduced to a pure control-flow loop coordinating isolated, single-responsibility modules.</p>
+<hr />
+<h2>🛑 Violation 1: Database Initialization &amp; Query Execution</h2>
+<p><strong>Current Location:</strong> <code>monitor.py</code> -&gt; <code>main()</code> and inline SQLite <code>cursor.execute()</code> calls throughout the scraping loop.
+* <strong>Description:</strong> The orchestrator manually creates SQLite schemas (<code>CREATE TABLE IF NOT EXISTS</code>) and writes deduplication logic directly to the disk.
+* <strong>Recommended Destination:</strong> <code>src/database/cache_manager.py</code>
+* <strong>Estimated Complexity:</strong> Low
+* <strong>Risk of Change:</strong> Low. (Pure structural move; no logic changes required, just abstracting the SQL queries into callable methods like <code>save_article()</code> or <code>is_duplicate()</code>).</p>
+<h2>🛑 Violation 2: State Recovery &amp; Google Sheets API Integration</h2>
+<p><strong>Current Location:</strong> <code>monitor.py</code> -&gt; <code>load_issuer_cache()</code> &amp; <code>load_ontology_rules()</code>
+* <strong>Description:</strong> The orchestrator handles Google V4 API authentication, network requests, and JSON parsing to build the daily memory caches.
+* <strong>Recommended Destination:</strong> <code>src/ingestion/sheets_client.py</code>
+* <strong>Estimated Complexity:</strong> Medium
+* <strong>Risk of Change:</strong> Low. (Moving network logic out of the main thread makes the orchestrator significantly cleaner and allows for isolated API mock testing).</p>
+<h2>🛑 Violation 3: The Deduplication Gatekeeper Logic</h2>
+<p><strong>Current Location:</strong> <code>monitor.py</code> -&gt; Scraping Loop
+* <strong>Description:</strong> The orchestrator manually hashes the URL/ID, checks the SQLite cache, and dictates whether the loop continues or aborts.
+* <strong>Recommended Destination:</strong> <code>src/pipeline/deduplicator.py</code>
+* <strong>Estimated Complexity:</strong> Low
+* <strong>Risk of Change:</strong> Medium. (If the abstraction is handled incorrectly, the pipeline could ingest duplicates, inflating AI costs and false positive alerting).</p>
+<h2>🛑 Violation 4: Rules &amp; Ontology Matrix Evaluation</h2>
+<p><strong>Current Location:</strong> <code>monitor.py</code> -&gt; <code>evaluate_ontology()</code> and <code>evaluate_playbook_rules()</code>
+* <strong>Description:</strong> The orchestrator is compiling regex strings and calculating float scores to determine playbook validity.
+* <strong>Recommended Destination:</strong> <code>src/engine/ontology.py</code> and <code>src/engine/rules.py</code>
+* <strong>Estimated Complexity:</strong> High
+* <strong>Risk of Change:</strong> High. (This is the core alpha-generation logic. Decoupling this requires precise interface contracts to ensure the dictionaries passed from the orchestrator match what the engines expect).</p>
+<h2>🛑 Violation 5: AI Payload Construction &amp; Network Dispatch</h2>
+<p><strong>Current Location:</strong> <code>monitor.py</code> -&gt; <code>invoke_llm_analysis()</code> and <code>dispatch_alert()</code>
+* <strong>Description:</strong> The orchestrator builds the system prompts, formats the JSON string for the LLM, and manages the outbound SMTP/Webhook connections.
+* <strong>Recommended Destination:</strong> <code>src/ai/evaluator.py</code> and <code>src/dispatch/alerter.py</code>
+* <strong>Estimated Complexity:</strong> Medium
+* <strong>Risk of Change:</strong> Medium. (Requires careful handling of environment variables for API keys outside of the main scope).</p>
+<hr />
+<h2>🏁 Execution Strategy &amp; Recommendation</h2>
+<p><strong>Do not execute this refactor yet.</strong> As stated in the <code>VALIDATION_MASTER_PLAN.md</code>, the system is currently under a strict feature and code freeze until the <strong>Opportunity Capture Rate</strong> metrics stabilize. </p>
+<p>Once the pipeline achieves a 0% False Negative rate based on the current architecture, execute this refactor incrementally (Violation 1 first, verify with tests, then Violation 2). Do not attempt a total rewrite in a single pull request.</p>
+    </div>
+    <script>
+        // Simple script to highlight the active sidebar link
+        const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
+        const activeLink = document.getElementById('link-' + currentPage);
+        if (activeLink) {
+            activeLink.classList.add('active');
+        }
+    </script>
+</body>
+</html>
