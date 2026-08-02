@@ -7,7 +7,7 @@ def check_pipeline_drift():
     conn = sqlite3.connect("ssr_observability.db")
 
     try:
-        conn.execute("""CREATE TABLE IF NOT EXISTS workflow_health (timestamp TEXT PRIMARY KEY, total_scanned INTEGER, articles INTEGER, errors INTEGER, drift_score REAL)""")
+        # Master schema handled by database.py
         conn.commit()
     except Exception:
         pass
