@@ -83,6 +83,10 @@ jobs:
             ssr_observability.db
           key: ssr-database-${{ github.run_id }}
 
+      - name: Generate HTML Dashboard
+        if: always()
+        run: python src/html_generator.py
+
       - name: Commit Dashboard
         if: always()
         run: |
