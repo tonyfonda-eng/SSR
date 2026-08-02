@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dead Code Report - SSR Living Documentation</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-color: #f1f5f9;
+            --border-color: #334155;
+            --accent: #3b82f6;
+            --sidebar-width: 250px;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--panel-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            position: fixed;
+            height: 100%;
+            overflow-y: auto;
+        }
+        .sidebar h2 {
+            color: var(--accent);
+            font-size: 1.2rem;
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar li {
+            margin-bottom: 10px;
+        }
+        .sidebar a {
+            color: var(--text-color);
+            text-decoration: none;
+            display: block;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--accent);
+        }
+        .content {
+            margin-left: var(--sidebar-width);
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            line-height: 1.6;
+        }
+        h1, h2, h3, h4 {
+            color: #ffffff;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+        h1 { font-size: 2.2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        code {
+            background-color: rgba(0,0,0,0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        pre code {
+            display: block;
+            padding: 15px;
+            overflow-x: auto;
+            background-color: #000;
+            border: 1px solid var(--border-color);
+        }
+        blockquote {
+            border-left: 4px solid var(--accent);
+            margin: 0;
+            padding-left: 15px;
+            color: #cbd5e1;
+            background-color: rgba(59, 130, 246, 0.05);
+            padding: 10px 15px;
+            border-radius: 0 4px 4px 0;
+        }
+        ul, ol { margin-top: 0.5em; margin-bottom: 1.5em; padding-left: 25px; }
+        li { margin-bottom: 0.5em; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 10px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        th {
+            background-color: rgba(0,0,0,0.2);
+            font-weight: 600;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 20px 0;
+            background: white; /* For SVG contrast if needed */
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>SSR Manual</h2>
+        <ul>
+            <li><a href="PROJECT_STATE.html" id="link-PROJECT_STATE">Project State</a></li>
+            <li><a href="ARCHITECTURE.html" id="link-ARCHITECTURE">Architecture</a></li>
+            <li><a href="PIPELINE.html" id="link-PIPELINE">The Pipeline</a></li>
+            <li><a href="WORKBOOK.html" id="link-WORKBOOK">Workbook Schema</a></li>
+            <li><a href="OPERATIONS.html" id="link-OPERATIONS">Operations</a></li>
+            <li><a href="CHANGELOG.html" id="link-CHANGELOG">Changelog</a></li>
+            <li style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="index.html">Live Dashboard</a>
+            </li>
+        </ul>
+    </div>
+    <div class="content">
+        <h1>SSR Dead Code &amp; Codebase Redundancy Audit</h1>
+<p><em>Document Version: 1.0.0 (Static Analysis Audit)</em></p>
+<p>This document maps all identified dead code, unused imports, unused functions/classes, duplicate utilities, shadowed code blocks, and unreachable branches across the Special Situations Radar (<code>monitor.py</code> and VQA suite) to maintain lean production standards.</p>
+<hr />
+<h2>🧹 Dead Code Analysis Matrix</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Category</th>
+<th style="text-align: left;">Component / Module</th>
+<th style="text-align: left;">Description</th>
+<th style="text-align: left;">Severity / Action</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Unused Functions</strong></td>
+<td style="text-align: left;">None identified in active production scopes.</td>
+<td style="text-align: left;">All defined functions in <code>monitor.py</code> and <code>src/validation/</code> are bound to CLI execution paths or orchestrator loops.</td>
+<td style="text-align: left;">✅ <strong>Clean</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Unused Classes</strong></td>
+<td style="text-align: left;">None identified.</td>
+<td style="text-align: left;">The codebase uses a procedural, script-driven architecture rather than complex class hierarchies.</td>
+<td style="text-align: left;">✅ <strong>Clean</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Unused Imports</strong></td>
+<td style="text-align: left;"><code>monitor.py</code></td>
+<td style="text-align: left;">Occasional historical imports of unused helper modules (e.g., specific regex flags or legacy datetime formatters).</td>
+<td style="text-align: left;">🟡 <strong>Low</strong> (Cleaned during lint sweeps)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Duplicate Utilities</strong></td>
+<td style="text-align: left;">Trend formatters</td>
+<td style="text-align: left;">Minor duplication of delta calculation logic between historical scripts and reporting modules.</td>
+<td style="text-align: left;">🟡 <strong>Low</strong> (Unified in VQA utilities)</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Shadowed Code</strong></td>
+<td style="text-align: left;">None identified.</td>
+<td style="text-align: left;">No local variables shadow global scope names or external package identifiers.</td>
+<td style="text-align: left;">✅ <strong>Clean</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Unreachable Branches</strong></td>
+<td style="text-align: left;"><code>coverage_report.py</code></td>
+<td style="text-align: left;">Fallback exception branch for historical SQLite <code>NoneType</code> metrics (resolved via graceful type checking).</td>
+<td style="text-align: left;">🟢 <strong>Mitigated</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>🔍 Detailed Findings &amp; Static Audit Notes</h2>
+<h3>1. Unused Imports</h3>
+<ul>
+<li><strong>Observation:</strong> Standard static analysis (<code>flake8</code> / <code>pylint</code>) detects minimal unused imports inside <code>monitor.py</code> during incremental feature branching. </li>
+<li><strong>Remediation:</strong> Automated pre-commit hooks purge unreferenced modules prior to branch merging.</li>
+</ul>
+<h3>2. Duplicate Utilities</h3>
+<ul>
+<li><strong>Observation:</strong> Formatting strings for percentage trends (<code>format_trend</code>) were historically duplicated across multiple validation scripts.</li>
+<li><strong>Remediation:</strong> Centralized within the respective modules to ensure singular source-of-truth delta calculations.</li>
+</ul>
+<h3>3. Unreachable Branches &amp; Defensive Stubs</h3>
+<ul>
+<li><strong>Observation:</strong> Defensive conditional checks (e.g., checking if database cursors return <code>None</code> or empty rows) are intentionally preserved as safety boundaries against corrupt historical SQLite state, rather than being classified as dead code.</li>
+</ul>
+<hr />
+<h2>🏁 Actionable Recommendations</h2>
+<ol>
+<li><strong>Maintain Zero-Tolerance for Unused Imports:</strong> Ensure CI/CD pipelines enforce automatic linting via <code>ruff</code> or <code>flake8</code> on every commit.</li>
+<li><strong>Post-Freeze Cleanup:</strong> During the scheduled post-freeze refactoring phase (as mapped in <code>docs/ORCHESTRATION_REFACTOR.md</code>), any legacy helper scripts should be audited and purged if rendered obsolete by the new modular architecture.</li>
+</ol>
+    </div>
+    <script>
+        // Simple script to highlight the active sidebar link
+        const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
+        const activeLink = document.getElementById('link-' + currentPage);
+        if (activeLink) {
+            activeLink.classList.add('active');
+        }
+    </script>
+</body>
+</html>
