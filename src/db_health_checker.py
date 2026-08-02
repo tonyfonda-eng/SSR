@@ -1,20 +1,12 @@
 import sqlite3
-import os
+from src.config import SYSTEM_SETTINGS
+from src.database import EXPECTED_TABLES
 
-def verify_system_tables(db_path=None):
+def verify_system_tables():
     """
-    Dynamically verifies that all monitoring tables exist without 
-    duplicating the schema definition or hardcoding the file path.
+    Dynamically verifies tables using a single source of truth.
     """
-    # Detect db from environment or fallback to project default
-    if not db_path:
-        db_path = os.getenv("DATABASE_PATH", "ssr_cache.sqlite")
-        
-    required_tables = [
-        "workflow_health", "run_metrics_log", "article_lifecycle_log",
-        "source_stats_log", "ai_usage_log", "exceptions_log",
-        "dashboard_state", "sheets_sync_log"
-    ]
+    db_path = SYSTEM_SETTINGS.get("DATABASE_PATH", "ssr_cache.sqlite")
     
     try:
         conn = sqlite3.connect(db_path)
@@ -24,13 +16,11 @@ def verify_system_tables(db_path=None):
         existing_tables = {row[0] for row in cursor.fetchall()}
         conn.close()
         
-        missing = [t for t in required_tables if t not in existing_tables]
+        missing = [t for t in EXPECTED_TABLES if t not in existing_tables]
         if missing:
-            print(f"[DATABASE WARNING] Missing lifecycle tables: {missing}. Running migrations...")
-            # Here we call your existing database initializer if needed
-            # from src.database import initialize_database; initialize_database()
+            print(f"[DATABASE WARNING] Missing tables: {missing}. Migrations required.")
         else:
-            print(f"[DATABASE] Schema integrity verified. All {len(required_tables)} lifecycle tables present.")
+            print(f"[DATABASE] Schema integrity verified. {len(EXPECTED_TABLES)} tables present.")
             
     except Exception as e:
         print(f"[DATABASE ERROR] Health check failed: {e}")
