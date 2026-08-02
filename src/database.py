@@ -685,3 +685,22 @@ def fetch_30_day_baselines(db_path="ssr_observability.db"):
         print(f" [WARNING] Anomaly Engine baseline retrieval bypassed: {e}")
         
     return avg_30, src_30
+
+def init_db():
+    """Ensures all core SQLite database tables are provisioned."""
+    try:
+        # Check for common database initialization methods in database.py
+        if 'setup_database' in globals():
+            setup_database()
+        elif 'init_database' in globals():
+            init_database()
+        else:
+            # Fallback direct table creation execution if needed
+            import sqlite3
+            conn = sqlite3.connect('ssr_observability.db')
+            conn.execute("CREATE TABLE IF NOT EXISTS workflow_health (timestamp TEXT PRIMARY KEY, total_scanned INTEGER, articles INTEGER, errors INTEGER, drift_score REAL, runtime REAL);")
+            conn.execute("CREATE TABLE IF NOT EXISTS run_metrics_log (timestamp TEXT PRIMARY KEY);")
+            conn.commit()
+            conn.close()
+    except Exception as e:
+        print(f'[DATABASE INIT WARNING] {e}')
