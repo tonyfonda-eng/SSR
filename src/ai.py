@@ -69,10 +69,9 @@ def _generate_with_retry(prompt: str, max_tokens: int = MAX_TOKENS) -> str:
             data = resp.json()
             return data["choices"][0]["message"]["content"]
         except Exception as e:
-            if "402" in str(e) or "429" in str(e):
-                or_pool.mark_cooldown(key)
-                continue
-            break
+            logger.warning(f"[AI WARNING] OpenRouter key error encountered: {e}. Moving to next key.")
+            or_pool.mark_cooldown(key)
+            continue
 
     for _ in range(len(gemini_pool.keys)):
         key = gemini_pool.next_key()
