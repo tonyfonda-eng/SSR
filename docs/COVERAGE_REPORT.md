@@ -1,5 +1,5 @@
 # SSR Pipeline: Weekly Coverage & Accuracy Report
-*Generated: 2026-08-02 13:27:15*
+*Generated: 2026-08-02 13:30:45*
 
 ## 🎯 Primary Operational Key Performance Indicator
 > ### **OPPORTUNITY CAPTURE RATE: 0.0%**
