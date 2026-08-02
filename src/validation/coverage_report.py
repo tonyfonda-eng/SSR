@@ -15,14 +15,26 @@ def execute_weekly_generation():
     
     conn = sqlite3.connect(VAL_DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("CREATE TABLE IF NOT EXISTS historical_runs_summary (id INTEGER PRIMARY KEY AUTOINCREMENT, timestamp TEXT, coverage REAL, false_positives REAL, false_negatives REAL, avg_delay INTEGER)")
-    cursor.execute("SELECT coverage, false_positives, false_negatives, avg_delay FROM historical_runs_summary ORDER BY id DESC LIMIT 1")
+    
+    # Isolate metrics into a dedicated table to avoid legacy schema conflicts
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS coverage_weekly_metrics (
+            id INTEGER PRIMARY KEY AUTOINCREMENT, 
+            timestamp TEXT, 
+            coverage REAL, 
+            false_positives REAL, 
+            false_negatives REAL, 
+            avg_delay INTEGER
+        )
+    """)
+    
+    cursor.execute("SELECT coverage, false_positives, false_negatives, avg_delay FROM coverage_weekly_metrics ORDER BY id DESC LIMIT 1")
     prev_metrics = cursor.fetchone()
     
     if not prev_metrics:
         prev_metrics = (93.5, 5.2, 6.5, 9)
         
-    cursor.execute("INSERT INTO historical_runs_summary (timestamp, coverage, false_positives, false_negatives, avg_delay) VALUES (?, ?, ?, ?, ?)",
+    cursor.execute("INSERT INTO coverage_weekly_metrics (timestamp, coverage, false_positives, false_negatives, avg_delay) VALUES (?, ?, ?, ?, ?)",
                    (datetime.now().strftime('%Y-%m-%d %H:%M:%S'), current_metrics["coverage"], current_metrics["false_positives"], current_metrics["false_negatives"], current_metrics["avg_delay"]))
     conn.commit()
     conn.close()
@@ -42,7 +54,8 @@ def execute_weekly_generation():
     trend_fn = format_trend(current_metrics["false_negatives"], prev_map["false_negatives"], lower_is_better=True)
     trend_delay = f"🟢 -{prev_map['avg_delay'] - current_metrics['avg_delay']} mins" if current_metrics["avg_delay"] < prev_map["avg_delay"] else f"🔴 +{current_metrics['avg_delay'] - prev_map['avg_delay']} mins"
 
-    report_content = f"""# SSR Pipeline: Weekly Coverage & Accuracy Report
+    # Using 'rf' (raw format string) neutralizes the LaTeX escape warnings
+    report_content = rf"""# SSR Pipeline: Weekly Coverage & Accuracy Report
 *Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}*
 
 This report aggregates automated coverage verification and manual VQA checklist metrics over the current trading week cycle. Performance targets focus on minimizing **Detection Delay** and eliminating leakage within the **Ontology Engine**.
@@ -77,7 +90,7 @@ This report aggregates automated coverage verification and manual VQA checklist 
 ## 🔧 Rule Performance & Scoring Optimization Profiles
 
 ### 🔴 Top False Negative Rules (Too Strict / Dropped Signals)
-- `Rule_Ontology_Core_Buyback`: Failed to capture \"Repurchase Offer\" syntax alternatives.
+- `Rule_Ontology_Core_Buyback`: Failed to capture "Repurchase Offer" syntax alternatives.
 - `Rule_Market_Cap_Floor`: Erroneously filtered out micro-cap dual-listings with complex quote formats.
 
 ### 🟡 Top False Positive Rules (Too Loose / Created Noise)
@@ -87,7 +100,7 @@ This report aggregates automated coverage verification and manual VQA checklist 
 ---
 
 ## 🏁 Operational Actions & Engineering Remediation Playbook
-1. **Ontology Engine Tuning:** Expand semantic dictionary tokens to link \"Strategic Review\" directly to a high-scoring `playbook_rejected` rule when missing explicit transaction advisors.
+1. **Ontology Engine Tuning:** Expand semantic dictionary tokens to link "Strategic Review" directly to a high-scoring `playbook_rejected` rule when missing explicit transaction advisors.
 2. **Delay Minimization:** Transition raw polling steps to event-driven Webhook listeners where supported, driving target latency down to sub-5 minute bounds.
 """
     os.makedirs("docs", exist_ok=True)
