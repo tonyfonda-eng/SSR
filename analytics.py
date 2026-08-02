@@ -2,7 +2,9 @@ import json
 import requests
 
 # 1. Flaw: Using a mutable default argument [] can leak data across calls
-def process_user_metrics(user_id, active_logs=[]):
+def process_user_metrics(user_id, active_logs=None):
+    if active_logs is None:
+        active_logs = []
     active_logs.append(f"Processing {user_id}")
     
     # 2. Flaw: No timeout or try/except block on this API call can crash the app
