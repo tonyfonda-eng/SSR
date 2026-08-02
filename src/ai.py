@@ -69,15 +69,16 @@ def _generate_with_retry(prompt, max_retries=3):
             try:
                 if provider == "openrouter":
                     response = client.chat.completions.create(
-                        model="meta-llama/llama-3.3-70b-instruct:free",
+                        model="google/gemini-2.0-flash-exp:free",
                         messages=[{"role": "user", "content": prompt}],
                         extra_body={
                             "models": [
-                                "meta-llama/llama-3.3-70b-instruct:free",
+                                "google/gemini-2.0-flash-exp:free",
                                 "google/gemini-2.0-flash-exp:free",
                                 "google/gemini-2.0-flash-exp:free"
                             ]
                         }
+                        
                     )
                     txt = response.choices[0].message.content.strip()
                     rt = time.perf_counter() - start_t
