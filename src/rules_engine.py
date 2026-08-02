@@ -43,7 +43,6 @@ def evaluate(article_obj, rules, document_type_scores,
     elif isinstance(document_type_scores, list):
         for item in document_type_scores:
             if isinstance(item, dict):
-                # Handle common key patterns from Google Sheets loaders
                 dt = item.get('Document Type') or item.get('document_type') or item.get('type')
                 sc = item.get('Score') or item.get('score', 0)
                 if dt:
@@ -59,7 +58,7 @@ def evaluate(article_obj, rules, document_type_scores,
 
     # ---- Independent Evidence Channels (apply to ALL rules) ----
 
-    # Channel 1: Document Type (Safely use scores_map which is guaranteed to be a dict)
+    # Channel 1: Document Type (Safely using scores_map lookup)
     doc_score = scores_map.get(doc_type, 0)
 
     # Channel 2: Ontology Concepts (independent, sheet-defined weights)
@@ -71,7 +70,6 @@ def evaluate(article_obj, rules, document_type_scores,
     status_ids = {sid for sid, _ in ontology_statuses}
 
     # Channel 4: Source Reliability (normalised to a 0-20 contribution)
-    # Scale: 100 reliability -> +20, 75 -> +15, 50 -> +10, 0 -> 0
     source_score = int(source_reliability * 0.2) if source_reliability else 0
 
     # Base score that every rule starts with (from independent channels)
@@ -92,29 +90,24 @@ def evaluate(article_obj, rules, document_type_scores,
             evidence_log.append(f"Source Reliability: {source_reliability} ({source_score:+d})")
 
         # ---- Rule-Specific Filtering ----
-
-        # If the rule specifies Semantic Concepts, the article MUST match at least one
         semantic_raw = str(rule.get("Semantic Concepts", "")).strip().upper()
         if semantic_raw:
             rule_concepts = {x.strip() for x in re.split(r'[,|]', semantic_raw) if x.strip()}
             if not rule_concepts & concept_ids:
-                continue  # Wrong concept family for this rule
+                continue
 
-        # If the rule specifies Event Status, the article MUST match at least one
         status_raw = str(rule.get("Event Status", "")).strip().upper()
         if status_raw:
             rule_statuses = {x.strip() for x in re.split(r'[,|]', status_raw) if x.strip()}
             if not rule_statuses & status_ids:
-                continue  # Wrong deal stage for this rule
+                continue
 
-        # ---- Channel 5: Exclusions (instant disqualification) ----
         exclusions_raw = str(rule.get("Exclusions", "")).strip()
         if exclusions_raw:
             exclusions = [x.strip().lower() for x in re.split(r'[,|]', exclusions_raw) if x.strip()]
             if any(re.search(r'\b' + re.escape(exc) + r'\b', text) for exc in exclusions):
                 continue
 
-        # ---- Channel 6: Keywords (rule-specific) ----
         keywords_raw = str(rule.get("Keywords", "")).strip()
         if keywords_raw:
             keywords = [x.strip().lower() for x in re.split(r'[,|]', keywords_raw) if x.strip()]
@@ -123,7 +116,6 @@ def evaluate(article_obj, rules, document_type_scores,
                     score += 5
                     evidence_log.append(f"Keyword: {kw} (+5)")
 
-        # ---- Channel 7: Confidence Modifiers (rule-specific) ----
         modifiers_raw = str(rule.get("Confidence Modifiers", "")).strip()
         if modifiers_raw:
             mods = [x.strip().lower() for x in re.split(r'[,|]', modifiers_raw) if x.strip()]
@@ -136,7 +128,6 @@ def evaluate(article_obj, rules, document_type_scores,
                         score += points
                         evidence_log.append(f"Modifier: {phrase} (+{points})")
 
-        # Check if threshold met
         if score >= threshold:
             candidate = dict(rule)
             candidate["_Score"] = score
