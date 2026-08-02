@@ -443,6 +443,10 @@ def cluster_articles(articles):
     return clusters
 
 
+from src.database import init_db
+init_db()
+
+print("=== Special Situations Radar v1.0.0 ===")
 def main():
     try:
         settings = get_system_settings(SHEET_URL)
@@ -451,10 +455,7 @@ def main():
         
     metrics = MetricsCollector.get_instance()
     metrics.set_settings(settings)
-    print("from src.database import init_db
-init_db()
 
-=== Special Situations Radar v1.0.0 ===")
     metrics.reset()
     initialise_database()
     
