@@ -3,7 +3,7 @@ def _safe_json(resp):
     try: return _safe_json(resp)
     except Exception:
         print("    [ASX WAF] HTML Challenge Blocked JSON payload. Skipping.")
-        return []
+        return {}
 import requests
 # --- WAF BYPASS WRAPPER ---
 try:
