@@ -1,19 +1,15 @@
 import sqlite3
 import os
-from src.config import SYSTEM_SETTINGS
 
-def initialize_validation_db(val_db_path="validation.db"):
-    """
-    Initializes a decoupled validation tracking database.
-    Stores historical accuracy metrics, statistical drift snapshots, and regression bounds.
-    """
+VALIDATION_DB_PATH = "validation.db"
+
+def initialize_validation_db(val_db_path=VALIDATION_DB_PATH):
+    """Initializes the historical tracking tables in the validation DB."""
     conn = sqlite3.connect(val_db_path)
     cursor = conn.cursor()
-    
-    # 1. Historical Data Log
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS historical_runs_summary (
-            run_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
             total_downloaded INTEGER,
             precision_score REAL,
@@ -22,8 +18,6 @@ def initialize_validation_db(val_db_path="validation.db"):
             unaccounted_variance INTEGER
         );
     """)
-    
-    # 2. Regression Tracking (Golden Dataset Validation Runs)
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS regression_test_logs (
             test_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,24 +30,15 @@ def initialize_validation_db(val_db_path="validation.db"):
             status TEXT
         );
     """)
-    
     conn.commit()
     conn.close()
-    print(f"[VQA] Validation Database successfully initialized at: {val_db_path}")
 
-if __name__ == "__main__":
-    initialize_validation_db()
-
-def initialize_golden_dataset_table(val_db_path="validation.db"):
-    """
-    Creates the regression framework table within validation.db.
-    Stores hand-curated special situations to verify against code updates.
-    """
+def initialize_historical_events_table(val_db_path=VALIDATION_DB_PATH):
+    """Creates the historical_events table matching VQA strict taxonomy."""
     conn = sqlite3.connect(val_db_path)
     cursor = conn.cursor()
-    
     cursor.execute("""
-        CREATE TABLE IF NOT EXISTS golden_backlog (
+        CREATE TABLE IF NOT EXISTS historical_events (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             date TEXT,
             company TEXT,
@@ -68,16 +53,16 @@ def initialize_golden_dataset_table(val_db_path="validation.db"):
             expected_rule TEXT,
             detected_yn TEXT,
             detection_timestamp TEXT,
-            detection_delay_seconds INTEGER,
+            detection_delay TEXT,
             reason_missed TEXT,
             reviewer_notes TEXT,
-            test_run_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         );
     """)
     conn.commit()
     conn.close()
-    print("[VQA] Golden Backlog validation table successfully injected.")
+    print(f"[VQA] Validation Database initialized successfully at: {val_db_path}")
 
 if __name__ == "__main__":
     initialize_validation_db()
-    initialize_golden_dataset_table()
+    initialize_historical_events_table()
