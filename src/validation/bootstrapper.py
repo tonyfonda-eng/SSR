@@ -43,3 +43,41 @@ def initialize_validation_db(val_db_path="validation.db"):
 
 if __name__ == "__main__":
     initialize_validation_db()
+
+def initialize_golden_dataset_table(val_db_path="validation.db"):
+    """
+    Creates the regression framework table within validation.db.
+    Stores hand-curated special situations to verify against code updates.
+    """
+    conn = sqlite3.connect(val_db_path)
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS golden_backlog (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            date TEXT,
+            company TEXT,
+            ticker TEXT,
+            country TEXT,
+            exchange TEXT,
+            event_type TEXT,
+            announcement_url TEXT,
+            primary_source TEXT,
+            official_filing TEXT,
+            expected_ontology TEXT,
+            expected_rule TEXT,
+            detected_yn TEXT,
+            detection_timestamp TEXT,
+            detection_delay_seconds INTEGER,
+            reason_missed TEXT,
+            reviewer_notes TEXT,
+            test_run_timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+    """)
+    conn.commit()
+    conn.close()
+    print("[VQA] Golden Backlog validation table successfully injected.")
+
+if __name__ == "__main__":
+    initialize_validation_db()
+    initialize_golden_dataset_table()
