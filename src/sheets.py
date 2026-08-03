@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import datetime
 import gspread
 from google.oauth2.service_account import Credentials
 
@@ -81,7 +82,68 @@ def load_gold_standards(sheet_url):
     return _safe_get_records(sheet_url, ["GoldStandards", "Gold Standards"])
 
 def load_daily_memory(sheet_url, *args, **kwargs):
-    return _safe_get_records(sheet_url, ["DailyMemory", "Daily Memory"])
+    """
+    Hardened replacement for load_daily_memory. Uses get_all_values() 
+    to bypass malformed gspread record dictionaries, parses literal text, 
+    and flushes data automatically if the day has changed.
+    """
+    spreadsheet = get_spreadsheet(sheet_url)
+    worksheet = None
+    
+    # Locate worksheet variations safely
+    for name in ["DailyMemory", "Daily Memory"]:
+        try:
+            worksheet = spreadsheet.worksheet(name)
+            break
+        except gspread.exceptions.WorksheetNotFound:
+            continue
+            
+    if not worksheet:
+        return []
+
+    # Pull brute-force raw string lists to completely ignore header string mashups
+    raw_rows = worksheet.get_all_values()
+    if not raw_rows or len(raw_rows) <= 1:
+        return []
+
+    processed_records = []
+    current_date_str = datetime.datetime.utcnow().strftime("%Y-%m-%d")
+    should_flush = False
+
+    # Skip header row (index 0)
+    for row in raw_rows[1:]:
+        if not row or len(row) < 1:
+            continue
+        
+        issuer_name = row[0].strip()
+        timestamp_raw = row[1].strip() if len(row) > 1 else ""
+
+        if not issuer_name:
+            continue
+
+        # Check if the date belongs to a previous calendar day to trigger automated daily flush
+        if timestamp_raw and current_date_str not in timestamp_raw:
+            should_flush = True
+        
+        # Build clean output format for monitor.py duplicate evaluation loop
+        processed_records.append({
+            "issuer": issuer_name,
+            "timestamp": timestamp_raw
+        })
+
+    # AUTOMATED FLUSH: If old dates are caught, reset the worksheet immediately
+    if should_flush:
+        print(f"[DAILY MEMORY] New calendar day detected ({current_date_str}). Auto-flushing stale weekend rows...")
+        try:
+            worksheet.clear()
+            worksheet.append_row(["Issuer", "Timestamp"]) # Re-seed clean columns
+            return [] # Memory is cleared for the new day's hunting window
+        except Exception as e:
+            print(f"[ERROR] Failed to execute automated daily memory flush: {e}")
+
+    # Map output explicitly so `monitor.py` reads a healthy tracking count
+    print(f"[DAILY MEMORY] Cleanly loaded {len(processed_records)} active tracking issuers from Google Sheets.")
+    return processed_records
 
 def load_source_reliability(sheet_url, *args, **kwargs):
     return _safe_get_records(sheet_url, ["SourceReliability", "Source Reliability"])
@@ -187,7 +249,6 @@ def batch_append_daily_memory(sheet_url, new_issuers):
         worksheet = spreadsheet.add_worksheet(title="DailyMemory", rows=1000, cols=2)
         worksheet.append_row(["Issuer", "Timestamp"])
         
-    import datetime
     ts = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S GMT")
     rows = [[issuer, ts] for issuer in new_issuers]
     worksheet.append_rows(rows)
