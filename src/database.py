@@ -79,16 +79,26 @@ def save_article(article_data=None, **kwargs):
     try:
         data = article_data or kwargs
         gmt_now = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S GMT")
+        
+        # CRITICAL FIX: Align the Database ID with the Monitor's duplicate check key
+        source = data.get('source') or data.get('source_name')
+        art_id = data.get('article_id') or data.get('id')
+        
+        if source and art_id:
+            primary_id = f"{source}:{art_id}"
+        else:
+            primary_id = data.get('id') or data.get('url') or data.get('link')
+            
         conn = sqlite3.connect(DB_PATH)
         conn.execute("""
             INSERT OR REPLACE INTO articles_cache (id, title, url, source, content, timestamp)
             VALUES (?, ?, ?, ?, ?, ?);
         """, (
-            data.get('id') or data.get('url') or data.get('link'),
+            primary_id,
             data.get('title'),
             data.get('url') or data.get('link'),
-            data.get('source'),
-            data.get('content') or data.get('summary'),
+            source,
+            data.get('content') or data.get('summary') or data.get('body'),
             data.get('timestamp') or gmt_now
         ))
         conn.commit()
