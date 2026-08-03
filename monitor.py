@@ -131,6 +131,11 @@ article_key = f"{source_name}:{article_id}"
         metrics.track_funnel("duplicate_id")
         return conclude(0, 'Database', 'Dropped', 'Duplicate Article')
 
+    # ---> CRITICAL FIX: COMMIT TO MEMORY IMMEDIATELY <---
+    # Log the article the millisecond it enters the funnel. 
+    # If the Rules Engine drops it 2 seconds from now, the DB already remembers it forever.
+    save_article(source=source_name, article_id=article_id, title=title, url=url, published=published, body=body)
+
     if not body:
         metrics.track_funnel("empty_body")
         return conclude(0, 'Download', 'Dropped', 'Empty Body')
