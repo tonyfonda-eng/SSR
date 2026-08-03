@@ -126,7 +126,7 @@ def _process_article(source_name, article_id, title, url, published,
     if global_exclusions is None:
         global_exclusions = []
 
-    article_key = f"{source_name}:{article_id}"
+article_key = f"{source_name}:{article_id}"
     if article_exists(article_key):
         metrics.track_funnel("duplicate_id")
         return conclude(0, 'Database', 'Dropped', 'Duplicate Article')
