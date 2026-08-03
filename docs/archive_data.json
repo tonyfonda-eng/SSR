@@ -1,5 +1,23 @@
 [
   {
+    "id": "20260803341739",
+    "timestamp": "2026-08-03 19:29:38 UTC",
+    "source": "Business Wire",
+    "headline": "\u0634\u0631\u0643\u0629 Kioxia \u062a\u0633\u062a\u0639\u0631\u0636 KIOXIA XL1 Series\u060c \u0648\u062d\u062f\u0629 \u062a\u0648\u0633\u064a\u0639 \u0627\u0644\u0630\u0627\u0643\u0631\u0629 \u0627\u0644\u0645\u062a\u0648\u0627\u0641\u0642\u0629 \u0645\u0639 \u062a\u0642\u0646\u064a\u0629 CXL\u2122\u200e \u0627\u0644\u0645\u0635\u0645\u0645\u0629 \u0644\u062f\u0639\u0645 \u0623\u062d\u0645\u0627\u0644 \u0639\u0645\u0644 \u0627\u0644\u0630\u0643\u0627\u0621 \u0627\u0644\u0627\u0635\u0637\u0646\u0627\u0639\u064a",
+    "url": "http://www.businesswire.com/news/home/20260803341739/ar/",
+    "country": "RSS/HTML",
+    "language": "",
+    "document_type": "",
+    "issuer": "KIOXIA",
+    "event_family": "Unknown",
+    "pipeline_stage": "Rules Engine",
+    "outcome": "Dropped",
+    "reason": "Failed Rules Threshold (Score < 10)",
+    "ai_invoked": 0,
+    "processing_time": "1531ms",
+    "slowest_stage": "Ontology"
+  },
+  {
     "id": "20260803118399",
     "timestamp": "2026-08-03 19:14:12 UTC",
     "source": "Business Wire",
@@ -198,10 +216,6 @@
     "slowest_stage": "Ontology"
   },
   {
-<<<<<<< HEAD
-    "id": "20260730013133",
-    "timestamp": "2026-08-03 17:26:36 UTC",
-=======
     "id": "20260803133338",
     "timestamp": "2026-08-03 17:34:56 UTC",
     "source": "Business Wire",
@@ -528,23 +542,12 @@
   {
     "id": "20260730013133",
     "timestamp": "2026-08-03 15:23:50 UTC",
->>>>>>> 83898791ae7baced93066ea1eb6f2c2acfb337a2
     "source": "Business Wire",
     "headline": "Textron Declares Quarterly Dividend",
     "url": "http://www.businesswire.com/news/home/20260730013133/en/Textron-Declares-Quarterly-Dividend/",
     "country": "RSS/HTML",
     "language": "",
     "document_type": "",
-<<<<<<< HEAD
-    "issuer": "Unknown",
-    "event_family": "Unknown",
-    "pipeline_stage": "Issuer Extraction",
-    "outcome": "Dropped",
-    "reason": "AI Exhausted",
-    "ai_invoked": 0,
-    "processing_time": "18ms",
-    "slowest_stage": "Issuer Extraction"
-=======
     "issuer": "TEXTRON",
     "event_family": "Unknown",
     "pipeline_stage": "Rules Engine",
@@ -4009,6 +4012,5 @@
     "ai_invoked": 0,
     "processing_time": "1536ms",
     "slowest_stage": "Ontology"
->>>>>>> 83898791ae7baced93066ea1eb6f2c2acfb337a2
   }
 ]
