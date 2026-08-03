@@ -216,10 +216,6 @@
     "slowest_stage": "Ontology"
   },
   {
-<<<<<<< HEAD
-    "id": "20260730013133",
-    "timestamp": "2026-08-03 17:26:36 UTC",
-=======
     "id": "20260803133338",
     "timestamp": "2026-08-03 17:34:56 UTC",
     "source": "Business Wire",
@@ -546,23 +542,12 @@
   {
     "id": "20260730013133",
     "timestamp": "2026-08-03 15:23:50 UTC",
->>>>>>> 83898791ae7baced93066ea1eb6f2c2acfb337a2
     "source": "Business Wire",
     "headline": "Textron Declares Quarterly Dividend",
     "url": "http://www.businesswire.com/news/home/20260730013133/en/Textron-Declares-Quarterly-Dividend/",
     "country": "RSS/HTML",
     "language": "",
     "document_type": "",
-<<<<<<< HEAD
-    "issuer": "Unknown",
-    "event_family": "Unknown",
-    "pipeline_stage": "Issuer Extraction",
-    "outcome": "Dropped",
-    "reason": "AI Exhausted",
-    "ai_invoked": 0,
-    "processing_time": "18ms",
-    "slowest_stage": "Issuer Extraction"
-=======
     "issuer": "TEXTRON",
     "event_family": "Unknown",
     "pipeline_stage": "Rules Engine",
@@ -4027,6 +4012,5 @@
     "ai_invoked": 0,
     "processing_time": "1536ms",
     "slowest_stage": "Ontology"
->>>>>>> 83898791ae7baced93066ea1eb6f2c2acfb337a2
   }
 ]
