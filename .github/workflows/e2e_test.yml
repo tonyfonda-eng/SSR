@@ -1,9 +1,9 @@
 name: End-to-End Pipeline Test
 
 on:
-  workflow_dispatch:  # Allows manual triggering from the Actions tab
+  workflow_dispatch:
   push:
-    branches: [ main ]  # Optional: also runs automatically on push to main
+    branches: [ main ]
 
 jobs:
   run-e2e-simulation:
@@ -22,6 +22,14 @@ jobs:
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
+      # Absorbed from the old 'Tests' workflow
+      - name: Run Google Sheets Integration Test
+        env:
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          python tests/test_sheets.py
+
+      # Primary pipeline simulation
       - name: Run End-to-End Test Script
         env:
           PYTHONPATH: .
