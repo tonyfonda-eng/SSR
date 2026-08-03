@@ -1,126 +1,172 @@
 """
-Investment playbook engine based on Multi-Channel Evidence Scoring.
+SSR 2.0: Deterministic Rules Engine (Layer B)
+Executes versioned rule packs against immutable text payloads.
+Extracts strict causal chains via character offset mapping and records 
+both supporting (matched) and opposing (failed) evidentiary nodes.
 """
+
 import re
+import logging
+from typing import Dict, List, Any
 
-def evaluate(article_obj, rules, document_type_scores,
-             ontology_concepts=None, ontology_statuses=None,
-             source_reliability=0, threshold=15):
+logger = logging.getLogger(__name__)
+
+def evaluate(article: dict, rules: list, document_type_scores: list,
+             ontology_concepts: list = None, ontology_statuses: list = None,
+             source_reliability: int = 0, threshold: int = 10) -> List[Dict[str, Any]]:
+    """
+    Executes the deterministic rule matrix.
     
-    if ontology_concepts is None:
-        ontology_concepts = []
-    if ontology_statuses is None:
-        ontology_statuses = []
-
-    # Strict type casting for incoming thresholds
-    try:
-        threshold = float(threshold)
-    except (ValueError, TypeError):
-        threshold = 15.0
-
-    # ---- Defensive Normalization for document_type_scores ----
-    scores_map = {}
-    if isinstance(document_type_scores, dict):
-        scores_map = {str(k).lower().strip(): v for k, v in document_type_scores.items()}
-    elif isinstance(document_type_scores, list):
-        for item in document_type_scores:
-            if isinstance(item, dict):
-                dt = item.get('Document Type') or item.get('document_type') or item.get('type')
-                sc = item.get('Score') or item.get('score', 0)
-                if dt:
-                    try:
-                        scores_map[str(dt).lower().strip()] = float(sc) if '.' in str(sc) else int(sc)
-                    except (ValueError, TypeError):
-                        scores_map[str(dt).lower().strip()] = 0
-
+    Returns a list of matching rule nodes. The first element contains the aggregate
+    score and the full Causal Evidence Graph (including Opposing Evidence) to maintain
+    compatibility with the orchestrator payload expectations.
+    """
+    raw_text = article.get("raw_text", "")
+    doc_type = article.get("document_type", "Unknown")
+    
+    total_score = float(source_reliability)
+    supporting_evidence = []
+    opposing_evidence = []
     matches = []
-    text = str(article_obj.get("raw_text", "")).lower()
-    doc_type = str(article_obj.get("document_type", "")).lower().strip()
+    
+    # ---------------------------------------------------------
+    # 1. Document Type Baseline Scoring
+    # ---------------------------------------------------------
+    doc_score = 0.0
+    for dt in document_type_scores:
+        if dt.get("Document Type") == doc_type:
+            doc_score = float(dt.get("Score", 0))
+            break
+            
+    total_score += doc_score
+    if doc_score > 0:
+        supporting_evidence.append({
+            "component": "DocType Validator v1.0",
+            "assertion": f"Target document format matched: '{doc_type}'",
+            "weight": doc_score,
+            "causal_link": None
+        })
+    elif doc_type and doc_type != "Unknown":
+        opposing_evidence.append({
+            "component": "DocType Validator v1.0",
+            "assertion": f"Document format '{doc_type}' lacks positive score mapping",
+            "weight": 0.0,
+            "causal_link": None
+        })
 
-    # Channel 1: Document Type
-    doc_score = scores_map.get(doc_type, 0)
-    ontology_score = sum(score for _, score in ontology_concepts)
-    concept_ids = {cid for cid, _ in ontology_concepts}
-    status_score = sum(score for _, score in ontology_statuses)
-    status_ids = {sid for sid, _ in ontology_statuses}
+    # ---------------------------------------------------------
+    # 2. Ontology Baseline Scoring
+    # ---------------------------------------------------------
+    ont_score = 0.0
+    if ontology_concepts:
+        for concept, weight in ontology_concepts:
+            ont_score += float(weight)
+            supporting_evidence.append({
+                "component": "Ontology Core Taxonomy",
+                "assertion": f"Semantic concept extracted: {concept}",
+                "weight": float(weight),
+                "causal_link": None
+            })
+    else:
+        opposing_evidence.append({
+            "component": "Ontology Core Taxonomy",
+            "assertion": "No baseline semantic concepts detected",
+            "weight": 1.0,
+            "causal_link": None
+        })
+        
+    total_score += ont_score
 
-    # Safe casting for source reliability
-    try:
-        safe_source_rel = float(source_reliability)
-        source_score = int(safe_source_rel * 0.2)
-    except (ValueError, TypeError):
-        source_score = 0
-
-    base_score = doc_score + ontology_score + status_score + source_score
-
+    # ---------------------------------------------------------
+    # 3. Deterministic Causal Rule Matrix
+    # ---------------------------------------------------------
     for rule in rules:
-        score = base_score
-        evidence_log = []
+        rule_id = rule.get("Rule ID", "UNKNOWN")
+        # Lineage Tracking: Defaults to v1.0 if not present in the Google Sheet yet
+        rule_version = rule.get("Version", "v1.0") 
+        component_tag = f"Rule {rule_id} {rule_version}"
+        
+        target_pattern = rule.get("Regex Pattern", "")
+        base_score = float(rule.get("Score", 0))
+        is_exclusion = str(rule.get("Exclusion", "")).strip().upper() == "TRUE"
+        
+        if not target_pattern:
+            continue
+            
+        try:
+            # Execute Regex with absolute character offset tracking (Causal Links)
+            regex_matches = list(re.finditer(target_pattern, raw_text, re.IGNORECASE))
+            
+            if regex_matches:
+                first_match = regex_matches[0]
+                match_text = first_match.group(0)
+                
+                # The causal link maps the decision precisely to the text coordinate
+                causal_link = {
+                    "text_start_offset": first_match.start(),
+                    "text_end_offset": first_match.end()
+                }
+                
+                if is_exclusion:
+                    # Deterministic Hard Drop via Exclusion Pattern
+                    opposing_evidence.append({
+                        "component": component_tag,
+                        "assertion": f"Terminal Exclusion triggered on string: '{match_text}'",
+                        "weight": 1.0,
+                        "causal_link": causal_link
+                    })
+                    logger.info(f"[RULES ENGINE] Hard exclusion triggered by {rule_id}")
+                    return [] # Instant exit; scores are voided
+                else:
+                    total_score += base_score
+                    supporting_evidence.append({
+                        "component": component_tag,
+                        "assertion": f"Positive pattern evaluation on string: '{match_text}'",
+                        "weight": base_score,
+                        "causal_link": causal_link
+                    })
+                    matches.append({
+                        "Rule": rule_id,
+                        "Summary": rule.get("Description", f"Pattern matched: {target_pattern}"),
+                        "Score": base_score,
+                        "MatchText": match_text,
+                        "Offsets": causal_link
+                    })
+            else:
+                # Capture explicitly negative evidence (rules that did NOT fire)
+                if not is_exclusion:
+                    opposing_evidence.append({
+                        "component": component_tag,
+                        "assertion": f"Required pattern signature missing: '{target_pattern}'",
+                        "weight": 0.0,
+                        "causal_link": None
+                    })
+                
+        except re.error as e:
+            logger.error(f"[RULES ENGINE] Invalid regex compilation in {rule_id}: {e}")
+            continue
 
-        if doc_score != 0:
-            evidence_log.append(f"Document Type: {doc_type} ({doc_score:+d})")
-        for cid, cscore in ontology_concepts:
-            evidence_log.append(f"Ontology: {cid} ({cscore:+d})")
-        for sid, sscore in ontology_statuses:
-            evidence_log.append(f"Event Status: {sid} ({sscore:+d})")
-        if source_score > 0:
-            evidence_log.append(f"Source Reliability: {safe_source_rel} ({source_score:+d})")
-
-        # Filtering: Semantic Concepts
-        semantic_raw = str(rule.get("Semantic Concepts", "")).strip().upper()
-        if semantic_raw:
-            rule_concepts = {x.strip() for x in re.split(r'[,|]', semantic_raw) if x.strip()}
-            if not rule_concepts & concept_ids:
-                continue
-
-        # Filtering: Event Status
-        status_raw = str(rule.get("Event Status", "")).strip().upper()
-        if status_raw:
-            rule_statuses = {x.strip() for x in re.split(r'[,|]', status_raw) if x.strip()}
-            if not rule_statuses & status_ids:
-                continue
-
-        # Filtering: Exclusions
-        exclusions_raw = str(rule.get("Exclusions", "")).strip()
-        if exclusions_raw:
-            exclusions = [re.escape(x.strip().lower()) for x in re.split(r'[,|]', exclusions_raw) if x.strip()]
-            if exclusions:
-                # Compile one single regex for ALL exclusions to save CPU
-                exc_pattern = re.compile(r'\b(' + '|'.join(exclusions) + r')\b')
-                if exc_pattern.search(text):
-                    continue
-
-        # Keywords Scoring
-        keywords_raw = str(rule.get("Keywords", "")).strip()
-        if keywords_raw:
-            keywords = [x.strip().lower() for x in re.split(r'[,|]', keywords_raw) if x.strip()]
-            for kw in keywords:
-                # Fast string matching before falling back to Regex boundaries
-                if kw in text and re.search(r'\b' + re.escape(kw) + r'\b', text):
-                    score += 5
-                    evidence_log.append(f"Keyword: {kw} (+5)")
-
-        # Modifiers Scoring (Now supports positive AND negative points)
-        modifiers_raw = str(rule.get("Confidence Modifiers", "")).strip()
-        if modifiers_raw:
-            mods = [x.strip().lower() for x in re.split(r'[,|]', modifiers_raw) if x.strip()]
-            for mod in mods:
-                # Regex allows '+' or '-' (e.g. "rumor -10" or "definitive agreement +20")
-                match = re.match(r"^(.+?)\s*([+-]?\d+)$", mod)
-                if match:
-                    phrase = match.group(1).strip()
-                    points = int(match.group(2))
-                    if phrase and phrase in text and re.search(r'\b' + re.escape(phrase) + r'\b', text):
-                        score += points
-                        evidence_log.append(f"Modifier: {phrase} ({points:+d})")
-
-        # Final Threshold Check
-        if score >= threshold:
-            candidate = dict(rule)
-            # CRITICAL FIX: Removed underscores to align with monitor.py expectations
-            candidate["Score"] = score
-            candidate["Evidence"] = evidence_log
-            matches.append(candidate)
-
-    matches.sort(key=lambda x: x.get("Score", 0), reverse=True)
-    return matches
+    # ---------------------------------------------------------
+    # 4. Institutional Threshold Validation
+    # ---------------------------------------------------------
+    if total_score >= threshold:
+        # Pack the aggregate score and full evidentiary DAG into the first match
+        # to preserve backward compatibility with the monitor.py signature interface.
+        if not matches:
+            # Edge case: Ontology/DocType passed the threshold, but no regex rule fired
+            matches.append({
+                "Rule": "AGGREGATE_BASELINE",
+                "Summary": "Institutional threshold satisfied entirely via Ontology/DocType baselines.",
+                "Score": total_score,
+                "MatchText": "",
+                "Offsets": None
+            })
+        
+        # Hydrate the return payload with the new SSR 2.0 Canonical Structure variables
+        matches[0]["Score"] = total_score
+        matches[0]["Evidence"] = supporting_evidence
+        matches[0]["Opposing_Evidence"] = opposing_evidence
+        return matches
+        
+    # Score fell below threshold; returns empty list acting as a silent deterministic drop
+    return []
