@@ -574,11 +574,33 @@ def main():
         is_enabled = str(source.get("Enabled", "")).upper() == "TRUE"
         source_name = source.get("Source", "Unknown")
         rss_url = source.get("RSS URL", "")
-        triage_all = str(source.get("Triage All (Email Rejections)", "")).strip().upper() == "TRUE"
-        country = source.get("Country", "")
-        language = source.get("Language", "")
         
-        if is_enabled:
+        # Get last checked time and calculate window threshold
+        last_checked_str = source.get("Last Checked", "")
+        try:
+            if last_checked_str:
+                # Handle both timestamp and simple date formats
+                if '-' in last_checked_str and len(last_checked_str.split()[0]) == 10:
+                    last_checked = datetime.datetime.strptime(last_checked_str.split()[0], "%Y-%m-%d")
+                else:
+                    last_checked = datetime.datetime.strptime(last_checked_str, "%Y-%m-%d %H:%M:%S GMT")
+            else:
+                last_checked = datetime.datetime.utcnow() - datetime.timedelta(days=7)
+        except:
+            last_checked = datetime.datetime.utcnow() - datetime.timedelta(days=7)
+            
+        # Check frequency in hours (default to 24 if missing)
+        frequency_hours = int(source.get("Check Frequency", "24"))
+        cutoff_dt = datetime.datetime.utcnow() - datetime.timedelta(hours=frequency_hours)
+        
+        # Only process if enough time has passed OR if it's the first run (no last checked)
+        should_process = (not last_checked_str) or (last_checked < cutoff_dt)
+        
+        if is_enabled and should_process:
+            triage_all = str(source.get("Triage All (Email Rejections)", "")).strip().upper() == "TRUE"
+            country = source.get("Country", "")
+            language = source.get("Language", "")
+            
             scraper = get_scraper_for_source(source_name)
             method_used = None
             parsed = []
@@ -597,6 +619,8 @@ def main():
                         all_new_articles.extend(parsed)
                         source_stats[source_name] = {"count": parsed_count, "new": len(parsed), "method": method_used}
                         print(f" [INGESTION] {source_name}: {parsed_count} fetched, {len(parsed)} new ({method_used})")
+                        # Update last checked time in Google Sheets
+                        update_last_checked(SHEET_URL, source_name)
                 except Exception as e:
                     print(f" [WARNING] HTML Scraper failed for {source_name}: {e}. Falling back to RSS...")
                     
@@ -608,8 +632,21 @@ def main():
                     all_new_articles.extend(parsed)
                     source_stats[source_name] = {"count": parsed_count, "new": len(parsed), "method": method_used}
                     print(f" [INGESTION] {source_name}: {parsed_count} fetched, {len(parsed)} new ({method_used})")
+                    # Update last checked time in Google Sheets
+                    update_last_checked(SHEET_URL, source_name)
                 except Exception as e:
                     print(f" [ERROR] RSS Ingestion failed for {source_name}: {e}")
+                    
+            if not method_used:
+                print(f" [INFO] {source_name} skipped: No new content or parsing errors.")
+                try:
+                    save_exception_log(
+                        error=f"Scraper {source_name} failed to fetch content (RSS: {rss_url or 'N/A'})."
+                    )
+                except Exception:
+                    pass
+        elif is_enabled:
+            print(f" [SKIP] {source_name} is on frequency {frequency_hours}h. Last checked: {last_checked_str}")
 
     clusters = cluster_articles(all_new_articles)
     clusters_by_source = defaultdict(list)
