@@ -4,7 +4,7 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>SSR Operations Centre & Tuning Dashboard</title>
+        <title>SSR Decision Centre</title>
         <style>
 
         :root {
@@ -53,11 +53,12 @@
         .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 16px 18px; }
         .card.span2 { grid-column: span 2; }
         .card h2 {
-            margin: 0 0 12px; font-size: 1em; color: #fff; border-bottom: 1px solid var(--border);
-            padding-bottom: 9px; text-transform: uppercase; letter-spacing: 0.5px;
+            margin: 0 0 4px; font-size: 1em; color: #fff; padding-bottom: 0;
+            text-transform: uppercase; letter-spacing: 0.5px;
             display: flex; justify-content: space-between; align-items: center; font-weight: 700;
         }
         .card h2 small { color: var(--muted); font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 0.85em; }
+        .question-title { font-size: 0.82em; color: var(--muted); font-style: italic; margin: 2px 0 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
 
         .tile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
         .stat-tile {
@@ -81,7 +82,6 @@
         tr.clickable { cursor: pointer; }
         tr.clickable:hover { background: var(--surface-hover); }
 
-        /* Pipeline funnel */
         .funnel { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
         .funnel-node {
             flex: 1; min-width: 120px; background: var(--surface-subtle); border: 1px solid var(--border);
@@ -94,6 +94,56 @@
         .funnel-node.terminal { border-color: var(--green); }
         .funnel-node.terminal .fn-value { color: var(--green); }
         .funnel-arrow { align-self: center; color: var(--border); font-size: 1.2em; }
+
+        .loss-funnel { display: flex; flex-direction: column; }
+        .loss-row {
+            display: grid; grid-template-columns: 170px 1fr 90px 110px 90px; gap: 12px; align-items: center;
+            padding: 9px 2px; border-bottom: 1px solid var(--surface-subtle); text-decoration: none; color: var(--text);
+        }
+        .loss-row:hover { background: var(--surface-hover); }
+        .loss-row .lr-name { font-weight: 600; font-size: 0.86em; }
+        .loss-row .lr-bar-wrap { background: var(--surface-subtle); border-radius: 3px; height: 15px; overflow: hidden; }
+        .loss-row .lr-bar { background: var(--blue); height: 100%; }
+        .loss-row.terminal .lr-bar { background: var(--green); }
+        .loss-row.loss .lr-bar { background: var(--orange); }
+        .loss-row .lr-count { font-family: var(--mono); text-align: right; font-size: 0.85em; }
+        .loss-row .lr-stage-pct { font-family: var(--mono); text-align: right; font-size: 0.8em; color: var(--muted); }
+        .loss-row .lr-yield-pct { font-family: var(--mono); text-align: right; font-size: 0.85em; font-weight: 700; }
+        .loss-row.head { color: var(--muted); text-transform: uppercase; font-size: 0.64em; letter-spacing: 0.4px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+        .loss-row.head:hover { background: none; }
+        .funnel-note { font-size: 0.78em; color: var(--muted); margin-top: 10px; font-style: italic; }
+
+        /* KPI hero */
+        .kpi-hero { display: flex; align-items: flex-start; gap: 32px; flex-wrap: wrap; }
+        .kpi-number { font-family: var(--mono); font-size: 3.1em; font-weight: 800; color: #fff; line-height: 1; }
+        .kpi-number.good { color: var(--green); } .kpi-number.bad { color: var(--red); } .kpi-number.warn { color: var(--yellow); }
+        .kpi-label { font-size: 0.75em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.5px; margin-bottom: 8px; }
+        .kpi-trend { font-family: var(--mono); font-size: 0.95em; margin-top: 8px; }
+        .kpi-trend.good { color: var(--green); } .kpi-trend.bad { color: var(--red); } .kpi-trend.neutral { color: var(--muted); }
+        .kpi-context-row { display: flex; gap: 26px; flex-wrap: wrap; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); width: 100%; }
+        .kpi-context-item .cx-label { font-size: 0.68em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.3px; }
+        .kpi-context-item .cx-value { font-family: var(--mono); font-weight: 700; font-size: 1.05em; margin-top: 2px; }
+        .kpi-side { flex: 1; min-width: 220px; }
+
+        /* Engineering telemetry sub-sections within one consolidated card */
+        .telemetry-sub { margin-top: 18px; }
+        .telemetry-sub:first-child { margin-top: 0; }
+        .telemetry-sub-label { font-size: 0.7em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.5px; margin-bottom: 8px; font-weight: 700; }
+
+        /* Decision Report (archive drill-down) */
+        .dr-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 4px; }
+        .dr-col h4 { margin: 0 0 6px; font-size: 0.7em; text-transform: uppercase; letter-spacing: 0.4px; }
+        .dr-col.pos h4 { color: var(--green); } .dr-col.neg h4 { color: var(--red); }
+        .dr-list { list-style: none; margin: 0; padding: 0; font-size: 0.82em; }
+        .dr-list li { padding: 3px 0; }
+        .dr-list li.empty { color: var(--muted); font-style: italic; }
+        .dr-meta-row { display: flex; gap: 26px; flex-wrap: wrap; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); font-size: 0.8em; }
+        .dr-meta-item .dm-label { color: var(--muted); font-size: 0.7em; text-transform: uppercase; }
+        .dr-meta-item .dm-value { font-family: var(--mono); margin-top: 2px; }
+
+        .deep-link-row { display: flex; justify-content: space-between; align-items: center; }
+        .deep-link { background: var(--blue); color: #fff !important; padding: 7px 14px; border-radius: 5px; text-decoration: none; font-size: 0.82em; font-weight: 700; white-space: nowrap; }
+        .deep-link:hover { opacity: 0.9; text-decoration: none; }
 
         .feed-row { display: grid; grid-template-columns: 1.6fr 0.8fr 0.8fr 0.7fr 0.7fr; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--surface-subtle); font-size: 0.85em; align-items: center; }
         .feed-row.head { color: var(--muted); text-transform: uppercase; font-size: 0.68em; letter-spacing: 0.4px; }
@@ -108,83 +158,106 @@
     </head>
     <body>
         <div class="container">
+            
             <div class="nav-tabs">
-                <a href="index.html" class="active">Operations Centre & Tuning</a>
-                <a href="archive.html">Immutable Event Ledger</a>
+                <a href="index.html" class="active">Decision Centre</a>
+                <a href="decision_analytics.html" class="">Decision Analytics</a>
+                <a href="archive.html" class="">Immutable Event Ledger</a>
             </div>
 
-            <header style="border-left-color: var(--green);">
+            <header style="border-left-color: var(--border);">
                 <div>
-                    <h1>SSR Operations Centre <span class="badge success">HEALTHY</span></h1>
+                    <h1>SSR Decision Centre <span class="badge awaiting">AWAITING DATA</span></h1>
                     <div class="subline">
-                        Run ID: 30794507811 &bull; Flight Recorder Active &bull; Generated 2026-08-03 07:43:30 UTC &bull; Latency: 134.1s
+                        Run ID: 30804420968 &bull; Flight Recorder Active &bull; Generated 2026-08-03 10:12:29 UTC &bull; Latency: 147.7s
                     </div>
                 </div>
                 <div style="text-align: right;">
-                    <div style="font-size: 1.1em;">System Confidence: <strong>99.4%</strong></div>
+                    <div style="font-size: 1.1em;">System Confidence: <strong>Awaiting Data</strong></div>
+                    <div class="subline">Last Successful Run: Awaiting Data</div>
                 </div>
             </header>
 
-            <div class="section-title">System Health</div>
-            <div class="card"><div class="tile-grid"><div class="stat-tile"><div class="stat-label">Overall Health</div><div class="stat-value"><span class="badge success">HEALTHY</span></div></div><div class="stat-tile"><div class="stat-label">Scheduler</div><div class="stat-value"><span class="badge awaiting">AWAITING DATA</span></div></div><div class="stat-tile"><div class="stat-label">Feed Health</div><div class="stat-value"><span class="badge awaiting">AWAITING DATA</span></div></div>
-                <div class="stat-tile stat-awaiting">
-                    <div class="stat-label">Queue</div>
-                    <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
+            <div class="grid" style="grid-template-columns: 1fr;">
+                <div class="card">
+                    <h2>Opportunity Capture</h2>
+                    <div class="question-title">Are we catching the opportunities that matter?</div>
                     
-                </div><div class="stat-tile"><div class="stat-label">AI Status</div><div class="stat-value"><span class="badge awaiting">AWAITING DATA</span></div></div><div class="stat-tile"><div class="stat-label">Database</div><div class="stat-value"><span class="badge awaiting">AWAITING DATA</span></div></div><div class="stat-tile"><div class="stat-label">Validation Status</div><div class="stat-value"><span class="badge awaiting">AWAITING DATA</span></div></div><div class="stat-tile"><div class="stat-label">GitHub Actions</div><div class="stat-value"><span class="badge awaiting">AWAITING DATA</span></div></div>
-                <div class="stat-tile stat-neutral">
-                    <div class="stat-label">Last Successful Run</div>
-                    <div class="stat-value">2026-08-03 07:43:30 UTC</div>
-                    
+                <div class="kpi-hero">
+                    <div>
+                        <div class="kpi-label">Opportunity Capture Rate</div>
+                        <div class="kpi-number "><span class="awaiting" style="font-size:0.4em;">Awaiting Data</span></div>
+                        <div class="kpi-trend neutral">No 30-day baseline reported yet &mdash; trend unavailable</div>
+                    </div>
+                    <div class="kpi-side">
+                        <div class="kpi-context-row"><div class="kpi-context-item"><div class="cx-label">False Positive Rate</div><div class="cx-value">Awaiting Data</div></div><div class="kpi-context-item"><div class="cx-label">False Negative Rate</div><div class="cx-value">Awaiting Data</div></div><div class="kpi-context-item"><div class="cx-label">Avg Detection Delay</div><div class="cx-value">Awaiting Data</div></div><div class="kpi-context-item"><div class="cx-label">Benchmark Lead</div><div class="cx-value">Awaiting Data</div></div><div class="kpi-context-item"><div class="cx-label">Validation Status</div><div class="cx-value"><span class="badge awaiting">AWAITING DATA</span></div></div></div>
+                    </div>
                 </div>
+                </div>
+
+                <div class="card">
+                    <h2>Where Opportunities Are Won and Lost</h2>
+                    <div class="question-title">At which stage does the pipeline throw away the most signal, and how much of it is real loss vs. correct rejection?</div>
+                    <div class="empty-note">Awaiting Data &mdash; the pipeline has not reported a Downloaded total for this run, so stage conversion rates can't be computed yet.</div>
+                    <div class="funnel-note">This funnel only covers articles the system downloaded. Opportunities the system never saw at all are tracked separately as the False Negative Rate above.</div>
+
+                    <div class="section-title" style="margin-top: 24px;">Source Effectiveness <small>click a source to inspect it in the ledger</small></div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Source</th><th>Articles</th><th>Alerts</th><th>Capture Share</th>
+                                <th>Alert %</th><th>Ontology %</th><th>Rules %</th><th>Failures</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <tr class="clickable" onclick="window.location='archive.html?source=Reuters'">
+                            <td><strong>Reuters</strong></td>
+                            <td class="metric-val">6412</td>
+                            <td class="metric-val">92</td>
+                            <td class="metric-val">29.7%</td>
+                            <td class="metric-val">1.4%</td>
+                            <td class="metric-val">18%</td>
+                            <td class="metric-val">5%</td>
+                            <td class="metric-val" style="color: var(--green);">0</td>
+                        </tr>
+                        <tr class="clickable" onclick="window.location='archive.html?source=SEC EDGAR'">
+                            <td><strong>SEC EDGAR</strong></td>
+                            <td class="metric-val">8921</td>
+                            <td class="metric-val">142</td>
+                            <td class="metric-val">45.8%</td>
+                            <td class="metric-val">0.16%</td>
+                            <td class="metric-val">2%</td>
+                            <td class="metric-val">0.5%</td>
+                            <td class="metric-val" style="color: var(--green);">0</td>
+                        </tr>
+                        <tr class="clickable" onclick="window.location='archive.html?source=PR Newswire'">
+                            <td><strong>PR Newswire</strong></td>
+                            <td class="metric-val">5123</td>
+                            <td class="metric-val">76</td>
+                            <td class="metric-val">24.5%</td>
+                            <td class="metric-val">1.5%</td>
+                            <td class="metric-val">24%</td>
+                            <td class="metric-val">9%</td>
+                            <td class="metric-val" style="color: var(--red);">3</td>
+                        </tr></tbody>
+                    </table>
+                </div>
+
+                <div class="card">
+                    <h2>Engineering Telemetry</h2>
+                    <div class="question-title">Is the pipeline itself healthy enough that the numbers above can be trusted, and where are the bottlenecks?</div>
+                    <div class="telemetry-sub">
+                        <div class="telemetry-sub-label">Component Status</div>
+                        <div class="tile-grid"><div class="stat-tile"><div class="stat-label">Scheduler</div><div class="stat-value"><span class="badge awaiting">AWAITING DATA</span></div></div><div class="stat-tile"><div class="stat-label">Feed Health</div><div class="stat-value"><span class="badge awaiting">AWAITING DATA</span></div></div><div class="stat-tile"><div class="stat-label">AI Status</div><div class="stat-value"><span class="badge awaiting">AWAITING DATA</span></div></div><div class="stat-tile"><div class="stat-label">Database</div><div class="stat-value"><span class="badge awaiting">AWAITING DATA</span></div></div><div class="stat-tile"><div class="stat-label">GitHub Actions</div><div class="stat-value"><span class="badge awaiting">AWAITING DATA</span></div></div>
                 <div class="stat-tile stat-awaiting">
                     <div class="stat-label">Uptime</div>
                     <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
                     
-                </div></div></div>
-
-            <div class="section-title">Pipeline Funnel &mdash; click a stage to inspect it in the ledger</div>
-            <div class="card"><div class="funnel"><a class="funnel-node" href="archive.html?stage=downloaded" title="Open ledger filtered to this stage"><div class="fn-label">Downloaded</div><div class="fn-value"><span class="awaiting">Awaiting Data</span></div></a><div class="funnel-arrow">&rarr;</div><a class="funnel-node" href="archive.html?stage=Deduplication" title="Open ledger filtered to this stage"><div class="fn-label">Duplicate</div><div class="fn-value"><span class="awaiting">Awaiting Data</span></div></a><div class="funnel-arrow">&rarr;</div><a class="funnel-node" href="archive.html?stage=Parsed" title="Open ledger filtered to this stage"><div class="fn-label">Parsed</div><div class="fn-value"><span class="awaiting">Awaiting Data</span></div></a><div class="funnel-arrow">&rarr;</div><a class="funnel-node" href="archive.html?stage=Ontology Reject" title="Open ledger filtered to this stage"><div class="fn-label">Ontology</div><div class="fn-value"><span class="awaiting">Awaiting Data</span></div></a><div class="funnel-arrow">&rarr;</div><a class="funnel-node" href="archive.html?stage=Rules Reject" title="Open ledger filtered to this stage"><div class="fn-label">Rules</div><div class="fn-value"><span class="awaiting">Awaiting Data</span></div></a><div class="funnel-arrow">&rarr;</div><a class="funnel-node" href="archive.html?stage=AI Reject" title="Open ledger filtered to this stage"><div class="fn-label">AI</div><div class="fn-value"><span class="awaiting">Awaiting Data</span></div></a><div class="funnel-arrow">&rarr;</div><a class="funnel-node terminal" href="archive.html?stage=DISPATCHED" title="Open ledger filtered to this stage"><div class="fn-label">Alerts</div><div class="fn-value"><span class="awaiting">Awaiting Data</span></div></a></div></div>
-
-            <div class="grid" style="margin-top: 16px;">
-                <div class="card">
-                    <h2>Validation</h2>
-                    <div class="tile-grid">
-                <div class="stat-tile stat-awaiting">
-                    <div class="stat-label">Opportunity Capture Rate</div>
-                    <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
-                    
-                </div>
-                <div class="stat-tile stat-awaiting">
-                    <div class="stat-label">False Positive Rate</div>
-                    <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
-                    
-                </div>
-                <div class="stat-tile stat-awaiting">
-                    <div class="stat-label">False Negative Rate</div>
-                    <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
-                    
-                </div>
-                <div class="stat-tile stat-awaiting">
-                    <div class="stat-label">Avg Detection Delay</div>
-                    <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
-                    
-                </div>
-                <div class="stat-tile stat-awaiting">
-                    <div class="stat-label">Benchmark Lead</div>
-                    <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
-                    
-                </div><div class="stat-tile"><div class="stat-label">Validation</div><div class="stat-value"><span class="badge awaiting">AWAITING DATA</span></div></div></div>
-                </div>
-
-                <div class="card">
-                    <h2>Performance</h2>
-                    <div class="tile-grid">
-                <div class="stat-tile stat-awaiting">
-                    <div class="stat-label">Articles / Hour</div>
-                    <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
-                    
-                </div>
+                </div></div>
+                    </div>
+                    <div class="telemetry-sub">
+                        <div class="telemetry-sub-label">Latency &mdash; drives Detection Delay and Benchmark Lead above</div>
+                        <div class="tile-grid">
                 <div class="stat-tile stat-awaiting">
                     <div class="stat-label">Avg Parse Time</div>
                     <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
@@ -196,12 +269,12 @@
                     
                 </div>
                 <div class="stat-tile stat-neutral">
-                    <div class="stat-label">Avg End-to-End Time</div>
-                    <div class="stat-value">134.12s</div>
+                    <div class="stat-label">Avg End-to-End</div>
+                    <div class="stat-value">147.68s</div>
                     
                 </div>
                 <div class="stat-tile stat-awaiting">
-                    <div class="stat-label">Alerts / Day</div>
+                    <div class="stat-label">Queue Depth</div>
                     <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
                     
                 </div>
@@ -211,58 +284,14 @@
                     
                 </div>
                 <div class="stat-tile stat-awaiting">
-                    <div class="stat-label">Queue Depth</div>
+                    <div class="stat-label">Articles / Hour</div>
                     <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
                     
                 </div></div>
-                </div>
-
-                <div class="card span2">
-                    <h2>Source Analytics <small>click a source to inspect it in the ledger</small></h2>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Source</th><th>Articles</th><th>Alerts</th><th>Alert %</th>
-                                <th>Ontology %</th><th>Rules %</th><th>Avg Runtime</th><th>Failures</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        <tr class="clickable" onclick="window.location='archive.html?source=Reuters'">
-                            <td><strong>Reuters</strong></td>
-                            <td class="metric-val">6412</td>
-                            <td class="metric-val">92</td>
-                            <td class="metric-val">1.4%</td>
-                            <td class="metric-val">18%</td>
-                            <td class="metric-val">5%</td>
-                            <td class="metric-val">1.2s</td>
-                            <td class="metric-val" style="color: var(--green);">0</td>
-                        </tr>
-                        <tr class="clickable" onclick="window.location='archive.html?source=SEC EDGAR'">
-                            <td><strong>SEC EDGAR</strong></td>
-                            <td class="metric-val">8921</td>
-                            <td class="metric-val">142</td>
-                            <td class="metric-val">0.16%</td>
-                            <td class="metric-val">2%</td>
-                            <td class="metric-val">0.5%</td>
-                            <td class="metric-val">0.4s</td>
-                            <td class="metric-val" style="color: var(--green);">0</td>
-                        </tr>
-                        <tr class="clickable" onclick="window.location='archive.html?source=PR Newswire'">
-                            <td><strong>PR Newswire</strong></td>
-                            <td class="metric-val">5123</td>
-                            <td class="metric-val">76</td>
-                            <td class="metric-val">1.5%</td>
-                            <td class="metric-val">24%</td>
-                            <td class="metric-val">9%</td>
-                            <td class="metric-val">0.9s</td>
-                            <td class="metric-val" style="color: var(--red);">3</td>
-                        </tr></tbody>
-                    </table>
-                </div>
-
-                <div class="card">
-                    <h2>Errors</h2>
-                    <div class="tile-grid">
+                    </div>
+                    <div class="telemetry-sub">
+                        <div class="telemetry-sub-label">Errors &amp; Retries</div>
+                        <div class="tile-grid">
                 <div class="stat-tile stat-awaiting">
                     <div class="stat-label">Parser</div>
                     <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
@@ -298,15 +327,26 @@
                     <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
                     
                 </div></div>
+                    </div>
+                    <div class="telemetry-sub">
+                        <div class="telemetry-sub-label">Feed Freshness</div>
+                        <div class="empty-note">Awaiting Data &mdash; no per-feed telemetry reported for this run.</div>
+                    </div>
                 </div>
 
                 <div class="card">
-                    <h2>Feed Health</h2>
-                    <div class="empty-note">Awaiting Data — no per-feed telemetry reported for this run.</div>
+                    <div class="deep-link-row">
+                        <div>
+                            <h2 style="border-bottom:none;">Decision Analytics</h2>
+                            <div class="question-title">Which specific rules, ontology concepts and AI calls are earning their keep, and which are dragging on Capture Rate?</div>
+                        </div>
+                        <a class="deep-link" href="decision_analytics.html">Open Decision Analytics &rarr;</a>
+                    </div>
                 </div>
 
-                <div class="card span2">
-                    <h2>Recent Activity</h2>
+                <div class="card">
+                    <h2>Live Activity</h2>
+                    <div class="question-title">What is the pipeline doing right now?</div>
                     <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
                         <div>
                             <div class="section-title" style="margin-top: 0;">Latest Processed</div>
@@ -321,28 +361,6 @@
                             <div class="empty-note">No failures logged for this run.</div>
                         </div>
                     </div>
-                </div>
-
-                <div class="card">
-                    <h2>Rule Analytics <small>earned utility</small></h2>
-                    <table>
-                        <thead><tr><th>Rule ID</th><th>Evaluated</th><th>Matched</th><th>Alerts</th><th>False Neg</th></tr></thead>
-                        <tbody><tr><td>R-17 (Board Ref)</td><td class="metric-val">1820</td>
-                <td class="metric-val">412</td><td class="metric-val">38</td>
-                <td class="metric-val">1</td></tr><tr><td>R-22 (Liquidation)</td><td class="metric-val">1820</td>
-                <td class="metric-val">89</td><td class="metric-val">42</td>
-                <td class="metric-val">0</td></tr><tr><td>R-04 (Cap Threshold)</td><td class="metric-val">1820</td>
-                <td class="metric-val">1410</td><td class="metric-val">12</td>
-                <td class="metric-val">2</td></tr></tbody>
-                    </table>
-                </div>
-
-                <div class="card">
-                    <h2>Ontology Concept Conversion</h2>
-                    <table>
-                        <thead><tr><th>Concept</th><th>Frequency</th><th>Conversion %</th></tr></thead>
-                        <tbody><tr><td>Voluntary Delisting</td><td class="metric-val">312</td><td class="metric-val" style="color: var(--green);">28.2%</td></tr><tr><td>Strategic Review</td><td class="metric-val">1420</td><td class="metric-val" style="color: var(--text);">4.1%</td></tr><tr><td>Tender Offer</td><td class="metric-val">184</td><td class="metric-val" style="color: var(--green);">41.8%</td></tr></tbody>
-                    </table>
                 </div>
             </div>
         </div>
