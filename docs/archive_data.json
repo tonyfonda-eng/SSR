@@ -1,5 +1,23 @@
 [
   {
+    "id": "20260803672484",
+    "timestamp": "2026-08-03 15:28:51 UTC",
+    "source": "Business Wire",
+    "headline": "BitGo\u63a8\u51faLink\uff0c\u70ba\u6a5f\u69cb\u63d0\u4f9b\u55ae\u4e00\u7121\u570b\u754c\u7684\u8cc7\u672c\u6d41\u52d5\u7db2\u8def",
+    "url": "http://www.businesswire.com/news/home/20260803672484/zh-HK/",
+    "country": "RSS/HTML",
+    "language": "",
+    "document_type": "",
+    "issuer": "BITGO",
+    "event_family": "Unknown",
+    "pipeline_stage": "Rules Engine",
+    "outcome": "Dropped",
+    "reason": "Failed Rules Threshold",
+    "ai_invoked": 0,
+    "processing_time": "1877ms",
+    "slowest_stage": "Ontology"
+  },
+  {
     "id": "20260803285348",
     "timestamp": "2026-08-03 15:24:02 UTC",
     "source": "Business Wire",
