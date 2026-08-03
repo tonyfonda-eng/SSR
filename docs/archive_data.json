@@ -1,13 +1,20 @@
 [
   {
-    "headline": "Awaiting Live Market Signals...",
-    "url": "#",
-    "timestamp": "2026-08-03 17:16:36 GMT",
-    "source": "System Core",
-    "outcome": "INITIALIZED",
-    "pipeline_stage": "Ingestion Window",
-    "reason": "Pipeline is active. Awaiting fresh intraday filings.",
-    "processing_time": "N/A",
-    "issuer": "N/A"
+    "id": "20260730013133",
+    "timestamp": "2026-08-03 17:26:36 UTC",
+    "source": "Business Wire",
+    "headline": "Textron Declares Quarterly Dividend",
+    "url": "http://www.businesswire.com/news/home/20260730013133/en/Textron-Declares-Quarterly-Dividend/",
+    "country": "RSS/HTML",
+    "language": "",
+    "document_type": "",
+    "issuer": "Unknown",
+    "event_family": "Unknown",
+    "pipeline_stage": "Issuer Extraction",
+    "outcome": "Dropped",
+    "reason": "AI Exhausted",
+    "ai_invoked": 0,
+    "processing_time": "18ms",
+    "slowest_stage": "Issuer Extraction"
   }
 ]
