@@ -1,5 +1,23 @@
 [
   {
+    "id": "20260803085999",
+    "timestamp": "2026-08-03 17:04:14 UTC",
+    "source": "Business Wire",
+    "headline": "Transflo Names Ray Morel Chief Financial Officer",
+    "url": "http://www.businesswire.com/news/home/20260803085999/en/Transflo-Names-Ray-Morel-Chief-Financial-Officer/",
+    "country": "RSS/HTML",
+    "language": "",
+    "document_type": "",
+    "issuer": "TRANSFLO",
+    "event_family": "Unknown",
+    "pipeline_stage": "Rules Engine",
+    "outcome": "Dropped",
+    "reason": "Failed Rules Threshold (Score < 10)",
+    "ai_invoked": 0,
+    "processing_time": "1122ms",
+    "slowest_stage": "Ontology"
+  },
+  {
     "id": "20260803709999",
     "timestamp": "2026-08-03 16:58:45 UTC",
     "source": "Business Wire",

@@ -1,17 +1,17 @@
 {
   "system_status": "OPERATIONAL",
   "uptime": "99.9%",
-  "last_sync_gmt": "2026-08-03 16:58:46 GMT",
-  "total_processed_today": 205,
+  "last_sync_gmt": "2026-08-03 17:04:17 GMT",
+  "total_processed_today": 206,
   "total_alerts_dispatched": 0,
-  "run_id": "SSR-OP-26080316",
+  "run_id": "SSR-OP-26080317",
   "health_score": 100,
   "system_confidence": 0.85,
   "total_runtime_s": 129.775982719,
   "dynamic_sources": [
     {
       "source": "Business Wire",
-      "articles": 205,
+      "articles": 206,
       "alerts": 0,
       "ontology_pct": 0.0,
       "rules_pct": 0.0,
