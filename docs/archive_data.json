@@ -1,5 +1,23 @@
 [
   {
+    "id": "20260803442408",
+    "timestamp": "2026-08-03 16:24:11 UTC",
+    "source": "Business Wire",
+    "headline": "InfraTech Capital Expands Investment Strategy to Build a Diversified Infrastructure Platform Across Digital Infrastructure, Energy and Real Assets",
+    "url": "http://www.businesswire.com/news/home/20260803442408/en/InfraTech-Capital-Expands-Investment-Strategy-to-Build-a-Diversified-Infrastructure-Platform-Across-Digital-Infrastructure-Energy-and-Real-Assets/",
+    "country": "RSS/HTML",
+    "language": "",
+    "document_type": "",
+    "issuer": "INFRATECH CAPITAL",
+    "event_family": "Unknown",
+    "pipeline_stage": "Rules Engine",
+    "outcome": "Dropped",
+    "reason": "Failed Rules Threshold (Score < 10)",
+    "ai_invoked": 0,
+    "processing_time": "1468ms",
+    "slowest_stage": "Ontology"
+  },
+  {
     "id": "20260803509155",
     "timestamp": "2026-08-03 16:05:42 UTC",
     "source": "Business Wire",
