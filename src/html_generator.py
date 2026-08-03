@@ -577,9 +577,9 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
                 f'<div class="feed-row">'
                 f'<div>{esc(_bag(f, "name"))}</div>'
                 f'<div>{status_badge(_bag(f, "status"))}</div>'
-                f'<div>{esc(_bag(f, "latency", "\u2014"))}</div>'
-                f'<div>{esc(_bag(f, "failures", "\u2014"))}</div>'
-                f'<div>{esc(_bag(f, "retries", "\u2014"))}</div>'
+                f'<div>{esc(_bag(f, "latency", "-"))}</div>'
+                f'<div>{esc(_bag(f, "failures", "-"))}</div>'
+                f'<div>{esc(_bag(f, "retries", "-"))}</div>'
                 f'</div>'
             )
     else:
