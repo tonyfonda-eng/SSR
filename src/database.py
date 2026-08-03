@@ -181,12 +181,11 @@ def save_workflow_health(health_data=None):
         pass
 
 def save_lifecycle_logs(logs):
-    """Converts the raw tuples from monitor.py into JSON text for the Archive to read."""
+    """Converts the raw tuples from monitor.py into JSON text for the Archive HTML to read."""
     try:
         conn = sqlite3.connect(DB_PATH)
         dicts = []
         for l in logs:
-            # Reconstruct the dictionary payload for HTML generation
             d = {
                 "id": l[0], "timestamp": l[1], "source": l[2], "headline": l[3], 
                 "url": l[4], "country": l[5], "language": l[6], "document_type": l[7], 
