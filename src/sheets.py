@@ -6,12 +6,10 @@ import gspread
 from google.oauth2.service_account import Credentials
 
 # --- GLOBAL CACHE ---
-# Prevents authenticating and downloading the spreadsheet manifest 8x per run.
 _cached_client = None
 _cached_spreadsheet = None
 
 def get_client():
-    """Initializes and returns an authorized gspread client using environment variables."""
     global _cached_client
     if _cached_client is not None:
         return _cached_client
@@ -33,7 +31,6 @@ def get_client():
     return _cached_client
 
 def get_spreadsheet(sheet_url):
-    """Returns the spreadsheet object, utilizing the global cache to save API quotas."""
     global _cached_spreadsheet
     if _cached_spreadsheet is not None:
         return _cached_spreadsheet
@@ -43,10 +40,6 @@ def get_spreadsheet(sheet_url):
     return _cached_spreadsheet
 
 def _safe_get_records(sheet_url, sheet_names, retries=3, backoff=2.0):
-    """
-    Bulletproof helper to fetch records with automatic retries for ephemeral Google API 500/503 errors.
-    Accepts a list of sheet names to handle schema naming variations smoothly.
-    """
     spreadsheet = get_spreadsheet(sheet_url)
     
     for attempt in range(retries):
@@ -55,16 +48,14 @@ def _safe_get_records(sheet_url, sheet_names, retries=3, backoff=2.0):
                 worksheet = spreadsheet.worksheet(name)
                 return worksheet.get_all_records()
             except gspread.exceptions.WorksheetNotFound:
-                continue # Try the next name variation
+                continue 
             except Exception as e:
                 if attempt == retries - 1:
                     print(f"[ERROR] Failed to fetch '{name}' after {retries} attempts: {e}")
                 else:
                     time.sleep(backoff * (attempt + 1))
                     
-    return [] # Safe fallback instead of crashing the pipeline
-
-# --- READ OPERATIONS (Now utilizing the cached, retry-enabled helper) ---
+    return [] 
 
 def load_rules(sheet_url):
     return _safe_get_records(sheet_url, ["Rules"])
@@ -82,15 +73,9 @@ def load_gold_standards(sheet_url):
     return _safe_get_records(sheet_url, ["GoldStandards", "Gold Standards"])
 
 def load_daily_memory(sheet_url, *args, **kwargs):
-    """
-    Hardened replacement for load_daily_memory. Uses get_all_values() 
-    to bypass malformed gspread record dictionaries, parses literal text, 
-    and flushes data automatically if the day has changed.
-    """
     spreadsheet = get_spreadsheet(sheet_url)
     worksheet = None
     
-    # Locate worksheet variations safely
     for name in ["DailyMemory", "Daily Memory"]:
         try:
             worksheet = spreadsheet.worksheet(name)
@@ -101,7 +86,6 @@ def load_daily_memory(sheet_url, *args, **kwargs):
     if not worksheet:
         return []
 
-    # Pull brute-force raw string lists to completely ignore header string mashups
     raw_rows = worksheet.get_all_values()
     if not raw_rows or len(raw_rows) <= 1:
         return []
@@ -110,7 +94,6 @@ def load_daily_memory(sheet_url, *args, **kwargs):
     current_date_str = datetime.datetime.utcnow().strftime("%Y-%m-%d")
     should_flush = False
 
-    # Skip header row (index 0)
     for row in raw_rows[1:]:
         if not row or len(row) < 1:
             continue
@@ -121,27 +104,23 @@ def load_daily_memory(sheet_url, *args, **kwargs):
         if not issuer_name:
             continue
 
-        # Check if the date belongs to a previous calendar day to trigger automated daily flush
         if timestamp_raw and current_date_str not in timestamp_raw:
             should_flush = True
         
-        # Build clean output format for monitor.py duplicate evaluation loop
         processed_records.append({
             "issuer": issuer_name,
             "timestamp": timestamp_raw
         })
 
-    # AUTOMATED FLUSH: If old dates are caught, reset the worksheet immediately
     if should_flush:
         print(f"[DAILY MEMORY] New calendar day detected ({current_date_str}). Auto-flushing stale weekend rows...")
         try:
             worksheet.clear()
-            worksheet.append_row(["Issuer", "Timestamp"]) # Re-seed clean columns
-            return [] # Memory is cleared for the new day's hunting window
+            worksheet.append_row(["Issuer", "Timestamp"]) 
+            return [] 
         except Exception as e:
             print(f"[ERROR] Failed to execute automated daily memory flush: {e}")
 
-    # Map output explicitly so `monitor.py` reads a healthy tracking count
     print(f"[DAILY MEMORY] Cleanly loaded {len(processed_records)} active tracking issuers from Google Sheets.")
     return processed_records
 
@@ -160,10 +139,7 @@ def load_semantic_concepts(sheet_url):
 def load_event_statuses(sheet_url):
     return _safe_get_records(sheet_url, ["Event Status", "EventStatus"])
 
-# --- WRITE OPERATIONS (Hardened against API exhaustion) ---
-
 def append_to_research_queue(sheet_url, data_row):
-    """Fallback single-row append. Highly recommend batch_append_to_research_queue instead."""
     spreadsheet = get_spreadsheet(sheet_url)
     try:
         worksheet = spreadsheet.worksheet("ResearchQueue")
@@ -185,10 +161,6 @@ def append_to_research_queue(sheet_url, data_row):
     worksheet.append_row(row_values)
 
 def batch_append_to_research_queue(sheet_url, data_rows):
-    """
-    CRITICAL PERFORMANCE FIX: Appends multiple rows in a SINGLE API call.
-    Prevents 429 RESOURCE_EXHAUSTED errors during high-volume news days.
-    """
     if not data_rows:
         return
         
@@ -213,7 +185,6 @@ def batch_append_to_research_queue(sheet_url, data_rows):
         else:
             formatted_rows.append(row)
             
-    # append_rows (plural) executes a single HTTP request for the entire block
     worksheet.append_rows(formatted_rows)
 
 def log_unknown_event(sheet_url, *args, **kwargs):
@@ -224,7 +195,6 @@ def log_unknown_event(sheet_url, *args, **kwargs):
         worksheet = spreadsheet.add_worksheet(title="UnknownEvents", rows=1000, cols=5)
         worksheet.append_row(["Timestamp", "Title", "Source", "Raw Text"])
         
-    # Example kwargs extraction mapping
     row_values = [
         kwargs.get("timestamp", ""),
         kwargs.get("article_title", ""),
@@ -234,9 +204,6 @@ def log_unknown_event(sheet_url, *args, **kwargs):
     worksheet.append_row(row_values)
 
 def update_last_checked(sheet_url, source_name):
-    """
-    Locates the source row in the 'Sources' tab and updates its 'Last Checked' timestamp column.
-    """
     if not source_name:
         return
     spreadsheet = get_spreadsheet(sheet_url)
@@ -251,7 +218,7 @@ def update_last_checked(sheet_url, source_name):
             header_row = worksheet.row_values(1)
             col_index = None
             for idx, header in enumerate(header_row, 1):
-                if "last checked" in header.lower() or "checked" in header.lower():
+                if "checked" in header.lower() or "timestamp" in header.lower():
                     col_index = idx
                     break
             
@@ -259,10 +226,10 @@ def update_last_checked(sheet_url, source_name):
                 ts = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S GMT")
                 worksheet.update_cell(cell.row, col_index, ts)
     except Exception as e:
-        print(f"[ERROR] Failed to update last checked for {source_name}: {e}")
+        pass # Silently proceed so we don't break pipeline if gspread hangs
 
 def update_pipeline_metrics(sheet_url, *args, **kwargs):
-    pass # Currently handled locally via SQLite
+    pass 
 
 def batch_append_daily_memory(sheet_url, new_issuers):
     if not new_issuers:
@@ -270,7 +237,6 @@ def batch_append_daily_memory(sheet_url, new_issuers):
     spreadsheet = get_spreadsheet(sheet_url)
     
     worksheet = None
-    # Try both naming variations before creating a new tab
     for name in ["Daily Memory", "DailyMemory"]:
         try:
             worksheet = spreadsheet.worksheet(name)
@@ -282,13 +248,11 @@ def batch_append_daily_memory(sheet_url, new_issuers):
         worksheet = spreadsheet.add_worksheet(title="Daily Memory", rows=1000, cols=2)
         worksheet.append_row(["Issuer", "Timestamp"])
         
-    import datetime
     ts = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S GMT")
     rows = [[issuer, ts] for issuer in new_issuers]
     worksheet.append_rows(rows)
 
 def prune_daily_memory(sheet_url, *args, **kwargs):
-    """Stub for daily cleanup if you move away from the SQLite intraday approach."""
     pass
 
 def log_ontology_review(sheet_url, *args, **kwargs):
