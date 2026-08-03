@@ -18,6 +18,23 @@ def ensure_columns(conn, table, columns):
     except Exception as e:
         logger.error(f"[DATABASE MIGRATION ERROR] Failed to update schema for {table}: {e}")
 
+def enforce_strict_gmt_intraday_cache(conn):
+    """
+    Strictly clears historical cache entries recorded prior to the current GMT calendar day.
+    Maintains a strict midnight-to-midnight GMT rolling observation window.
+    """
+    try:
+        # Enforce current GMT date boundary
+        today_gmt_midnight = datetime.datetime.utcnow().strftime("%Y-%m-%d 00:00:00 GMT")
+        
+        # Flush previous days from articles_cache
+        cursor = conn.execute("DELETE FROM articles_cache WHERE timestamp < ?;", (today_gmt_midnight,))
+        rows_purged = cursor.rowcount
+        if rows_purged > 0:
+            logger.info(f"[GMT CACHE FLUSH] Cleared {rows_purged} historical articles. Active window: {today_gmt_midnight} onward.")
+    except Exception as e:
+        logger.error(f"[GMT CACHE FLUSH ERROR] Failed to purge historical cache: {e}")
+
 def init_db():
     os.makedirs(os.path.dirname(os.path.abspath(DB_PATH)), exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
@@ -49,8 +66,12 @@ def init_db():
     
     conn.commit()
     ensure_columns(conn, "workflow_health", {"failed": "INTEGER", "succeeded": "INTEGER", "skipped": "INTEGER", "run_id": "TEXT"})
+    
+    # Enforce midnight-to-midnight rule at database initialization/boot time
+    enforce_strict_gmt_intraday_cache(conn)
+    
     conn.close()
-    logger.info("[DATABASE] Fully migrated canonical schema initialized.")
+    logger.info("[DATABASE] Fully migrated canonical schema initialized with strict GMT intraday flushing.")
 
 initialise_database = init_db
 
@@ -66,6 +87,7 @@ def article_exists(identifier):
 def save_article(article_data=None, **kwargs):
     try:
         data = article_data or kwargs
+        gmt_now = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S GMT")
         conn = sqlite3.connect(DB_PATH)
         conn.execute("""
             INSERT OR REPLACE INTO articles_cache (id, title, url, source, content, timestamp)
@@ -76,7 +98,7 @@ def save_article(article_data=None, **kwargs):
             data.get('url') or data.get('link'),
             data.get('source'),
             data.get('content') or data.get('summary'),
-            data.get('timestamp') or datetime.datetime.utcnow().isoformat()
+            data.get('timestamp') or gmt_now
         ))
         conn.commit()
         conn.close()
@@ -94,8 +116,9 @@ def article_count():
 
 def track_company(ticker):
     try:
+        gmt_now = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S GMT")
         conn = sqlite3.connect(DB_PATH)
-        conn.execute("INSERT OR IGNORE INTO tracked_companies (ticker, added_at) VALUES (?, ?);", (ticker, datetime.datetime.utcnow().isoformat()))
+        conn.execute("INSERT OR IGNORE INTO tracked_companies (ticker, added_at) VALUES (?, ?);", (ticker, gmt_now))
         conn.commit()
         conn.close()
     except Exception:
@@ -104,13 +127,16 @@ def track_company(ticker):
 def create_event_if_new(event_family, ticker):
     try:
         conn = sqlite3.connect(DB_PATH)
-        event_id = f"{ticker}_{event_family}_{datetime.date.today().isoformat()}"
+        gmt_today = datetime.datetime.utcnow().strftime("%Y-%m-%d")
+        gmt_now = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S GMT")
+        
+        event_id = f"{ticker}_{event_family}_{gmt_today}"
         res = conn.execute("SELECT 1 FROM events_log WHERE event_id = ?;", (event_id,)).fetchone()
         if res:
             conn.close()
             return event_id, False
         conn.execute("INSERT INTO events_log (event_id, event_family, ticker, created_at) VALUES (?, ?, ?, ?);", 
-                     (event_id, event_family, ticker, datetime.datetime.utcnow().isoformat()))
+                     (event_id, event_family, ticker, gmt_now))
         conn.commit()
         conn.close()
         return event_id, True
@@ -128,8 +154,9 @@ def get_pending_reminders():
 
 def log_run(metrics_dict=None):
     try:
+        gmt_now = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S GMT")
         conn = sqlite3.connect(DB_PATH)
-        conn.execute("INSERT OR REPLACE INTO run_metrics_log (timestamp) VALUES (?);", (datetime.datetime.utcnow().isoformat(),))
+        conn.execute("INSERT OR REPLACE INTO run_metrics_log (timestamp) VALUES (?);", (gmt_now,))
         conn.commit()
         conn.close()
     except Exception:
@@ -140,12 +167,13 @@ def save_run_metrics(metrics=None):
 
 def save_workflow_health(health_data=None):
     try:
+        gmt_now = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S GMT")
         conn = sqlite3.connect(DB_PATH)
         conn.execute("""
             INSERT OR REPLACE INTO workflow_health (timestamp, total_scanned, articles, errors, drift_score, runtime, failed, succeeded, skipped)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
         """, (
-            datetime.datetime.utcnow().isoformat(),
+            gmt_now,
             health_data.get('total_scanned', 0) if health_data else 0,
             health_data.get('articles', 0) if health_data else 0,
             health_data.get('errors', 0) if health_data else 0,
