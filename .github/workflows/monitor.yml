@@ -3,10 +3,10 @@ name: Special Situations Radar
 on:
   workflow_dispatch:
   schedule:
-    - cron: '*/5 * * * *'
+    - cron: '*/15 * * * *'  # Adjusted to every 15 mins to prevent overlapping runs and race conditions
 
 concurrency:
-  group: "monitor-pipeline"
+  group: "monitor-pipeline-${{ github.ref }}"
   cancel-in-progress: false
 
 jobs:
@@ -18,97 +18,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      - name: Restore database
-        uses: actions/cache/restore@v4
         with:
-          path: |
-            ssr_cache.sqlite
-            ssr_observability.db
-          key: ssr-database-
-          restore-keys: |
-            ssr-database-
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Run monitor
-        continue-on-error: true
-        env:
-          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-          GEMINI_API_KEY_1: ${{ secrets.GEMINI_API_KEY_1 }}
-          GEMINI_API_KEY_2: ${{ secrets.GEMINI_API_KEY_2 }}
-          GEMINI_API_KEY_3: ${{ secrets.GEMINI_API_KEY_3 }}
-          GEMINI_API_KEY_4: ${{ secrets.GEMINI_API_KEY_4 }}
-          GEMINI_API_KEY_5: ${{ secrets.GEMINI_API_KEY_5 }}
-          GEMINI_API_KEY_6: ${{ secrets.GEMINI_API_KEY_6 }}
-          GEMINI_API_KEY_7: ${{ secrets.GEMINI_API_KEY_7 }}
-          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          OPENROUTER_API_KEY_1: ${{ secrets.OPENROUTER_API_KEY_1 }}
-          OPENROUTER_API_KEY_2: ${{ secrets.OPENROUTER_API_KEY_2 }}
-          OPENROUTER_API_KEY_3: ${{ secrets.OPENROUTER_API_KEY_3 }}
-          OPENROUTER_API_KEY_4: ${{ secrets.OPENROUTER_API_KEY_4 }}
-          OPENROUTER_API_KEY_5: ${{ secrets.OPENROUTER_API_KEY_5 }}
-          OPENROUTER_API_KEY_6: ${{ secrets.OPENROUTER_API_KEY_6 }}
-          SMTP_SERVER: ${{ secrets.SMTP_SERVER }}
-          SMTP_PORT: ${{ secrets.SMTP_PORT }}
-          SMTP_USER: ${{ secrets.SMTP_USER }}
-          SMTP_PASS: ${{ secrets.SMTP_PASS }}
-          ALERT_EMAIL_RECIPIENT: ${{ secrets.ALERT_EMAIL_RECIPIENT }}
-          KEDM_USER: ${{ secrets.KEDM_USER }}
-          KEDM_PASS: ${{ secrets.KEDM_PASS }}
-        run: |
-          python setup_ontology_tabs.py
-          python -u monitor.py
-
-      - name: Sync Metrics to Google Sheets
-        env:
-          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
-        run: python -m src.sheets_sync
-
-      - name: Save database cache
-        uses: actions/cache/save@v4
-        if: always()
-        with:
-          path: |
-            ssr_cache.sqlite
-            ssr_observability.db
-          key: ssr-database-${{ github.run_id }}
-
-      - name: Generate HTML Dashboard
-        if: always()
-        run: |
-          python -m src.validation.export_frontend_data
-          python src/html_generator.py
-
-name: Special Situations Radar
-
-on:
-  workflow_dispatch:
-  schedule:
-    - cron: '*/5 * * * *'
-
-concurrency:
-  group: "monitor-pipeline"
-  cancel-in-progress: false
-
-jobs:
-  monitor:
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+          persist-credentials: true
+          fetch-depth: 0
 
       - name: Restore database
         uses: actions/cache/restore@v4
@@ -186,14 +98,12 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           
-          # 1. Stage all potential operational dashboard artifacts
+          # Stage artifacts safely
           git add docs/index.html docs/archive.html docs/archive_data.json docs/dashboard_metrics.json || true
           
-          # 2. Commit them locally first so the index is clean
-          git commit -m "chore: update operational dashboard and archive [skip ci]" || echo "No changes to commit"
+          # Check if there's actually anything to commit
+          git diff --staged --quiet || git commit -m "chore: update operational dashboard and archive [skip ci]"
           
-          # 3. Pull any remote modifications using autostash to avoid push rejections
-          git pull --rebase --autostash origin main
-          
-          # 4. Push cleanly back to the repository
+          # Pull with rebase safely handling upstream changes
+          git pull --rebase origin main || git rebase --abort
           git push origin main
