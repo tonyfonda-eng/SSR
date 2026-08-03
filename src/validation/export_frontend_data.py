@@ -1,155 +1,158 @@
-import os
 import json
-import ast
 import sqlite3
+import os
+from collections import defaultdict
 import datetime
 
-DB_PATH = "ssr_observability.db"
+RESEARCH_DB_PATH = "ssr_observability.db"
 
-def export_data():
-    os.makedirs("docs", exist_ok=True)
-    
-    if not os.path.exists(DB_PATH):
-        print(f"[WARNING] Observability database not found at {DB_PATH}. Postponing export.")
-        return
+def _dict_factory(cursor, row):
+    d = {}
+    for idx, col in enumerate(cursor.description):
+        d[col[0]] = row[idx]
+    return d
 
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    cursor = conn.cursor()
-    
-    # ---------------------------------------------------------
-    # 1. EXTRACT THE DECISION LEDGER (archive_data.json)
-    # ---------------------------------------------------------
-    archive_list = []
-    source_stats = {}
-    total_processed = 0
-    total_alerts = 0
-    
+def _decode_json(val, default=None):
+    if not val:
+        return default if default is not None else {}
     try:
-        cursor.execute("SELECT log_text FROM lifecycle_logs ORDER BY id DESC LIMIT 1000")
-        rows = cursor.fetchall()
+        return json.loads(val)
+    except json.JSONDecodeError:
+        return default if default is not None else {}
+
+def export_archive_json(filepath="docs/archive_data.json"):
+    """
+    Exports the complete history of SSR 2.0 Decisions into the JSON format
+    consumed by the Evidence Engine's HTML Dashboards.
+    """
+    try:
+        conn = sqlite3.connect(RESEARCH_DB_PATH)
+        conn.row_factory = _dict_factory
+        cursor = conn.cursor()
+
+        # Join across the normalized schema to reconstruct the Canonical Decision Manifest view
+        cursor.execute("""
+            SELECT 
+                el.decision_id,
+                el.event_id,
+                el.manifest_hash,
+                el.runtime_timestamp,
+                el.detection_outcome,
+                el.terminal_stage,
+                el.evidence_completeness_score,
+                fm.headline,
+                fm.source_url,
+                fm.published_timestamp,
+                sl.sensor_id,
+                ai.parsed_structural_properties,
+                ai.aggregate_confidence,
+                ep.ingest_repo_ms,
+                ep.transformation_ms,
+                ep.ontology_ms,
+                ep.rules_ms,
+                ep.ai_inference_ms,
+                ep.financial_query_ms
+            FROM evaluation_ledger el
+            LEFT JOIN factual_metadata fm ON el.decision_id = fm.decision_id
+            LEFT JOIN sensor_lineage sl ON el.event_id = sl.event_id
+            LEFT JOIN ai_core_inference ai ON el.decision_id = ai.decision_id
+            LEFT JOIN execution_performance ep ON el.decision_id = ep.decision_id
+            ORDER BY el.runtime_timestamp DESC
+            LIMIT 500
+        """)
         
-        for row in rows:
-            raw_text = row["log_text"]
-            data = None
+        decisions = cursor.fetchall()
+        
+        # We need to fetch the atomic evidence (the DAG) separately and bind it
+        # to avoid massive denormalized joins
+        cursor.execute("""
+            SELECT evidence_id, decision_id, stage, evidence_direction, source_component, assertion_key, confidence_weight, source_transformation_id, text_start_offset, text_end_offset
+            FROM atomic_evidence
+            WHERE decision_id IN (SELECT decision_id FROM evaluation_ledger ORDER BY runtime_timestamp DESC LIMIT 500)
+        """)
+        evidence_rows = cursor.fetchall()
+        
+        conn.close()
+
+        # Group evidence by decision_id
+        evidence_by_decision = defaultdict(lambda: {"SUPPORTING": [], "OPPOSING": []})
+        for ev in evidence_rows:
+            direction = ev["evidence_direction"]
+            ev_dict = {
+                "evidence_id": ev["evidence_id"],
+                "stage": ev["stage"],
+                "component": ev["source_component"],
+                "assertion": ev["assertion_key"],
+                "weight": ev["confidence_weight"],
+                "causal_link": {
+                    "transformation_id": ev["source_transformation_id"],
+                    "text_start_offset": ev["text_start_offset"],
+                    "text_end_offset": ev["text_end_offset"]
+                }
+            }
+            evidence_by_decision[ev["decision_id"]][direction].append(ev_dict)
+
+        # Assemble the final manifests
+        manifests = []
+        for d in decisions:
+            parsed_ai = _decode_json(d["parsed_structural_properties"], {})
+            ev_dag = evidence_by_decision.get(d["decision_id"], {"SUPPORTING": [], "OPPOSING": []})
             
-            # Robust parsing: Try strict JSON first, fallback to Python literal dict eval if single-quoted
-            try:
-                data = json.loads(raw_text)
-            except Exception:
-                try:
-                    data = ast.literal_eval(raw_text)
-                    if isinstance(data, dict):
-                        data = {str(k): v for k, v in data.items()}
-                except Exception as parse_err:
-                    print(f"[DEBUG] Skipping unparseable log row: {parse_err}")
-                    continue
+            manifest = {
+                "manifest_registry": {
+                    "decision_id": d["decision_id"],
+                    "event_id": d["event_id"],
+                    "configuration_manifest_hash": d["manifest_hash"],
+                    "execution_timestamp_gmt": d["runtime_timestamp"],
+                    "evidence_completeness_score": d["evidence_completeness_score"]
+                },
+                "detection_vector": {
+                    "outcome": d["detection_outcome"],
+                    "terminal_stage": d["terminal_stage"],
+                    "detected_event_type": parsed_ai.get("strategy", "Unknown"),
+                    "target_ticker": parsed_ai.get("ticker", "UNKNOWN"),
+                    "confidence_decomposition": {
+                        "aggregate_confidence": d["aggregate_confidence"] or 0.0
+                    }
+                },
+                "performance_telemetry_ms": {
+                    "ingest_repo_ms": d["ingest_repo_ms"],
+                    "transformation_ms": d["transformation_ms"],
+                    "ontology_ms": d["ontology_ms"],
+                    "rules_ms": d["rules_ms"],
+                    "ai_inference_ms": d["ai_inference_ms"],
+                    "financial_query_ms": d["financial_query_ms"]
+                },
+                "evidentiary_provenance_dag": {
+                    "supporting_evidence": ev_dag["SUPPORTING"],
+                    "opposing_evidence": ev_dag["OPPOSING"]
+                },
+                "syndication_lineage": {
+                    "canonical_sensor_id": d["sensor_id"]
+                },
+                # Flattened properties for easy top-level access by UI
+                "timestamp": d["runtime_timestamp"],
+                "outcome": d["detection_outcome"],
+                "pipeline_stage": d["terminal_stage"],
+                "source": d["sensor_id"],
+                "issuer": parsed_ai.get("ticker", "UNKNOWN"),
+                "headline": d["headline"],
+                "url": d["source_url"]
+            }
+            manifests.append(manifest)
+
+        # Ensure directory exists
+        os.makedirs(os.path.dirname(os.path.abspath(filepath)), exist_ok=True)
+        
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump({"ledger": manifests}, f, indent=2)
             
-            if not isinstance(data, dict):
-                continue
-                
-            try:
-                # Standardize Timestamps
-                ts = data.get("timestamp", "")
-                if ts and "GMT" not in ts and "UTC" not in ts:
-                    ts += " GMT"
-                data["timestamp"] = ts
-                
-                # Enhance Drop Reasons to expose Rule Engine specifics
-                if data.get("pipeline_stage") == "Rules Engine" and data.get("outcome") == "Dropped":
-                    if data.get("reason") == "Failed Rules Threshold":
-                        data["reason"] = "Failed Rules Threshold (Score < 10)"
-                        
-                archive_list.append(data)
-                
-                # Dynamically build Source Intelligence metrics while we iterate
-                src = data.get("source", "Unknown")
-                if src not in source_stats:
-                    source_stats[src] = {"source": src, "articles": 0, "alerts": 0, "ontology_pct": 0, "rules_pct": 0, "failures": 0}
-                
-                source_stats[src]["articles"] += 1
-                total_processed += 1
-                
-                outcome = str(data.get("outcome", "")).upper()
-                stage = str(data.get("pipeline_stage", "")).upper()
-                
-                if outcome == "DISPATCHED":
-                    source_stats[src]["alerts"] += 1
-                    total_alerts += 1
-                elif "ONTOLOGY" in stage:
-                    source_stats[src]["ontology_pct"] += 1
-                elif "RULES" in stage:
-                    source_stats[src]["rules_pct"] += 1
-                elif outcome in ["FAILED", "ERROR"]:
-                    source_stats[src]["failures"] += 1
-                    
-            except Exception as e:
-                print(f"[WARNING] Error processing log record fields: {e}")
-                continue
-                
+        print(f"[EXPORT] Successfully wrote {len(manifests)} Decision Manifests to {filepath}")
+        return True
+
     except Exception as e:
-        print(f"[WARNING] Archive Data Sync Database Error: {e}")
-
-    if not archive_list:
-        archive_list = [{
-            "headline": "Awaiting Live Market Signals...",
-            "url": "#",
-            "timestamp": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S GMT"),
-            "source": "System Core",
-            "outcome": "INITIALIZED",
-            "pipeline_stage": "Ingestion Window",
-            "reason": "Pipeline is active. Awaiting fresh intraday filings.",
-            "processing_time": "N/A",
-            "issuer": "N/A"
-        }]
-        
-    with open("docs/archive_data.json", "w", encoding="utf-8") as f:
-        json.dump(archive_list, f, indent=2)
-    print(f"[VQA] Successfully extracted {len(archive_list)} live ledger items to docs/archive_data.json")
-
-    # ---------------------------------------------------------
-    # 2. EXTRACT SYSTEM METRICS & SOURCE INTELLIGENCE
-    # ---------------------------------------------------------
-    metrics_payload = {
-        "system_status": "OPERATIONAL",
-        "uptime": "99.9%",
-        "last_sync_gmt": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S GMT"),
-        "total_processed_today": total_processed,
-        "total_alerts_dispatched": total_alerts,
-        "run_id": f"SSR-OP-{datetime.datetime.utcnow().strftime('%y%m%d%H')}",
-        "health_score": 100,
-        "system_confidence": 0.85
-    }
-
-    # Finalize dynamic source percentages safely
-    src_30_list = []
-    for src, stats in source_stats.items():
-        arts = stats["articles"]
-        if arts > 0:
-            stats["alert_pct"] = round((stats["alerts"] / arts) * 100, 1)
-            stats["ontology_pct"] = round((stats["ontology_pct"] / arts) * 100, 1)
-            stats["rules_pct"] = round((stats["rules_pct"] / arts) * 100, 1)
-        src_30_list.append(stats)
-
-    try:
-        cursor.execute("SELECT failed, runtime FROM workflow_health ORDER BY timestamp DESC LIMIT 1")
-        health_row = cursor.fetchone()
-        if health_row:
-            metrics_payload["total_runtime_s"] = health_row["runtime"]
-            if health_row["failed"] > 0:
-                metrics_payload["system_status"] = "DEGRADED"
-                metrics_payload["health_score"] = 75
-    except Exception:
-        pass 
-        
-    # Inject the dynamic source list into the payload so the frontend can render it
-    metrics_payload["dynamic_sources"] = src_30_list
-        
-    with open("docs/dashboard_metrics.json", "w", encoding="utf-8") as f:
-        json.dump(metrics_payload, f, indent=2)
-        
-    conn.close()
-    print("[VQA] Clean metrics payload synced to docs/dashboard_metrics.json")
+        print(f"[EXPORT ERROR] Failed to generate archive_data.json: {e}")
+        return False
 
 if __name__ == "__main__":
-    export_data()
+    export_archive_json()
