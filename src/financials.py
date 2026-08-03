@@ -1,114 +1,113 @@
+"""
+SSR 2.0: Financial Interrogation Engine (Layer B - Derived Facts)
+Calculates fundamental metrics and structural price floors (e.g., T-12 limits).
+Outputs deterministic evidence records for the Causal DAG.
+"""
+
 import yfinance as yf
-import datetime
+import logging
+from dataclasses import dataclass
+from typing import Optional, Dict, Any
 
-def get_t12_metrics(ticker, pre_halt_price=None, halt_date_str=None):
+logger = logging.getLogger(__name__)
+
+@dataclass
+class FinancialSnapshot:
+    """Immutable snapshot of target financials at the time of evaluation."""
+    ticker: str
+    is_complete: bool
+    market_cap: Optional[float] = None
+    current_price: Optional[float] = None
+    net_cash: Optional[float] = None
+    net_cash_per_share: Optional[float] = None
+    options_available: bool = False
+    raw_data: Optional[Dict[str, Any]] = None
+
+def query_financial_snapshot(ticker: str) -> FinancialSnapshot:
     """
-    Fetches financial metrics required for the T12 Resumption Strategy.
-    Uses yfinance to get Cash, Debt, Shares Outstanding, and Short Interest.
-    Calculates Net Cash Per Share and checks the Float Filter.
-    
-    If pre_halt_price is provided (e.g. from the article or previous close),
-    it calculates the expected gap down target.
-    
-    If halt_date_str (YYYY-MM-DD) is provided, it estimates cash burn.
+    Retrieves real-time fundamental data to support evidentiary assertions.
     """
+    if not ticker or ticker == "UNKNOWN" or "MOCK AI" in ticker:
+        return FinancialSnapshot(ticker=ticker, is_complete=False)
+
     try:
-        t = yf.Ticker(ticker)
-        info = t.info
+        y_tick = yf.Ticker(ticker)
+        info = y_tick.info
         
+        # Standard Fundamentals
+        market_cap = info.get('marketCap')
+        current_price = info.get('currentPrice', info.get('regularMarketPrice'))
+        
+        # Cash Fundamentals
+        total_cash = info.get('totalCash', 0)
+        total_debt = info.get('totalDebt', 0)
         shares_out = info.get('sharesOutstanding')
-        total_cash = info.get('totalCash')
-        total_debt = info.get('totalDebt', 0) # If missing, assume 0 debt or it might be a risk.
-        short_percent = info.get('shortPercentOfFloat', 0)
         
-        # If any crucial data is missing, we must fail gracefully.
-        if not shares_out or total_cash is None:
-            return {
-                "valid": False, 
-                "reason": f"Missing critical yfinance data for {ticker} (Shares: {shares_out}, Cash: {total_cash})."
-            }
-            
-        # 1. Phase 4: Float Filter
-        if shares_out > 10_000_000:
-            return {
-                "valid": False,
-                "reason": f"Float too large. Shares Outstanding ({shares_out:,.0f}) > 10,000,000."
-            }
-            
-        # 2. Net Cash Calculation
-        net_cash = total_cash - total_debt
-        if net_cash <= 0:
-            return {
-                "valid": False,
-                "reason": f"No structural floor. Net Cash is negative or zero (${net_cash:,.2f})."
-            }
-            
-        # 3. Burn Rate Risk (Phase 3)
-        # Assume a standard microcap burn rate of $1M/month if not disclosed, just as a safety discount.
-        # Alternatively, discount net_cash based on months halted.
-        discounted_net_cash = net_cash
-        halt_duration_days = 0
+        net_cash = None
+        net_cash_per_share = None
         
-        if halt_date_str:
-            try:
-                halt_date = datetime.datetime.strptime(halt_date_str, "%Y-%m-%d").date()
-                today = datetime.date.today()
-                halt_duration_days = (today - halt_date).days
-                if halt_duration_days > 0:
-                    months_halted = halt_duration_days / 30.0
-                    # Assume $500k burn per month for microcaps as a rough proxy
-                    estimated_burn = months_halted * 500_000
-                    discounted_net_cash -= estimated_burn
-            except Exception as e:
-                print(f"[WARNING] Could not parse halt date {halt_date_str}: {e}")
-                
-        if discounted_net_cash <= 0:
-            return {
-                "valid": False,
-                "reason": f"Burn rate wiped out cash floor over {halt_duration_days} days halted."
-            }
-            
-        net_cash_per_share = discounted_net_cash / shares_out
-        
-        # 4. Gap Down Check (Phase 2)
-        # If pre-halt price isn't given, use previous close as a proxy.
-        reference_price = pre_halt_price if pre_halt_price else info.get('previousClose')
-        
-        meets_gap_down = False
-        gap_down_target_50 = 0
-        gap_down_target_70 = 0
-        
-        if reference_price and reference_price > 0:
-            gap_down_target_50 = reference_price * 0.50
-            gap_down_target_70 = reference_price * 0.30
-            
-            # If a 50-70% gap down pushes the price below or AT the Net Cash Per Share, it's a pass!
-            if gap_down_target_50 <= net_cash_per_share or gap_down_target_70 <= net_cash_per_share:
-                meets_gap_down = True
-            else:
-                return {
-                    "valid": False,
-                    "reason": f"Gap down targets ($ {gap_down_target_70:.2f} - $ {gap_down_target_50:.2f}) do not reach Net Cash floor ($ {net_cash_per_share:.2f})."
-                }
-        else:
-            print(f"[WARNING] No reference price found for {ticker}. Skipping Gap Down check.")
-            meets_gap_down = True # Pass if we can't verify, let the analyst decide.
+        if total_cash is not None and total_debt is not None:
+            net_cash = float(total_cash) - float(total_debt)
+            if shares_out and shares_out > 0:
+                net_cash_per_share = net_cash / float(shares_out)
 
-        return {
-            "valid": True,
-            "net_cash_per_share": net_cash_per_share,
-            "shares_outstanding": shares_out,
-            "short_percent_of_float": short_percent,
-            "halt_duration_days": halt_duration_days,
-            "gap_down_target_50": gap_down_target_50,
-            "gap_down_target_70": gap_down_target_70,
-            "reference_price": reference_price,
-            "total_cash": total_cash,
-            "total_debt": total_debt
-        }
-        
+        # Options Market Support
+        options_available = False
+        try:
+            options_available = len(y_tick.options) > 0
+        except Exception:
+            pass
+
+        return FinancialSnapshot(
+            ticker=ticker,
+            is_complete=True,
+            market_cap=market_cap,
+            current_price=current_price,
+            net_cash=net_cash,
+            net_cash_per_share=net_cash_per_share,
+            options_available=options_available,
+            raw_data=info
+        )
     except Exception as e:
-        return {
-            "valid": False,
-            "reason": f"Error fetching financial data: {e}"
-        }
+        logger.warning(f"[FINANCIALS] Failed to retrieve snapshot for {ticker}: {e}")
+        return FinancialSnapshot(ticker=ticker, is_complete=False)
+
+
+def get_t12_metrics(ticker: str, pre_halt_price: float = None, halt_date_str: str = None) -> dict:
+    """
+    Evaluates the T-12 Structural Floor constraint for Resumption of Trading events.
+    Returns a deterministic validation dictionary for the Evidence Capsule.
+    """
+    result = {
+        "valid": False,
+        "reason": "Unknown",
+        "net_cash_per_share": 0.0,
+        "pre_halt_price": pre_halt_price
+    }
+
+    if ticker == "UNKNOWN" or not ticker:
+        result["reason"] = "Missing ticker identification"
+        return result
+
+    snap = query_financial_snapshot(ticker)
+    
+    if not snap.is_complete or snap.net_cash_per_share is None:
+        result["reason"] = "Fundamental cash metrics unavailable via Yahoo Finance"
+        return result
+
+    result["net_cash_per_share"] = snap.net_cash_per_share
+
+    if snap.net_cash_per_share <= 0:
+        result["reason"] = f"Negative Net Cash Floor (${snap.net_cash_per_share:.2f}/share)"
+        return result
+
+    # Check margin of safety if pre-halt price is known
+    if pre_halt_price:
+        downside = (pre_halt_price - snap.net_cash_per_share) / pre_halt_price
+        if downside > 0.85: # If cash floor requires an 85%+ drop, it's not a safe floor
+            result["reason"] = f"Unsafe margin: Cash floor (${snap.net_cash_per_share:.2f}) is {downside*100:.1f}% below pre-halt price (${pre_halt_price:.2f})"
+            return result
+
+    result["valid"] = True
+    result["reason"] = "Structural floor validated"
+    return result
