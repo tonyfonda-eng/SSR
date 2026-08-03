@@ -1,5 +1,6 @@
 import os
 import json
+import ast
 import sqlite3
 import datetime
 
@@ -25,14 +26,29 @@ def export_data():
     total_alerts = 0
     
     try:
-        # Pulls from lifecycle_logs to get Drop Reasons and Pipeline Stages
         cursor.execute("SELECT log_text FROM lifecycle_logs ORDER BY id DESC LIMIT 1000")
         rows = cursor.fetchall()
         
         for row in rows:
+            raw_text = row["log_text"]
+            data = None
+            
+            # Robust parsing: Try strict JSON first, fallback to Python literal dict eval if single-quoted
             try:
-                data = json.loads(row["log_text"])
+                data = json.loads(raw_text)
+            except Exception:
+                try:
+                    data = ast.literal_eval(raw_text)
+                    if isinstance(data, dict):
+                        data = {str(k): v for k, v in data.items()}
+                except Exception as parse_err:
+                    print(f"[DEBUG] Skipping unparseable log row: {parse_err}")
+                    continue
+            
+            if not isinstance(data, dict):
+                continue
                 
+            try:
                 # Standardize Timestamps
                 ts = data.get("timestamp", "")
                 if ts and "GMT" not in ts and "UTC" not in ts:
@@ -54,21 +70,25 @@ def export_data():
                 source_stats[src]["articles"] += 1
                 total_processed += 1
                 
-                if str(data.get("outcome", "")).upper() == "DISPATCHED":
+                outcome = str(data.get("outcome", "")).upper()
+                stage = str(data.get("pipeline_stage", "")).upper()
+                
+                if outcome == "DISPATCHED":
                     source_stats[src]["alerts"] += 1
                     total_alerts += 1
-                elif str(data.get("pipeline_stage", "")).upper() == "ONTOLOGY":
+                elif "ONTOLOGY" in stage:
                     source_stats[src]["ontology_pct"] += 1
-                elif str(data.get("pipeline_stage", "")).upper() == "RULES":
+                elif "RULES" in stage:
                     source_stats[src]["rules_pct"] += 1
-                elif str(data.get("outcome", "")).upper() in ["FAILED", "ERROR"]:
+                elif outcome in ["FAILED", "ERROR"]:
                     source_stats[src]["failures"] += 1
                     
-            except Exception:
+            except Exception as e:
+                print(f"[WARNING] Error processing log record fields: {e}")
                 continue
                 
     except Exception as e:
-        print(f"[WARNING] Archive Data Sync: {e}")
+        print(f"[WARNING] Archive Data Sync Database Error: {e}")
 
     if not archive_list:
         archive_list = [{
@@ -101,7 +121,7 @@ def export_data():
         "system_confidence": 0.85
     }
 
-    # Finalize dynamic source percentages
+    # Finalize dynamic source percentages safely
     src_30_list = []
     for src, stats in source_stats.items():
         arts = stats["articles"]
