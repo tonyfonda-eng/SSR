@@ -1,191 +1,131 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>SSR Decision Centre</title><style>
-        :root { --bg: #0d1117; --surface: #161b22; --surface-subtle: #21262d; --surface-hover: #262c36; --border: #30363d; --text: #c9d1d9; --muted: #8b949e; --green: #2ea043; --red: #cb2431; --yellow: #dbab0a; --blue: #58a6ff; --mono: "SF Mono", "JetBrains Mono", Consolas, "Roboto Mono", monospace; }
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>SSR Operations Centre</title><style>
+        :root { --bg: #0a0e14; --surface: #11161d; --surface-subtle: #1a2029; --surface-hover: #222933; --border: #2a323d; --text: #c1c9d2; --muted: #79838f; --green: #2ea043; --red: #cb2431; --yellow: #dbab0a; --blue: #4088db; --mono: "SF Mono", "JetBrains Mono", Consolas, "Roboto Mono", monospace; }
         * { box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 16px; font-size: 14px; }
-        .container { max-width: 1700px; margin: 0 auto; }
-        header { display: flex; justify-content: space-between; align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 16px 22px; margin-bottom: 16px; border-left: 6px solid var(--green); }
-        h1 { margin: 0; font-size: 1.5em; color: #fff; display: flex; align-items: center; gap: 10px; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 12px; font-size: 13px; line-height: 1.4; }
+        .container { max-width: 1800px; margin: 0 auto; }
+        header { display: flex; justify-content: space-between; align-items: center; background: var(--surface); border: 1px solid var(--border); padding: 12px 18px; margin-bottom: 12px; border-left: 5px solid var(--green); }
+        h1 { margin: 0; font-size: 1.3em; color: #fff; display: flex; align-items: center; gap: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
         .subline { color: var(--muted); margin-top: 4px; font-size: 0.85em; font-family: var(--mono); }
-        .badge { padding: 3px 8px; border-radius: 4px; font-size: 0.72em; font-weight: 700; letter-spacing: 0.3px; }
+        .badge { padding: 2px 6px; border-radius: 3px; font-size: 0.7em; font-weight: 700; letter-spacing: 0.5px; }
         .badge.success { background: rgba(46,160,67,0.15); color: var(--green); border: 1px solid var(--green); }
         .badge.danger  { background: rgba(203,36,49,0.15); color: var(--red); border: 1px solid var(--red); }
         .badge.warn    { background: rgba(219,171,10,0.15); color: var(--yellow); border: 1px solid var(--yellow); }
-        .badge.info    { background: rgba(88,166,255,0.15); color: var(--blue); border: 1px solid var(--blue); }
-        .badge.awaiting{ background: rgba(139,148,158,0.12); color: var(--muted); border: 1px dashed var(--muted); }
-        .nav-tabs { display: flex; gap: 10px; margin-bottom: 16px; }
-        .nav-tabs a { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 9px 18px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 0.9em; }
+        .badge.info    { background: rgba(64,136,219,0.15); color: var(--blue); border: 1px solid var(--blue); }
+        .badge.awaiting{ background: rgba(121,131,143,0.12); color: var(--muted); border: 1px dashed var(--muted); }
+        .nav-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+        .nav-tabs a { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 7px 14px; text-decoration: none; font-weight: 600; font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.5px; }
         .nav-tabs a.active { background: var(--blue); color: #fff; border-color: var(--blue); }
-        .section-title { font-size: 0.78em; text-transform: uppercase; letter-spacing: 0.8px; color: var(--muted); margin: 22px 0 10px; display: flex; align-items: center; gap: 8px; }
-        .section-title::after { content: ""; flex: 1; height: 1px; background: var(--border); }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(440px, 1fr)); gap: 16px; }
-        .card { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 16px 18px; }
-        .card h2 { margin: 0 0 4px; font-size: 1em; color: #fff; padding-bottom: 0; text-transform: uppercase; letter-spacing: 0.5px; display: flex; justify-content: space-between; align-items: center; font-weight: 700; }
-        .card h2 small { color: var(--muted); font-weight: 400; text-transform: none; letter-spacing: 0; font-size: 0.85em; }
-        .question-title { font-size: 0.82em; color: var(--muted); font-style: italic; margin: 2px 0 12px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
-        .tile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
-        .stat-tile { background: var(--surface-subtle); border: 1px solid var(--border); border-radius: 5px; padding: 10px 12px; }
-        .stat-label { font-size: 0.7em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.4px; margin-bottom: 5px; }
-        .stat-value { font-family: var(--mono); font-size: 1.25em; font-weight: 700; color: var(--text); }
-        .stat-note { font-size: 0.72em; color: var(--muted); margin-top: 3px; }
-        .stat-good .stat-value { color: var(--green); } .stat-bad .stat-value { color: var(--red); } .stat-warn .stat-value { color: var(--yellow); } .stat-info .stat-value { color: var(--blue); }
-        .stat-tile.stat-awaiting { border-style: dashed; }
-        .awaiting { color: var(--muted); font-style: italic; font-size: 0.62em; font-weight: 600; letter-spacing: 0.3px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 12px; }
+        .card { background: var(--surface); border: 1px solid var(--border); padding: 14px; }
+        .card h2 { margin: 0 0 10px; font-size: 0.95em; color: #fff; text-transform: uppercase; letter-spacing: 0.8px; display: flex; justify-content: space-between; align-items: center; font-weight: 700; border-bottom: 1px solid var(--border); padding-bottom: 8px;}
+        .tile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+        .stat-tile { background: var(--surface-subtle); border: 1px solid var(--border); padding: 8px 10px; }
+        .stat-label { font-size: 0.65em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.5px; margin-bottom: 4px; font-weight: 600;}
+        .stat-value { font-family: var(--mono); font-size: 1.15em; font-weight: 700; color: var(--text); }
+        .awaiting { color: var(--muted); font-style: italic; font-size: 0.65em; font-weight: 600; letter-spacing: 0.3px; }
         table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
-        th, td { padding: 8px 10px; border-bottom: 1px solid var(--surface-subtle); text-align: left; }
-        th { color: var(--muted); text-transform: uppercase; font-size: 0.7em; letter-spacing: 0.4px; }
-        .metric-val { text-align: right; font-weight: 600; font-family: var(--mono); }
+        th, td { padding: 6px 8px; border-bottom: 1px solid var(--surface-subtle); text-align: left; vertical-align: top;}
+        th { color: var(--muted); text-transform: uppercase; font-size: 0.7em; letter-spacing: 0.4px; cursor: pointer; user-select: none;}
+        th:hover { color: #fff; background: var(--surface-hover); }
+        .metric-val { text-align: right; font-family: var(--mono); }
         tr.clickable { cursor: pointer; } tr.clickable:hover { background: var(--surface-hover); }
         .loss-funnel { display: flex; flex-direction: column; }
-        .loss-row { display: grid; grid-template-columns: 170px 1fr 90px 110px 90px; gap: 12px; align-items: center; padding: 9px 2px; border-bottom: 1px solid var(--surface-subtle); text-decoration: none; color: var(--text); }
+        .loss-row { display: grid; grid-template-columns: 180px 1fr 1fr 1fr 1fr 1fr; gap: 8px; align-items: center; padding: 7px 4px; border-bottom: 1px solid var(--surface-subtle); text-decoration: none; color: var(--text); }
         .loss-row:hover { background: var(--surface-hover); }
-        .loss-row .lr-name { font-weight: 600; font-size: 0.86em; }
-        .loss-row .lr-bar-wrap { background: var(--surface-subtle); border-radius: 3px; height: 15px; overflow: hidden; }
-        .loss-row .lr-bar { background: var(--blue); height: 100%; }
-        .loss-row.terminal .lr-bar { background: var(--green); } .loss-row.loss .lr-bar { background: var(--orange); }
-        .loss-row .lr-count { font-family: var(--mono); text-align: right; font-size: 0.85em; }
-        .loss-row .lr-stage-pct { font-family: var(--mono); text-align: right; font-size: 0.8em; color: var(--muted); }
-        .loss-row .lr-yield-pct { font-family: var(--mono); text-align: right; font-size: 0.85em; font-weight: 700; }
-        .loss-row.head { color: var(--muted); text-transform: uppercase; font-size: 0.64em; letter-spacing: 0.4px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
-        .loss-row.head:hover { background: none; }
-        .kpi-hero { display: flex; align-items: flex-start; gap: 32px; flex-wrap: wrap; }
-        .kpi-number { font-family: var(--mono); font-size: 3.1em; font-weight: 800; color: #fff; line-height: 1; }
-        .kpi-number.good { color: var(--green); } .kpi-number.bad { color: var(--red); } .kpi-number.warn { color: var(--yellow); }
-        .kpi-label { font-size: 0.75em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.5px; margin-bottom: 8px; }
-        .kpi-trend { font-family: var(--mono); font-size: 0.95em; margin-top: 8px; }
-        .kpi-trend.good { color: var(--green); } .kpi-trend.bad { color: var(--red); } .kpi-trend.neutral { color: var(--muted); }
-        .kpi-context-row { display: flex; gap: 26px; flex-wrap: wrap; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); width: 100%; }
-        .kpi-context-item .cx-label { font-size: 0.68em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.3px; }
+        .loss-row .lr-name { font-weight: 600; font-size: 0.85em; }
+        .loss-row .lr-val { font-family: var(--mono); text-align: right; font-size: 0.85em; }
+        .loss-row.head { color: var(--muted); text-transform: uppercase; font-size: 0.65em; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+        .kpi-hero { display: flex; align-items: flex-start; gap: 24px; flex-wrap: wrap; }
+        .kpi-number { font-family: var(--mono); font-size: 3em; font-weight: 800; color: #fff; line-height: 1; }
+        .kpi-label { font-size: 0.75em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.5px; margin-bottom: 6px; font-weight: 700;}
+        .kpi-context-row { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); width: 100%; }
+        .kpi-context-item .cx-label { font-size: 0.65em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.4px; }
         .kpi-context-item .cx-value { font-family: var(--mono); font-weight: 700; font-size: 1.05em; margin-top: 2px; }
-        .kpi-side { flex: 1; min-width: 220px; }
-        .telemetry-sub { margin-top: 18px; } .telemetry-sub:first-child { margin-top: 0; }
-        .telemetry-sub-label { font-size: 0.7em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.5px; margin-bottom: 8px; font-weight: 700; }
-        .deep-link-row { display: flex; justify-content: space-between; align-items: center; }
-        .deep-link { background: var(--blue); color: #fff !important; padding: 7px 14px; border-radius: 5px; text-decoration: none; font-size: 0.82em; font-weight: 700; white-space: nowrap; }
-        .feed-row { display: grid; grid-template-columns: 1.6fr 0.8fr 0.8fr 0.7fr 0.7fr; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--surface-subtle); font-size: 0.85em; align-items: center; }
-        .feed-row.head { color: var(--muted); text-transform: uppercase; font-size: 0.68em; letter-spacing: 0.4px; }
+        .telemetry-sub { margin-top: 16px; } .telemetry-sub:first-child { margin-top: 0; }
+        .empty-note { color: var(--muted); font-style: italic; padding: 8px 0; font-size: 0.85em; }
         .activity-list { list-style: none; margin: 0; padding: 0; }
-        .activity-list li { padding: 7px 0; border-bottom: 1px solid var(--surface-subtle); font-size: 0.85em; display: flex; justify-content: space-between; gap: 10px; }
+        .activity-list li { padding: 6px 0; border-bottom: 1px solid var(--surface-subtle); font-size: 0.85em; display: flex; justify-content: space-between; gap: 10px; }
         .activity-list li:last-child { border-bottom: none; }
         .activity-ts { color: var(--muted); font-family: var(--mono); font-size: 0.82em; white-space: nowrap; }
-        .empty-note { color: var(--muted); font-style: italic; padding: 10px 0; font-size: 0.85em; }
-</style></head>
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('th').forEach(th => th.addEventListener('click', (() => {
+        const table = th.closest('table');
+        Array.from(table.querySelectorAll('tr:nth-child(n+2)'))
+            .sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc))
+            .forEach(tr => table.appendChild(tr) );
+    })));
+});
+const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;
+const comparer = (idx, asc) => (a, b) => ((v1, v2) => 
+    v1 !== '' && v2 !== '' && !isNaN(v1.replace(/[,%]/g,'')) && !isNaN(v2.replace(/[,%]/g,'')) ? v1.replace(/[,%]/g,'') - v2.replace(/[,%]/g,'') : v1.toString().localeCompare(v2)
+    )(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
+</script>
+</head>
     <body><div class="container">
             <div class="nav-tabs">
-                <a href="index.html" class="active">Decision Centre</a>
+                <a href="index.html" class="active">Operations Centre</a>
                 <a href="decision_analytics.html" class="">Decision Analytics</a>
-                <a href="archive.html" class="">Immutable Event Ledger</a>
+                <a href="archive.html" class="">Decision Ledger</a>
             </div>
-    <header style="border-left-color: var(--border);"><div><h1>SSR Decision Centre <span class="badge awaiting">AWAITING DATA</span></h1>
-    <div class="subline">Run ID: 30825005012 &bull; Generated 2026-08-03 15:01:29 UTC</div></div>
-    <div style="text-align: right;"><div style="font-size: 1.1em;">System Confidence: <strong>Awaiting Data</strong></div></div></header>
-    <div class="grid" style="grid-template-columns: 1fr;"><div class="card"><h2>Opportunity Capture</h2><div class="kpi-hero"><div><div class="kpi-label">Opportunity Capture Rate</div><div class="kpi-number "><span class="awaiting" style="font-size:0.4em;">Awaiting Data</span></div><div class="kpi-trend neutral">No 30-day baseline reported yet &mdash; trend unavailable</div></div><div class="kpi-side"><div class="kpi-context-row"><div class="kpi-context-item"><div class="cx-label">False Positive Rate</div><div class="cx-value">Awaiting Data</div></div><div class="kpi-context-item"><div class="cx-label">False Negative Rate</div><div class="cx-value">Awaiting Data</div></div><div class="kpi-context-item"><div class="cx-label">Avg Detection Delay</div><div class="cx-value">Awaiting Data</div></div><div class="kpi-context-item"><div class="cx-label">Benchmark Lead</div><div class="cx-value">Awaiting Data</div></div><div class="kpi-context-item"><div class="cx-label">Validation Status</div><div class="cx-value"><span class="badge awaiting">AWAITING DATA</span></div></div></div></div></div></div>
-    <div class="card"><h2>Where Opportunities Are Won and Lost</h2><div class="empty-note">Awaiting Data &mdash; pipeline has not reported a Downloaded total.</div>
-    <div class="section-title" style="margin-top: 24px;">Source Effectiveness</div><table><thead><tr><th>Source</th><th>Articles</th><th>Alerts</th><th>Capture Share</th><th>Alert %</th><th>Ontology %</th><th>Rules %</th><th>Failures</th></tr></thead><tbody><tr class="clickable" onclick="window.location='archive.html?source=Reuters'">
-            <td><strong>Reuters</strong></td><td class="metric-val">6412</td>
-            <td class="metric-val">92</td><td class="metric-val">39.3%</td>
-            <td class="metric-val">1.4%</td><td class="metric-val">18%</td><td class="metric-val">5%</td>
-            <td class="metric-val" style="color: var(--green);">0</td></tr><tr class="clickable" onclick="window.location='archive.html?source=SEC EDGAR'">
-            <td><strong>SEC EDGAR</strong></td><td class="metric-val">8921</td>
-            <td class="metric-val">142</td><td class="metric-val">60.7%</td>
-            <td class="metric-val">0.16%</td><td class="metric-val">2%</td><td class="metric-val">0.5%</td>
-            <td class="metric-val" style="color: var(--green);">0</td></tr></tbody></table></div>
-    <div class="card"><h2>Engineering Telemetry</h2>
-    <div class="telemetry-sub"><div class="telemetry-sub-label">Component Status</div><div class="tile-grid">
-        <div class="stat-tile stat-awaiting">
-            <div class="stat-label">Scheduler</div>
-            <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
-            
-        </div>
-        <div class="stat-tile stat-awaiting">
-            <div class="stat-label">Feed Health</div>
-            <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
-            
-        </div>
-        <div class="stat-tile stat-awaiting">
-            <div class="stat-label">AI Status</div>
-            <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
-            
-        </div>
-        <div class="stat-tile stat-awaiting">
-            <div class="stat-label">Database</div>
-            <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
-            
-        </div>
-        <div class="stat-tile stat-awaiting">
-            <div class="stat-label">GitHub Actions</div>
-            <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
-            
-        </div></div></div>
-    <div class="telemetry-sub"><div class="telemetry-sub-label">Latency</div><div class="tile-grid">
-        <div class="stat-tile stat-awaiting">
-            <div class="stat-label">Avg Parse Time</div>
-            <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
-            
-        </div>
-        <div class="stat-tile stat-awaiting">
-            <div class="stat-label">Avg AI Time</div>
-            <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
-            
-        </div>
-        <div class="stat-tile stat-neutral">
-            <div class="stat-label">Avg End-to-End</div>
-            <div class="stat-value">334.67s</div>
-            
-        </div>
-        <div class="stat-tile stat-awaiting">
-            <div class="stat-label">Queue Depth</div>
-            <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
-            
-        </div>
-        <div class="stat-tile stat-awaiting">
-            <div class="stat-label">AI Invocations</div>
-            <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
-            
-        </div>
-        <div class="stat-tile stat-awaiting">
-            <div class="stat-label">Articles / Hour</div>
-            <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
-            
-        </div></div></div>
-    <div class="telemetry-sub"><div class="telemetry-sub-label">Errors &amp; Retries</div><div class="tile-grid">
-        <div class="stat-tile stat-awaiting">
-            <div class="stat-label">Parser</div>
-            <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
-            
-        </div>
-        <div class="stat-tile stat-awaiting">
-            <div class="stat-label">HTTP</div>
-            <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
-            
-        </div>
-        <div class="stat-tile stat-awaiting">
-            <div class="stat-label">RSS</div>
-            <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
-            
-        </div>
-        <div class="stat-tile stat-awaiting">
-            <div class="stat-label">AI</div>
-            <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
-            
-        </div>
-        <div class="stat-tile stat-awaiting">
-            <div class="stat-label">SQLite</div>
-            <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
-            
-        </div>
-        <div class="stat-tile stat-awaiting">
-            <div class="stat-label">Email</div>
-            <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
-            
-        </div>
-        <div class="stat-tile stat-awaiting">
-            <div class="stat-label">Retry Success</div>
-            <div class="stat-value"><span class="awaiting">Awaiting Data</span></div>
-            
-        </div></div></div>
-    <div class="telemetry-sub"><div class="telemetry-sub-label">Feed Freshness</div><div class="empty-note">Awaiting Data &mdash; no per-feed telemetry reported for this run.</div></div></div>
-    <div class="card"><div class="deep-link-row"><div><h2 style="border-bottom:none;">Decision Analytics</h2></div><a class="deep-link" href="decision_analytics.html">Open Analytics &rarr;</a></div></div>
-    <div class="card"><h2>Live Activity</h2><div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-    <div><div class="section-title" style="margin-top: 0;">Latest Processed</div><ul class="activity-list"><li><span>CrowdStrike 2026 Threat Hunting Report: AI is Now Embedded Across Modern Adversary Operations</span><span class="activity-ts">2026-08-03 14:28:58 UTC</span></li><li><span>Sangfor Technologies Included in the 2026 Gartner® Magic Quadrant™ for SASE Platforms</span><span class="activity-ts">2026-08-03 14:29:00 UTC</span></li><li><span>Twist Bioscience Announces Fiscal 2026 Third Quarter Financial Results</span><span class="activity-ts">2026-08-03 14:29:01 UTC</span></li><li><span>Sony Pictures’ Spider-Man: Brand New Day to Expand in IMAX® Across North America Beginning August 6</span><span class="activity-ts">2026-08-03 14:29:03 UTC</span></li><li><span>Christopher Nolan’s The Odyssey Powers IMAX to its Highest Grossing Month in Company History with $257 Million in July</span><span class="activity-ts">2026-08-03 14:29:15 UTC</span></li><li><span>Matthew Scagnelli Named ATSG Chief Human Resources Officer</span><span class="activity-ts">2026-08-03 14:59:25 UTC</span></li></ul></div>
-    <div><div class="section-title" style="margin-top: 0;">Latest Alerts</div><div class="empty-note">Awaiting Data</div></div></div></div>
-    </div></div></body></html>
+    <header style="border-left-color: var(--border);"><div><h1>Operations Centre</h1>
+    <div class="subline">Run ID: 30826068834 &bull; Generated 2026-08-03 15:11:50 UTC</div></div></header>
+    
+    <div class="card" style="margin-bottom: 12px;"><h2>Section 1: Trust & Operational Status</h2><div class="tile-grid" style="grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));"><div class="stat-tile"><div class="stat-label">Overall Health</div><div class="stat-value"><span class="badge awaiting">AWAITING DATA</span></div></div><div class="stat-tile"><div class="stat-label">Validation Status</div><div class="stat-value"><span class="badge awaiting">AWAITING DATA</span></div></div><div class="stat-tile"><div class="stat-label">System Confidence</div><div class="stat-value"><span class="awaiting">Awaiting Data</span></div></div><div class="stat-tile"><div class="stat-label">Last Successful Run</div><div class="stat-value">2026-08-03 15:11:50 UTC</div></div><div class="stat-tile"><div class="stat-label">Scheduler Status</div><div class="stat-value"><span class="badge awaiting">AWAITING DATA</span></div></div><div class="stat-tile"><div class="stat-label">Queue Health</div><div class="stat-value"><span class="badge success">OK</span></div></div><div class="stat-tile"><div class="stat-label">Feed Health</div><div class="stat-value"><span class="badge success">OK</span></div></div><div class="stat-tile"><div class="stat-label">AI Status</div><div class="stat-value"><span class="badge success">OK</span></div></div><div class="stat-tile"><div class="stat-label">Database Status</div><div class="stat-value"><span class="badge success">OK</span></div></div><div class="stat-tile"><div class="stat-label">GH Actions Status</div><div class="stat-value"><span class="badge success">OK</span></div></div></div></div>
+    
+    <div class="card" style="margin-bottom: 12px;"><h2>Section 2: Opportunity Capture</h2><div class="kpi-hero"><div><div class="kpi-label">Opportunity Capture Rate</div><div class="kpi-number"><span class="awaiting" style="font-size:0.4em;">AWAITING DATA</span></div></div><div style="flex:1; min-width:220px;"><div class="kpi-context-row"><div class="kpi-context-item"><div class="cx-label">False Positive Rate</div><div class="cx-value"><span class="awaiting">Awaiting Data</span></div></div><div class="kpi-context-item"><div class="cx-label">False Negative Rate</div><div class="cx-value"><span class="awaiting">Awaiting Data</span></div></div><div class="kpi-context-item"><div class="cx-label">Avg Detection Delay</div><div class="cx-value"><span class="awaiting">Awaiting Data</span></div></div><div class="kpi-context-item"><div class="cx-label">Benchmark Lead</div><div class="cx-value"><span class="awaiting">Awaiting Data</span></div></div></div></div></div></div>
+    
+    <div class="card" style="margin-bottom: 12px;"><h2>Section 3: Pipeline Loss Analysis</h2><div class="empty-note">Awaiting Data &mdash; pipeline has not reported a Downloaded total.</div></div>
+    
+    <div class="card" style="margin-bottom: 12px; overflow-x: auto;"><h2>Section 4: Source Intelligence</h2>
+    <table><thead><tr><th>Source</th><th>Articles</th><th>Alerts</th><th>Capture Share</th><th>Alert %</th><th>Ontology %</th><th>Rules %</th><th>Failures</th><th>Opp Density</th><th>Dup Rate</th><th>Parse Succ</th><th>Avg Freshness</th><th>Med Delay</th><th>Avg Conf</th><th>Avg Cost</th><th>Capture Contrib</th></tr></thead><tbody><tr>
+            <td><strong>Reuters</strong></td>
+            <td class="metric-val">6412</td>
+            <td class="metric-val">92</td>
+            <td class="metric-val">39.3%</td>
+            <td class="metric-val">1.4%</td>
+            <td class="metric-val">18%</td>
+            <td class="metric-val">5%</td>
+            <td class="metric-val" style="color: var(--text);">0</td>
+            <td class="metric-val"><span class="awaiting">Awaiting Data</span></td>
+            <td class="metric-val"><span class="awaiting">Awaiting Data</span></td>
+            <td class="metric-val"><span class="awaiting">Awaiting Data</span></td>
+            <td class="metric-val"><span class="awaiting">Awaiting Data</span></td>
+            <td class="metric-val"><span class="awaiting">Awaiting Data</span></td>
+            <td class="metric-val"><span class="awaiting">Awaiting Data</span></td>
+            <td class="metric-val"><span class="awaiting">Awaiting Data</span></td>
+            <td class="metric-val"><span class="awaiting">Awaiting Data</span></td>
+        </tr><tr>
+            <td><strong>SEC EDGAR</strong></td>
+            <td class="metric-val">8921</td>
+            <td class="metric-val">142</td>
+            <td class="metric-val">60.7%</td>
+            <td class="metric-val">0.16%</td>
+            <td class="metric-val">2%</td>
+            <td class="metric-val">0.5%</td>
+            <td class="metric-val" style="color: var(--text);">0</td>
+            <td class="metric-val"><span class="awaiting">Awaiting Data</span></td>
+            <td class="metric-val"><span class="awaiting">Awaiting Data</span></td>
+            <td class="metric-val"><span class="awaiting">Awaiting Data</span></td>
+            <td class="metric-val"><span class="awaiting">Awaiting Data</span></td>
+            <td class="metric-val"><span class="awaiting">Awaiting Data</span></td>
+            <td class="metric-val"><span class="awaiting">Awaiting Data</span></td>
+            <td class="metric-val"><span class="awaiting">Awaiting Data</span></td>
+            <td class="metric-val"><span class="awaiting">Awaiting Data</span></td>
+        </tr></tbody></table></div>
+    
+    <div class="card" style="margin-bottom: 12px;"><h2>Section 7: Performance Latencies</h2><div class="tile-grid"><div class="stat-tile"><div class="stat-label">RSS</div><div class="stat-value"><span class="awaiting">Awaiting Data</span></div></div><div class="stat-tile"><div class="stat-label">Download</div><div class="stat-value"><span class="awaiting">Awaiting Data</span></div></div><div class="stat-tile"><div class="stat-label">Parse</div><div class="stat-value"><span class="awaiting">Awaiting Data</span></div></div><div class="stat-tile"><div class="stat-label">Issuer Extraction</div><div class="stat-value"><span class="awaiting">Awaiting Data</span></div></div><div class="stat-tile"><div class="stat-label">Ontology</div><div class="stat-value"><span class="awaiting">Awaiting Data</span></div></div><div class="stat-tile"><div class="stat-label">Rules</div><div class="stat-value"><span class="awaiting">Awaiting Data</span></div></div><div class="stat-tile"><div class="stat-label">AI</div><div class="stat-value"><span class="awaiting">Awaiting Data</span></div></div><div class="stat-tile"><div class="stat-label">Email</div><div class="stat-value"><span class="awaiting">Awaiting Data</span></div></div><div class="stat-tile"><div class="stat-label">SQLite</div><div class="stat-value"><span class="awaiting">Awaiting Data</span></div></div></div></div>
+    
+    <div class="card" style="margin-bottom: 12px;"><h2>Section 8: Feed Quality</h2>
+    <table><thead><tr><th>Feed</th><th>Status</th><th>Latency</th><th>Failures</th><th>Retries</th><th>Freshness</th><th>Retry Rate</th><th>Consec Failures</th><th>Last Success Poll</th></tr></thead><tbody><tr><td colspan="9" class="empty-note">Awaiting Data &mdash; no per-feed telemetry reported for this run.</td></tr></tbody></table></div>
+    
+    <div class="card"><h2>Section 9: Engineering Activity</h2>
+    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
+        <div><div class="stat-label">Latest Alerts</div><div class="empty-note">Awaiting Data</div></div>
+        <div><div class="stat-label">Latest Failures</div><div class="empty-note">Awaiting Data</div></div>
+        <div><div class="stat-label">Latest Retries</div><div class="empty-note">Awaiting Data</div></div>
+        <div><div class="stat-label">Latest Feed Errors</div><div class="empty-note">Awaiting Data</div></div>
+        <div><div class="stat-label">Latest Validation Issues</div><div class="empty-note">Awaiting Data</div></div>
+    </div></div>
+    </div></body></html>
