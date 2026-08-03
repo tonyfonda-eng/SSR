@@ -1,78 +1,67 @@
+"""
+SSR 2.0: Strategy Engine & Options Evaluator
+Downstream quantitative evaluation. Decoupled from the detection pipeline.
+Calculates expected return thresholds and ROI logic (e.g., Naked Call Strategy).
+"""
 import yfinance as yf
-import pandas as pd
-import datetime
+import logging
 
-def calculate_naked_call_roi(ticker):
+logger = logging.getLogger(__name__)
+
+def calculate_naked_call_roi(ticker: str) -> str:
+    """
+    Strategy Engine: Calculates theoretical Return on Investment (ROI)
+    for short-term M&A option writing strategies.
+    Designed to append execution rationales to reminder alerts.
+    """
+    if not ticker or ticker == "UNKNOWN":
+        return "Strategy constraints not met: Invalid ticker."
+        
     try:
-        yf_ticker = yf.Ticker(ticker)
-        current_price = yf_ticker.info.get('currentPrice', yf_ticker.info.get('regularMarketPrice', 0))
-        if current_price == 0:
-            return "Could not retrieve current price for ROI calculation."
+        stock = yf.Ticker(ticker)
+        current_price = stock.info.get("currentPrice", stock.info.get("regularMarketPrice"))
+        
+        if not current_price:
+            return f"Strategy constraints not met: Unable to resolve current spot price for {ticker}."
             
-        options = yf_ticker.options
+        options = stock.options
         if not options:
-            return "No options chain available for ROI calculation."
+            return f"Strategy Alert: No exchange-listed options chains available for {ticker}."
             
-        results = []
-        today = datetime.date.today()
+        # Grab the nearest expiration date sequence
+        nearest_expiry = options[0]
+        chain = stock.option_chain(nearest_expiry)
+        calls = chain.calls
         
-        for exp in options:
-            exp_date = datetime.datetime.strptime(exp, "%Y-%m-%d").date()
-            dte = (exp_date - today).days
-            if dte <= 0:
-                continue
-                
-            chain = yf_ticker.option_chain(exp).calls
+        if calls.empty:
+            return f"Strategy Alert: No call options open interest found for expiry {nearest_expiry}."
             
-            for _, row in chain.iterrows():
-                strike = row['strike']
-                # only calculate for OTM options
-                if strike <= current_price:
-                    continue
-                    
-                bid = row.get('bid', 0)
-                ask = row.get('ask', 0)
-                last = row.get('lastPrice', 0)
-                
-                if bid > 0 and ask > 0:
-                    premium = (bid + ask) / 2
-                else:
-                    premium = last
-                    
-                if premium <= 0.05: # Skip effectively worthless options
-                    continue
-                    
-                otm_amount = strike - current_price
-                
-                # Reg T Margin for naked call
-                margin1 = 0.20 * current_price - otm_amount + premium
-                margin2 = 0.10 * current_price + premium
-                margin_req = max(margin1, margin2)
-                
-                # Minimum margin requirement is usually $250 per contract, meaning $2.50 per share
-                if margin_req < 2.50:
-                    margin_req = 2.50
-                    
-                roi = premium / margin_req
-                annualized_roi = roi * (365 / dte)
-                
-                results.append({
-                    'Expiry': exp,
-                    'Strike': strike,
-                    'Premium': f"${premium:.2f}",
-                    'Margin Req': f"${margin_req:.2f}",
-                    'Ann. ROI': f"{annualized_roi * 100:.1f}%"
-                })
-                
-        if not results:
-            return "No OTM options available with significant premium to calculate ROI."
+        # Filter for strictly Out-Of-The-Money (OTM) calls
+        otm_calls = calls[calls['strike'] > current_price]
+        if otm_calls.empty:
+            return f"Strategy Alert: No OTM call options available for {ticker} at {nearest_expiry}."
             
-        df = pd.DataFrame(results)
-        # Limit to top 15 highest ROI
-        df['sort_roi'] = df['Ann. ROI'].str.replace('%', '').astype(float)
-        df = df.sort_values('sort_roi', ascending=False).drop('sort_roi', axis=1).head(15)
+        # Select the nearest OTM strike allocation
+        target_call = otm_calls.iloc[0]
+        strike = target_call['strike']
+        bid = target_call['bid']
         
-        return "### Naked Call Annualized ROI (Reg T Margin)\\nUnderlying Price: $" + str(current_price) + "\\n\\n" + df.to_markdown(index=False)
+        if bid <= 0.01:
+            return f"Strategy Alert: Bid too low on {nearest_expiry} ${strike}C. Market maker liquidity insufficient."
+            
+        roi = (bid / current_price) * 100
+        
+        return (
+            f"--- STRATEGY ENGINE: NAKED CALL ROI EVALUATION ---\n"
+            f"Target Ticker: {ticker}\n"
+            f"Current Spot Price: ${current_price:.2f}\n"
+            f"Nearest Expiration: {nearest_expiry}\n"
+            f"Target Strike (OTM): ${strike:.2f}\n"
+            f"Current Bid Premium: ${bid:.2f}\n"
+            f"Theoretical Unlevered Yield: {roi:.2f}%\n"
+            f"--------------------------------------------------\n"
+        )
         
     except Exception as e:
-        return f"Error calculating ROI: {e}"
+        logger.error(f"[STRATEGY ENGINE] Execution failed for {ticker}: {e}")
+        return f"Strategy evaluation failed due to upstream market data fault: {e}"

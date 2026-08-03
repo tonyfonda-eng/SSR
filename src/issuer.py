@@ -1,89 +1,48 @@
-import re
-import string
-
-def normalize_issuer(name):
-    """
-    Normalizes an issuing company name to improve deterministic deduplication.
-    - Uppercase
-    - Removes punctuation
-    - Strips common corporate suffixes (INC, CORP, PLC, etc.)
-    """
-    if not name or name.strip().upper() == "UNKNOWN":
-        return "UNKNOWN"
-        
-    # 1. Uppercase and strip whitespace
-    name = name.strip().upper()
-    
-    # 2. Remove punctuation
-    name = name.translate(str.maketrans('', '', string.punctuation))
-    
-    # 3. Strip common corporate suffixes repeatedly
-    # Using \b to ensure we match whole words at the end of the string
-    suffixes = [
-        "INC", "CORPORATION", "CORP", "PLC", "LIMITED", "LTD", 
-        "SA", "NV", "AG", "HOLDINGS", "HOLDING", "LLC", "LP", "COMPANY", "CO"
-    ]
-    
-    # Regex: match a space, then any suffix, at the end of the string.
-    # Optional trailing spaces handled by strip().
-    suffix_pattern = r'\b(?:' + '|'.join(suffixes) + r')\b$'
-    
-    while True:
-        # Strip to ensure $ matches the actual end of the text
-        name = name.strip()
-        new_name = re.sub(suffix_pattern, '', name).strip()
-        if new_name == name:
-            break
-        name = new_name
-        
-    # If the name gets stripped to nothing (e.g. they literally named the company "Inc"), revert
-    return name if name else "UNKNOWN"
-
-def extract_issuing_company(source_name, title, body):
-    """
-    Extracts the issuing company from the article using deterministic methods first,
-    falling back to AI if necessary.
-    """
-    # 1. SEC EDGAR extraction
-    if source_name == "SEC EDGAR":
-        # Usually title is formatted as "8-K [1.01] - Louisiana-Pacific Corp"
-        if " - " in title:
-            issuer = title.split(" - ")[-1].strip()
-            return normalize_issuer(issuer)
-            
-    # 2. Extract from standard PR Dateline (PR Newswire / GlobeNewswire / BusinessWire)
-    # Dateline typically looks like: "NEW YORK, July 31, 2026 /PRNewswire/ -- Stryker Corporation today announced..."
-    # Or "TORONTO, July 31 (GlobeNewswire) -- DeepHealth..."
-    
-    # Since extracting accurately across 3 providers and 1000s of formats using Regex is extremely fragile,
-    # and we don't have access to the raw HTML metadata in this scope,
-    # we rely on the cheap AI fallback which is remarkably good at this specific task.
-    
-    # 3. Fallback to AI
-    from src.ai import _generate_with_retry
-    
-    prompt = f"""
-Return ONLY the company issuing this announcement.
-If you cannot determine it, return UNKNOWN.
-Do not return a ticker, return the formal company name.
-Article Title: {title}
-Article Body: {body[:1500]}
 """
+SSR 2.0: Entity Resolution Node (Issuer Identification)
+Utilizes the Layer 1 Provider Output abstraction to extract the canonical 
+corporate entity from a sensor's raw text payload.
+"""
+import logging
+from src.ai import invoke_llm
+
+logger = logging.getLogger(__name__)
+
+def extract_issuing_company(source_name: str, title: str, body: str) -> str:
+    """
+    Evaluates the raw article text to extract the primary issuing company.
+    Returns the exact string name, 'UNKNOWN', or 'EXHAUSTED' for upstream handling.
+    """
+    if not title and not body:
+        return "UNKNOWN"
+
+    prompt = f"""You are a quantitative financial entity resolution engine.
+    Analyze the following corporate press release and identify the PRIMARY issuing company.
+    Respond ONLY with the exact company name. Do not include tickers, legal suffixes (like Inc. or Corp.) unless critical for disambiguation, and do not add any conversational text.
+    If multiple companies are mentioned (e.g., in an M&A transaction), return the specific company that issued the release.
+    If it is impossible to determine the issuer, respond EXACTLY with the word "UNKNOWN".
+
+    Sensor Source: {source_name}
+    Headline: {title}
+    
+    Raw Payload:
+    {body[:4000]}
+    """
     
     try:
-        response = _generate_with_retry(prompt)
-        issuer = response.strip()
-        if not issuer or issuer == "UNKNOWN":
-            return "UNKNOWN"
-            
-        # Very long responses usually indicate hallucination or the AI returning the whole sentence.
-        if len(issuer) > 50:
-            return "UNKNOWN"
-            
-        return normalize_issuer(issuer)
-    except Exception as e:
-        print(f"    [AI ERROR] Issuer Extraction failed: {e}")
-        error_msg = str(e).lower()
-        if "exhausted" in error_msg or "no api keys" in error_msg:
+        # Route through the unified SSR 2.0 AI Provider abstraction
+        raw_response = invoke_llm(prompt, json_mode=False)
+        
+        if raw_response == "EXHAUSTED":
             return "EXHAUSTED"
+            
+        cleaned = raw_response.strip().replace('"', '').replace("'", "")
+        
+        if not cleaned or cleaned.upper() == "UNKNOWN":
+            return "UNKNOWN"
+            
+        return cleaned
+        
+    except Exception as e:
+        logger.error(f"[ENTITY RESOLUTION] Structural failure extracting issuer from {source_name}: {e}")
         return "UNKNOWN"
