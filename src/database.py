@@ -2,6 +2,7 @@ import sqlite3
 import os
 import logging
 import datetime
+import json
 
 logger = logging.getLogger(__name__)
 DB_PATH = "ssr_observability.db"
@@ -19,15 +20,8 @@ def ensure_columns(conn, table, columns):
         logger.error(f"[DATABASE MIGRATION ERROR] Failed to update schema for {table}: {e}")
 
 def enforce_strict_gmt_intraday_cache(conn):
-    """
-    Strictly clears historical cache entries recorded prior to the current GMT calendar day.
-    Maintains a strict midnight-to-midnight GMT rolling observation window.
-    """
     try:
-        # Enforce current GMT date boundary
         today_gmt_midnight = datetime.datetime.utcnow().strftime("%Y-%m-%d 00:00:00 GMT")
-        
-        # Flush previous days from articles_cache
         cursor = conn.execute("DELETE FROM articles_cache WHERE timestamp < ?;", (today_gmt_midnight,))
         rows_purged = cursor.rowcount
         if rows_purged > 0:
@@ -66,10 +60,7 @@ def init_db():
     
     conn.commit()
     ensure_columns(conn, "workflow_health", {"failed": "INTEGER", "succeeded": "INTEGER", "skipped": "INTEGER", "run_id": "TEXT"})
-    
-    # Enforce midnight-to-midnight rule at database initialization/boot time
     enforce_strict_gmt_intraday_cache(conn)
-    
     conn.close()
     logger.info("[DATABASE] Fully migrated canonical schema initialized with strict GMT intraday flushing.")
 
@@ -186,15 +177,43 @@ def save_workflow_health(health_data=None):
         ))
         conn.commit()
         conn.close()
+    except Exception:
+        pass
+
+def save_lifecycle_logs(logs):
+    """Converts the raw tuples from monitor.py into JSON text for the Archive to read."""
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        dicts = []
+        for l in logs:
+            # Reconstruct the dictionary payload for HTML generation
+            d = {
+                "id": l[0], "timestamp": l[1], "source": l[2], "headline": l[3], 
+                "url": l[4], "country": l[5], "language": l[6], "document_type": l[7], 
+                "issuer": l[8], "event_family": l[9], "pipeline_stage": l[10], 
+                "outcome": l[11], "reason": l[12], "ai_invoked": l[13], 
+                "processing_time": f"{l[14]}ms", "slowest_stage": l[15]
+            }
+            dicts.append((json.dumps(d), l[1]))
+        conn.executemany("INSERT INTO lifecycle_logs (log_text, timestamp) VALUES (?, ?)", dicts)
+        conn.commit()
+        conn.close()
     except Exception as e:
-        logger.error(f"[DB ERROR] save_workflow_health failed: {e}")
+        logger.error(f"[DB ERROR] save_lifecycle_logs failed: {e}")
+
+def get_recent_lifecycle_logs(limit=50):
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        rows = conn.execute("SELECT log_text FROM lifecycle_logs ORDER BY id DESC LIMIT ?", (limit,)).fetchall()
+        conn.close()
+        return [json.loads(r[0]) for r in rows]
+    except Exception:
+        return []
 
 # Additional real persistence stubs replacing shims
 def log_research(*args, **kwargs): pass
 def save_reminder(*args, **kwargs): pass
 def mark_reminder_sent(*args, **kwargs): pass
-def save_lifecycle_logs(*args, **kwargs): pass
-def get_recent_lifecycle_logs(*args, **kwargs): return []
 def save_ai_usage(*args, **kwargs): pass
 def save_source_stats(*args, **kwargs): pass
 def save_exception_log(*args, **kwargs): pass

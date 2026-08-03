@@ -18,8 +18,6 @@ def _spoofed_get(*args, **kwargs):
         headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     kwargs['headers'] = headers
     
-    # Inject a global network timeout if a down-stream scraper forgot one.
-    # 3.0 seconds to connect, 15.0 seconds maximum between bytes. Stops TCP tarpits universally.
     if 'timeout' not in kwargs:
         kwargs['timeout'] = (3.0, 15.0)
         
@@ -57,7 +55,7 @@ from src.drift_monitor import check_pipeline_drift
 from src.ontology import extract_concepts, extract_statuses, get_all_matched_terms, load_ontology
 from src.financials import get_t12_metrics
 from src.monitoring import MetricsCollector
-from src.html_generator import generate_dashboard_html, generate_archive_html
+from src.html_generator import generate_dashboard_html, generate_archive_html, generate_decision_analytics_html
 
 class IssuerMemory:
     """In-memory cache of all issuing companies processed today."""
@@ -224,7 +222,6 @@ def _process_article(source_name, article_id, title, url, published,
     ticker_info = None 
     options = []
     
-    # FINANCIAL OPTIMIZATION PASS: Intraday Caching layer preventing Yahoo Finance IP limits
     if ticker != "UNKNOWN" and "MOCK AI" not in ticker:
         if financials_cache is not None and ticker in financials_cache:
             print(f" [FINANCIALS] Deploying cached market statistics for {ticker}")
@@ -232,7 +229,7 @@ def _process_article(source_name, article_id, title, url, published,
             options = financials_cache[ticker].get("options")
         else:
             try:
-                time.sleep(0.5) # Dynamic anti-ban jitter
+                time.sleep(0.5)
                 yf_ticker = yf.Ticker(ticker)
                 ticker_info = yf_ticker.info
                 options = yf_ticker.options
@@ -344,7 +341,6 @@ def _process_article(source_name, article_id, title, url, published,
     
     log_research(event_id, article_id, confidence, research_summary)
     
-    # UNIFORM TIME ZONE ENFORCEMENT PASS: Forced standard GMT string matching your SQLite layout
     queue_payload = {
         "timestamp": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S GMT"),
         "ticker": ticker,
@@ -430,7 +426,7 @@ def process_1_feed(rss_url, source_name, triage_all=False, country=None, languag
         })
         
     feed_len = len(feed.entries)
-    del feed # RAM RECOVERY: Forces deep collection of XML namespaces
+    del feed 
     return parsed_articles, feed_len
 
 
@@ -476,10 +472,6 @@ def process_custom_scraper(scraper, source_name, rss_url=None, triage_all=False,
 
 
 def cluster_articles(articles):
-    """
-    PERFORMANCE PASS: Replaces O(N^2) SequenceMatcher with linear Token-Set Jaccard calculation.
-    Saves thousands of core CPU cycles during mass ingestion.
-    """
     clusters = []
     for article in articles:
         if not article.get('body'):
@@ -498,7 +490,7 @@ def cluster_articles(articles):
             overlap = len(art_tokens.intersection(rep_tokens))
             similarity = overlap / float(min(len(art_tokens), len(rep_tokens)))
             
-            if similarity > 0.75:  # 75% uniform token match configuration
+            if similarity > 0.75:  
                 cluster.append(article)
                 found_cluster = True
                 break
@@ -574,33 +566,11 @@ def main():
         is_enabled = str(source.get("Enabled", "")).upper() == "TRUE"
         source_name = source.get("Source", "Unknown")
         rss_url = source.get("RSS URL", "")
+        triage_all = str(source.get("Triage All (Email Rejections)", "")).strip().upper() == "TRUE"
+        country = source.get("Country", "")
+        language = source.get("Language", "")
         
-        # Get last checked time and calculate window threshold
-        last_checked_str = source.get("Last Checked", "")
-        try:
-            if last_checked_str:
-                # Handle both timestamp and simple date formats
-                if '-' in last_checked_str and len(last_checked_str.split()[0]) == 10:
-                    last_checked = datetime.datetime.strptime(last_checked_str.split()[0], "%Y-%m-%d")
-                else:
-                    last_checked = datetime.datetime.strptime(last_checked_str, "%Y-%m-%d %H:%M:%S GMT")
-            else:
-                last_checked = datetime.datetime.utcnow() - datetime.timedelta(days=7)
-        except:
-            last_checked = datetime.datetime.utcnow() - datetime.timedelta(days=7)
-            
-        # Check frequency in hours (default to 24 if missing)
-        frequency_hours = int(source.get("Check Frequency", "24"))
-        cutoff_dt = datetime.datetime.utcnow() - datetime.timedelta(hours=frequency_hours)
-        
-        # Only process if enough time has passed OR if it's the first run (no last checked)
-        should_process = (not last_checked_str) or (last_checked < cutoff_dt)
-        
-        if is_enabled and should_process:
-            triage_all = str(source.get("Triage All (Email Rejections)", "")).strip().upper() == "TRUE"
-            country = source.get("Country", "")
-            language = source.get("Language", "")
-            
+        if is_enabled:
             scraper = get_scraper_for_source(source_name)
             method_used = None
             parsed = []
@@ -619,8 +589,6 @@ def main():
                         all_new_articles.extend(parsed)
                         source_stats[source_name] = {"count": parsed_count, "new": len(parsed), "method": method_used}
                         print(f" [INGESTION] {source_name}: {parsed_count} fetched, {len(parsed)} new ({method_used})")
-                        # Update last checked time in Google Sheets
-                        update_last_checked(SHEET_URL, source_name)
                 except Exception as e:
                     print(f" [WARNING] HTML Scraper failed for {source_name}: {e}. Falling back to RSS...")
                     
@@ -632,21 +600,14 @@ def main():
                     all_new_articles.extend(parsed)
                     source_stats[source_name] = {"count": parsed_count, "new": len(parsed), "method": method_used}
                     print(f" [INGESTION] {source_name}: {parsed_count} fetched, {len(parsed)} new ({method_used})")
-                    # Update last checked time in Google Sheets
-                    update_last_checked(SHEET_URL, source_name)
                 except Exception as e:
                     print(f" [ERROR] RSS Ingestion failed for {source_name}: {e}")
-                    
-            if not method_used:
-                print(f" [INFO] {source_name} skipped: No new content or parsing errors.")
-                try:
-                    save_exception_log(
-                        error=f"Scraper {source_name} failed to fetch content (RSS: {rss_url or 'N/A'})."
-                    )
-                except Exception:
-                    pass
-        elif is_enabled:
-            print(f" [SKIP] {source_name} is on frequency {frequency_hours}h. Last checked: {last_checked_str}")
+
+            # LIVE SOURCES TIMESTAMP SYNC
+            try:
+                update_last_checked(SHEET_URL, source_name)
+            except Exception as e:
+                pass 
 
     clusters = cluster_articles(all_new_articles)
     clusters_by_source = defaultdict(list)
@@ -670,13 +631,12 @@ def main():
 
     total_new = 0
     research_queue_rows = [] 
-    financials_cache = {} # PERF PASS: Installs local intraday financial directory cache
+    financials_cache = {} 
     
     for cluster in clusters:
         primary = cluster[0]
         body = primary.get("body", "")
         
-        # --- THE ARTICLE BLAST SHIELD ---
         try:
             if not body or len(body) < 100:
                 try:
@@ -712,7 +672,7 @@ def main():
                 ontology_stats=ontology_stats,
                 source_reliability_scores=source_reliability_scores,
                 research_queue_rows=research_queue_rows,
-                financials_cache=financials_cache # Inject the cache layer downward
+                financials_cache=financials_cache 
             )
             
             if res == "ABORT":
@@ -727,16 +687,13 @@ def main():
             except Exception:
                 pass
             continue 
-        # ---------------------------------
 
-    # BATCH SYNC PHASE: Pushes all queue additions in 1 single write call
     if research_queue_rows:
         try:
             from src.sheets import batch_append_to_research_queue
             batch_append_to_research_queue(SHEET_URL, research_queue_rows)
             print(f" [SHEETS SYNC] Batched {len(research_queue_rows)} successful items to Research Queue.")
         except AttributeError:
-            print(f" [SHEETS SYNC] Batch append logic not found, falling back to sequential append.")
             for row in research_queue_rows:
                 append_to_research_queue(sheet_url=SHEET_URL, data_row=row)
 
@@ -848,6 +805,9 @@ def main():
         export_archive_json(filepath=str(archive_json_path))
         generate_archive_html(output_path=str(archive_html_path))
         
+        # ---> FINALLY GENERATES DECISION ANALYTICS <---
+        generate_decision_analytics_html(output_path=str(docs_dir / "decision_analytics.html"), metrics=metrics, avg_30=avg_30)
+        
         set_dashboard_state("last_publish", time.time())
     else:
         print("[MONITORING] Skipping HTML Dashboard generation (throttle).")
@@ -877,7 +837,6 @@ if __name__ == "__main__":
         sys.exit(1)
 
 def generate_firepower_and_traffic_lights(or_pool, gemini_pool, scraper_results):
-    """Calculates aggregated firepower and scraper statuses for the HTML dashboard."""
     or_total = len(or_pool.keys) if hasattr(or_pool, 'keys') else 9
     or_cooling = len(or_pool.cooldowns) if hasattr(or_pool, 'cooldowns') else 0
     or_active = max(0, or_total - or_cooling)

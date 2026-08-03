@@ -3,7 +3,6 @@ import json
 import sqlite3
 import datetime
 
-# Point directly to your active production database path
 DB_PATH = "ssr_observability.db"
 
 def export_data():
@@ -13,67 +12,41 @@ def export_data():
         print(f"[WARNING] Observability database not found at {DB_PATH}. Postponing export.")
         return
 
-    # 1. Connect to the real production database
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
-    # Unified query extracting from your true production articles cache
-    query = """
-    SELECT 
-        id, 
-        title, 
-        url, 
-        source, 
-        timestamp
-    FROM articles_cache
-    ORDER BY timestamp DESC
-    LIMIT 1000
-    """
-    
     archive_list = []
     try:
-        cursor.execute(query)
+        # Pull rich JSON directly from our new lifecycle logger
+        cursor.execute("SELECT log_text FROM lifecycle_logs ORDER BY id DESC LIMIT 1000")
         rows = cursor.fetchall()
-        
         for row in rows:
-            # Reconstruct the tracking structure for archive.html cleanly
-            archive_list.append({
-                "title": row["title"] or "Untitled Announcement",
-                "url": row["url"] or "#",
-                "timestamp": row["timestamp"] or "N/A",
-                "source": row["source"] or "Unknown",
-                "status": "PROCESSED",
-                "drop_stage": "Stage 3: Ingestion Complete",
-                "reason": "Successfully recorded into daily memory state",
-                "evaluator": "System Logic"
-            })
-    except sqlite3.OperationalError as e:
-        print(f"[WARNING] Table mapping failed or unpopulated yet: {e}")
+            try:
+                data = json.loads(row["log_text"])
+                archive_list.append(data)
+            except Exception:
+                continue
     except Exception as e:
-        print(f"[ERROR] Failed to query production data: {e}")
+        print(f"[WARNING] Archive Data Sync: {e}")
 
     # Fallback to defaults only if the table is literally brand new or empty
     if not archive_list:
-        archive_list = [
-            {
-                "title": "Awaiting Live Market Signals...",
-                "url": "#",
-                "timestamp": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S GMT"),
-                "source": "System Core",
-                "status": "INITIALIZED",
-                "drop_stage": "Ingestion Window",
-                "reason": "Pipeline is active. Awaiting fresh intraday filings.",
-                "evaluator": "Python"
-            }
-        ]
+        archive_list = [{
+            "headline": "Awaiting Live Market Signals...",
+            "url": "#",
+            "timestamp": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S GMT"),
+            "source": "System Core",
+            "outcome": "INITIALIZED",
+            "processing_time": "N/A",
+            "issuer": "N/A"
+        }]
         
-    # Write cleanly to the true frontend json asset vector
     with open("docs/archive_data.json", "w", encoding="utf-8") as f:
         json.dump(archive_list, f, indent=2)
     print(f"[VQA] Successfully extracted {len(archive_list)} live ledger items to docs/archive_data.json")
 
-    # 2. Export Real Metrics Payload dynamically from workflow_health table
+    # Metrics Payload
     metrics_payload = {
         "system_status": "OPERATIONAL",
         "uptime": "99.9%",
@@ -91,7 +64,7 @@ def export_data():
             if health_row["failed"] > 0:
                 metrics_payload["system_status"] = "DEGRADED"
     except Exception:
-        pass # Fallback to standard defaults gracefully
+        pass 
         
     with open("docs/dashboard_metrics.json", "w", encoding="utf-8") as f:
         json.dump(metrics_payload, f, indent=2)
