@@ -1,12 +1,18 @@
 {
   "system_status": "OPERATIONAL",
   "uptime": "99.9%",
+<<<<<<< HEAD
   "last_sync_gmt": "2026-08-03 17:26:44 GMT",
   "total_processed_today": 1,
+=======
+  "last_sync_gmt": "2026-08-03 17:38:51 GMT",
+  "total_processed_today": 211,
+>>>>>>> 83898791ae7baced93066ea1eb6f2c2acfb337a2
   "total_alerts_dispatched": 0,
   "run_id": "SSR-OP-26080317",
   "health_score": 100,
   "system_confidence": 0.85,
+<<<<<<< HEAD
   "total_runtime_s": 238.06959181000002,
   "dynamic_sources": [
     {
@@ -15,6 +21,16 @@
       "alerts": 0,
       "ontology_pct": 0.0,
       "rules_pct": 0.0,
+=======
+  "total_runtime_s": 129.775982719,
+  "dynamic_sources": [
+    {
+      "source": "Business Wire",
+      "articles": 211,
+      "alerts": 0,
+      "ontology_pct": 0.0,
+      "rules_pct": 94.3,
+>>>>>>> 83898791ae7baced93066ea1eb6f2c2acfb337a2
       "failures": 0,
       "alert_pct": 0.0
     }
