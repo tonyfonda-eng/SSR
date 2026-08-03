@@ -104,6 +104,6 @@ jobs:
           # Check if there's actually anything to commit
           git diff --staged --quiet || git commit -m "chore: update operational dashboard and archive [skip ci]"
           
-          # Pull with rebase safely handling upstream changes
-          git pull --rebase origin main || git rebase --abort
+          # Pull with rebase using '-X theirs' strategy to automatically prefer the runner's fresh metrics/HTML
+          git pull --rebase -X theirs origin main || git rebase --abort
           git push origin main
