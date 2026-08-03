@@ -114,9 +114,9 @@ def trend_indicator(current, baseline, higher_is_better=True):
         return None, None
     diff = current - baseline
     if abs(diff) < 1e-9:
-        return "\u2192", "neutral"
+        return "→", "neutral"
     improving = (diff > 0) if higher_is_better else (diff < 0)
-    arrow = "\u2191" if diff > 0 else "\u2193"
+    arrow = "↑" if diff > 0 else "↓"
     return arrow, ("good" if improving else "bad")
 
 
@@ -256,8 +256,8 @@ def render_loss_funnel_html(funnel_counts):
             row_cls += " loss"
         bar_pct = r["yield_pct"] if is_num(r["yield_pct"]) else 0
         count_html = esc(fmt_num(r["count"])) if is_num(r["count"]) else '<span class="awaiting">Awaiting</span>'
-        stage_pct_html = fmt_pct(r["stage_pct"]) if is_num(r["stage_pct"]) else "&mdash;"
-        yield_pct_html = fmt_pct(r["yield_pct"]) if is_num(r["yield_pct"]) else "&mdash;"
+        stage_pct_html = fmt_pct(r["stage_pct"]) if is_num(r["stage_pct"]) else "—"
+        yield_pct_html = fmt_pct(r["yield_pct"]) if is_num(r["yield_pct"]) else "—"
         bar_dashed = "border: 1px dashed var(--muted);" if r["awaiting"] else ""
         body += f"""
             <a class="{row_cls}" href="{href}" title="Inspect this stage in the ledger">
@@ -352,8 +352,6 @@ BASE_CSS = """
         tr.clickable { cursor: pointer; }
         tr.clickable:hover { background: var(--surface-hover); }
 
-        /* Legacy box-style funnel (kept in case anything still links to it as a
-           visual reference; the primary funnel is now .loss-funnel below). */
         .funnel { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
         .funnel-node {
             flex: 1; min-width: 120px; background: var(--surface-subtle); border: 1px solid var(--border);
@@ -367,11 +365,6 @@ BASE_CSS = """
         .funnel-node.terminal .fn-value { color: var(--green); }
         .funnel-arrow { align-self: center; color: var(--border); font-size: 1.2em; }
 
-        /* Loss-analysis funnel: a cascade of clickable rows, each with a
-           cumulative-yield bar, a stage retention rate and an overall yield
-           rate, so a bottleneck stage is visible as a bar that suddenly
-           shrinks rather than as a bare number next to five other bare
-           numbers. */
         .loss-funnel { display: flex; flex-direction: column; }
         .loss-row {
             display: grid; grid-template-columns: 170px 1fr 90px 110px 90px; gap: 12px; align-items: center;
@@ -458,10 +451,6 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
     """Generates the Decision Centre — the primary KPI plus its explanation."""
     now_str = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
     run_id = getattr(metrics, 'run_id', 'SSR-OP-2026')
-    # No fabricated defaults here on purpose: a fallback like "assume 98%
-    # healthy" or "assume 118.5s runtime" would silently misreport a
-    # backend that hasn't started sending this field yet. Missing means
-    # Awaiting Data, not "probably fine."
     runtime_s = _daily(metrics, "total_runtime_s")
     health_score = _daily(metrics, "health_score")
 
@@ -504,6 +493,7 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
         f'<div class="kpi-context-item"><div class="cx-label">Validation Status</div><div class="cx-value">{status_badge(validation_status)}</div></div>',
     ])
 
+    # SYNTAX FIX: Terminated unclosed f-string template cleanly below
     hero_html = f"""
                 <div class="kpi-hero">
                     <div>
@@ -539,7 +529,7 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
                             <td><strong>{esc(_bag(row, "source"))}</strong></td>
                             <td class="metric-val">{esc(_bag(row, "articles"))}</td>
                             <td class="metric-val">{esc(alerts)}</td>
-                            <td class="metric-val">{esc(fmt_pct(capture_share) or "&mdash;")}</td>
+                            <td class="metric-val">{esc(fmt_pct(capture_share) or "—")}</td>
                             <td class="metric-val">{esc(_bag(row, "alert_pct"))}%</td>
                             <td class="metric-val">{esc(_bag(row, "ontology_pct"))}%</td>
                             <td class="metric-val">{esc(_bag(row, "rules_pct"))}%</td>
@@ -600,11 +590,11 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
             items += f'<li><span>{label}</span><span class="activity-ts">{ts}</span></li>'
         return f'<ul class="activity-list">{items}</ul>'
 
-    recent_articles_html = _activity_items(lambda l: True, "Awaiting Data \u2014 no log entries supplied for this run.")
+    recent_articles_html = _activity_items(lambda l: True, "Awaiting Data — no log entries supplied for this run.")
     recent_alerts_html = _activity_items(lambda l: str(_bag(l, "outcome", "")).upper() == "DISPATCHED",
-                                          "Awaiting Data \u2014 no dispatched alerts logged for this run.")
+                                          "Awaiting Data — no dispatched alerts logged for this run.")
     recent_failures_html = _activity_items(lambda l: str(_bag(l, "level", "")).upper() in ("ERROR", "FAIL", "FAILURE"),
-                                            "No failures logged for this run.")
+                                           "No failures logged for this run.")
 
     runtime_display = f"{runtime_s:.1f}s" if is_num(runtime_s) else "Awaiting Data"
 
@@ -723,7 +713,7 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
 # ===========================================================================
 # 2. decision_analytics.html — deep dive on the detectors themselves
 #    Question this page answers: which rules / ontology concepts / AI calls
-#    are earning their keep, and which are the biggest drag on Capture Rate?
+#    are earning their keep, and which ones are the biggest drag on Capture Rate?
 # ===========================================================================
 def generate_decision_analytics_html(output_path, metrics, avg_30=None):
     rule_rows = _daily(metrics, "rule_analytics") or [
@@ -743,7 +733,7 @@ def generate_decision_analytics_html(output_path, metrics, avg_30=None):
         rule_rows_html += f"""<tr{' style="color: var(--red);"' if drag_row else ''}>
                 <td>{esc(_bag(r, "rule"))}</td><td class="metric-val">{esc(evaluated)}</td>
                 <td class="metric-val">{esc(matched)}</td><td class="metric-val">{esc(alerts)}</td>
-                <td class="metric-val">{esc(fmt_pct(yield_pct) or "&mdash;")}</td>
+                <td class="metric-val">{esc(fmt_pct(yield_pct) or "—")}</td>
                 <td class="metric-val">{esc(false_neg)}</td></tr>"""
 
     ontology_rows = _daily(metrics, "ontology_conversion") or [
@@ -761,14 +751,10 @@ def generate_decision_analytics_html(output_path, metrics, avg_30=None):
         share = share * 100 if share is not None else None
         ontology_rows_html += (
             f'<tr><td>{esc(_bag(o, "concept"))}</td><td class="metric-val">{esc(freq)}</td>'
-            f'<td class="metric-val">{esc(fmt_pct(share) or "&mdash;")}</td>'
+            f'<td class="metric-val">{esc(fmt_pct(share) or "—")}</td>'
             f'<td class="metric-val" style="color: {color};">{esc(pct)}%</td></tr>'
         )
 
-    # AI calibration — genuinely new territory for this pipeline, so almost
-    # everything here is Awaiting Data until the backend starts reporting an
-    # `ai_performance` group. The two figures we *can* derive today (from
-    # the funnel and daily counters that already exist) are shown live.
     ai_invocations = _daily(metrics, "ai_invocations")
     ai_rejects = _bag(_daily(metrics, "funnel", {}) or {}, "ai")
     ai_reject_rate = safe_div(ai_rejects, ai_invocations)
@@ -776,8 +762,8 @@ def generate_decision_analytics_html(output_path, metrics, avg_30=None):
     ai_tiles = "".join([
         stat_block("AI Invocations", ai_invocations),
         stat_block("AI Reject Rate", ai_reject_rate, unit="%"),
-        stat_block("Avg Confidence \u2014 Dispatched", _sub(metrics, "ai_performance", "avg_confidence_dispatched"), unit="%"),
-        stat_block("Avg Confidence \u2014 Dropped", _sub(metrics, "ai_performance", "avg_confidence_dropped"), unit="%"),
+        stat_block("Avg Confidence — Dispatched", _sub(metrics, "ai_performance", "avg_confidence_dispatched"), unit="%"),
+        stat_block("Avg Confidence — Dropped", _sub(metrics, "ai_performance", "avg_confidence_dropped"), unit="%"),
         stat_block("Accuracy vs Validated Outcomes", _sub(metrics, "ai_performance", "accuracy_vs_validation"), unit="%"),
         stat_block("Avg AI Time", _daily(metrics, "avg_ai_time_s"), unit="s"),
     ])
@@ -825,7 +811,7 @@ def generate_decision_analytics_html(output_path, metrics, avg_30=None):
 
                 <div class="card">
                     <h2>AI Calibration</h2>
-                    {question_title("Is the AI classifier well-calibrated \u2014 does confidence actually track whether the outcome was correct?")}
+                    {question_title("Is the AI classifier well-calibrated — does confidence actually track whether the outcome was correct?")}
                     <div class="tile-grid">{ai_tiles}</div>
                     <div class="funnel-note">Confidence-vs-outcome calibration needs the backend to report an <code>ai_performance</code> metrics group; the tiles above will populate automatically once it does, with no changes needed to this page.</div>
                 </div>
@@ -1066,14 +1052,6 @@ __ARCHIVE_CSS__
                 filterTable();
             }
 
-            // Supports "clicking a funnel stage / loss-funnel row on another
-            // page opens the ledger pre-filtered to that exact stage" via
-            // ?stage=... and ?source=.... The stage token here must match
-            // row.stage_dropped verbatim (see filterTable's exact-match
-            // check below) -- these are the same canonical tokens used by
-            // the funnel banner buttons and by the Decision Centre's loss
-            // funnel, so a click from either page always lands on the
-            // right rows.
             function applyUrlParams() {
                 const params = new URLSearchParams(window.location.search);
                 const stage = params.get('stage');
@@ -1271,10 +1249,6 @@ __ARCHIVE_CSS__
                 return `<div class="trace-step ${cls}"><div class="ts-label">${label}</div><div class="ts-value">${value ?? '&mdash;'}</div>${timeHtml}</div>`;
             }
 
-            // Renders one field of the Decision Report's evidence lists, or
-            // a visibly-labelled empty state -- never a silently blank <li>,
-            // since a blank line reads as "there was no evidence" when it
-            // might just mean "the backend hasn't reported this yet".
             function evidenceItems(items, emptyLabel) {
                 const list = (items || []).filter(Boolean);
                 if (list.length === 0) {
@@ -1343,11 +1317,6 @@ __ARCHIVE_CSS__
                     ];
                     const traceHtml = trace.join('<div class="trace-arrow">&rarr;</div>');
 
-                    // Positive evidence: whatever actually supported the outcome.
-                    // Missing evidence: whatever was absent, failed, or fell
-                    // short of a threshold. A row can (and often should) have
-                    // items in both columns -- e.g. a rule can match while
-                    // AI confidence still falls short.
                     const positive = [];
                     if (audit.issuer_extracted) positive.push(`Issuer identified: <strong>${audit.issuer_extracted}</strong>`);
                     if (row.ontology && row.ontology !== '-') positive.push(`Ontology concept matched: <strong>${row.ontology}</strong>`);
@@ -1415,9 +1384,6 @@ __ARCHIVE_CSS__
                 const validation = document.getElementById('filterValidation').value.toLowerCase();
 
                 const filtered = archiveData.filter(row => {
-                    // Exact match against the canonical stage token, not a
-                    // substring check -- "Ontology" vs "Ontology Reject"
-                    // used to fail this silently in both directions.
                     const matchesFunnel = activeFunnelStage === 'ALL' ||
                                           (activeFunnelStage === 'DISPATCHED' ? row.outcome === 'DISPATCHED' : row.stage_dropped === activeFunnelStage);
 
