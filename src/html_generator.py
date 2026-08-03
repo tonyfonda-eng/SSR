@@ -263,7 +263,24 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
     loss_funnel_html = render_loss_funnel_html(_daily(metrics, "funnel", {}))
 
     # Section 4: Source Intelligence
-    source_rows = _rows(src_30) or [{"source": "Reuters", "articles": 6412, "alerts": 92, "alert_pct": 1.4, "ontology_pct": 18, "rules_pct": 5, "failures": 0}, {"source": "SEC EDGAR", "articles": 8921, "alerts": 142, "alert_pct": 0.16, "ontology_pct": 2, "rules_pct": 0.5, "failures": 0}]
+    # Section 4: Source Intelligence (Wired to Live Intraday Telemetry)
+    source_stats_raw = _daily(metrics, "source_stats", {})
+    source_rows = []
+    if source_stats_raw:
+        for src, st in source_stats_raw.items():
+            arts = st.get("downloaded", 0)
+            alerts = st.get("alerts", 0)
+            source_rows.append({
+                "source": src,
+                "articles": arts,
+                "alerts": alerts,
+                "alert_pct": round((alerts / arts * 100), 1) if arts else 0,
+                "ontology_pct": round((st.get("survived_ontology", 0) / arts * 100), 1) if arts else 0,
+                "rules_pct": round((st.get("survived_rules", 0) / arts * 100), 1) if arts else 0,
+                "failures": st.get("failures", 0)
+            })
+    else:
+        source_rows = [{"source": "Awaiting Live Feeds", "articles": 0, "alerts": 0, "alert_pct": 0, "ontology_pct": 0, "rules_pct": 0, "failures": 0}]
     total_alerts_all_sources = sum(a for a in (_bag(r, "alerts") for r in source_rows) if is_num(a))
     source_row_html = "".join([
         f"""<tr>
