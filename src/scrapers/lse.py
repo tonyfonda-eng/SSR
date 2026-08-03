@@ -21,7 +21,7 @@ from src.config.settings import USER_AGENT
 class LSEScraper(SourceScraper):
     """
     London Stock Exchange Scraper.
-    Bypasses LSE's Angular CSR anti-bot mechanisms by scraping Investegate (a reliable RNS aggregator).
+    Hardened against TCP Tarpits and WAF infinite-streams.
     """
     
     BASE_URL = "https://www.investegate.co.uk"
@@ -32,9 +32,18 @@ class LSEScraper(SourceScraper):
         seen = set()
         
         try:
-            response = requests.get(self.BASE_URL, headers=headers, timeout=15)
+            # Tuple timeout: (3s connect limit, 5s read limit per byte)
+            response = requests.get(self.BASE_URL, headers=headers, timeout=(3.0, 5.0), stream=True)
             response.raise_for_status()
-            soup = BeautifulSoup(response.text, "html.parser")
+            
+            # WAF Safeguard: Ensure they didn't serve a massive tarball to crash memory
+            content_type = response.headers.get('Content-Type', '')
+            if 'text/html' not in content_type:
+                raise ValueError(f"WAF Blocked: Received invalid Content-Type: {content_type}")
+                
+            # Read first 1MB only to prevent infinite stream tarpits
+            html_content = response.raw.read(1000000) 
+            soup = BeautifulSoup(html_content, "html.parser")
             
             # Find all links to announcements on the homepage
             links = soup.find_all('a', href=True)
@@ -61,6 +70,8 @@ class LSEScraper(SourceScraper):
                             "published": "" # Real-time feed
                         })
                         
+        except requests.exceptions.Timeout:
+            print("[ERROR] LSE Scraper timed out (Caught in WAF Tarpit). Skipping.")
         except Exception as e:
             print(f"[ERROR] LSE (Investegate) Scraper failed: {e}")
             
@@ -70,11 +81,13 @@ class LSEScraper(SourceScraper):
     def get_article_body(self, url):
         headers = {"User-Agent": USER_AGENT}
         try:
-            response = requests.get(url, headers=headers, timeout=30)
+            response = requests.get(url, headers=headers, timeout=(3.0, 5.0), stream=True)
             if response.status_code != 200:
                 return None
                 
-            soup = BeautifulSoup(response.text, 'html.parser')
+            # WAF Safeguard: Only read up to 1MB
+            html_content = response.raw.read(1000000)
+            soup = BeautifulSoup(html_content, 'html.parser')
             
             # The body is usually within a specific container
             main_container = soup.find('div', id='announcementContent') or soup.find('div', class_='container')
@@ -86,6 +99,8 @@ class LSEScraper(SourceScraper):
             # Fallback to the whole page text
             return soup.get_text(separator="\n", strip=True)
             
+        except requests.exceptions.Timeout:
+            print(f"[WARNING] Failed to fetch LSE article body (Timeout): {url}")
         except Exception as e:
             print(f"[WARNING] Failed to fetch LSE article body: {e}")
             
