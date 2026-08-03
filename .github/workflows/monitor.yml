@@ -95,12 +95,14 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           
-          # 1. Stage the files immediately to resolve 'unstaged changes' rebase conflicts
-          git add docs/index.html docs/archive_data.json docs/archive.html
+          # 1. Stage all potential operational dashboard artifacts
+          git add docs/index.html docs/archive.html docs/archive_data.json docs/dashboard_metrics.json || true
           
-          # 2. Rebase cleanly on top of any manual commits you pushed in the meantime
-          git pull origin main --rebase || true
+          # 2. Commit them locally first so the index is clean
+          git commit -m "chore: update operational dashboard and archive [skip ci]" || echo "No changes to commit"
           
-          # 3. Final safety stage and clean push
-          git add docs/index.html docs/archive_data.json docs/archive.html
-          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update operational dashboard and archive [skip ci]" && git push)
+          # 3. Pull any remote modifications using autostash to avoid push rejections
+          git pull --rebase --autostash origin main
+          
+          # 4. Push cleanly back to the repository
+          git push origin main
