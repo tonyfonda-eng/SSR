@@ -1,175 +1,190 @@
+"""
+SSR 2.0: Operations Telemetry Engine (DevOps Domain)
+Decoupled from Research Telemetry. Tracks runtime health, error rates, 
+sensor latency, and cross-run operational infrastructure limits.
+"""
+
 import time
 import datetime
-import os
-import sys
 from collections import defaultdict
+import uuid
 
 class MetricsCollector:
     _instance = None
-    
+
     @classmethod
     def get_instance(cls):
         if cls._instance is None:
             cls._instance = MetricsCollector()
         return cls._instance
-        
+
     def __init__(self):
         self.reset()
-        
-    def reset(self):
-        self.run_id = os.environ.get("GITHUB_RUN_ID", datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S"))
-        self.workflow_start = time.perf_counter()
         self.settings = {}
+
+    def set_settings(self, settings: dict):
+        self.settings = settings
+
+    def reset(self):
+        self.run_id = f"SSR-OP-{datetime.datetime.now(datetime.timezone.utc).strftime('%Y%m%d%H%M')}-{uuid.uuid4().hex[:6]}"
+        self.workflow_start = time.perf_counter()
         
-        # --- Phase 3 Explicit Pipeline Funnel ---
-        self.funnel = {
+        # In SSR 2.0, article tracking is committed directly to the database via Evidence Capsules.
+        # This dictionary is maintained purely for backward compatibility with legacy metrics interfaces 
+        # and simple end-of-run counts.
+        self.article_traces = {} 
+        
+        # Operational aggregates
+        self.daily = {
+            "run_id": self.run_id,
             "downloaded": 0,
             "duplicate_id": 0,
-            "duplicate_issuer": 0,
             "empty_body": 0,
+            "duplicate_issuer": 0,
             "global_exclusion": 0,
-            "regex_rejected": 0,
-            "ontology_rejected": 0,
             "rules_rejected": 0,
             "reached_ai": 0,
+            "ai_exhausted": 0,
             "ai_rejected_private": 0,
             "ai_rejected_false_positive": 0,
-            "ai_exhausted": 0,
             "playbook_rejected": 0,
             "duplicate_event": 0,
-            "alerts_sent": 0
+            "alerts_sent": 0,
+            "errors": 0,
+            "total_runtime_s": 0.0,
+            "health_score": 100.0,
+            "validation_status": "PENDING",
+            "system_confidence": 0.0,
+            "db_status": "OK",
+            "ai_status": "OK",
+            "feed_health_status": "OK",
+            "queue_status": "OK",
+            "scheduler_status": "RUNNING",
+            "gh_actions_status": "OK"
         }
         
-        # Legacy daily stats (Preserved for SQLite compatibility)
-        self.daily = {
-            "downloaded": 0, "unique": 0, "duplicates": 0, "passed_regex": 0, "failed_regex": 0,
-            "global_exclusions": 0, "ontology_matches": 0, "rules_passes": 0, "rules_failures": 0,
-            "ai_calls": 0, "ai_successes": 0, "ai_failures": 0, "playbooks_executed": 0, "emails_sent": 0,
-            "rules_score_sum": 0.0, "ai_confidence_sum": 0.0, "articles_processed_count": 0,
-            "rejected_before_regex": 0, "rejected_by_regex": 0, "rejected_by_exclusions": 0, 
-            "rejected_by_ontology": 0, "rejected_by_rules": 0, "reached_ai": 0, "total_runtime_s": 0.0
-        }
-        
-        self.source_stats = defaultdict(lambda: {
-            "downloaded": 0, "survived_regex": 0, "survived_ontology": 0, "survived_rules": 0,
-            "reached_ai": 0, "alerts": 0, "processing_time_sum": 0.0, "processed_count": 0
-        })
-        
+        # Cross-sectional operational aggregates
+        self.source_stats = defaultdict(lambda: defaultdict(int))
         self.ai_telemetry = defaultdict(lambda: {
-            "provider": "", "key_id": "", "requests": 0, "success": 0, "failures": 0,
+            "provider": "unknown", "key_id": "unknown", "requests": 0, "success": 0, "failures": 0,
             "errors_429": 0, "errors_503": 0, "timeouts": 0, "retries": 0, "fallbacks": 0,
             "response_time_sum": 0.0, "max_latency": 0.0, "last_success_ts": "", "last_failure_ts": ""
         })
-        
-        self.article_traces = {}
         self.exceptions = []
-
-    def set_settings(self, settings_dict):
-        self.settings = settings_dict
+        self.funnel = defaultdict(int)
 
     def track_funnel(self, stage: str, count: int = 1):
-        """Deterministically track articles moving through the pipeline."""
-        if stage in self.funnel:
-            self.funnel[stage] += count
-        else:
-            print(f"[WARNING] Unrecognized funnel stage logged: {stage}")
+        """
+        Increments operational aggregate counters.
+        Note: The actual Causal Lineage of these drops is recorded instantly in the DB via EvidenceCapsules.
+        """
+        self.funnel[stage] += count
+        if stage in self.daily:
+            self.daily[stage] += count
 
-    def log_article(self, article_id, source, url, title, country, language, document_type, issuer, event_family, pipeline_stage, outcome, reason, ai_invoked, processing_time_ms, slowest_stage):
+    def log_error(self, module: str, message: str, exc_info=None):
+        """Logs infrastructure errors (not research dropouts) into the devops bucket."""
+        self.daily["errors"] += 1
+        self.exceptions.append({
+            "timestamp": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT"),
+            "module": module,
+            "func_name": "unknown",
+            "exc_type": type(exc_info).__name__ if exc_info else "Error",
+            "stack_trace": str(exc_info) if exc_info else message,
+            "article_url": "",
+            "severity": "ERROR"
+        })
+
+    def log_ai_request(self, provider: str, key_id: str, success: bool, latency: float, error_code: int = None, is_retry: bool = False, is_fallback: bool = False):
+        """Monitors external LLM vendor health, rate limits, and latency spikes."""
+        now_ts = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
+        stats = self.ai_telemetry[key_id]
+        
+        stats["provider"] = provider
+        stats["key_id"] = key_id
+        stats["requests"] += 1
+        stats["response_time_sum"] += latency
+        
+        if latency > stats["max_latency"]:
+            stats["max_latency"] = latency
+            
+        if success:
+            stats["success"] += 1
+            stats["last_success_ts"] = now_ts
+        else:
+            stats["failures"] += 1
+            stats["last_failure_ts"] = now_ts
+            if error_code == 429: stats["errors_429"] += 1
+            elif error_code == 503: stats["errors_503"] += 1
+            else: stats["timeouts"] += 1
+            
+        if is_retry: stats["retries"] += 1
+        if is_fallback: stats["fallbacks"] += 1
+
+    def log_article(self, article_id: str, source: str, url: str, title: str, country: str, language: str,
+                    document_type: str, issuer: str, event_family: str, pipeline_stage: str, outcome: str, 
+                    reason: str, ai_invoked: bool, processing_time_ms: float, slowest_stage: str):
+        """
+        Legacy stub to prevent backward-compatibility breaks with older scraper test scripts.
+        In SSR 2.0, actual decision tracking executes inside monitor.py via `commit_decision_capsule`.
+        """
         self.article_traces[article_id] = {
-            "timestamp": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC"),
-            "source": source or "Unknown", "url": url or "", "title": title or "",
-            "country": country or "", "language": language or "", "document_type": document_type or "",
-            "issuer": issuer or "", "event_family": event_family or "",
-            "pipeline_stage": pipeline_stage or "Unknown", "outcome": outcome or "",
-            "reason": reason or "", "ai_invoked": 1 if ai_invoked else 0, "processing_time_ms": int(processing_time_ms),
+            "timestamp": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT"),
+            "source": source,
+            "url": url,
+            "title": title,
+            "country": country,
+            "language": language,
+            "document_type": document_type,
+            "issuer": issuer,
+            "event_family": event_family,
+            "pipeline_stage": pipeline_stage,
+            "outcome": outcome,
+            "reason": reason,
+            "ai_invoked": ai_invoked,
+            "processing_time_ms": processing_time_ms,
             "slowest_stage": slowest_stage
         }
         
-        # Update run stats
-        self.daily["articles_processed_count"] += 1
-        self.source_stats[source]["processing_time_sum"] += processing_time_ms
-        self.source_stats[source]["processed_count"] += 1
+        if source not in self.source_stats:
+             self.source_stats[source] = defaultdict(int)
+             
+        stats = self.source_stats[source]
+        stats["processed_count"] += 1
+        stats["processing_time_sum"] += processing_time_ms
         
-        # Legacy Funnel Logic
-        if "Reject" in outcome or "Abort" in outcome:
-            if pipeline_stage in ["Download", "Database", "Daily Memory"]:
-                self.daily["rejected_before_regex"] += 1
-            elif pipeline_stage == "Regex":
-                if "Exclusion" in reason or "Duplicate" in reason:
-                    self.daily["rejected_by_exclusions"] += 1
-                else:
-                    self.daily["rejected_by_regex"] += 1
-            elif pipeline_stage == "Ontology":
-                self.daily["rejected_by_ontology"] += 1
-            elif pipeline_stage == "Rules":
-                self.daily["rejected_by_rules"] += 1
-                
-        if ai_invoked:
-            self.daily["reached_ai"] += 1
+        if outcome == "Alert Sent" or outcome == "DISPATCHED":
+            stats["alerts"] += 1
+        elif pipeline_stage == "AI Classification" or pipeline_stage == "Financial Verification":
+             stats["reached_ai"] += 1
+        elif pipeline_stage == "Rules Engine" and outcome != "DROPPED":
+             stats["survived_rules"] += 1
+        elif pipeline_stage == "Ontology" and outcome != "DROPPED":
+             stats["survived_ontology"] += 1
+        elif pipeline_stage == "Global Exclusions" and outcome != "DROPPED":
+             stats["survived_regex"] += 1
 
-    def log_ai_usage(self, provider, key_id, success, is_429=False, is_503=False, is_timeout=False, is_retry=False, is_fallback=False, response_time=0.0):
-        entry = self.ai_telemetry[key_id]
-        entry["provider"] = provider
-        entry["key_id"] = key_id
-        entry["requests"] += 1
+    def calculate_health_score(self, total_runtime_s: float):
+        """
+        Generates an infrastructure health score (0-100) based strictly on DevOps parameters,
+        not Alpha capture performance.
+        """
+        score = 100.0
         
-        if response_time > entry["max_latency"]:
-            entry["max_latency"] = response_time
+        if self.daily["errors"] > 0:
+            score -= (self.daily["errors"] * 5)
+            self.daily["db_status"] = "DEGRADED"
             
-        now_ts = datetime.datetime.utcnow().strftime("%H:%M:%S UTC")
-        
-        if success:
-            entry["success"] += 1
-            entry["last_success_ts"] = now_ts
-        else:
-            entry["failures"] += 1
-            entry["last_failure_ts"] = now_ts
+        if self.funnel.get("downloaded", 0) == 0:
+            score -= 20
+            self.daily["feed_health_status"] = "DOWN"
             
-        if is_429: entry["errors_429"] += 1
-        if is_503: entry["errors_503"] += 1
-        if is_timeout: entry["timeouts"] += 1
-        if is_retry: entry["retries"] += 1
-        if is_fallback: entry["fallbacks"] += 1
-        
-        entry["response_time_sum"] += response_time
-        
-        self.daily["ai_calls"] += 1
-        if success: self.daily["ai_successes"] += 1
-        else: self.daily["ai_failures"] += 1
-
-    def log_exception(self, exc_type, stack_trace, module, func_name, article_url="", severity="ERROR"):
-        self.exceptions.append({
-            "run_id": self.run_id,
-            "timestamp": datetime.datetime.utcnow().isoformat(),
-            "exc_type": exc_type,
-            "stack_trace": stack_trace,
-            "module": module,
-            "func_name": func_name,
-            "article_url": article_url,
-            "severity": severity
-        })
-        
-    def calculate_health_score(self, total_runtime_s):
-        # Weighted Health Score: Pipeline (30%), Sources (20%), AI (20%), Runtime (15%), Exceptions (10%), Alerts (5%)
-        score_pipeline = 30
-        score_sources = 20
-        
-        score_ai = 20
-        total_ai_calls = self.daily["ai_calls"]
-        if total_ai_calls > 0:
-            success_rate = self.daily["ai_successes"] / total_ai_calls
-            score_ai = int(20 * success_rate)
+        if self.funnel.get("ai_exhausted", 0) > 0:
+            score -= 50
+            self.daily["ai_status"] = "DOWN"
             
-        score_runtime = 15
-        max_runtime = self.settings.get("Maximum Runtime Seconds", 240)
-        if total_runtime_s > max_runtime:
-            penalty = int(15 * ((total_runtime_s - max_runtime) / max_runtime))
-            score_runtime = max(0, 15 - penalty)
+        # Target threshold parameter logic for extreme slow-downs
+        if total_runtime_s > 600: 
+            score -= 10
             
-        score_exceptions = 10
-        if self.exceptions:
-            score_exceptions = max(0, 10 - (len(self.exceptions) * 5))
-            
-        score_alerts = 5
-        
-        return max(0, score_pipeline + score_sources + score_ai + score_runtime + score_exceptions + score_alerts)
+        self.daily["health_score"] = max(0.0, score)
