@@ -1,5 +1,23 @@
 [
   {
+    "id": "20260803709999",
+    "timestamp": "2026-08-03 16:58:45 UTC",
+    "source": "Business Wire",
+    "headline": "From Closed APIs to Open Models: Serve Your Own Tokens",
+    "url": "http://www.businesswire.com/news/home/20260803709999/en/From-Closed-APIs-to-Open-Models-Serve-Your-Own-Tokens/",
+    "country": "RSS/HTML",
+    "language": "",
+    "document_type": "",
+    "issuer": "NEUREALITY",
+    "event_family": "Unknown",
+    "pipeline_stage": "Rules Engine",
+    "outcome": "Dropped",
+    "reason": "Failed Rules Threshold (Score < 10)",
+    "ai_invoked": 0,
+    "processing_time": "648ms",
+    "slowest_stage": "Ontology"
+  },
+  {
     "id": "20260803442408",
     "timestamp": "2026-08-03 16:24:11 UTC",
     "source": "Business Wire",
