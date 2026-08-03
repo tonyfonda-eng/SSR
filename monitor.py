@@ -126,14 +126,13 @@ def _process_article(source_name, article_id, title, url, published,
     if global_exclusions is None:
         global_exclusions = []
 
-article_key = f"{source_name}:{article_id}"
+    article_key = f"{source_name}:{article_id}"
     if article_exists(article_key):
         metrics.track_funnel("duplicate_id")
         return conclude(0, 'Database', 'Dropped', 'Duplicate Article')
 
     # ---> CRITICAL FIX: COMMIT TO MEMORY IMMEDIATELY <---
     # Log the article the millisecond it enters the funnel. 
-    # If the Rules Engine drops it 2 seconds from now, the DB already remembers it forever.
     save_article(source=source_name, article_id=article_id, title=title, url=url, published=published, body=body)
 
     if not body:
@@ -148,7 +147,6 @@ article_key = f"{source_name}:{article_id}"
     if issuer_memory and issuer_memory.is_duplicate(issuer):
         print(f" [DAILY MEMORY] Issuer '{issuer}' already processed today. Dropping duplicate syndicated news.")
         metrics.track_funnel("duplicate_issuer")
-        save_article(source=source_name, article_id=article_id, title=title, url=url, published=published, body=body)
         return conclude(1, 'Daily Memory', 'Dropped', 'Duplicate Issuer', issuer)
 
     title_lower = title.lower()
@@ -158,7 +156,6 @@ article_key = f"{source_name}:{article_id}"
         if re.search(r'\b' + re.escape(ex_lower) + r'\b', title_lower) or re.search(r'\b' + re.escape(ex_lower) + r'\b', body_lower):
             print(f"[GLOBAL EXCLUSION] Match found for '{ex}'. Skipping article.")
             metrics.track_funnel("global_exclusion")
-            save_article(source=source_name, article_id=article_id, title=title, url=url, published=published, body=body)
             return conclude(1, 'Global Exclusions', 'Dropped', 'Regex Failed', issuer)
 
     print(f" -> Processing: {title}")
@@ -218,7 +215,6 @@ article_key = f"{source_name}:{article_id}"
     if ticker == "PRIVATE":
         print("[AI REJECTED] Target is a private company.")
         metrics.track_funnel("ai_rejected_private")
-        save_article(source=source_name, article_id=article_id, title=title, url=url, published=published, body=body)
         return conclude(1, 'AI Classification', 'Dropped', 'Private Company', ticker)
 
     options_available = False
@@ -276,20 +272,17 @@ article_key = f"{source_name}:{article_id}"
             print(f"[BYPASS] Source '{source_name}' has Triage All enabled.")
             event_family = "Triage Rejection"
         else:
-            save_article(source=source_name, article_id=article_id, title=title, url=url, published=published, body=body)
             return conclude(1, 'AI Classification', 'Dropped', 'AI False Positive', ticker, event_family)
 
     if event_family.strip().lower() == "unknown":
         print("[UNKNOWN EVENT] Logging to Knowledge Base for review.")
         log_unknown_event(sheet_url=SHEET_URL, Source=source_name, article_title=title, article_url=url, 
                           rules_score=matches[0]["Score"], ai_response=event_family)
-        save_article(source=source_name, article_id=article_id, title=title, url=url, published=published, body=body)
         return conclude(1, 'AI Classification', 'Archived', 'Unknown Event', ticker, event_family)
 
     if event_family == "M&A Naked Call Strategy" and not options_available:
         print(f" [AI REJECTED] Strategy requires tradable options, but none found for {ticker}.")
         metrics.track_funnel("playbook_rejected")
-        save_article(source=source_name, article_id=article_id, title=title, url=url, published=published, body=body)
         return conclude(1, 'AI Classification', 'Dropped', 'No Options Available', ticker, event_family)
 
     if event_family == "Resumption of Trading":
@@ -303,7 +296,6 @@ article_key = f"{source_name}:{article_id}"
         if not t12_data['valid']:
             print(f" [T12 REJECTED] {t12_data.get('reason')}")
             metrics.track_funnel("playbook_rejected")
-            save_article(source=source_name, article_id=article_id, url=url, published=published, body=body, title=title)
             return conclude(1, 'Playbook', 'Dropped', 'T12 Structural Floor Failed', ticker, event_family)
             
         print(f" [T12 APPROVED] Net Cash/Share: ${t12_data['net_cash_per_share']:.2f}")
@@ -326,7 +318,6 @@ article_key = f"{source_name}:{article_id}"
             else:
                 print(" [PYTHON UPDATE] No material keywords found. Dropping duplicate.")
                 metrics.track_funnel("duplicate_event")
-                save_article(source=source_name, article_id=article_id, title=title, url=url, published=published, body=body)
                 return conclude(1, 'Deduplication', 'Dropped', 'No Material Update', ticker, event_family)
     else:
         event_id = f"UNKNOWN_{article_id}"
@@ -359,8 +350,6 @@ article_key = f"{source_name}:{article_id}"
         research_queue_rows.append(queue_payload)
     else:
         append_to_research_queue(sheet_url=SHEET_URL, data_row=queue_payload)
-    
-    save_article(source=source_name, article_id=article_id, title=title, url=url, published=published, body=body)
     
     try:
         send_alert(
@@ -615,25 +604,7 @@ def main():
                 pass 
 
     clusters = cluster_articles(all_new_articles)
-    clusters_by_source = defaultdict(list)
-    for cluster in clusters:
-        clusters_by_source[cluster[0]["source_name"]].append(cluster)
-        
-    MAX_AI_EVALS = 50
-    active_sources = list(clusters_by_source.keys())
-    source_quotas = {}
     
-    if active_sources:
-        for src in active_sources:
-            source_quotas[src] = max(1, MAX_AI_EVALS // max(1, len(active_sources)))
-            
-        final_clusters = []
-        for src in active_sources:
-            src_clusters = clusters_by_source[src]
-            quota = source_quotas[src]
-            final_clusters.extend(src_clusters[:quota])
-        clusters = final_clusters
-
     total_new = 0
     research_queue_rows = [] 
     financials_cache = {} 
@@ -810,7 +781,6 @@ def main():
         export_archive_json(filepath=str(archive_json_path))
         generate_archive_html(output_path=str(archive_html_path))
         
-        # ---> FINALLY GENERATES DECISION ANALYTICS <---
         generate_decision_analytics_html(output_path=str(docs_dir / "decision_analytics.html"), metrics=metrics, avg_30=avg_30)
         
         set_dashboard_state("last_publish", time.time())
