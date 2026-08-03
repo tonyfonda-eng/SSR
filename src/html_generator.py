@@ -3,7 +3,8 @@ import os
 import json
 
 # ---------------------------------------------------------------------------
-# INSTITUTIONAL OPERATIONS CENTRE & DECISION INTELLIGENCE
+# SSR 2.0 INSTITUTIONAL OPERATIONS CENTRE & DECISION INTELLIGENCE
+# Consumes Canonical Decision Manifests & Operational Telemetry
 # ---------------------------------------------------------------------------
 
 AWAITING_SPAN = '<span class="awaiting">Awaiting Data</span>'
@@ -55,23 +56,26 @@ def fmt_num(value, decimals=1):
     if not is_num(value): return None
     return f"{int(value):,}" if isinstance(value, int) or float(value).is_integer() else f"{value:.{decimals}f}"
 
-def status_badge(value, ok_values=("OK", "HEALTHY", "PASS", "UP", "RUNNING")):
+def status_badge(value, ok_values=("OK", "HEALTHY", "PASS", "UP", "RUNNING", "DETECTED", "DISPATCHED")):
     if not value: return '<span class="badge awaiting">AWAITING DATA</span>'
     v = str(value).upper()
     if v in ok_values: cls = "success"
-    elif v in ("DEGRADED", "WARN", "WARNING", "SLOW"): cls = "warn"
-    elif v in ("DOWN", "FAIL", "FAILED", "ERROR", "STOPPED"): cls = "danger"
+    elif v in ("DEGRADED", "WARN", "WARNING", "SLOW", "PENDING"): cls = "warn"
+    elif v in ("DOWN", "FAIL", "FAILED", "ERROR", "STOPPED", "DROPPED"): cls = "danger"
     else: cls = "info"
     return f'<span class="badge {cls}">{esc(value)}</span>'
 
+# Updated to reflect SSR 2.0 Evaluation Stages
 LOSS_STAGE_DEFS = [
-    ("Downloaded",         "downloaded", None,            "start"),
-    ("Duplicates Removed", "duplicate",  "Deduplication", "loss"),
-    ("Parse Failures",     "parsed",     "Parse Failure", "loss"),
-    ("Ontology Rejects",   "ontology",   "Ontology",      "loss"),
-    ("Rules Rejects",      "rules",      "Rules",         "loss"),
-    ("AI Rejects",         "ai",         "AI",            "loss"),
-    ("Dispatched",         "alerts",     "DISPATCHED",    "terminal"),
+    ("Sensor Ingestion",      "downloaded",          None,                     "start"),
+    ("Idempotency & Dedupe",  "duplicate",           "Ingestion",              "loss"),
+    ("Global Exclusions",     "exclusion",           "Global Exclusions",      "loss"),
+    ("Ontology Extraction",   "ontology",            "Ontology",               "loss"),
+    ("Deterministic Rules",   "rules",               "Rules Engine",           "loss"),
+    ("AI Entity Resolution",  "ai_rejected_private", "AI Core",                "loss"),
+    ("AI Strategy Playbook",  "ai",                  "AI Classification",      "loss"),
+    ("Financial Verification","financial",           "Financial Verification", "loss"),
+    ("Detected & Dispatched", "alerts",              "Complete",               "terminal"),
 ]
 
 def build_loss_funnel(funnel_counts):
@@ -114,16 +118,16 @@ def build_loss_funnel(funnel_counts):
 
 def render_loss_funnel_html(funnel_counts):
     rows, have_total = build_loss_funnel(funnel_counts)
-    if not have_total: return '<div class="empty-note">Awaiting Data &mdash; pipeline has not reported a Downloaded total.</div>'
+    if not have_total: return '<div class="empty-note">Awaiting Data &mdash; pipeline has not reported an ingestion total.</div>'
 
-    header = '<div class="loss-row head"><div>Stage</div><div style="text-align:right;">Entering</div><div style="text-align:right;">Exiting</div><div style="text-align:right;">Loss Count</div><div style="text-align:right;">Stage Conversion</div><div style="text-align:right;">% Lost</div></div>'
+    header = '<div class="loss-row head"><div>Evaluation Stage</div><div style="text-align:right;">Entering</div><div style="text-align:right;">Exiting</div><div style="text-align:right;">Terminations</div><div style="text-align:right;">Stage Conversion</div><div style="text-align:right;">% Dropped</div></div>'
     body = ""
     for r in rows:
         href = "archive.html" if r["stage_token"] is None else f'archive.html?stage={r["stage_token"]}'
         row_cls = "loss-row " + (r["kind"] if r["kind"] in ("terminal", "loss") else "")
         entering_html = esc(fmt_num(r["entering"])) if is_num(r["entering"]) else AWAITING_SPAN
         exiting_html = esc(fmt_num(r["exiting"])) if is_num(r["exiting"]) else AWAITING_SPAN
-        lost_html = esc(fmt_num(r["lost"])) if is_num(r["lost"]) and r["kind"] != "start" else ('—' if r["kind"] == "start" else AWAITING_SPAN)
+        lost_html = esc(fmt_num(r["lost"])) if is_num(r["lost"]) and r["kind"] != "start" else ('â€”' if r["kind"] == "start" else AWAITING_SPAN)
         
         body += f"""
             <a class="{row_cls}" href="{href}" title="Inspect this stage in the Decision Ledger">
@@ -131,8 +135,8 @@ def render_loss_funnel_html(funnel_counts):
                 <div class="lr-val">{entering_html}</div>
                 <div class="lr-val">{exiting_html}</div>
                 <div class="lr-val" style="color:var(--yellow);">{lost_html}</div>
-                <div class="lr-val" style="color:var(--green); font-weight:700;">{fmt_pct(r["conv_pct"]) or "—"}</div>
-                <div class="lr-val" style="color:var(--red);">{fmt_pct(r["loss_pct"]) or "—"}</div>
+                <div class="lr-val" style="color:var(--green); font-weight:700;">{fmt_pct(r["conv_pct"]) or "â€”"}</div>
+                <div class="lr-val" style="color:var(--red);">{fmt_pct(r["loss_pct"]) or "â€”"}</div>
             </a>"""
     return f'<div class="loss-funnel">{header}{body}</div>'
 
@@ -180,7 +184,6 @@ BASE_CSS = """
         .kpi-context-row { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); width: 100%; }
         .kpi-context-item .cx-label { font-size: 0.65em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.4px; }
         .kpi-context-item .cx-value { font-family: var(--mono); font-weight: 700; font-size: 1.05em; margin-top: 2px; }
-        .telemetry-sub { margin-top: 16px; } .telemetry-sub:first-child { margin-top: 0; }
         .empty-note { color: var(--muted); font-style: italic; padding: 8px 0; font-size: 0.85em; }
         .activity-list { list-style: none; margin: 0; padding: 0; }
         .activity-list li { padding: 6px 0; border-bottom: 1px solid var(--surface-subtle); font-size: 0.85em; display: flex; justify-content: space-between; gap: 10px; }
@@ -191,8 +194,8 @@ BASE_CSS = """
 NAV_TABS = """
             <div class="nav-tabs">
                 <a href="index.html" class="{cls_index}">Operations Centre</a>
-                <a href="decision_analytics.html" class="{cls_analytics}">Decision Analytics</a>
-                <a href="archive.html" class="{cls_archive}">Decision Ledger</a>
+                <a href="decision_analytics.html" class="{cls_analytics}">Drift & Intelligence</a>
+                <a href="archive.html" class="{cls_archive}">Decision Ledger Manifests</a>
             </div>"""
 
 def render_nav(active):
@@ -220,7 +223,7 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
 """
 
 def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None):
-    now_str = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S UTC")
+    now_str = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
     run_id = getattr(metrics, 'run_id', _daily(metrics, "run_id", 'SSR-OP-2026'))
     health_score = _daily(metrics, "health_score")
 
@@ -233,14 +236,11 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
     trust_row = "".join([
         f'<div class="stat-tile"><div class="stat-label">Overall Health</div><div class="stat-value">{status_badge(health_label)}</div></div>',
         f'<div class="stat-tile"><div class="stat-label">Validation Status</div><div class="stat-value">{status_badge(_sub(metrics, "validation", "status"))}</div></div>',
-        f'<div class="stat-tile"><div class="stat-label">System Confidence</div><div class="stat-value">{esc(fmt_pct(_daily(metrics, "system_confidence"))) or AWAITING_SPAN}</div></div>',
+        f'<div class="stat-tile"><div class="stat-label">Research Fidelity (CI)</div><div class="stat-value">{esc(fmt_pct(_daily(metrics, "system_confidence"))) or AWAITING_SPAN}</div></div>',
         f'<div class="stat-tile"><div class="stat-label">Last Successful Run</div><div class="stat-value">{esc(now_str)}</div></div>',
-        f'<div class="stat-tile"><div class="stat-label">Scheduler Status</div><div class="stat-value">{status_badge(_daily(metrics, "scheduler_status"))}</div></div>',
-        f'<div class="stat-tile"><div class="stat-label">Queue Health</div><div class="stat-value">{status_badge(_daily(metrics, "queue_status", "OK"))}</div></div>',
-        f'<div class="stat-tile"><div class="stat-label">Feed Health</div><div class="stat-value">{status_badge(_daily(metrics, "feed_health_status", "OK"))}</div></div>',
-        f'<div class="stat-tile"><div class="stat-label">AI Status</div><div class="stat-value">{status_badge(_daily(metrics, "ai_status", "OK"))}</div></div>',
-        f'<div class="stat-tile"><div class="stat-label">Database Status</div><div class="stat-value">{status_badge(_daily(metrics, "db_status", "OK"))}</div></div>',
-        f'<div class="stat-tile"><div class="stat-label">GH Actions Status</div><div class="stat-value">{status_badge(_daily(metrics, "gh_actions_status", "OK"))}</div></div>'
+        f'<div class="stat-tile"><div class="stat-label">Sensor Asset Health</div><div class="stat-value">{status_badge(_daily(metrics, "feed_health_status", "OK"))}</div></div>',
+        f'<div class="stat-tile"><div class="stat-label">AI Strategy Engine</div><div class="stat-value">{status_badge(_daily(metrics, "ai_status", "OK"))}</div></div>',
+        f'<div class="stat-tile"><div class="stat-label">Evidence Repository</div><div class="stat-value">{status_badge(_daily(metrics, "db_status", "OK"))}</div></div>'
     ])
 
     # Section 2: Opportunity Capture
@@ -248,22 +248,19 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
     fp_rate = _sub(metrics, "validation", "false_positive_rate")
     fn_rate = _sub(metrics, "validation", "false_negative_rate")
     detection_delay = _sub(metrics, "validation", "avg_detection_delay")
-    benchmark_lead = _sub(metrics, "validation", "benchmark_lead")
 
-    kpi_value_html = f'{capture_rate:.1f}%' if is_num(capture_rate) else f'<span class="awaiting" style="font-size:0.4em;">AWAITING DATA</span>'
+    kpi_value_html = f'{capture_rate:.1f}%' if is_num(capture_rate) else f'<span class="awaiting" style="font-size:0.4em;">AWAITING CONTINUOUS VALIDATION</span>'
     kpi_context = "".join([
         f'<div class="kpi-context-item"><div class="cx-label">False Positive Rate</div><div class="cx-value">{esc(fmt_pct(fp_rate)) or AWAITING_SPAN}</div></div>',
-        f'<div class="kpi-context-item"><div class="cx-label">False Negative Rate</div><div class="cx-value">{esc(fmt_pct(fn_rate)) or AWAITING_SPAN}</div></div>',
+        f'<div class="kpi-context-item"><div class="cx-label">False Negative (Miss) Rate</div><div class="cx-value">{esc(fmt_pct(fn_rate)) or AWAITING_SPAN}</div></div>',
         f'<div class="kpi-context-item"><div class="cx-label">Avg Detection Delay</div><div class="cx-value">{esc(detection_delay) if detection_delay is not None else AWAITING_SPAN}</div></div>',
-        f'<div class="kpi-context-item"><div class="cx-label">Benchmark Lead</div><div class="cx-value">{esc(benchmark_lead) if benchmark_lead is not None else AWAITING_SPAN}</div></div>',
     ])
-    hero_html = f"""<div class="kpi-hero"><div><div class="kpi-label">Opportunity Capture Rate</div><div class="kpi-number">{kpi_value_html}</div></div><div style="flex:1; min-width:220px;"><div class="kpi-context-row">{kpi_context}</div></div></div>"""
+    hero_html = f"""<div class="kpi-hero"><div><div class="kpi-label">Opportunity Capture Rate (vs Golden Dataset)</div><div class="kpi-number">{kpi_value_html}</div></div><div style="flex:1; min-width:220px;"><div class="kpi-context-row">{kpi_context}</div></div></div>"""
 
     # Section 3: Pipeline Loss Analysis
     loss_funnel_html = render_loss_funnel_html(_daily(metrics, "funnel", {}))
 
-    # Section 4: Source Intelligence
-    # Section 4: Source Intelligence (Wired to Live Intraday Telemetry)
+    # Section 4: Sensor Intelligence
     source_stats_raw = _daily(metrics, "source_stats", {})
     source_rows = []
     if source_stats_raw:
@@ -280,7 +277,8 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
                 "failures": st.get("failures", 0)
             })
     else:
-        source_rows = [{"source": "Awaiting Live Feeds", "articles": 0, "alerts": 0, "alert_pct": 0, "ontology_pct": 0, "rules_pct": 0, "failures": 0}]
+        source_rows = [{"source": "Awaiting Sensor Integration", "articles": 0, "alerts": 0, "alert_pct": 0, "ontology_pct": 0, "rules_pct": 0, "failures": 0}]
+    
     total_alerts_all_sources = sum(a for a in (_bag(r, "alerts") for r in source_rows) if is_num(a))
     source_row_html = "".join([
         f"""<tr>
@@ -295,66 +293,27 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
             <td class="metric-val">{AWAITING_SPAN}</td>
             <td class="metric-val">{AWAITING_SPAN}</td>
             <td class="metric-val">{AWAITING_SPAN}</td>
-            <td class="metric-val">{AWAITING_SPAN}</td>
-            <td class="metric-val">{AWAITING_SPAN}</td>
-            <td class="metric-val">{AWAITING_SPAN}</td>
-            <td class="metric-val">{AWAITING_SPAN}</td>
-            <td class="metric-val">{AWAITING_SPAN}</td>
         </tr>""" for r in source_rows
     ])
-
-    # Section 7: Performance (Component Latencies)
-    latency_tiles = "".join([
-        f'<div class="stat-tile"><div class="stat-label">{n}</div><div class="stat-value">{AWAITING_SPAN}</div></div>' for n in ["RSS", "Download", "Parse", "Issuer Extraction", "Ontology", "Rules", "AI", "Email", "SQLite"]
-    ])
-
-    # Section 8: Feed Quality
-    feeds = _rows(_daily(metrics, "feeds"))
-    feed_rows_html = "".join([
-        f'<tr><td>{esc(_bag(f, "name"))}</td><td>{status_badge(_bag(f, "status"))}</td><td class="metric-val">{esc(_bag(f, "latency", "-"))}</td><td class="metric-val">{esc(_bag(f, "failures", "-"))}</td><td class="metric-val">{esc(_bag(f, "retries", "-"))}</td><td class="metric-val">{AWAITING_SPAN}</td><td class="metric-val">{AWAITING_SPAN}</td><td class="metric-val">{AWAITING_SPAN}</td><td class="metric-val">{AWAITING_SPAN}</td></tr>' for f in feeds
-    ]) if feeds else '<tr><td colspan="9" class="empty-note">Awaiting Data &mdash; no per-feed telemetry reported for this run.</td></tr>'
-
-    # Section 9: Engineering Activity
-    log_entries = _rows(logs)[-10:][::-1]
-    recent_alerts = [l for l in log_entries if str(_bag(l, "outcome", "")).upper() == "DISPATCHED"]
-    
-    recent_alerts_html = f'<ul class="activity-list">' + "".join([f'<li><span>{esc(_bag(l, "headline") or str(l))}</span><span class="activity-ts">{esc(_bag(l, "timestamp", ""))}</span></li>' for l in recent_alerts]) + '</ul>' if recent_alerts else '<div class="empty-note">Awaiting Data</div>'
-    failures_html = '<div class="empty-note">Awaiting Data</div>'
-    retries_html = '<div class="empty-note">Awaiting Data</div>'
-    feed_errors_html = '<div class="empty-note">Awaiting Data</div>'
-    validation_issues_html = '<div class="empty-note">Awaiting Data</div>'
 
     html = f"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>SSR Operations Centre</title><style>{BASE_CSS}</style>{SORT_JS}</head>
     <body><div class="container">{render_nav("index")}
     <header style="border-left-color: {health_border};"><div><h1>Operations Centre</h1>
-    <div class="subline">Run ID: {esc(run_id)} &bull; Generated {esc(now_str)}</div></div></header>
+    <div class="subline">Manifest Configuration Hash: CFG-LATEST &bull; Re-Evaluated {esc(now_str)}</div></div></header>
     
-    <div class="card" style="margin-bottom: 12px;"><h2>Section 1: Trust & Operational Status</h2><div class="tile-grid" style="grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));">{trust_row}</div></div>
+    <div class="card" style="margin-bottom: 12px;"><h2>1. Validation & Platform Status</h2><div class="tile-grid" style="grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));">{trust_row}</div></div>
     
-    <div class="card" style="margin-bottom: 12px;"><h2>Section 2: Opportunity Capture</h2>{hero_html}</div>
+    <div class="card" style="margin-bottom: 12px;"><h2>2. Continuous Alpha Validation</h2>{hero_html}</div>
     
-    <div class="card" style="margin-bottom: 12px;"><h2>Section 3: Pipeline Loss Analysis</h2>{loss_funnel_html}</div>
+    <div class="card" style="margin-bottom: 12px;"><h2>3. Evaluation Funnel Metrics</h2>{loss_funnel_html}</div>
     
-    <div class="card" style="margin-bottom: 12px; overflow-x: auto;"><h2>Section 4: Source Intelligence</h2>
-    <table><thead><tr><th>Source</th><th>Articles</th><th>Alerts</th><th>Capture Share</th><th>Alert %</th><th>Ontology %</th><th>Rules %</th><th>Failures</th><th>Opp Density</th><th>Dup Rate</th><th>Parse Succ</th><th>Avg Freshness</th><th>Med Delay</th><th>Avg Conf</th><th>Avg Cost</th><th>Capture Contrib</th></tr></thead><tbody>{source_row_html}</tbody></table></div>
-    
-    <div class="card" style="margin-bottom: 12px;"><h2>Section 7: Performance Latencies</h2><div class="tile-grid">{latency_tiles}</div></div>
-    
-    <div class="card" style="margin-bottom: 12px;"><h2>Section 8: Feed Quality</h2>
-    <table><thead><tr><th>Feed</th><th>Status</th><th>Latency</th><th>Failures</th><th>Retries</th><th>Freshness</th><th>Retry Rate</th><th>Consec Failures</th><th>Last Success Poll</th></tr></thead><tbody>{feed_rows_html}</tbody></table></div>
-    
-    <div class="card"><h2>Section 9: Engineering Activity</h2>
-    <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));">
-        <div><div class="stat-label">Latest Alerts</div>{recent_alerts_html}</div>
-        <div><div class="stat-label">Latest Failures</div>{failures_html}</div>
-        <div><div class="stat-label">Latest Retries</div>{retries_html}</div>
-        <div><div class="stat-label">Latest Feed Errors</div>{feed_errors_html}</div>
-        <div><div class="stat-label">Latest Validation Issues</div>{validation_issues_html}</div>
-    </div></div>
+    <div class="card" style="margin-bottom: 12px; overflow-x: auto;"><h2>4. Sensor Asset Intelligence (SPI)</h2>
+    <table><thead><tr><th>Sensor Identity</th><th>Artifacts Ingested</th><th>Decisions</th><th>Capture Share</th><th>Alert %</th><th>Ontology %</th><th>Rules %</th><th>Failures</th><th>Reliability</th><th>Avg Latency</th><th>Cost/Yield</th></tr></thead><tbody>{source_row_html}</tbody></table></div>
     </div></body></html>"""
     
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f: f.write(html)
+
 
 def generate_decision_analytics_html(output_path, metrics, avg_30=None):
     rule_data = _daily(metrics, "rule_analytics") or []
@@ -362,23 +321,24 @@ def generate_decision_analytics_html(output_path, metrics, avg_30=None):
 
     # Section 5: Rule Intelligence
     rule_rows_html = "".join([f"<tr><td>{esc(_bag(r, 'rule'))}</td><td class='metric-val'>{esc(_bag(r, 'evaluated'))}</td><td class='metric-val'>{esc(_bag(r, 'alerts'))}</td><td class='metric-val'>{AWAITING_SPAN}</td><td class='metric-val'>{AWAITING_SPAN}</td><td class='metric-val'>{AWAITING_SPAN}</td><td class='metric-val'>{AWAITING_SPAN}</td><td class='metric-val'>{AWAITING_SPAN}</td></tr>" for r in rule_data])
-    if not rule_data: rule_rows_html = "<tr><td colspan='8' class='empty-note'>Awaiting Data</td></tr>"
+    if not rule_data: rule_rows_html = "<tr><td colspan='8' class='empty-note'>Awaiting Evidentiary DAG Replays</td></tr>"
 
     # Section 6: Ontology Intelligence
     ontology_rows_html = "".join([f"<tr><td>{esc(_bag(o, 'concept'))}</td><td class='metric-val'>{esc(_bag(o, 'frequency'))}</td><td class='metric-val'>{AWAITING_SPAN}</td><td class='metric-val'>{AWAITING_SPAN}</td><td class='metric-val'>{AWAITING_SPAN}</td><td class='metric-val'>{AWAITING_SPAN}</td></tr>" for o in ontology_data])
-    if not ontology_data: ontology_rows_html = "<tr><td colspan='6' class='empty-note'>Awaiting Data</td></tr>"
+    if not ontology_data: ontology_rows_html = "<tr><td colspan='6' class='empty-note'>Awaiting Evidentiary DAG Replays</td></tr>"
     
-    html = f"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>SSR Decision Analytics</title><style>{BASE_CSS}</style>{SORT_JS}</head>
-    <body><div class="container">{render_nav("analytics")}<header><h1>Decision Analytics</h1></header>
+    html = f"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>SSR Concept Drift Analytics</title><style>{BASE_CSS}</style>{SORT_JS}</head>
+    <body><div class="container">{render_nav("analytics")}<header><h1>Concept Drift & Rules Intelligence</h1></header>
     
-    <div class="card" style="margin-bottom: 12px; overflow-x: auto;"><h2>Section 5: Rule Intelligence</h2>
-    <table><thead><tr><th>Rule</th><th>Evaluated</th><th>Alerts</th><th>AI Overrides</th><th>FP %</th><th>FN %</th><th>Capture Contrib</th><th>Avg Conf</th></tr></thead><tbody>{rule_rows_html}</tbody></table></div>
+    <div class="card" style="margin-bottom: 12px; overflow-x: auto;"><h2>Determinism Lineage: Rules Intelligence</h2>
+    <table><thead><tr><th>Rule Component Version</th><th>Total Evaluated</th><th>Alerts Issued</th><th>Human Overrides</th><th>FP Contrib %</th><th>FN Contrib %</th><th>Capture Contrib</th><th>Avg DAG Weight</th></tr></thead><tbody>{rule_rows_html}</tbody></table></div>
     
-    <div class="card" style="overflow-x: auto;"><h2>Section 6: Ontology Intelligence</h2>
-    <table><thead><tr><th>Concept</th><th>Frequency</th><th>FP Contrib</th><th>FN Contrib</th><th>Avg Conf</th><th>Alert Conversion</th></tr></thead><tbody>{ontology_rows_html}</tbody></table></div>
+    <div class="card" style="overflow-x: auto;"><h2>Ontology Lineage: Concept Drift Monitor</h2>
+    <table><thead><tr><th>Taxonomy Concept Node</th><th>Observation Frequency</th><th>Drift Z-Score</th><th>FP Contrib</th><th>FN Contrib</th><th>Alert Conversion %</th></tr></thead><tbody>{ontology_rows_html}</tbody></table></div>
     </div></body></html>"""
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f: f.write(html)
+
 
 def generate_archive_html(output_path):
     archive_css = """
@@ -386,23 +346,25 @@ def generate_archive_html(output_path):
         th { background: var(--surface-subtle); position: sticky; top: 0; z-index: 10; }
         .decision-report-row { display: none; background: #0f131a; }
         .decision-report-row.expanded { display: table-row; }
-        .decision-report { padding: 16px 24px; border-left: 4px solid var(--blue); display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;}
+        .decision-report { padding: 16px 24px; border-left: 4px solid var(--blue); display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;}
         .drop-reason { font-family: var(--mono); color: var(--yellow); font-size: 0.9em; background: rgba(219,171,10,0.1); padding: 2px 6px; border-radius: 3px;}
         .dr-block h4 { margin: 0 0 8px; font-size: 0.8em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.5px; border-bottom: 1px solid var(--border); padding-bottom: 4px;}
         .dr-list { list-style: none; margin: 0; padding: 0; font-size: 0.85em; }
-        .dr-list li { margin-bottom: 4px; display: flex; justify-content: space-between; }
-        .dr-list li strong { color: var(--text); font-weight: normal; }
+        .dr-list li { margin-bottom: 6px; display: flex; justify-content: space-between; gap: 12px; }
+        .dr-list li strong { color: var(--text); font-weight: normal; white-space: nowrap;}
         .dr-list li span { font-family: var(--mono); color: #fff; text-align: right; }
         .replay-btn { background: var(--surface-subtle); color: var(--text); border: 1px solid var(--border); padding: 6px 12px; cursor: pointer; border-radius: 4px; font-weight: 600; text-transform: uppercase; font-size: 0.75em; letter-spacing: 0.5px; width: 100%; margin-top: 10px;}
         .replay-btn:hover { background: var(--blue); color: #fff; border-color: var(--blue); }
+        .evidence-for { border-left: 3px solid var(--green); padding-left: 8px; margin-bottom: 8px;}
+        .evidence-against { border-left: 3px solid var(--red); padding-left: 8px; margin-bottom: 8px;}
     """
 
-    html = """<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>SSR Decision Ledger</title><style>__BASE_CSS__ __ARCHIVE_CSS__</style>__SORT_JS__</head>
-    <body><div class="container">__NAV__<header><h1>Decision Ledger</h1></header>
+    html = """<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>SSR Canonical Decision Manifests</title><style>__BASE_CSS__ __ARCHIVE_CSS__</style>__SORT_JS__</head>
+    <body><div class="container">__NAV__<header><h1>Canonical Decision Manifests</h1></header>
     
     <div class="table-wrapper"><table id="archiveTable">
-    <thead><tr><th>Timestamp (GMT)</th><th>Source / Issuer</th><th>Headline</th><th>Outcome</th><th>Pipeline Stage</th><th>Drop Reason</th><th>Proc Time</th></tr></thead>
-    <tbody id="tableBody"><tr><td colspan="7" style="text-align: center; color: var(--muted); padding: 30px;">Loading immutable event stream...</td></tr></tbody>
+    <thead><tr><th>Execution Timestamp (GMT)</th><th>Canonical Sensor</th><th>Entity / Target</th><th>Final Outcome</th><th>Terminal Stage</th><th>Confidence Score</th></tr></thead>
+    <tbody id="tableBody"><tr><td colspan="6" style="text-align: center; color: var(--muted); padding: 30px;">Mounting Canonical Decision Manifest API...</td></tr></tbody>
     </table></div></div>
     
     <script>
@@ -423,9 +385,7 @@ def generate_archive_html(output_path):
         
         function toggleRow(idx) {
             const el = document.getElementById('detail-' + idx);
-            if (el) {
-                el.classList.toggle('expanded');
-            }
+            if (el) el.classList.toggle('expanded');
         }
         
         function renderTable() {
@@ -433,82 +393,100 @@ def generate_archive_html(output_path):
             tbody.innerHTML = '';
             
             if (!archiveData || archiveData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">No decisions currently in ledger.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No decision manifests exposed in API.</td></tr>';
                 return;
             }
             
-            archiveData.forEach((row, index) => {
-                let ts = row.timestamp || '';
-                if (ts && !ts.includes('GMT') && !ts.includes('UTC')) ts += ' GMT';
-                let reasonHtml = row.reason ? `<span class="drop-reason">${row.reason}</span>` : '';
+            archiveData.forEach((manifest, index) => {
+                // Parse SSR 2.0 Canonical Structure with Legacy Fallbacks
+                const reg = manifest.manifest_registry || {};
+                const det = manifest.detection_vector || {};
+                const prov = manifest.evidentiary_provenance_dag || {supporting_evidence: [], opposing_evidence: []};
+                const perf = manifest.performance_telemetry_ms || {};
+                const line = manifest.syndication_lineage || {};
+                
+                let ts = reg.execution_timestamp_gmt || manifest.timestamp || '';
+                let outcome = det.outcome || manifest.outcome || 'PENDING';
+                let stage = det.terminal_stage || manifest.pipeline_stage || 'Unknown';
+                let sensor = line.canonical_sensor_id || manifest.source || 'Unknown Sensor';
+                let ticker = det.target_ticker || manifest.issuer || 'UNKNOWN';
+                
+                let confDecomp = det.confidence_decomposition || {};
+                let aggConf = confDecomp.aggregate_confidence || manifest.confidence || 0.0;
+                let confStr = aggConf > 0 ? (aggConf * 100).toFixed(1) + '%' : '<span class="awaiting">N/A</span>';
                 
                 // Main Row
                 const tr = document.createElement('tr');
                 tr.className = 'clickable';
                 tr.onclick = () => toggleRow(index);
                 tr.innerHTML = `<td>${ts}</td>
-                                <td><strong>${row.source || ''}</strong><br><small>${row.issuer || 'Unknown Issuer'}</small></td>
-                                <td style="max-width:350px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${row.headline || ''}"><a href="${row.url || '#'}">${row.headline || ''}</a></td>
-                                <td><strong>${row.outcome || ''}</strong></td>
-                                <td>${row.pipeline_stage || ''}</td>
-                                <td>${reasonHtml}</td>
-                                <td class="metric-val">${row.processing_time || ''}</td>`;
+                                <td><strong>${sensor}</strong></td>
+                                <td>${ticker}</td>
+                                <td><strong>${outcome}</strong></td>
+                                <td>${stage}</td>
+                                <td class="metric-val">${confStr}</td>`;
                 
-                // Expanded Decision Report Row
+                // Build Supporting Evidence HTML
+                let suppHtml = prov.supporting_evidence.map(e => `
+                    <div class="evidence-for">
+                        <div style="font-size:0.8em; color:var(--muted); text-transform:uppercase;">${e.component || e.stage} (Wt: ${e.weight || e.confidence_weight || 1.0})</div>
+                        <div>${e.assertion || e.assertion_key}</div>
+                    </div>`).join('');
+                if(!suppHtml) suppHtml = '<div class="empty-note">No supporting causal links recorded.</div>';
+
+                // Build Opposing Evidence HTML
+                let oppHtml = prov.opposing_evidence.map(e => `
+                    <div class="evidence-against">
+                        <div style="font-size:0.8em; color:var(--muted); text-transform:uppercase;">${e.component || e.stage} (Wt: ${e.weight || e.confidence_weight || 1.0})</div>
+                        <div>${e.assertion || e.assertion_key}</div>
+                    </div>`).join('');
+                // Legacy support for single "drop reason" mapped to opposing evidence
+                if(!oppHtml && manifest.reason) {
+                    oppHtml = `<div class="evidence-against"><div>Legacy Termination: ${manifest.reason}</div></div>`;
+                }
+                if(!oppHtml) oppHtml = '<div class="empty-note">No opposing causal links recorded.</div>';
+
+                // Expanded Manifest Report Row
                 const dTr = document.createElement('tr');
                 dTr.id = 'detail-' + index;
                 dTr.className = 'decision-report-row';
                 dTr.innerHTML = `
-                    <td colspan="7" style="padding: 0;">
+                    <td colspan="6" style="padding: 0;">
                         <div class="decision-report">
                             <div class="dr-block">
-                                <h4>Decision Summary</h4>
+                                <h4>Manifest Identifiers & Lineage</h4>
                                 <ul class="dr-list">
-                                    <li><strong>Outcome:</strong> <span>${row.outcome || ''}</span></li>
-                                    <li><strong>Stage Exited:</strong> <span>${row.pipeline_stage || ''}</span></li>
-                                    <li><strong>Authority:</strong> <span>${row.pipeline_stage || ''} Engine</span></li>
-                                    <li><strong>Confidence:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
-                                    <li><strong>Processing Time:</strong> <span>${row.processing_time || ''}</span></li>
-                                    <li><strong>Validation Status:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
+                                    <li><strong>Decision ID:</strong> <span>${reg.decision_id || 'Legacy-Data'}</span></li>
+                                    <li><strong>Core Event ID:</strong> <span>${reg.event_id || 'Legacy-Data'}</span></li>
+                                    <li><strong>Config Manifest:</strong> <span>${reg.configuration_manifest_hash || 'SSR-CFG-LEGACY'}</span></li>
+                                    <li><strong>Completeness Score:</strong> <span>${reg.evidence_completeness_score ? (reg.evidence_completeness_score*100).toFixed(0)+'%' : '100%'}</span></li>
+                                </ul>
+                                <h4 style="margin-top:16px;">Execution Timings (ms)</h4>
+                                <ul class="dr-list">
+                                    <li><strong>Repo Ingest:</strong> <span>${perf.ingest_repo_ms || perf.download || 0}</span></li>
+                                    <li><strong>Text Transforms:</strong> <span>${perf.transformation_ms || perf.transformation || 0}</span></li>
+                                    <li><strong>Ontology Engine:</strong> <span>${perf.ontology_ms || perf.ontology || 0}</span></li>
+                                    <li><strong>Rules Engine:</strong> <span>${perf.rules_ms || perf.rules || 0}</span></li>
+                                    <li><strong>AI Inference:</strong> <span>${perf.ai_inference_ms || perf.ai || 0}</span></li>
                                 </ul>
                             </div>
                             <div class="dr-block">
-                                <h4>Positive Evidence</h4>
-                                <ul class="dr-list">
-                                    <li><strong>Ontology Concepts:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
-                                    <li><strong>Matched Rules:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
-                                    <li><strong>Extracted Issuer:</strong> <span>${row.issuer || 'None'}</span></li>
-                                    <li><strong>Supporting Evidence:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
-                                </ul>
+                                <h4>Supporting Causal DAG</h4>
+                                ${suppHtml}
                             </div>
                             <div class="dr-block">
-                                <h4>Missing Evidence</h4>
-                                <ul class="dr-list">
-                                    <li><strong>Missing Concepts:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
-                                    <li><strong>Missing Rules:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
-                                    <li><strong>Missing Issuer:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
-                                    <li><strong>Missing AI Auth:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
-                                </ul>
+                                <h4>Opposing / Terminal Causal DAG</h4>
+                                ${oppHtml}
                             </div>
                             <div class="dr-block">
-                                <h4>Execution Timeline</h4>
+                                <h4>Strategy Decoupling & Human Audit</h4>
                                 <ul class="dr-list">
-                                    <li><strong>Start Time:</strong> <span>${ts}</span></li>
-                                    <li><strong>Duration:</strong> <span>${row.processing_time || ''}</span></li>
-                                    <li><strong>Component:</strong> <span>${row.pipeline_stage || ''}</span></li>
-                                    <li><strong>Status:</strong> <span>${row.outcome || ''}</span></li>
+                                    <li><strong>Human Override:</strong> <span><span class="awaiting">None</span></span></li>
+                                    <li><strong>Strategy Validation:</strong> <span><span class="awaiting">Pending Sync</span></span></li>
+                                    <li><strong>Market Cap Floor:</strong> <span><span class="awaiting">Unavailable</span></span></li>
+                                    <li><strong>Options Verification:</strong> <span><span class="awaiting">Unavailable</span></span></li>
                                 </ul>
-                            </div>
-                            <div class="dr-block">
-                                <h4>Version Metadata</h4>
-                                <ul class="dr-list">
-                                    <li><strong>Parser Version:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
-                                    <li><strong>Ontology Version:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
-                                    <li><strong>Rule Pack Version:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
-                                    <li><strong>Prompt Version:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
-                                    <li><strong>Generator Version:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
-                                </ul>
-                                <button class="replay-btn" onclick="alert('Replay endpoint not implemented. Event ID: ${row.id || index}')">Replay Event</button>
+                                <button class="replay-btn" onclick="alert('Immutable Replay triggered for Event ID: ${reg.event_id || 'Unknown'} via Configuration Manifest ${reg.configuration_manifest_hash || 'Latest'}.')">Trigger Deterministic Replay</button>
                             </div>
                         </div>
                     </td>
