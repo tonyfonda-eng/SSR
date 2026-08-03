@@ -1,13 +1,8 @@
 {
   "system_status": "OPERATIONAL",
   "uptime": "99.9%",
-<<<<<<< HEAD
-  "last_sync_gmt": "2026-08-03 17:38:51 GMT",
-  "total_processed_today": 211,
-=======
-  "last_sync_gmt": "2026-08-03 19:24:28 GMT",
-  "total_processed_today": 222,
->>>>>>> 360d967f0af2d9ed352a135bb907f8aa7bae96c7
+  "last_sync_gmt": "2026-08-03 19:29:40 GMT",
+  "total_processed_today": 223,
   "total_alerts_dispatched": 0,
   "run_id": "SSR-OP-26080319",
   "health_score": 100,
@@ -17,27 +12,7 @@
   "dynamic_sources": [
     {
       "source": "Business Wire",
-<<<<<<< HEAD
-      "articles": 1,
-      "alerts": 0,
-      "ontology_pct": 0.0,
-      "rules_pct": 0.0,
-=======
-  "total_runtime_s": 129.775982719,
-      "dynamic_sources": [
-        {
-          "source": "Business Wire",
-          "articles": 214,
-          "alerts": 0,
-          "ontology_pct": 0.0,
-          "rules_pct": 94.3,
-          "failures": 0,
-          "alert_pct": 0.0
-        }
-      ]
-    }
-=======
-      "articles": 222,
+      "articles": 223,
       "alerts": 0,
       "ontology_pct": 0.0,
       "rules_pct": 94.6,
