@@ -6,6 +6,8 @@ import json
 # INSTITUTIONAL OPERATIONS CENTRE & DECISION INTELLIGENCE
 # ---------------------------------------------------------------------------
 
+AWAITING_SPAN = '<span class="awaiting">Awaiting Data</span>'
+
 def _daily(metrics, key, default=None):
     if isinstance(metrics, dict):
         d = metrics.get("daily", metrics)
@@ -36,7 +38,7 @@ def _rows(value):
     return list(value) if isinstance(value, (list, tuple)) else []
 
 def esc(value):
-    if value is None: return ""
+    if value is None or value == "": return ""
     return str(value).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
 
 def is_num(value):
@@ -119,9 +121,9 @@ def render_loss_funnel_html(funnel_counts):
     for r in rows:
         href = "archive.html" if r["stage_token"] is None else f'archive.html?stage={r["stage_token"]}'
         row_cls = "loss-row " + (r["kind"] if r["kind"] in ("terminal", "loss") else "")
-        entering_html = esc(fmt_num(r["entering"])) if is_num(r["entering"]) else '<span class="awaiting">Awaiting Data</span>'
-        exiting_html = esc(fmt_num(r["exiting"])) if is_num(r["exiting"]) else '<span class="awaiting">Awaiting Data</span>'
-        lost_html = esc(fmt_num(r["lost"])) if is_num(r["lost"]) and r["kind"] != "start" else ('—' if r["kind"] == "start" else '<span class="awaiting">Awaiting Data</span>')
+        entering_html = esc(fmt_num(r["entering"])) if is_num(r["entering"]) else AWAITING_SPAN
+        exiting_html = esc(fmt_num(r["exiting"])) if is_num(r["exiting"]) else AWAITING_SPAN
+        lost_html = esc(fmt_num(r["lost"])) if is_num(r["lost"]) and r["kind"] != "start" else ('—' if r["kind"] == "start" else AWAITING_SPAN)
         
         body += f"""
             <a class="{row_cls}" href="{href}" title="Inspect this stage in the Decision Ledger">
@@ -231,7 +233,7 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
     trust_row = "".join([
         f'<div class="stat-tile"><div class="stat-label">Overall Health</div><div class="stat-value">{status_badge(health_label)}</div></div>',
         f'<div class="stat-tile"><div class="stat-label">Validation Status</div><div class="stat-value">{status_badge(_sub(metrics, "validation", "status"))}</div></div>',
-        f'<div class="stat-tile"><div class="stat-label">System Confidence</div><div class="stat-value">{esc(fmt_pct(_daily(metrics, "system_confidence")) or "<span class=\'awaiting\'>Awaiting Data</span>")}</div></div>',
+        f'<div class="stat-tile"><div class="stat-label">System Confidence</div><div class="stat-value">{esc(fmt_pct(_daily(metrics, "system_confidence"))) or AWAITING_SPAN}</div></div>',
         f'<div class="stat-tile"><div class="stat-label">Last Successful Run</div><div class="stat-value">{esc(now_str)}</div></div>',
         f'<div class="stat-tile"><div class="stat-label">Scheduler Status</div><div class="stat-value">{status_badge(_daily(metrics, "scheduler_status"))}</div></div>',
         f'<div class="stat-tile"><div class="stat-label">Queue Health</div><div class="stat-value">{status_badge(_daily(metrics, "queue_status", "OK"))}</div></div>',
@@ -248,12 +250,12 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
     detection_delay = _sub(metrics, "validation", "avg_detection_delay")
     benchmark_lead = _sub(metrics, "validation", "benchmark_lead")
 
-    kpi_value_html = f'{capture_rate:.1f}%' if is_num(capture_rate) else '<span class="awaiting" style="font-size:0.4em;">Awaiting Data</span>'
+    kpi_value_html = f'{capture_rate:.1f}%' if is_num(capture_rate) else f'<span class="awaiting" style="font-size:0.4em;">AWAITING DATA</span>'
     kpi_context = "".join([
-        f'<div class="kpi-context-item"><div class="cx-label">False Positive Rate</div><div class="cx-value">{esc(fmt_pct(fp_rate) or "<span class=\'awaiting\'>Awaiting Data</span>")}</div></div>',
-        f'<div class="kpi-context-item"><div class="cx-label">False Negative Rate</div><div class="cx-value">{esc(fmt_pct(fn_rate) or "<span class=\'awaiting\'>Awaiting Data</span>")}</div></div>',
-        f'<div class="kpi-context-item"><div class="cx-label">Avg Detection Delay</div><div class="cx-value">{esc(detection_delay if detection_delay is not None else "<span class=\'awaiting\'>Awaiting Data</span>")}</div></div>',
-        f'<div class="kpi-context-item"><div class="cx-label">Benchmark Lead</div><div class="cx-value">{esc(benchmark_lead if benchmark_lead is not None else "<span class=\'awaiting\'>Awaiting Data</span>")}</div></div>',
+        f'<div class="kpi-context-item"><div class="cx-label">False Positive Rate</div><div class="cx-value">{esc(fmt_pct(fp_rate)) or AWAITING_SPAN}</div></div>',
+        f'<div class="kpi-context-item"><div class="cx-label">False Negative Rate</div><div class="cx-value">{esc(fmt_pct(fn_rate)) or AWAITING_SPAN}</div></div>',
+        f'<div class="kpi-context-item"><div class="cx-label">Avg Detection Delay</div><div class="cx-value">{esc(detection_delay) if detection_delay is not None else AWAITING_SPAN}</div></div>',
+        f'<div class="kpi-context-item"><div class="cx-label">Benchmark Lead</div><div class="cx-value">{esc(benchmark_lead) if benchmark_lead is not None else AWAITING_SPAN}</div></div>',
     ])
     hero_html = f"""<div class="kpi-hero"><div><div class="kpi-label">Opportunity Capture Rate</div><div class="kpi-number">{kpi_value_html}</div></div><div style="flex:1; min-width:220px;"><div class="kpi-context-row">{kpi_context}</div></div></div>"""
 
@@ -268,31 +270,31 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
             <td><strong>{esc(_bag(r, "source"))}</strong></td>
             <td class="metric-val">{esc(_bag(r, "articles"))}</td>
             <td class="metric-val">{esc(_bag(r, "alerts"))}</td>
-            <td class="metric-val">{esc(fmt_pct(safe_div(_bag(r, "alerts"), total_alerts_all_sources) * 100 if total_alerts_all_sources else None) or '<span class="awaiting">Awaiting Data</span>')}</td>
+            <td class="metric-val">{esc(fmt_pct(safe_div(_bag(r, "alerts"), total_alerts_all_sources) * 100 if total_alerts_all_sources else None)) or AWAITING_SPAN}</td>
             <td class="metric-val">{esc(_bag(r, "alert_pct"))}%</td>
             <td class="metric-val">{esc(_bag(r, "ontology_pct"))}%</td>
             <td class="metric-val">{esc(_bag(r, "rules_pct"))}%</td>
             <td class="metric-val" style="color: {'var(--red)' if _bag(r, 'failures', 0) else 'var(--text)'};">{esc(_bag(r, 'failures', 0))}</td>
-            <td class="metric-val"><span class="awaiting">Awaiting Data</span></td>
-            <td class="metric-val"><span class="awaiting">Awaiting Data</span></td>
-            <td class="metric-val"><span class="awaiting">Awaiting Data</span></td>
-            <td class="metric-val"><span class="awaiting">Awaiting Data</span></td>
-            <td class="metric-val"><span class="awaiting">Awaiting Data</span></td>
-            <td class="metric-val"><span class="awaiting">Awaiting Data</span></td>
-            <td class="metric-val"><span class="awaiting">Awaiting Data</span></td>
-            <td class="metric-val"><span class="awaiting">Awaiting Data</span></td>
+            <td class="metric-val">{AWAITING_SPAN}</td>
+            <td class="metric-val">{AWAITING_SPAN}</td>
+            <td class="metric-val">{AWAITING_SPAN}</td>
+            <td class="metric-val">{AWAITING_SPAN}</td>
+            <td class="metric-val">{AWAITING_SPAN}</td>
+            <td class="metric-val">{AWAITING_SPAN}</td>
+            <td class="metric-val">{AWAITING_SPAN}</td>
+            <td class="metric-val">{AWAITING_SPAN}</td>
         </tr>""" for r in source_rows
     ])
 
     # Section 7: Performance (Component Latencies)
     latency_tiles = "".join([
-        f'<div class="stat-tile"><div class="stat-label">{n}</div><div class="stat-value"><span class="awaiting">Awaiting Data</span></div></div>' for n in ["RSS", "Download", "Parse", "Issuer Extraction", "Ontology", "Rules", "AI", "Email", "SQLite"]
+        f'<div class="stat-tile"><div class="stat-label">{n}</div><div class="stat-value">{AWAITING_SPAN}</div></div>' for n in ["RSS", "Download", "Parse", "Issuer Extraction", "Ontology", "Rules", "AI", "Email", "SQLite"]
     ])
 
     # Section 8: Feed Quality
     feeds = _rows(_daily(metrics, "feeds"))
     feed_rows_html = "".join([
-        f'<tr><td>{esc(_bag(f, "name"))}</td><td>{status_badge(_bag(f, "status"))}</td><td class="metric-val">{esc(_bag(f, "latency", "-"))}</td><td class="metric-val">{esc(_bag(f, "failures", "-"))}</td><td class="metric-val">{esc(_bag(f, "retries", "-"))}</td><td class="metric-val"><span class="awaiting">Awaiting Data</span></td><td class="metric-val"><span class="awaiting">Awaiting Data</span></td><td class="metric-val"><span class="awaiting">Awaiting Data</span></td><td class="metric-val"><span class="awaiting">Awaiting Data</span></td></tr>' for f in feeds
+        f'<tr><td>{esc(_bag(f, "name"))}</td><td>{status_badge(_bag(f, "status"))}</td><td class="metric-val">{esc(_bag(f, "latency", "-"))}</td><td class="metric-val">{esc(_bag(f, "failures", "-"))}</td><td class="metric-val">{esc(_bag(f, "retries", "-"))}</td><td class="metric-val">{AWAITING_SPAN}</td><td class="metric-val">{AWAITING_SPAN}</td><td class="metric-val">{AWAITING_SPAN}</td><td class="metric-val">{AWAITING_SPAN}</td></tr>' for f in feeds
     ]) if feeds else '<tr><td colspan="9" class="empty-note">Awaiting Data &mdash; no per-feed telemetry reported for this run.</td></tr>'
 
     # Section 9: Engineering Activity
@@ -342,11 +344,11 @@ def generate_decision_analytics_html(output_path, metrics, avg_30=None):
     ontology_data = _daily(metrics, "ontology_conversion") or []
 
     # Section 5: Rule Intelligence
-    rule_rows_html = "".join([f"<tr><td>{esc(_bag(r, 'rule'))}</td><td class='metric-val'>{esc(_bag(r, 'evaluated'))}</td><td class='metric-val'>{esc(_bag(r, 'alerts'))}</td><td class='metric-val'><span class='awaiting'>Awaiting Data</span></td><td class='metric-val'><span class='awaiting'>Awaiting Data</span></td><td class='metric-val'><span class='awaiting'>Awaiting Data</span></td><td class='metric-val'><span class='awaiting'>Awaiting Data</span></td><td class='metric-val'><span class='awaiting'>Awaiting Data</span></td></tr>" for r in rule_data])
+    rule_rows_html = "".join([f"<tr><td>{esc(_bag(r, 'rule'))}</td><td class='metric-val'>{esc(_bag(r, 'evaluated'))}</td><td class='metric-val'>{esc(_bag(r, 'alerts'))}</td><td class='metric-val'>{AWAITING_SPAN}</td><td class='metric-val'>{AWAITING_SPAN}</td><td class='metric-val'>{AWAITING_SPAN}</td><td class='metric-val'>{AWAITING_SPAN}</td><td class='metric-val'>{AWAITING_SPAN}</td></tr>" for r in rule_data])
     if not rule_data: rule_rows_html = "<tr><td colspan='8' class='empty-note'>Awaiting Data</td></tr>"
 
     # Section 6: Ontology Intelligence
-    ontology_rows_html = "".join([f"<tr><td>{esc(_bag(o, 'concept'))}</td><td class='metric-val'>{esc(_bag(o, 'frequency'))}</td><td class='metric-val'><span class='awaiting'>Awaiting Data</span></td><td class='metric-val'><span class='awaiting'>Awaiting Data</span></td><td class='metric-val'><span class='awaiting'>Awaiting Data</span></td><td class='metric-val'><span class='awaiting'>Awaiting Data</span></td></tr>" for o in ontology_data])
+    ontology_rows_html = "".join([f"<tr><td>{esc(_bag(o, 'concept'))}</td><td class='metric-val'>{esc(_bag(o, 'frequency'))}</td><td class='metric-val'>{AWAITING_SPAN}</td><td class='metric-val'>{AWAITING_SPAN}</td><td class='metric-val'>{AWAITING_SPAN}</td><td class='metric-val'>{AWAITING_SPAN}</td></tr>" for o in ontology_data])
     if not ontology_data: ontology_rows_html = "<tr><td colspan='6' class='empty-note'>Awaiting Data</td></tr>"
     
     html = f"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>SSR Decision Analytics</title><style>{BASE_CSS}</style>{SORT_JS}</head>
