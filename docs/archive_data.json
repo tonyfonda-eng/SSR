@@ -1,5 +1,23 @@
 [
   {
+    "id": "20260803544589",
+    "timestamp": "2026-08-03 18:53:59 UTC",
+    "source": "Business Wire",
+    "headline": "ConnexPay Launches Hotel PayValet to Eliminate Hotel Payment Friction for Travel Management Companies",
+    "url": "http://www.businesswire.com/news/home/20260803544589/en/ConnexPay-Launches-Hotel-PayValet-to-Eliminate-Hotel-Payment-Friction-for-Travel-Management-Companies/",
+    "country": "RSS/HTML",
+    "language": "",
+    "document_type": "",
+    "issuer": "CONNEXPAY",
+    "event_family": "Unknown",
+    "pipeline_stage": "Rules Engine",
+    "outcome": "Dropped",
+    "reason": "Failed Rules Threshold (Score < 10)",
+    "ai_invoked": 0,
+    "processing_time": "826ms",
+    "slowest_stage": "Ontology"
+  },
+  {
     "id": "20260803105527",
     "timestamp": "2026-08-03 17:50:39 UTC",
     "source": "Business Wire",
