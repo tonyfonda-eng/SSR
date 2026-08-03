@@ -170,10 +170,11 @@ def save_workflow_health(health_data=None):
         gmt_now = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S GMT")
         conn = sqlite3.connect(DB_PATH)
         conn.execute("""
-            INSERT OR REPLACE INTO workflow_health (timestamp, total_scanned, articles, errors, drift_score, runtime, failed, succeeded, skipped)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+            INSERT OR REPLACE INTO workflow_health (timestamp, run_id, total_scanned, articles, errors, drift_score, runtime, failed, succeeded, skipped)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         """, (
             gmt_now,
+            health_data.get('run_id', 'UNKNOWN') if health_data else 'UNKNOWN',
             health_data.get('total_scanned', 0) if health_data else 0,
             health_data.get('articles', 0) if health_data else 0,
             health_data.get('errors', 0) if health_data else 0,
@@ -185,8 +186,8 @@ def save_workflow_health(health_data=None):
         ))
         conn.commit()
         conn.close()
-    except Exception:
-        pass
+    except Exception as e:
+        logger.error(f"[DB ERROR] save_workflow_health failed: {e}")
 
 # Additional real persistence stubs replacing shims
 def log_research(*args, **kwargs): pass

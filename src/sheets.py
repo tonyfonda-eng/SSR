@@ -243,12 +243,21 @@ def batch_append_daily_memory(sheet_url, new_issuers):
     if not new_issuers:
         return
     spreadsheet = get_spreadsheet(sheet_url)
-    try:
-        worksheet = spreadsheet.worksheet("DailyMemory")
-    except gspread.exceptions.WorksheetNotFound:
-        worksheet = spreadsheet.add_worksheet(title="DailyMemory", rows=1000, cols=2)
+    
+    worksheet = None
+    # Try both naming variations before creating a new tab
+    for name in ["Daily Memory", "DailyMemory"]:
+        try:
+            worksheet = spreadsheet.worksheet(name)
+            break
+        except gspread.exceptions.WorksheetNotFound:
+            continue
+            
+    if not worksheet:
+        worksheet = spreadsheet.add_worksheet(title="Daily Memory", rows=1000, cols=2)
         worksheet.append_row(["Issuer", "Timestamp"])
         
+    import datetime
     ts = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S GMT")
     rows = [[issuer, ts] for issuer in new_issuers]
     worksheet.append_rows(rows)
