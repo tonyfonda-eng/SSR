@@ -1,32 +1,12 @@
 [
   {
-    "title": "Quarterly Earnings Update Legacy",
-    "url": "https://example.com/ignored",
-    "timestamp": "2026-08-02 10:00:00",
-    "source": "PR Newswire",
-    "status": "DROPPED",
-    "drop_stage": "Stage 1: Ingestion",
-    "reason": "URL matched existing deduplication hash index",
-    "evaluator": "Python"
-  },
-  {
-    "title": "Denied Scheme of Arrangement Variation Rumor",
-    "url": "https://example.com/ai-reviewed",
-    "timestamp": "2026-08-02 11:15:00",
-    "source": "GlobeNewswire",
-    "status": "DROPPED",
-    "drop_stage": "Stage 4: AI Evaluation",
-    "reason": "LLM analysis identified contextual negotiation/denial text",
-    "evaluator": "AI"
-  },
-  {
-    "title": "Definitive Acquisition Agreement for Watchlist Microcap",
-    "url": "https://example.com/alert-triggering",
-    "timestamp": "2026-08-02 12:30:00",
-    "source": "PR Newswire",
-    "status": "DISPATCHED",
-    "drop_stage": "Stage 5: Alert Dispatch",
-    "reason": "Meets quantitative thresholds and qualitative bar",
-    "evaluator": "AI"
+    "title": "Atkore Inc. to be Acquired by Prysmian for $95.00 per Share in Cash",
+    "url": "http://www.businesswire.com/news/home/20260802368964/en/Atkore-Inc.-to-be-Acquired-by-Prysmian-for-95.00-per-Share-in-Cash/",
+    "timestamp": "2026-08-03 06:57:56 GMT",
+    "source": "Business Wire",
+    "status": "PROCESSED",
+    "drop_stage": "Stage 3: Ingestion Complete",
+    "reason": "Successfully recorded into daily memory state",
+    "evaluator": "System Logic"
   }
 ]
