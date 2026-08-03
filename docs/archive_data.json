@@ -1,5 +1,23 @@
 [
   {
+    "id": "20260803119602",
+    "timestamp": "2026-08-03 15:49:22 UTC",
+    "source": "Business Wire",
+    "headline": "BitGo lanza Link, una red sin fronteras que permite a las instituciones mover capital",
+    "url": "http://www.businesswire.com/news/home/20260803119602/es/",
+    "country": "RSS/HTML",
+    "language": "",
+    "document_type": "",
+    "issuer": "BITGO",
+    "event_family": "Unknown",
+    "pipeline_stage": "Rules Engine",
+    "outcome": "Dropped",
+    "reason": "Failed Rules Threshold (Score < 10)",
+    "ai_invoked": 0,
+    "processing_time": "1646ms",
+    "slowest_stage": "Ontology"
+  },
+  {
     "id": "20260803745012",
     "timestamp": "2026-08-03 15:44:35 UTC",
     "source": "Business Wire",
