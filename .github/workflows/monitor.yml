@@ -94,6 +94,13 @@ jobs:
         run: |
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          
+          # 1. Stage the files immediately to resolve 'unstaged changes' rebase conflicts
+          git add docs/index.html docs/archive_data.json docs/archive.html
+          
+          # 2. Rebase cleanly on top of any manual commits you pushed in the meantime
           git pull origin main --rebase || true
+          
+          # 3. Final safety stage and clean push
           git add docs/index.html docs/archive_data.json docs/archive.html
           git diff --quiet && git diff --staged --quiet || (git commit -m "chore: update operational dashboard and archive [skip ci]" && git push)
