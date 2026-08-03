@@ -233,8 +233,33 @@ def log_unknown_event(sheet_url, *args, **kwargs):
     ]
     worksheet.append_row(row_values)
 
-def update_last_checked(sheet_url, *args, **kwargs):
-    pass # Reserved for future state tracking
+def update_last_checked(sheet_url, source_name):
+    """
+    Locates the source row in the 'Sources' tab and updates its 'Last Checked' timestamp column.
+    """
+    if not source_name:
+        return
+    spreadsheet = get_spreadsheet(sheet_url)
+    try:
+        worksheet = spreadsheet.worksheet("Sources")
+    except gspread.exceptions.WorksheetNotFound:
+        return
+    
+    try:
+        cell = worksheet.find(source_name)
+        if cell:
+            header_row = worksheet.row_values(1)
+            col_index = None
+            for idx, header in enumerate(header_row, 1):
+                if "last checked" in header.lower() or "checked" in header.lower():
+                    col_index = idx
+                    break
+            
+            if col_index:
+                ts = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S GMT")
+                worksheet.update_cell(cell.row, col_index, ts)
+    except Exception as e:
+        print(f"[ERROR] Failed to update last checked for {source_name}: {e}")
 
 def update_pipeline_metrics(sheet_url, *args, **kwargs):
     pass # Currently handled locally via SQLite
