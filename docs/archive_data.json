@@ -1,5 +1,23 @@
 [
   {
+    "id": "20260728384521",
+    "timestamp": "2026-08-03 17:14:29 UTC",
+    "source": "Business Wire",
+    "headline": "Superblocks and AWS Announce Strategic Collaboration to Bring Secure Enterprise AI App Development to Amazon Bedrock",
+    "url": "http://www.businesswire.com/news/home/20260728384521/en/Superblocks-and-AWS-Announce-Strategic-Collaboration-to-Bring-Secure-Enterprise-AI-App-Development-to-Amazon-Bedrock/",
+    "country": "RSS/HTML",
+    "language": "",
+    "document_type": "",
+    "issuer": "SUPERBLOCKS",
+    "event_family": "Unknown",
+    "pipeline_stage": "Rules Engine",
+    "outcome": "Dropped",
+    "reason": "Failed Rules Threshold (Score < 10)",
+    "ai_invoked": 0,
+    "processing_time": "11419ms",
+    "slowest_stage": "Ontology"
+  },
+  {
     "id": "20260803085999",
     "timestamp": "2026-08-03 17:04:14 UTC",
     "source": "Business Wire",
