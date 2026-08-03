@@ -5,7 +5,6 @@ import datetime
 import gspread
 from google.oauth2.service_account import Credentials
 
-# --- GLOBAL CACHE ---
 _cached_client = None
 _cached_spreadsheet = None
 
@@ -41,7 +40,6 @@ def get_spreadsheet(sheet_url):
 
 def _safe_get_records(sheet_url, sheet_names, retries=3, backoff=2.0):
     spreadsheet = get_spreadsheet(sheet_url)
-    
     for attempt in range(retries):
         for name in sheet_names:
             try:
@@ -54,7 +52,6 @@ def _safe_get_records(sheet_url, sheet_names, retries=3, backoff=2.0):
                     print(f"[ERROR] Failed to fetch '{name}' after {retries} attempts: {e}")
                 else:
                     time.sleep(backoff * (attempt + 1))
-                    
     return [] 
 
 def load_rules(sheet_url):
@@ -128,7 +125,7 @@ def load_source_reliability(sheet_url, *args, **kwargs):
     return _safe_get_records(sheet_url, ["SourceReliability", "Source Reliability"])
 
 def load_document_type_scores(sheet_url):
-    return _safe_get_records(sheet_url, ["DocumentScores", "Document Scores"])
+    return _safe_get_records(sheet_url, ["DocumentScores", "Document Scores", "Document Types"])
 
 def get_system_settings(sheet_url):
     return _safe_get_records(sheet_url, ["Settings", "SystemSettings"])

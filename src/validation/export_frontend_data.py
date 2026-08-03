@@ -23,8 +23,7 @@ def export_data():
         rows = cursor.fetchall()
         for row in rows:
             try:
-                data = json.loads(row["log_text"])
-                archive_list.append(data)
+                archive_list.append(json.loads(row["log_text"]))
             except Exception:
                 continue
     except Exception as e:
