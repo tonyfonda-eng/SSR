@@ -97,7 +97,7 @@ def _process_article(source_name, article_id, title, url, published,
                      body, rules, playbook_map, global_exclusions=None, gold_standards=None,
                      triage_all=False, issuer_memory=None, document_type=None, country=None,
                      language=None, document_type_scores=None, ontology_stats=None,
-                     source_reliability_scores=None):
+                     source_reliability_scores=None, research_queue_rows=None):
     
     start_time = time.perf_counter()
     metrics = MetricsCollector.get_instance()
@@ -222,15 +222,17 @@ def _process_article(source_name, article_id, title, url, published,
     options_available = False
     market_cap = None
     market_data_str = ""
+    ticker_info = None # OPTIMIZATION 1: Cache to prevent duplicate Yahoo Finance HTTP calls
     
     if ticker != "UNKNOWN" and "MOCK AI" not in ticker:
         try:
             yf_ticker = yf.Ticker(ticker)
-            mc = yf_ticker.info.get('marketCap')
+            ticker_info = yf_ticker.info
+            mc = ticker_info.get('marketCap')
             if mc:
                 market_cap = mc
                 print(f" [FINANCIALS] Market Cap: ${market_cap:,.2f}")
-            current_price = yf_ticker.info.get('currentPrice', yf_ticker.info.get('regularMarketPrice'))
+            current_price = ticker_info.get('currentPrice', ticker_info.get('regularMarketPrice'))
             if current_price:
                 market_data_str += f"Current Share Price: ${current_price}\n\n"
                 
@@ -282,7 +284,11 @@ def _process_article(source_name, article_id, title, url, published,
         pre_halt = None
         if ticker != "UNKNOWN":
             try:
-                pre_halt = yf.Ticker(ticker).info.get('previousClose')
+                # OPTIMIZATION 1: Utilize cached dictionary instead of executing a second network request
+                if ticker_info:
+                    pre_halt = ticker_info.get('previousClose')
+                else:
+                    pre_halt = yf.Ticker(ticker).info.get('previousClose')
             except:
                 pass
         t12_data = get_t12_metrics(ticker, pre_halt_price=pre_halt, halt_date_str=halt_date_str)
@@ -333,17 +339,20 @@ def _process_article(source_name, article_id, title, url, published,
     
     log_research(event_id, article_id, confidence, research_summary)
     
-    append_to_research_queue(
-        sheet_url=SHEET_URL,
-        data_row={
-            "timestamp": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S GMT"),
-            "ticker": ticker,
-            "issuer": issuer,
-            "event_family": event_family,
-            "url": url,
-            "status": "Pending"
-        }
-    )
+    # OPTIMIZATION 2 & 4: Append to memory array instead of hitting the Google Sheets API sequentially, and strictly format as GMT
+    queue_payload = {
+        "timestamp": datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S GMT"),
+        "ticker": ticker,
+        "issuer": issuer,
+        "event_family": event_family,
+        "url": url,
+        "status": "Pending"
+    }
+    
+    if research_queue_rows is not None:
+        research_queue_rows.append(queue_payload)
+    else:
+        append_to_research_queue(sheet_url=SHEET_URL, data_row=queue_payload)
     
     save_article(source=source_name, article_id=article_id, title=title, url=url, published=published, body=body)
     
@@ -517,16 +526,25 @@ def main():
         )
         mark_reminder_sent(rem['id'])
         
-    rules = load_rules(SHEET_URL)
-    sources = load_sources(SHEET_URL)
-    playbooks = load_playbooks(SHEET_URL)
-    global_exclusions = load_global_exclusions(SHEET_URL)
-    gold_standards = load_gold_standards(SHEET_URL)
-    playbook_map = {p['Playbook']: p.get('Questions/Research Steps', '') for p in playbooks}
-    document_type_scores = load_document_type_scores(SHEET_URL)
-    source_reliability_scores = load_source_reliability(SHEET_URL)
-    
-    load_ontology(SHEET_URL)
+    # OPTIMIZATION 3: Guard the Google Sheets config load layer
+    print("[SYSTEM] Bootstrapping core configuration from Google Sheets...")
+    try:
+        rules = load_rules(SHEET_URL)
+        sources = load_sources(SHEET_URL)
+        playbooks = load_playbooks(SHEET_URL)
+        global_exclusions = load_global_exclusions(SHEET_URL)
+        gold_standards = load_gold_standards(SHEET_URL)
+        playbook_map = {p['Playbook']: p.get('Questions/Research Steps', '') for p in playbooks}
+        document_type_scores = load_document_type_scores(SHEET_URL)
+        source_reliability_scores = load_source_reliability(SHEET_URL)
+        
+        load_ontology(SHEET_URL)
+    except Exception as e:
+        error_msg = f"Failed to load core system configuration from Google Sheets: {e}"
+        print(f"[FATAL ERROR] {error_msg}")
+        save_exception_log(error=error_msg)
+        sys.exit(1) # Graceful abort instead of exploding mid-run
+        
     ontology_stats = {"total": 0, "extracted": 0, "missed": 0}
     all_new_articles = []
     source_stats = {}
@@ -593,12 +611,13 @@ def main():
         clusters = final_clusters
 
     total_new = 0
+    research_queue_rows = [] # OPTIMIZATION 2: Pre-allocate array for batch saving
+    
     for cluster in clusters:
         primary = cluster[0]
         body = primary.get("body", "")
         
         # --- THE ARTICLE BLAST SHIELD ---
-        # Isolates processing so a single article crash does not kill the pipeline
         try:
             if not body or len(body) < 100:
                 try:
@@ -632,7 +651,8 @@ def main():
                 language=primary.get("language"),
                 document_type_scores=document_type_scores,
                 ontology_stats=ontology_stats,
-                source_reliability_scores=source_reliability_scores
+                source_reliability_scores=source_reliability_scores,
+                research_queue_rows=research_queue_rows # Pass array downwards
             )
             
             if res == "ABORT":
@@ -646,8 +666,20 @@ def main():
                 save_exception_log(error=error_msg)
             except Exception:
                 pass
-            continue # Skip this bad article, keep the pipeline alive!
+            continue 
         # ---------------------------------
+
+    # Process all batched Google Sheet writes together safely
+    if research_queue_rows:
+        try:
+            from src.sheets import batch_append_to_research_queue
+            batch_append_to_research_queue(SHEET_URL, research_queue_rows)
+            print(f" [SHEETS SYNC] Batched {len(research_queue_rows)} successful items to Research Queue.")
+        except ImportError:
+            # Fallback if your sheets handler does not have batching yet
+            print(f" [SHEETS SYNC] Batch append logic not found, falling back to sequential append.")
+            for row in research_queue_rows:
+                append_to_research_queue(sheet_url=SHEET_URL, data_row=row)
 
     issuer_memory.flush_to_sheets()
     prune_daily_memory(SHEET_URL)
