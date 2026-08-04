@@ -89,25 +89,30 @@ def _sanitize_private_key(raw_pk: str) -> str:
 def get_google_service_account():
     creds_dict = None
     
-    # Production / GitHub Actions: Load from Environment
+    # Production / GitHub Actions: Load from Environment with robust fallback parsing
     env_json = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON", "").strip()
     if env_json:
-        try:
-            creds_dict = json.loads(env_json)
-        except json.JSONDecodeError:
+        # Prevent parsing placeholder strings or malformed snippets
+        if env_json.startswith("{") and env_json.endswith("}"):
             try:
-                creds_dict = ast.literal_eval(env_json)
-            except Exception:
-                pass
+                creds_dict = json.loads(env_json)
+            except json.JSONDecodeError:
+                try:
+                    creds_dict = ast.literal_eval(env_json)
+                except Exception:
+                    pass
     
     # Local / Agent Fallback: Load from ignored JSON file
     if not creds_dict:
         for filename in ["google_credentials.json", "secure_google_credentials.json", "credentials.json"]:
             local_key_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), filename)
             if os.path.exists(local_key_path):
-                with open(local_key_path, 'r', encoding='utf-8') as f:
-                    creds_dict = json.load(f)
-                break
+                try:
+                    with open(local_key_path, 'r', encoding='utf-8') as f:
+                        creds_dict = json.load(f)
+                    break
+                except Exception:
+                    pass
                 
     if not creds_dict:
         raise ValueError("Google Service Account credentials not found in environment or local credential files.")
