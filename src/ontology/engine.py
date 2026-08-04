@@ -9,8 +9,15 @@ import logging
 import re
 from dataclasses import dataclass
 from typing import List, Dict, Tuple, Any
-from googleapiclient.discovery import build
-from google.oauth2.service_account import Credentials
+
+# Graceful handling of optional Google API dependencies to prevent runner import failures
+try:
+    from googleapiclient.discovery import build
+    from google.oauth2.service_account import Credentials
+    GOOGLE_API_AVAILABLE = True
+except ImportError:
+    GOOGLE_API_AVAILABLE = False
+
 from src.config.secrets import get_google_service_account
 
 logger = logging.getLogger(__name__)
@@ -33,6 +40,9 @@ class ConceptMatch:
 
 def get_sheets_service():
     """Initializes the Google Sheets API client service."""
+    if not GOOGLE_API_AVAILABLE:
+        logger.error("[ONTOLOGY] googleapiclient/oauth2 packages are not installed.")
+        return None
     try:
         creds_dict = get_google_service_account()
         scopes = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
