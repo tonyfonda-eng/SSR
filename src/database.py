@@ -298,3 +298,7 @@ def get_latest_config_snapshot() -> dict:
     except Exception as e:
         logger.warning(f"[DB FAULT] Unable to retrieve config snapshot: {e}")
         return None
+
+# MODULE-LEVEL EXPORTS REQUIRED BY MONITOR.PY
+def initialise_database():
+    init_db()
