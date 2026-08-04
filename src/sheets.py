@@ -16,24 +16,35 @@ def get_client():
     creds_json = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON")
     scopes = ["https://www.googleapis.com/auth/spreadsheets"]
     
+    creds_dict = None
     if creds_json:
         try:
             creds_dict = json.loads(creds_json)
-            creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
-            _cached_client = gspread.authorize(creds)
-            return _cached_client
         except json.JSONDecodeError:
             print("[CRITICAL] GOOGLE_SERVICE_ACCOUNT_JSON is malformed. Falling back to local secure files.")
             
-    # Look for the new secure credentials file first
-    for filename in ["secure_google_credentials.json", "credentials.json", "google_credentials.json"]:
-        if os.path.exists(filename):
-            _cached_client = gspread.service_account(filename=filename)
-            return _cached_client
-            
-    # Fallback default if files aren't found locally (will raise an error telling us it's missing)
-    _cached_client = gspread.service_account(filename="secure_google_credentials.json")
-        
+    if not creds_dict:
+        # Look for local secure credentials files explicitly
+        for filename in ["secure_google_credentials.json", "credentials.json", "google_credentials.json"]:
+            if os.path.exists(filename):
+                try:
+                    with open(filename, "r", encoding="utf-8") as f:
+                        creds_dict = json.load(f)
+                    break
+                except Exception as e:
+                    print(f"[ERROR] Failed to load JSON from {filename}: {e}")
+                    
+    if not creds_dict:
+        raise ValueError("[CRITICAL] No valid Google service account credentials found anywhere!")
+
+    # --- ROBUST FIX: Clean up escaped newlines in the private key ---
+    if "private_key" in creds_dict:
+        pk = creds_dict["private_key"]
+        if "\\n" in pk:
+            creds_dict["private_key"] = pk.replace("\\n", "\n")
+
+    creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
+    _cached_client = gspread.authorize(creds)
     return _cached_client
 
 def get_spreadsheet(sheet_url):
@@ -230,7 +241,7 @@ def update_last_checked(sheet_url, source_name):
                 ts = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S GMT")
                 worksheet.update_cell(cell.row, col_index, ts)
     except Exception as e:
-        pass # Silently proceed so we don't break pipeline if gspread hangs
+        pass 
 
 def update_pipeline_metrics(sheet_url, *args, **kwargs):
     pass 
