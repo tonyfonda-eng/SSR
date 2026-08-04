@@ -20,3 +20,5 @@ data/
 __pycache__/
 *.py[cod]
 *$py.class
+google_credentials.json
+archive/scratch/google_credentials.json
