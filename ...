@@ -1,0 +1,358 @@
+"""
+Special Situations Radar (SSR) 2.0 — Immutable Evidence Engine
+Domain-Driven Storage Layer & Telemetry Engine
+"""
+
+import sqlite3
+import os
+import logging
+import datetime
+import json
+import hashlib
+
+logger = logging.getLogger(__name__)
+
+# Strict physical isolation of storage domains
+RESEARCH_DB_PATH = "ssr_observability.db"
+DEVOPS_DB_PATH = "ssr_devops.db"
+# Backwards-compatible alias expected by other modules
+DB_PATH = RESEARCH_DB_PATH
+
+
+def init_db():
+    """
+    Initializes the fully normalized relational schema for the Research Decision Ledger
+    and the DevOps Workflow log using strict timezone-aware UTC paradigms.
+    """
+    os.makedirs(os.path.dirname(os.path.abspath(RESEARCH_DB_PATH)), exist_ok=True)
+    r_conn = sqlite3.connect(RESEARCH_DB_PATH)
+    r_conn.execute("PRAGMA foreign_keys = ON;")
+    
+    # Phase 1: Configuration Manifest Snapshots
+    r_conn.execute("""
+        CREATE TABLE IF NOT EXISTS config_snapshots (
+            hash TEXT PRIMARY KEY,
+            captured_at TEXT NOT NULL,
+            run_id TEXT NOT NULL,
+            config_json TEXT NOT NULL
+        );
+    """)
+
+    # Legacy Configuration tracking (kept for backward compatibility during transition)
+    r_conn.execute("""
+        CREATE TABLE IF NOT EXISTS configuration_manifests (
+            manifest_hash TEXT PRIMARY KEY,
+            parser_version TEXT NOT NULL,
+            transformation_dag_version TEXT NOT NULL,
+            ontology_version TEXT NOT NULL,
+            rule_pack_version TEXT NOT NULL,
+            prompt_version TEXT NOT NULL,
+            playbook_version TEXT NOT NULL
+        );
+    """)
+
+    r_conn.execute("""
+        CREATE TABLE IF NOT EXISTS event_registry (
+            event_id TEXT PRIMARY KEY,
+            article_hash TEXT NOT NULL UNIQUE,
+            raw_payload_blob BLOB NOT NULL,
+            payload_mime_type TEXT NOT NULL,
+            ingest_timestamp TEXT NOT NULL
+        );
+    """)
+
+    r_conn.execute("""
+        CREATE TABLE IF NOT EXISTS sensor_assets (
+            sensor_id TEXT PRIMARY KEY,
+            display_name TEXT NOT NULL,
+            data_format TEXT NOT NULL,
+            coverage_scope TEXT,
+            estimated_annual_cost REAL DEFAULT 0.0,
+            known_blind_spots TEXT,
+            maintenance_notes TEXT
+        );
+    """)
+
+    r_conn.execute("""
+        CREATE TABLE IF NOT EXISTS sensor_lineage (
+            lineage_id TEXT PRIMARY KEY,
+            event_id TEXT NOT NULL,
+            sensor_id TEXT NOT NULL,
+            wire_published_timestamp TEXT,
+            canonical_source_url TEXT NOT NULL,
+            FOREIGN KEY (event_id) REFERENCES event_registry(event_id),
+            FOREIGN KEY (sensor_id) REFERENCES sensor_assets(sensor_id)
+        );
+    """)
+
+    r_conn.execute("""
+        CREATE TABLE IF NOT EXISTS evidence_transformations (
+            transformation_id TEXT PRIMARY KEY,
+            event_id TEXT NOT NULL,
+            stage_name TEXT NOT NULL,
+            transformation_version TEXT NOT NULL,
+            output_hash TEXT NOT NULL,
+            duration_ms INTEGER NOT NULL,
+            transformed_payload TEXT NOT NULL,
+            FOREIGN KEY (event_id) REFERENCES event_registry(event_id)
+        );
+    """)
+
+    # Core Evaluation Ledger
+    r_conn.execute("""
+        CREATE TABLE IF NOT EXISTS evaluation_ledger (
+            decision_id TEXT PRIMARY KEY,
+            event_id TEXT NOT NULL,
+            manifest_hash TEXT NOT NULL,
+            runtime_timestamp TEXT NOT NULL,
+            detection_outcome TEXT NOT NULL,
+            terminal_stage TEXT NOT NULL,
+            evidence_completeness_score REAL NOT NULL,
+            parent_decision_id TEXT,
+            market_data_snapshot TEXT,
+            FOREIGN KEY (event_id) REFERENCES event_registry(event_id),
+            FOREIGN KEY (parent_decision_id) REFERENCES evaluation_ledger(decision_id)
+        );
+    """)
+
+    # Attempt to gracefully alter the table if it exists but is missing the new column (Phase 1 Migration)
+    try:
+        r_conn.execute("ALTER TABLE evaluation_ledger ADD COLUMN market_data_snapshot TEXT;")
+    except sqlite3.OperationalError:
+        pass # Column already exists
+
+    r_conn.execute("""
+        CREATE TABLE IF NOT EXISTS execution_performance (
+            decision_id TEXT PRIMARY KEY,
+            ingest_repo_ms INTEGER NOT NULL,
+            transformation_ms INTEGER NOT NULL,
+            ontology_ms INTEGER NOT NULL,
+            rules_ms INTEGER NOT NULL,
+            ai_inference_ms INTEGER NOT NULL,
+            financial_query_ms INTEGER NOT NULL,
+            FOREIGN KEY (decision_id) REFERENCES evaluation_ledger(decision_id)
+        );
+    """)
+
+    r_conn.execute("""
+        CREATE TABLE IF NOT EXISTS atomic_evidence (
+            evidence_id TEXT PRIMARY KEY,
+            decision_id TEXT NOT NULL,
+            stage TEXT NOT NULL,
+            evidence_direction TEXT NOT NULL,
+            source_component TEXT NOT NULL,
+            assertion_key TEXT NOT NULL,
+            confidence_weight REAL NOT NULL,
+            source_transformation_id TEXT,
+            text_start_offset INTEGER,
+            text_end_offset INTEGER,
+            FOREIGN KEY (decision_id) REFERENCES evaluation_ledger(decision_id),
+            FOREIGN KEY (source_transformation_id) REFERENCES evidence_transformations(transformation_id)
+        );
+    """)
+
+    r_conn.execute("""
+        CREATE TABLE IF NOT EXISTS ai_core_inference (
+            decision_id TEXT PRIMARY KEY,
+            raw_provider_json TEXT NOT NULL,
+            parsed_structural_properties TEXT,
+            semantic_interpretation TEXT,
+            ontology_confidence REAL,
+            rules_confidence REAL,
+            ai_confidence REAL,
+            financial_confidence REAL,
+            aggregate_confidence REAL NOT NULL,
+            FOREIGN KEY (decision_id) REFERENCES evaluation_ledger(decision_id)
+        );
+    """)
+
+    r_conn.execute("""
+        CREATE TABLE IF NOT EXISTS human_overrides (
+            override_id TEXT PRIMARY KEY,
+            decision_id TEXT NOT NULL,
+            reviewer_identity TEXT NOT NULL,
+            override_timestamp TEXT NOT NULL,
+            previous_decision TEXT NOT NULL,
+            validated_decision TEXT NOT NULL,
+            override_rationale_text TEXT NOT NULL,
+            FOREIGN KEY (decision_id) REFERENCES evaluation_ledger(decision_id)
+        );
+    """)
+    
+    r_conn.commit()
+    r_conn.close()
+
+    # -------------------------------------------------------------------------
+    # 2. DEVOPS & INFRASTRUCTURE LOGS
+    # -------------------------------------------------------------------------
+    os.makedirs(os.path.dirname(os.path.abspath(DEVOPS_DB_PATH)), exist_ok=True)
+    d_conn = sqlite3.connect(DEVOPS_DB_PATH)
+    
+    d_conn.execute("""
+        CREATE TABLE IF NOT EXISTS workflow_health (
+            timestamp TEXT PRIMARY KEY,
+            run_id TEXT NOT NULL,
+            total_scanned INTEGER NOT NULL,
+            articles INTEGER NOT NULL,
+            errors INTEGER NOT NULL,
+            drift_score REAL NOT NULL,
+            runtime REAL NOT NULL,
+            failed INTEGER NOT NULL DEFAULT 0,
+            succeeded INTEGER NOT NULL DEFAULT 0,
+            skipped INTEGER NOT NULL DEFAULT 0,
+            git_commit TEXT,
+            branch TEXT,
+            python_version TEXT,
+            exception TEXT,
+            workflow_version TEXT,
+            run_number TEXT
+        );
+    """)
+
+    d_conn.execute("""
+        CREATE TABLE IF NOT EXISTS exception_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            run_id TEXT,
+            timestamp TEXT NOT NULL,
+            exc_type TEXT,
+            stack_trace TEXT,
+            module TEXT,
+            func_name TEXT,
+            article_url TEXT,
+            severity TEXT
+        );
+    """)
+
+    d_conn.execute("""
+        CREATE TABLE IF NOT EXISTS ai_usage_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            run_id TEXT,
+            timestamp TEXT NOT NULL,
+            provider TEXT NOT NULL,
+            key_id TEXT,
+            requests INTEGER DEFAULT 0,
+            success INTEGER DEFAULT 0,
+            failures INTEGER DEFAULT 0,
+            errors_429 INTEGER DEFAULT 0,
+            errors_503 INTEGER DEFAULT 0,
+            timeouts INTEGER DEFAULT 0,
+            retries INTEGER DEFAULT 0,
+            fallbacks INTEGER DEFAULT 0,
+            response_time_sum REAL DEFAULT 0.0,
+            max_latency REAL DEFAULT 0.0,
+            last_success_ts TEXT,
+            last_failure_ts TEXT
+        );
+    """)
+
+    d_conn.execute("""
+        CREATE TABLE IF NOT EXISTS source_stats_log (
+            run_id TEXT,
+            timestamp TEXT NOT NULL,
+            source TEXT NOT NULL,
+            downloaded INTEGER DEFAULT 0,
+            survived_regex INTEGER DEFAULT 0,
+            survived_ontology INTEGER DEFAULT 0,
+            survived_rules INTEGER DEFAULT 0,
+            reached_ai INTEGER DEFAULT 0,
+            alerts INTEGER DEFAULT 0,
+            processing_time_sum REAL DEFAULT 0.0,
+            processed_count INTEGER DEFAULT 0,
+            PRIMARY KEY (run_id, source)
+        );
+    """)
+
+    d_conn.execute("""
+        CREATE TABLE IF NOT EXISTS dashboard_state_kv (
+            key TEXT PRIMARY KEY,
+            value TEXT NOT NULL
+        );
+    """)
+
+    d_conn.commit()
+    d_conn.close()
+
+    initialise_database = init_db
+
+# -------------------------------------------------------------------------
+# CORE REPO INTERFACES (Facts Layer & Context Manifest Processing)
+# -------------------------------------------------------------------------
+
+def get_latest_config_snapshot() -> dict:
+    """Retrieves the most recent config hash snapshot to evaluate diffs."""
+    try:
+        conn = sqlite3.connect(RESEARCH_DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT hash, captured_at, run_id, config_json FROM config_snapshots ORDER BY captured_at DESC LIMIT 1")
+        row = cursor.fetchone()
+        conn.close()
+        if row:
+            return {"hash": row[0], "captured_at": row[1], "run_id": row[2], "config_json": row[3]}
+        return None
+    except Exception as e:
+        logger.warning(f"[DB FAULT] Unable to retrieve config snapshot: {e}")
+        return None
+
+def save_config_snapshot(config_hash: str, run_id: str, config_json: str):
+    """Persists a new immutable configuration JSON snapshot."""
+    try:
+        gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
+        conn = sqlite3.connect(RESEARCH_DB_PATH)
+        conn.execute("""
+            INSERT OR IGNORE INTO config_snapshots (hash, captured_at, run_id, config_json)
+            VALUES (?, ?, ?, ?);
+        """, (config_hash, gmt_now, run_id, config_json))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        logger.error(f"[SCHEMA ERROR] save_config_snapshot failed: {e}")
+
+
+def generate_manifest_hash(components: dict) -> str:
+    """Computes a strict content-addressed SHA256 signature from system version maps."""
+    serialized = json.dumps(components, sort_keys=True).encode("utf-8")
+    return f"CFG-{hashlib.sha256(serialized).hexdigest()[:12].upper()}"
+
+
+def register_configuration_manifest(manifest_data: dict) -> str:
+    """Freezes an environment lineage profile in the configuration tracking table."""
+    m_hash = generate_manifest_hash(manifest_data)
+    try:
+        conn = sqlite3.connect(RESEARCH_DB_PATH)
+        conn.execute("""
+            INSERT OR IGNORE INTO configuration_manifests 
+            (manifest_hash, parser_version, transformation_dag_version, ontology_version, rule_pack_version, prompt_version, playbook_version)
+            VALUES (?, ?, ?, ?, ?, ?, ?);
+        """, (
+            m_hash,
+            manifest_data.get("parser_version", "1.0.0"),
+            manifest_data.get("transformation_dag_version", "1.0.0"),
+            manifest_data.get("ontology_version", "1.0.0"),
+            manifest_data.get("rule_pack_version", "1.0.0"),
+            manifest_data.get("prompt_version", "1.0.0"),
+            manifest_data.get("playbook_version", "1.0.0")
+        ))
+        conn.commit()
+        conn.close()
+        return m_hash
+    except Exception as e:
+        return m_hash
+
+
+def get_or_create_event(article_hash: str, raw_payload: bytes, mime_type: str = "text/html") -> tuple:
+    conn = sqlite3.connect(RESEARCH_DB_PATH)
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT event_id FROM event_registry WHERE article_hash = ? LIMIT 1;", (article_hash,))
+    row = cursor.fetchone()
+    if row:
+        event_id = row[0]
+        conn.close()
+        return event_id, False
+        
+    gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
+    event_id = f"EVT-{hashlib.md5(article_hash.encode('utf-8')).hexdigest()[:12].upper()}"
+    
+    try:
+        cursor.execute("""
+File push committed. Now need to report. Next, run actions? We cannot run CI. Need to inform user that we pushed branch fix/db-path. Provide instructions to rerun actions, mention JWT signature may persist if secret mismatched. Also we should create PR? The user earlier asked to 
