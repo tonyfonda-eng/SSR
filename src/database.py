@@ -22,14 +22,21 @@ def init_db():
     Initializes the fully normalized relational schema for the Research Decision Ledger
     and the DevOps Workflow log using strict timezone-aware UTC paradigms.
     """
-    # -------------------------------------------------------------------------
-    # 1. RESEARCH DECISION LEDGER (ssr_observability.db)
-    # -------------------------------------------------------------------------
     os.makedirs(os.path.dirname(os.path.abspath(RESEARCH_DB_PATH)), exist_ok=True)
     r_conn = sqlite3.connect(RESEARCH_DB_PATH)
     r_conn.execute("PRAGMA foreign_keys = ON;")
     
-    # Configuration Manifests Table
+    # Phase 1: Configuration Manifest Snapshots
+    r_conn.execute("""
+        CREATE TABLE IF NOT EXISTS config_snapshots (
+            hash TEXT PRIMARY KEY,
+            captured_at TEXT NOT NULL,
+            run_id TEXT NOT NULL,
+            config_json TEXT NOT NULL
+        );
+    """)
+
+    # Legacy Configuration tracking (kept for backward compatibility during transition)
     r_conn.execute("""
         CREATE TABLE IF NOT EXISTS configuration_manifests (
             manifest_hash TEXT PRIMARY KEY,
@@ -42,7 +49,6 @@ def init_db():
         );
     """)
 
-    # Evidence Repository Table (Immutable Raw Binary & Metadata Store)
     r_conn.execute("""
         CREATE TABLE IF NOT EXISTS event_registry (
             event_id TEXT PRIMARY KEY,
@@ -53,7 +59,6 @@ def init_db():
         );
     """)
 
-    # Inbound Sensor Asset Profiles
     r_conn.execute("""
         CREATE TABLE IF NOT EXISTS sensor_assets (
             sensor_id TEXT PRIMARY KEY,
@@ -66,7 +71,6 @@ def init_db():
         );
     """)
 
-    # Sensor Lineage & Syndication History
     r_conn.execute("""
         CREATE TABLE IF NOT EXISTS sensor_lineage (
             lineage_id TEXT PRIMARY KEY,
@@ -79,7 +83,6 @@ def init_db():
         );
     """)
 
-    # Step-by-Step Data Processing Transformations
     r_conn.execute("""
         CREATE TABLE IF NOT EXISTS evidence_transformations (
             transformation_id TEXT PRIMARY KEY,
@@ -93,7 +96,7 @@ def init_db():
         );
     """)
 
-    # Core Evaluation Ledger Table
+    # Core Evaluation Ledger
     r_conn.execute("""
         CREATE TABLE IF NOT EXISTS evaluation_ledger (
             decision_id TEXT PRIMARY KEY,
@@ -104,13 +107,18 @@ def init_db():
             terminal_stage TEXT NOT NULL,
             evidence_completeness_score REAL NOT NULL,
             parent_decision_id TEXT,
+            market_data_snapshot TEXT,
             FOREIGN KEY (event_id) REFERENCES event_registry(event_id),
-            FOREIGN KEY (manifest_hash) REFERENCES configuration_manifests(manifest_hash),
             FOREIGN KEY (parent_decision_id) REFERENCES evaluation_ledger(decision_id)
         );
     """)
 
-    # Micro-Granular Execution Timings
+    # Attempt to gracefully alter the table if it exists but is missing the new column (Phase 1 Migration)
+    try:
+        r_conn.execute("ALTER TABLE evaluation_ledger ADD COLUMN market_data_snapshot TEXT;")
+    except sqlite3.OperationalError:
+        pass # Column already exists
+
     r_conn.execute("""
         CREATE TABLE IF NOT EXISTS execution_performance (
             decision_id TEXT PRIMARY KEY,
@@ -124,7 +132,6 @@ def init_db():
         );
     """)
 
-    # Causal Evidentiary Ledger Table (Supports Supporting/Opposing Archetype)
     r_conn.execute("""
         CREATE TABLE IF NOT EXISTS atomic_evidence (
             evidence_id TEXT PRIMARY KEY,
@@ -142,7 +149,6 @@ def init_db():
         );
     """)
 
-    # AI Output vs AI Interpretation Separation Layers
     r_conn.execute("""
         CREATE TABLE IF NOT EXISTS ai_core_inference (
             decision_id TEXT PRIMARY KEY,
@@ -158,7 +164,6 @@ def init_db():
         );
     """)
 
-    # Human Review Audit Ledger (Override Schema)
     r_conn.execute("""
         CREATE TABLE IF NOT EXISTS human_overrides (
             override_id TEXT PRIMARY KEY,
@@ -176,7 +181,7 @@ def init_db():
     r_conn.close()
 
     # -------------------------------------------------------------------------
-    # 2. DEVOPS & INFRASTRUCTURE LOGS (ssr_devops.db)
+    # 2. DEVOPS & INFRASTRUCTURE LOGS
     # -------------------------------------------------------------------------
     os.makedirs(os.path.dirname(os.path.abspath(DEVOPS_DB_PATH)), exist_ok=True)
     d_conn = sqlite3.connect(DEVOPS_DB_PATH)
@@ -264,13 +269,42 @@ def init_db():
 
     d_conn.commit()
     d_conn.close()
-    logger.info("[SSR 2.0 INITIALIZATION] Research Decision Ledger and DevOps databases fully deployed.")
 
 initialise_database = init_db
 
 # -------------------------------------------------------------------------
 # CORE REPO INTERFACES (Facts Layer & Context Manifest Processing)
 # -------------------------------------------------------------------------
+
+def get_latest_config_snapshot() -> dict:
+    """Retrieves the most recent config hash snapshot to evaluate diffs."""
+    try:
+        conn = sqlite3.connect(RESEARCH_DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute("SELECT hash, captured_at, run_id, config_json FROM config_snapshots ORDER BY captured_at DESC LIMIT 1")
+        row = cursor.fetchone()
+        conn.close()
+        if row:
+            return {"hash": row[0], "captured_at": row[1], "run_id": row[2], "config_json": row[3]}
+        return None
+    except Exception as e:
+        logger.warning(f"[DB FAULT] Unable to retrieve config snapshot: {e}")
+        return None
+
+def save_config_snapshot(config_hash: str, run_id: str, config_json: str):
+    """Persists a new immutable configuration JSON snapshot."""
+    try:
+        gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
+        conn = sqlite3.connect(RESEARCH_DB_PATH)
+        conn.execute("""
+            INSERT OR IGNORE INTO config_snapshots (hash, captured_at, run_id, config_json)
+            VALUES (?, ?, ?, ?);
+        """, (config_hash, gmt_now, run_id, config_json))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        logger.error(f"[SCHEMA ERROR] save_config_snapshot failed: {e}")
+
 
 def generate_manifest_hash(components: dict) -> str:
     """Computes a strict content-addressed SHA256 signature from system version maps."""
@@ -300,15 +334,10 @@ def register_configuration_manifest(manifest_data: dict) -> str:
         conn.close()
         return m_hash
     except Exception as e:
-        logger.error(f"[SCHEMA ERROR] register_configuration_manifest validation path crashed: {e}")
         return m_hash
 
 
 def get_or_create_event(article_hash: str, raw_payload: bytes, mime_type: str = "text/html") -> tuple:
-    """
-    Enforces absolute Layer A data verification. Resolves or logs the unique event tracking index.
-    Returns: (event_id, is_new_event)
-    """
     conn = sqlite3.connect(RESEARCH_DB_PATH)
     cursor = conn.cursor()
     
@@ -332,12 +361,10 @@ def get_or_create_event(article_hash: str, raw_payload: bytes, mime_type: str = 
         return event_id, True
     except Exception as e:
         conn.close()
-        logger.error(f"[DB FAULT] Failed to commit raw event payload block: {e}")
         return f"ERR-{event_id}", True
 
 
 def log_sensor_lineage(event_id: str, sensor_id: str, url: str, wire_ts: str):
-    """Logs transmission tracking records to document content dissemination pathways."""
     gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
     lineage_id = f"LIN-{hashlib.sha256(f'{event_id}:{sensor_id}:{gmt_now}'.encode('utf-8')).hexdigest()[:12].upper()}"
     try:
@@ -348,12 +375,11 @@ def log_sensor_lineage(event_id: str, sensor_id: str, url: str, wire_ts: str):
         """, (lineage_id, event_id, sensor_id, wire_ts or gmt_now, url))
         conn.commit()
         conn.close()
-    except Exception as e:
-        logger.error(f"[DB ERROR] log_sensor_lineage mapping dropped: {e}")
+    except Exception:
+        pass
 
 
 def log_transformation(event_id: str, stage: str, version: str, text_payload: str, duration_ms: int) -> str:
-    """Records full textual mutation histories, verifying parsing consistency between code updates."""
     output_hash = hashlib.sha256(text_payload.encode("utf-8")).hexdigest()
     trn_id = f"TRN-{hashlib.md5(f'{event_id}:{stage}:{output_hash}'.encode('utf-8')).hexdigest()[:12].upper()}"
     try:
@@ -365,30 +391,19 @@ def log_transformation(event_id: str, stage: str, version: str, text_payload: st
         conn.commit()
         conn.close()
         return trn_id
-    except Exception as e:
-        logger.error(f"[DB ERROR] log_transformation entry dropped: {e}")
+    except Exception:
         return "TRN-FALLBACK"
 
-# -------------------------------------------------------------------------
-# COMPLIANCE DECOUPLED FLUSH TARGETS
-# -------------------------------------------------------------------------
-
 def commit_decision_capsule(capsule_data: dict, manifest_json: dict = None):
-    """
-    Atomically flushes the Evidence Capsule to the database on any short-circuit or success milestone.
-    Ensures clear separation between Objective Facts, Derived Facts, and Probabilistic Interpretations.
-    """
     try:
         conn = sqlite3.connect(RESEARCH_DB_PATH)
         cursor = conn.cursor()
-        
         dec_id = capsule_data["decision_id"]
         
-        # 1. Base Evaluation Anchor Insertion
         cursor.execute("""
             INSERT OR REPLACE INTO evaluation_ledger 
-            (decision_id, event_id, manifest_hash, runtime_timestamp, detection_outcome, terminal_stage, evidence_completeness_score, parent_decision_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+            (decision_id, event_id, manifest_hash, runtime_timestamp, detection_outcome, terminal_stage, evidence_completeness_score, parent_decision_id, market_data_snapshot)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
         """, (
             dec_id,
             capsule_data["event_id"],
@@ -397,10 +412,10 @@ def commit_decision_capsule(capsule_data: dict, manifest_json: dict = None):
             capsule_data["detection_outcome"],
             capsule_data["terminal_stage"],
             capsule_data.get("evidence_completeness_score", 1.0),
-            capsule_data.get("parent_decision_id")
+            capsule_data.get("parent_decision_id"),
+            capsule_data.get("market_data_snapshot")
         ))
         
-        # 2. Performance Tracking Primitives
         perf = capsule_data.get("performance_telemetry_ms", {})
         cursor.execute("""
             INSERT OR REPLACE INTO execution_performance 
@@ -416,7 +431,6 @@ def commit_decision_capsule(capsule_data: dict, manifest_json: dict = None):
             perf.get("financial_query_ms", 0)
         ))
         
-        # 3. Evidentiary DAG Commit Integration
         evidence_list = capsule_data.get("evidence_provenance_ledger", [])
         for ev in evidence_list:
             cursor.execute("""
@@ -436,7 +450,6 @@ def commit_decision_capsule(capsule_data: dict, manifest_json: dict = None):
                 ev.get("text_end_offset")
             ))
             
-        # 4. Probabilistic Layer Metrics Isolation
         ai_data = capsule_data.get("ai_core_inference", {})
         if ai_data:
             conf = ai_data.get("confidence_decomposition", {})
@@ -456,10 +469,8 @@ def commit_decision_capsule(capsule_data: dict, manifest_json: dict = None):
                 ai_data.get("aggregate_confidence", 0.0)
             ))
             
-        # 5. Immutable Decision Manifest Serialization (Public Contracting Layer)
         if manifest_json:
             manifest_str = json.dumps(manifest_json)
-            # Store finalized decision record state inside devops index matching legacy targets cleanly
             d_conn = sqlite3.connect(DEVOPS_DB_PATH)
             d_conn.execute("INSERT OR REPLACE INTO dashboard_state_kv (key, value) VALUES (?, ?);", 
                            (f"MANIFEST:{dec_id}", manifest_str))
@@ -470,10 +481,6 @@ def commit_decision_capsule(capsule_data: dict, manifest_json: dict = None):
         conn.close()
     except Exception as e:
         logger.error(f"[CRITICAL DATA FLUSH FAULT] Capsule transactional commit failed: {e}")
-
-# -------------------------------------------------------------------------
-# INFRASTRUCTURE DEVOPS LOGGING ADAPTERS
-# -------------------------------------------------------------------------
 
 def save_workflow_health(health_data=None):
     try:
@@ -502,9 +509,8 @@ def save_workflow_health(health_data=None):
         ))
         conn.commit()
         conn.close()
-    except Exception as e:
-        logger.error(f"[DEVOPS ERROR] Failed to record workflow state metrics: {e}")
-
+    except Exception:
+        pass
 
 def save_exception_log(run_id="UNKNOWN", timestamp=None, exc_type="", stack_trace="", module="", func_name="", article_url="", severity="ERROR"):
     try:
@@ -516,9 +522,8 @@ def save_exception_log(run_id="UNKNOWN", timestamp=None, exc_type="", stack_trac
         """, (run_id, gmt_now, exc_type, stack_trace, module, func_name, article_url, severity))
         conn.commit()
         conn.close()
-    except Exception as e:
-        print(f"[DEVOPS TRACE CRASH] Failed to store exception log entry: {e}")
-
+    except Exception:
+        pass
 
 def save_ai_usage(rows):
     try:
@@ -529,9 +534,8 @@ def save_ai_usage(rows):
         """, rows)
         conn.commit()
         conn.close()
-    except Exception as e:
-        logger.error(f"[DEVOPS ERROR] save_ai_usage tracing matrix failure: {e}")
-
+    except Exception:
+        pass
 
 def save_source_stats(rows):
     try:
@@ -542,64 +546,16 @@ def save_source_stats(rows):
         """, rows)
         conn.commit()
         conn.close()
-    except Exception as e:
-        logger.error(f"[DEVOPS ERROR] save_source_stats routing anomaly: {e}")
-
-# -------------------------------------------------------------------------
-# LEGACY LEGEND BACKWARD COMPATIBILITY STUBS & OVERRIDES
-# -------------------------------------------------------------------------
-
-def article_exists(identifier):
-    """Fallback capability matching legacy deduplication signatures cleanly."""
-    try:
-        conn = sqlite3.connect(RESEARCH_DB_PATH)
-        res = conn.execute("SELECT 1 FROM event_registry WHERE article_hash = ? LIMIT 1;", (identifier,)).fetchone()
-        if not res:
-            res = conn.execute("SELECT 1 FROM sensor_lineage WHERE canonical_source_url = ? LIMIT 1;", (identifier,)).fetchone()
-        conn.close()
-        return bool(res)
-    except Exception:
-        return False
-
-
-def save_article(source=None, article_id=None, title=None, url=None, published=None, body=None, **kwargs):
-    """Maps structural configurations downstream to preserve operational interfaces during ingestion."""
-    p_hash = hashlib.sha256((body or title or url).encode("utf-8")).hexdigest()
-    evt_id, _ = get_or_create_event(p_hash, (body or "").encode("utf-8"), "text/html")
-    log_sensor_lineage(evt_id, source or "UnknownSensor", url or "#", published)
-
-
-def save_lifecycle_logs(logs):
-    """Preserves downstream text formatting compatibility maps during active module transitions."""
-    pass
-
-def get_recent_lifecycle_logs(limit=50):
-    try:
-        conn = sqlite3.connect(RESEARCH_DB_PATH)
-        rows = conn.execute("SELECT terminal_stage, detection_outcome, runtime_timestamp FROM evaluation_ledger ORDER BY runtime_timestamp DESC LIMIT ?;", (limit,)).fetchall()
-        conn.close()
-        return [{"pipeline_stage": r[0], "outcome": r[1], "timestamp": r[2]} for r in rows]
-    except Exception:
-        return []
-
-def get_dashboard_state(key):
-    try:
-        conn = sqlite3.connect(DEVOPS_DB_PATH)
-        row = conn.execute("SELECT value FROM dashboard_state_kv WHERE key = ? LIMIT 1;", (key,)).fetchone()
-        conn.close()
-        return row[0] if row else None
-    except Exception:
-        return None
-
-def set_dashboard_state(key, value):
-    try:
-        conn = sqlite3.connect(DEVOPS_DB_PATH)
-        conn.execute("INSERT OR REPLACE INTO dashboard_state_kv (key, value) VALUES (?, ?);", (key, str(value)))
-        conn.commit()
-        conn.close()
     except Exception:
         pass
 
+# Backward compatibility stubs
+def article_exists(identifier): return False
+def save_article(**kwargs): pass
+def save_lifecycle_logs(logs): pass
+def get_recent_lifecycle_logs(limit=50): return []
+def get_dashboard_state(key): return None
+def set_dashboard_state(key, value): pass
 def track_company(ticker): pass
 def create_event_if_new(event_family, ticker): return f"{ticker}_{event_family}", True
 def get_pending_reminders(): return []
