@@ -16,9 +16,17 @@ def get_client():
         
     scopes = ["https://www.googleapis.com/auth/spreadsheets"]
     
-    # Retrieve credentials dictionary through the centralized secrets manager,
-    # which automatically applies bulletproof PEM private key sanitization.
+    # Retrieve credentials dictionary through the centralized secrets manager
     creds_dict = get_google_service_account()
+
+    # --- BULLETPROOF LOCAL PRIVATE KEY SANITIZATION ---
+    if creds_dict and "private_key" in creds_dict:
+        pk = str(creds_dict["private_key"])
+        # Unescape literal backslashes and carriage returns into true cryptographic newlines
+        pk = pk.replace("\\r\\n", "\n").replace("\\n", "\n").replace("\\\\n", "\n")
+        if not pk.endswith("\n"):
+            pk += "\n"
+        creds_dict["private_key"] = pk
 
     creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
     _cached_client = gspread.authorize(creds)
