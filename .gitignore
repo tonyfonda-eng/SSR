@@ -22,3 +22,4 @@ __pycache__/
 *$py.class
 google_credentials.json
 archive/scratch/google_credentials.json
+secure_google_credentials.json

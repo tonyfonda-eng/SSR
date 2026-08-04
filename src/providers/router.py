@@ -2,8 +2,8 @@ import json
 import os
 
 # Gmail API & SMTP Credentials
-GMAIL_USER = os.environ.get("GMAIL_USER", "karimbarbara7@gmail.com")
-GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "htxrgxfstxkpzpvv")
+GMAIL_USER = os.environ.get("GMAIL_USER", "your-email@gmail.com")
+GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "your-app-password")
 
 def get_google_service_account():
     # Production / GitHub Actions: Load from Environment
