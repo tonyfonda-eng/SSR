@@ -9,6 +9,8 @@ import logging
 import datetime
 import json
 import hashlib
+import uuid
+import sys
 
 logger = logging.getLogger(__name__)
 
@@ -285,6 +287,7 @@ def init_db():
 # CORE REPO INTERFACES (Facts Layer & Context Manifest Processing)
 # -------------------------------------------------------------------------
 
+
 def get_latest_config_snapshot() -> dict:
     try:
         conn = sqlite3.connect(RESEARCH_DB_PATH)
@@ -302,3 +305,197 @@ def get_latest_config_snapshot() -> dict:
 # MODULE-LEVEL EXPORTS REQUIRED BY MONITOR.PY
 def initialise_database():
     init_db()
+
+# -------------------------------------------------------------------------
+# Added implementations to satisfy monitor.py expectations
+# -------------------------------------------------------------------------
+
+def _now_ts():
+    return datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
+
+
+def get_or_create_event(article_hash: str, raw_payload_blob: bytes):
+    """
+    Idempotently ensures an event exists for a given article_hash.
+    Returns (event_id, is_new).
+    """
+    try:
+        conn = sqlite3.connect(RESEARCH_DB_PATH)
+        conn.execute("PRAGMA foreign_keys = ON;")
+        cursor = conn.cursor()
+        cursor.execute("SELECT event_id FROM event_registry WHERE article_hash = ?", (article_hash,))
+        row = cursor.fetchone()
+        if row:
+            conn.close()
+            return row[0], False
+
+        # Create a deterministic event id based on hash + uuid
+        event_id = f"EVT-{hashlib.sha256((article_hash + str(uuid.uuid4())).encode('utf-8')).hexdigest()[:12].upper()}"
+        ingest_ts = _now_ts()
+        cursor.execute(
+            "INSERT INTO event_registry (event_id, article_hash, raw_payload_blob, payload_mime_type, ingest_timestamp) VALUES (?, ?, ?, ?, ?)",
+            (event_id, article_hash, sqlite3.Binary(raw_payload_blob if raw_payload_blob is not None else b""), "application/octet-stream", ingest_ts)
+        )
+        conn.commit()
+        conn.close()
+        return event_id, True
+    except Exception as e:
+        logger.error(f"[DB ERROR] get_or_create_event failed: {e}")
+        try:
+            conn.close()
+        except Exception:
+            pass
+        raise
+
+
+def commit_decision_capsule(decision: dict):
+    """
+    Persists a decision/alert into the normalized evaluation_ledger and related tables.
+    Expects at minimum keys: decision_id, event_id, manifest_hash, runtime_timestamp, detection_outcome, terminal_stage
+    """
+    try:
+        conn = sqlite3.connect(RESEARCH_DB_PATH)
+        conn.execute("PRAGMA foreign_keys = ON;")
+        cursor = conn.cursor()
+
+        decision_id = decision.get("decision_id")
+        event_id = decision.get("event_id")
+        manifest_hash = decision.get("manifest_hash")
+        runtime_timestamp = decision.get("runtime_timestamp", _now_ts())
+        detection_outcome = decision.get("detection_outcome", "UNKNOWN")
+        terminal_stage = decision.get("terminal_stage", "UNKNOWN")
+        evidence_completeness_score = float(decision.get("evidence_completeness_score", 1.0))
+        parent_decision_id = decision.get("parent_decision_id")
+        market_snapshot = json.dumps(decision.get("market_data_snapshot")) if decision.get("market_data_snapshot") is not None else None
+
+        cursor.execute(
+            "INSERT OR REPLACE INTO evaluation_ledger (decision_id, event_id, manifest_hash, runtime_timestamp, detection_outcome, terminal_stage, evidence_completeness_score, parent_decision_id, market_data_snapshot) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (decision_id, event_id, manifest_hash, runtime_timestamp, detection_outcome, terminal_stage, evidence_completeness_score, parent_decision_id, market_snapshot)
+        )
+
+        # factual_metadata
+        try:
+            headline = decision.get("headline")
+            source_url = decision.get("url") or decision.get("source_url")
+            published_ts = decision.get("published_timestamp") or runtime_timestamp
+            if headline or source_url:
+                cursor.execute(
+                    "INSERT OR REPLACE INTO factual_metadata (decision_id, headline, source_url, published_timestamp) VALUES (?, ?, ?, ?)",
+                    (decision_id, headline, source_url, published_ts)
+                )
+        except Exception:
+            # non-critical
+            logger.debug("factual_metadata insert skipped or failed")
+
+        # ai_core_inference
+        try:
+            ai = decision.get("ai_core_inference") or {}
+            raw_provider_json = json.dumps(ai)
+            parsed_structural = json.dumps(ai.get("parsed_structural_properties")) if ai.get("parsed_structural_properties") is not None else None
+            aggregate_confidence = float(ai.get("aggregate_confidence", 1.0))
+            cursor.execute(
+                "INSERT OR REPLACE INTO ai_core_inference (decision_id, raw_provider_json, parsed_structural_properties, aggregate_confidence) VALUES (?, ?, ?, ?)",
+                (decision_id, raw_provider_json, parsed_structural, aggregate_confidence)
+            )
+        except Exception:
+            logger.debug("ai_core_inference insert skipped or failed")
+
+        conn.commit()
+        conn.close()
+        logger.info(f"[DB] Committed decision {decision_id}")
+    except Exception as e:
+        logger.error(f"[DB ERROR] commit_decision_capsule failed: {e}")
+        try:
+            conn.close()
+        except Exception:
+            pass
+        raise
+
+
+def save_workflow_health(payload: dict):
+    """
+    Saves a compact run-level health payload to the devops DB.
+    """
+    try:
+        conn = sqlite3.connect(DEVOPS_DB_PATH)
+        cursor = conn.cursor()
+        ts = _now_ts()
+        cursor.execute(
+            "INSERT OR REPLACE INTO workflow_health (timestamp, run_id, total_scanned, articles, errors, drift_score, runtime, failed, succeeded, skipped, git_commit, branch, python_version, exception, workflow_version, run_number) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                ts,
+                payload.get("run_id"),
+                int(payload.get("total_scanned", 0)),
+                int(payload.get("articles", 0)),
+                int(payload.get("errors", 0)),
+                float(payload.get("drift_score", 0.0)),
+                float(payload.get("runtime", 0.0)),
+                int(payload.get("failed", 0)),
+                int(payload.get("succeeded", 0)),
+                int(payload.get("skipped", 0)),
+                payload.get("git_commit"),
+                payload.get("branch"),
+                sys.version,
+                payload.get("exception"),
+                payload.get("workflow_version"),
+                payload.get("run_number")
+            )
+        )
+        conn.commit()
+        conn.close()
+        logger.info("[DB] Workflow health saved")
+    except Exception as e:
+        logger.error(f"[DB ERROR] save_workflow_health failed: {e}")
+        try:
+            conn.close()
+        except Exception:
+            pass
+        raise
+
+
+def save_exception_log(run_id: str, exc_type: str = None, stack_trace: str = None, module: str = None, func_name: str = None, article_url: str = None, severity: str = "ERROR"):
+    """
+    Persists an exception entry into the devops exception_logs table.
+    """
+    try:
+        conn = sqlite3.connect(DEVOPS_DB_PATH)
+        cursor = conn.cursor()
+        ts = _now_ts()
+        cursor.execute(
+            "INSERT INTO exception_logs (run_id, timestamp, exc_type, stack_trace, module, func_name, article_url, severity) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (run_id, ts, exc_type, stack_trace, module, func_name, article_url, severity)
+        )
+        conn.commit()
+        conn.close()
+        logger.info("[DB] Exception logged")
+    except Exception as e:
+        logger.error(f"[DB ERROR] save_exception_log failed: {e}")
+        try:
+            conn.close()
+        except Exception:
+            pass
+        raise
+
+
+def save_config_snapshot(manifest_hash: str, run_id: str, config_json: str):
+    """
+    Writes a captured configuration snapshot into the research DB.
+    """
+    try:
+        conn = sqlite3.connect(RESEARCH_DB_PATH)
+        cursor = conn.cursor()
+        ts = _now_ts()
+        cursor.execute(
+            "INSERT OR REPLACE INTO config_snapshots (hash, captured_at, run_id, config_json) VALUES (?, ?, ?, ?)",
+            (manifest_hash, ts, run_id, config_json)
+        )
+        conn.commit()
+        conn.close()
+        logger.info(f"[DB] Config snapshot {manifest_hash} saved")
+    except Exception as e:
+        logger.error(f"[DB ERROR] save_config_snapshot failed: {e}")
+        try:
+            conn.close()
+        except Exception:
+            pass
+        raise
