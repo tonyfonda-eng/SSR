@@ -1,0 +1,10 @@
+{
+    "metadata": {
+        "version_hash": "DS-8B80FBF23908",
+        "last_updated": "2026-08-04 06:50:50 GMT",
+        "description": "SSR 2.0 Immutable Golden Benchmark Corpus",
+        "case_count": 0
+    },
+    "gold_standards_reference": {},
+    "cases": []
+}
