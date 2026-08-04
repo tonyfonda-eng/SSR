@@ -273,7 +273,8 @@ def init_db():
     d_conn.commit()
     d_conn.close()
 
-initialise_database = init_db
+def initialise_database():
+    init_db()
 
 # -------------------------------------------------------------------------
 # CORE REPO INTERFACES (Facts Layer & Context Manifest Processing)
