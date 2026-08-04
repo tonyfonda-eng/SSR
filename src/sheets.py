@@ -2,38 +2,106 @@ import os
 import json
 import time
 import datetime
+import ast
 import gspread
 from google.oauth2.service_account import Credentials
+from src.config.secrets import get_google_service_account
 
 _cached_client = None
 _cached_spreadsheet = None
+
+def _sanitize_private_key(raw_pk: str) -> str:
+    # Normalize to Python string
+    if isinstance(raw_pk, bytes):
+        pk = raw_pk.decode("utf-8", "strict")
+    else:
+        pk = str(raw_pk)
+
+    # Quick accept: already valid PEM
+    if pk.startswith("-----BEGIN ") and "-----END " in pk:
+        pk = pk.strip()
+        if not pk.endswith("\n"):
+            pk += "\n"
+        return pk
+
+    # Remove accidental surrounding quotes
+    if (pk.startswith('"') and pk.endswith('"')) or (pk.startswith("'") and pk.endswith("'")):
+        pk = pk[1:-1]
+
+    # Iteratively try to unwrap encodings/escapes (handles double-encoded cases)
+    for _ in range(5):
+        prev = pk
+        # If it's a JSON-encoded string, decode
+        try:
+            decoded = json.loads(pk)
+            if isinstance(decoded, str):
+                pk = decoded
+        except Exception:
+            pass
+        # If it's a Python literal-encoded string, decode
+        try:
+            decoded = ast.literal_eval(pk)
+            if isinstance(decoded, str):
+                pk = decoded
+        except Exception:
+            pass
+        # Replace common escaped newline sequences (more-escaped first)
+        pk = pk.replace("\\r\\n", "\n").replace("\\\\n", "\n").replace("\\n", "\n")
+        # stop if nothing changed
+        if pk == prev:
+            break
+
+    # Last-resort: decode escape sequences (use cautiously)
+    if ("\\n" in pk or "\\\\" in pk) and not (pk.startswith("-----BEGIN ") and "-----END " in pk):
+        try:
+            pk_candidate = pk.encode("utf-8").decode("unicode_escape")
+            pk = pk_candidate
+        except Exception:
+            # leave as-is; we will validate below and raise if malformed
+            pass
+
+    # Trim and sanity-check framing
+    pk = pk.strip()
+    if not pk.startswith("-----BEGIN ") or "-----END " not in pk:
+        raise ValueError("private_key appears malformed after sanitization (missing PEM header/footer)")
+
+    if not pk.endswith("\n"):
+        pk += "\n"
+
+    # Validate PEM by attempting to parse it (fails fast with clearer message)
+    try:
+        from cryptography.hazmat.primitives.serialization import load_pem_private_key
+        from cryptography.hazmat.backends import default_backend
+        load_pem_private_key(pk.encode("utf-8"), password=None, backend=default_backend())
+    except Exception as e:
+        # Do NOT include the key in the error message
+        raise ValueError(f"private_key failed PEM parse validation after sanitization: {e}")
+
+    return pk
 
 def get_client():
     global _cached_client
     if _cached_client is not None:
         return _cached_client
         
-    creds_json = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON")
     scopes = ["https://www.googleapis.com/auth/spreadsheets"]
     
-    if creds_json:
+    # Retrieve credentials dictionary through the centralized secrets manager
+    creds_dict = get_google_service_account()
+
+    # If credentials returned as a string, parse to dict
+    if isinstance(creds_dict, str):
         try:
-            creds_dict = json.loads(creds_json)
-            creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
-            _cached_client = gspread.authorize(creds)
-            return _cached_client
+            creds_dict = json.loads(creds_dict)
         except json.JSONDecodeError:
-            print("[CRITICAL] GOOGLE_SERVICE_ACCOUNT_JSON is malformed. Falling back to local secure files.")
-            
-    # Look for the new secure credentials file first
-    for filename in ["secure_google_credentials.json", "credentials.json", "google_credentials.json"]:
-        if os.path.exists(filename):
-            _cached_client = gspread.service_account(filename=filename)
-            return _cached_client
-            
-    # Fallback default if files aren't found locally (will raise an error telling us it's missing)
-    _cached_client = gspread.service_account(filename="secure_google_credentials.json")
-        
+            creds_dict = ast.literal_eval(creds_dict)
+
+    # --- PRIVATE KEY SANITIZATION & VALIDATION ---
+    if creds_dict and "private_key" in creds_dict:
+        creds_dict["private_key"] = _sanitize_private_key(creds_dict["private_key"])
+
+    creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
+    _cached_client = gspread.authorize(creds)
     return _cached_client
 
 def get_spreadsheet(sheet_url):
@@ -230,7 +298,7 @@ def update_last_checked(sheet_url, source_name):
                 ts = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S GMT")
                 worksheet.update_cell(cell.row, col_index, ts)
     except Exception as e:
-        pass # Silently proceed so we don't break pipeline if gspread hangs
+        pass 
 
 def update_pipeline_metrics(sheet_url, *args, **kwargs):
     pass 

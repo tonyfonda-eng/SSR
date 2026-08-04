@@ -18,6 +18,9 @@ DEVOPS_DB_PATH = "ssr_devops.db"
 # Backwards-compatible alias expected by other modules
 DB_PATH = RESEARCH_DB_PATH
 
+# Alias for legacy modules expecting DB_PATH
+DB_PATH = RESEARCH_DB_PATH
+
 
 def init_db():
     """
