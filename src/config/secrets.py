@@ -6,7 +6,14 @@ import ast
 GMAIL_USER = os.environ.get("GMAIL_USER", "your-email@gmail.com")
 GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "your-app-password")
 
+
 def _sanitize_private_key(raw_pk: str) -> str:
+    """Normalize a possibly-escaped PEM private key into a clean PEM string.
+
+    This handles values coming from environment variables (raw JSON, double-encoded JSON,
+    or Python-literal strings) and local JSON files. It iteratively un-wraps JSON/Python
+    quoting and collapses common escape sequences like "\\n" into real newlines.
+    """
     if isinstance(raw_pk, bytes):
         pk = raw_pk.decode("utf-8", "strict")
     else:
@@ -52,19 +59,22 @@ def _sanitize_private_key(raw_pk: str) -> str:
 
     return pk
 
+
 def get_google_service_account():
+    """Return a credentials dict for a Google service account.
+
+    Sources checked (in order):
+    - Environment variable GOOGLE_SERVICE_ACCOUNT_JSON (robust parsing of raw or double-encoded JSON)
+    - Local files: google_credentials.json, secure_google_credentials.json (located two levels up from this file)
+
+    The returned dict will have a sanitized "private_key" suitable for google-auth.
+    """
     creds_dict = None
 
-    # Production / GitHub Actions: Load from Environment
     env_raw = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON", "").strip()
     if env_raw:
-        # Try to robustly parse environment value that may be:
-        # - a raw JSON object
-        # - a JSON string containing the JSON object
-        # - a Python dict literal
         try:
             parsed = json.loads(env_raw)
-            # If parsed is a string, attempt to parse that string too (double-encoded)
             if isinstance(parsed, str):
                 try:
                     creds_dict = json.loads(parsed)
@@ -79,10 +89,9 @@ def get_google_service_account():
             try:
                 creds_dict = ast.literal_eval(env_raw)
             except Exception:
-                # Last fallback: keep raw string (we'll attempt to coerce later)
                 creds_dict = env_raw
 
-    # Local / Agent Fallback: Load from ignored JSON file
+    # Local file fallback
     if not creds_dict:
         for filename in ["google_credentials.json", "secure_google_credentials.json"]:
             local_key_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), filename)
@@ -94,21 +103,19 @@ def get_google_service_account():
     if not creds_dict:
         raise ValueError("Google Service Account credentials not found in environment or local files")
 
-    # If creds_dict is still a string (e.g., double-encoded), attempt to coerce to dict
+    # Coerce to dict if it's still a string
     if isinstance(creds_dict, str):
         try:
             creds_dict = json.loads(creds_dict)
-        except json.JSONDecodeError:
+        except Exception:
             try:
                 creds_dict = ast.literal_eval(creds_dict)
             except Exception:
-                # keep it as-is; will fail below with a clear error
                 pass
 
     if not isinstance(creds_dict, dict):
         raise ValueError("Failed to parse Google service account credentials into a dict")
 
-    # --- BULLETPROOF PEM PRIVATE KEY SANITIZATION ---
     if "private_key" in creds_dict:
         creds_dict["private_key"] = _sanitize_private_key(creds_dict["private_key"])
 
