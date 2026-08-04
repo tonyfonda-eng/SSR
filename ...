@@ -292,3 +292,67 @@ def get_latest_config_snapshot() -> dict:
     except Exception as e:
         logger.warning(f"[DB FAULT] Unable to retrieve config snapshot: {e}")
         return None
+
+def save_config_snapshot(config_hash: str, run_id: str, config_json: str):
+    """Persists a new immutable configuration JSON snapshot."""
+    try:
+        gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
+        conn = sqlite3.connect(RESEARCH_DB_PATH)
+        conn.execute("""
+            INSERT OR IGNORE INTO config_snapshots (hash, captured_at, run_id, config_json)
+            VALUES (?, ?, ?, ?);
+        """, (config_hash, gmt_now, run_id, config_json))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        logger.error(f"[SCHEMA ERROR] save_config_snapshot failed: {e}")
+
+
+def generate_manifest_hash(components: dict) -> str:
+    """Computes a strict content-addressed SHA256 signature from system version maps."""
+    serialized = json.dumps(components, sort_keys=True).encode("utf-8")
+    return f"CFG-{hashlib.sha256(serialized).hexdigest()[:12].upper()}"
+
+
+def register_configuration_manifest(manifest_data: dict) -> str:
+    """Freezes an environment lineage profile in the configuration tracking table."""
+    m_hash = generate_manifest_hash(manifest_data)
+    try:
+        conn = sqlite3.connect(RESEARCH_DB_PATH)
+        conn.execute("""
+            INSERT OR IGNORE INTO configuration_manifests 
+            (manifest_hash, parser_version, transformation_dag_version, ontology_version, rule_pack_version, prompt_version, playbook_version)
+            VALUES (?, ?, ?, ?, ?, ?, ?);
+        """, (
+            m_hash,
+            manifest_data.get("parser_version", "1.0.0"),
+            manifest_data.get("transformation_dag_version", "1.0.0"),
+            manifest_data.get("ontology_version", "1.0.0"),
+            manifest_data.get("rule_pack_version", "1.0.0"),
+            manifest_data.get("prompt_version", "1.0.0"),
+            manifest_data.get("playbook_version", "1.0.0")
+        ))
+        conn.commit()
+        conn.close()
+        return m_hash
+    except Exception as e:
+        return m_hash
+
+
+def get_or_create_event(article_hash: str, raw_payload: bytes, mime_type: str = "text/html") -> tuple:
+    conn = sqlite3.connect(RESEARCH_DB_PATH)
+    cursor = conn.cursor()
+    
+    cursor.execute("SELECT event_id FROM event_registry WHERE article_hash = ? LIMIT 1;", (article_hash,))
+    row = cursor.fetchone()
+    if row:
+        event_id = row[0]
+        conn.close()
+        return event_id, False
+        
+    gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
+    event_id = f"EVT-{hashlib.md5(article_hash.encode('utf-8')).hexdigest()[:12].upper()}"
+    
+    try:
+        cursor.execute("""
+File push committed. Now need to report. Next, run actions? We cannot run CI. Need to inform user that we pushed branch fix/db-path. Provide instructions to rerun actions, mention JWT signature may persist if secret mismatched. Also we should create PR? The user earlier asked to 
