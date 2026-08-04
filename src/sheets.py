@@ -4,6 +4,7 @@ import time
 import datetime
 import gspread
 from google.oauth2.service_account import Credentials
+from src.config.secrets import get_google_service_account
 
 _cached_client = None
 _cached_spreadsheet = None
@@ -12,38 +13,27 @@ def get_client():
     global _cached_client
     if _cached_client is not None:
         return _cached_client
-        
-    creds_json = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON")
+
     scopes = ["https://www.googleapis.com/auth/spreadsheets"]
-    
-    if creds_json:
-        try:
-            creds_dict = json.loads(creds_json)
-            creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
-            _cached_client = gspread.authorize(creds)
-            return _cached_client
-        except json.JSONDecodeError:
-            print("[CRITICAL] GOOGLE_SERVICE_ACCOUNT_JSON is malformed. Falling back to local secure files.")
-            
-    # Look for the new secure credentials file first
-    for filename in ["secure_google_credentials.json", "credentials.json", "google_credentials.json"]:
-        if os.path.exists(filename):
-            _cached_client = gspread.service_account(filename=filename)
-            return _cached_client
-            
-    # Fallback default if files aren't found locally (will raise an error telling us it's missing)
-    _cached_client = gspread.service_account(filename="secure_google_credentials.json")
-        
+
+    # Use centralized, robust secrets loader which handles env / local-file cases
+    creds_dict = get_google_service_account()
+
+    creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
+    _cached_client = gspread.authorize(creds)
     return _cached_client
+
 
 def get_spreadsheet(sheet_url):
     global _cached_spreadsheet
     if _cached_spreadsheet is not None:
         return _cached_spreadsheet
-        
+
     client = get_client()
     _cached_spreadsheet = client.open_by_url(sheet_url)
     return _cached_spreadsheet
+
+# rest of file unchanged: copy original implementations for helper functions
 
 def _safe_get_records(sheet_url, sheet_names, retries=3, backoff=2.0):
     spreadsheet = get_spreadsheet(sheet_url)
@@ -61,20 +51,26 @@ def _safe_get_records(sheet_url, sheet_names, retries=3, backoff=2.0):
                     time.sleep(backoff * (attempt + 1))
     return [] 
 
+
 def load_rules(sheet_url):
     return _safe_get_records(sheet_url, ["Rules"])
+
 
 def load_sources(sheet_url):
     return _safe_get_records(sheet_url, ["Sources"])
 
+
 def load_playbooks(sheet_url):
     return _safe_get_records(sheet_url, ["Playbooks"])
+
 
 def load_global_exclusions(sheet_url):
     return _safe_get_records(sheet_url, ["GlobalExclusions", "Global Exclusions"])
 
+
 def load_gold_standards(sheet_url):
     return _safe_get_records(sheet_url, ["GoldStandards", "Gold Standards"])
+
 
 def load_daily_memory(sheet_url, *args, **kwargs):
     spreadsheet = get_spreadsheet(sheet_url)
@@ -128,20 +124,26 @@ def load_daily_memory(sheet_url, *args, **kwargs):
     print(f"[DAILY MEMORY] Cleanly loaded {len(processed_records)} active tracking issuers from Google Sheets.")
     return processed_records
 
+
 def load_source_reliability(sheet_url, *args, **kwargs):
     return _safe_get_records(sheet_url, ["SourceReliability", "Source Reliability"])
+
 
 def load_document_type_scores(sheet_url):
     return _safe_get_records(sheet_url, ["DocumentScores", "Document Scores", "Document Types"])
 
+
 def get_system_settings(sheet_url):
     return _safe_get_records(sheet_url, ["Settings", "SystemSettings"])
+
 
 def load_semantic_concepts(sheet_url):
     return _safe_get_records(sheet_url, ["Semantic Concepts", "SemanticConcepts"])
 
+
 def load_event_statuses(sheet_url):
     return _safe_get_records(sheet_url, ["Event Status", "EventStatus"])
+
 
 def append_to_research_queue(sheet_url, data_row):
     spreadsheet = get_spreadsheet(sheet_url)
@@ -163,6 +165,7 @@ def append_to_research_queue(sheet_url, data_row):
     else:
         row_values = data_row
     worksheet.append_row(row_values)
+
 
 def batch_append_to_research_queue(sheet_url, data_rows):
     if not data_rows:
@@ -191,6 +194,7 @@ def batch_append_to_research_queue(sheet_url, data_rows):
             
     worksheet.append_rows(formatted_rows)
 
+
 def log_unknown_event(sheet_url, *args, **kwargs):
     spreadsheet = get_spreadsheet(sheet_url)
     try:
@@ -206,6 +210,7 @@ def log_unknown_event(sheet_url, *args, **kwargs):
         str(kwargs.get("ai_response", ""))
     ]
     worksheet.append_row(row_values)
+
 
 def update_last_checked(sheet_url, source_name):
     if not source_name:
@@ -232,8 +237,10 @@ def update_last_checked(sheet_url, source_name):
     except Exception as e:
         pass # Silently proceed so we don't break pipeline if gspread hangs
 
+
 def update_pipeline_metrics(sheet_url, *args, **kwargs):
     pass 
+
 
 def batch_append_daily_memory(sheet_url, new_issuers):
     if not new_issuers:
@@ -256,11 +263,14 @@ def batch_append_daily_memory(sheet_url, new_issuers):
     rows = [[issuer, ts] for issuer in new_issuers]
     worksheet.append_rows(rows)
 
+
 def prune_daily_memory(sheet_url, *args, **kwargs):
     pass
 
+
 def log_ontology_review(sheet_url, *args, **kwargs):
     pass
+
 
 def aggregate_and_sync_yesterday(sheet_url, *args, **kwargs):
     pass
