@@ -15,9 +15,17 @@ USER_AGENT = (
 
 def get_system_settings(sheet_url=None):
     """
-    Returns default or environment-configured settings.
-    Required by the AI inference modules.
+    Returns live system settings from Google Sheets, 
+    falling back to robust defaults if unavailable.
     """
+    try:
+        from src.sheets import get_system_settings as sheets_get_settings
+        records = sheets_get_settings(sheet_url or SHEET_URL)
+        if records and isinstance(records, list):
+            return records[0]
+    except Exception:
+        pass
+        
     return {
         "RULE_THRESHOLD": 10,
         "MATERIAL_KEYWORDS": "bump, increase, amend, terminate, cancel, regulatory approval, revised, superior proposal, competing, blocked",
