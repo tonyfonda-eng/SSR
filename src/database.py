@@ -29,7 +29,6 @@ def init_db():
     r_conn = sqlite3.connect(RESEARCH_DB_PATH)
     r_conn.execute("PRAGMA foreign_keys = ON;")
     
-    # Phase 1: Configuration Manifest Snapshots
     r_conn.execute("""
         CREATE TABLE IF NOT EXISTS config_snapshots (
             hash TEXT PRIMARY KEY,
@@ -39,7 +38,6 @@ def init_db():
         );
     """)
 
-    # Legacy Configuration tracking (kept for backward compatibility during transition)
     r_conn.execute("""
         CREATE TABLE IF NOT EXISTS configuration_manifests (
             manifest_hash TEXT PRIMARY KEY,
@@ -99,7 +97,6 @@ def init_db():
         );
     """)
 
-    # Core Evaluation Ledger
     r_conn.execute("""
         CREATE TABLE IF NOT EXISTS evaluation_ledger (
             decision_id TEXT PRIMARY KEY,
@@ -116,7 +113,6 @@ def init_db():
         );
     """)
 
-    # Factual Metadata mapping table for frontend export compatibility
     r_conn.execute("""
         CREATE TABLE IF NOT EXISTS factual_metadata (
             decision_id TEXT PRIMARY KEY,
@@ -127,11 +123,10 @@ def init_db():
         );
     """)
 
-    # Attempt to gracefully alter the table if it exists but is missing the new column (Phase 1 Migration)
     try:
         r_conn.execute("ALTER TABLE evaluation_ledger ADD COLUMN market_data_snapshot TEXT;")
     except sqlite3.OperationalError:
-        pass # Column already exists
+        pass 
 
     r_conn.execute("""
         CREATE TABLE IF NOT EXISTS execution_performance (
@@ -194,9 +189,7 @@ def init_db():
     r_conn.commit()
     r_conn.close()
 
-    # -------------------------------------------------------------------------
-    # 2. DEVOPS & INFRASTRUCTURE LOGS
-    # -------------------------------------------------------------------------
+    # DEVOPS DB
     os.makedirs(os.path.dirname(os.path.abspath(DEVOPS_DB_PATH)), exist_ok=True)
     d_conn = sqlite3.connect(DEVOPS_DB_PATH)
     
@@ -287,12 +280,7 @@ def init_db():
 def initialise_database():
     init_db()
 
-# -------------------------------------------------------------------------
-# CORE REPO INTERFACES (Facts Layer & Context Manifest Processing)
-# -------------------------------------------------------------------------
-
 def get_latest_config_snapshot() -> dict:
-    """Retrieves the most recent config hash snapshot to evaluate diffs."""
     try:
         conn = sqlite3.connect(RESEARCH_DB_PATH)
         cursor = conn.cursor()
@@ -307,7 +295,6 @@ def get_latest_config_snapshot() -> dict:
         return None
 
 def save_config_snapshot(config_hash: str, run_id: str, config_json: str):
-    """Persists a new immutable configuration JSON snapshot."""
     try:
         gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
         conn = sqlite3.connect(RESEARCH_DB_PATH)
@@ -320,42 +307,9 @@ def save_config_snapshot(config_hash: str, run_id: str, config_json: str):
     except Exception as e:
         logger.error(f"[SCHEMA ERROR] save_config_snapshot failed: {e}")
 
-
-def generate_manifest_hash(components: dict) -> str:
-    """Computes a strict content-addressed SHA256 signature from system version maps."""
-    serialized = json.dumps(components, sort_keys=True).encode("utf-8")
-    return f"CFG-{hashlib.sha256(serialized).hexdigest()[:12].upper()}"
-
-
-def register_configuration_manifest(manifest_data: dict) -> str:
-    """Freezes an environment lineage profile in the configuration tracking table."""
-    m_hash = generate_manifest_hash(manifest_data)
-    try:
-        conn = sqlite3.connect(RESEARCH_DB_PATH)
-        conn.execute("""
-            INSERT OR IGNORE INTO configuration_manifests 
-            (manifest_hash, parser_version, transformation_dag_version, ontology_version, rule_pack_version, prompt_version, playbook_version)
-            VALUES (?, ?, ?, ?, ?, ?, ?);
-        """, (
-            m_hash,
-            manifest_data.get("parser_version", "1.0.0"),
-            manifest_data.get("transformation_dag_version", "1.0.0"),
-            manifest_data.get("ontology_version", "1.0.0"),
-            manifest_data.get("rule_pack_version", "1.0.0"),
-            manifest_data.get("prompt_version", "1.0.0"),
-            manifest_data.get("playbook_version", "1.0.0")
-        ))
-        conn.commit()
-        conn.close()
-        return m_hash
-    except Exception as e:
-        return m_hash
-
-
 def get_or_create_event(article_hash: str, raw_payload: bytes, mime_type: str = "text/html") -> tuple:
     conn = sqlite3.connect(RESEARCH_DB_PATH)
     cursor = conn.cursor()
-    
     cursor.execute("SELECT event_id FROM event_registry WHERE article_hash = ? LIMIT 1;", (article_hash,))
     row = cursor.fetchone()
     if row:
@@ -374,40 +328,9 @@ def get_or_create_event(article_hash: str, raw_payload: bytes, mime_type: str = 
         conn.commit()
         conn.close()
         return event_id, True
-    except Exception as e:
+    except Exception:
         conn.close()
         return f"ERR-{event_id}", True
-
-
-def log_sensor_lineage(event_id: str, sensor_id: str, url: str, wire_ts: str):
-    gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
-    lineage_id = f"LIN-{hashlib.sha256(f'{event_id}:{sensor_id}:{gmt_now}'.encode('utf-8')).hexdigest()[:12].upper()}"
-    try:
-        conn = sqlite3.connect(RESEARCH_DB_PATH)
-        conn.execute("""
-            INSERT OR IGNORE INTO sensor_lineage (lineage_id, event_id, sensor_id, wire_published_timestamp, canonical_source_url)
-            VALUES (?, ?, ?, ?, ?);
-        """, (lineage_id, event_id, sensor_id, wire_ts or gmt_now, url))
-        conn.commit()
-        conn.close()
-    except Exception:
-        pass
-
-
-def log_transformation(event_id: str, stage: str, version: str, text_payload: str, duration_ms: int) -> str:
-    output_hash = hashlib.sha256(text_payload.encode("utf-8")).hexdigest()
-    trn_id = f"TRN-{hashlib.md5(f'{event_id}:{stage}:{output_hash}'.encode('utf-8')).hexdigest()[:12].upper()}"
-    try:
-        conn = sqlite3.connect(RESEARCH_DB_PATH)
-        conn.execute("""
-            INSERT OR REPLACE INTO evidence_transformations (transformation_id, event_id, stage_name, transformation_version, output_hash, duration_ms, transformed_payload)
-            VALUES (?, ?, ?, ?, ?, ?, ?);
-        """, (trn_id, event_id, stage, version, output_hash, duration_ms, text_payload))
-        conn.commit()
-        conn.close()
-        return trn_id
-    except Exception:
-        return "TRN-FALLBACK"
 
 def commit_decision_capsule(capsule_data: dict, manifest_json: dict = None):
     try:
@@ -431,7 +354,6 @@ def commit_decision_capsule(capsule_data: dict, manifest_json: dict = None):
             capsule_data.get("market_data_snapshot")
         ))
         
-        # Populate Factual Metadata table for frontend export compatibility
         cursor.execute("""
             INSERT OR REPLACE INTO factual_metadata (decision_id, headline, source_url, published_timestamp)
             VALUES (?, ?, ?, ?);
@@ -442,67 +364,6 @@ def commit_decision_capsule(capsule_data: dict, manifest_json: dict = None):
             capsule_data.get("runtime_timestamp")
         ))
         
-        perf = capsule_data.get("performance_telemetry_ms", {})
-        cursor.execute("""
-            INSERT OR REPLACE INTO execution_performance 
-            (decision_id, ingest_repo_ms, transformation_ms, ontology_ms, rules_ms, ai_inference_ms, financial_query_ms)
-            VALUES (?, ?, ?, ?, ?, ?, ?);
-        """, (
-            dec_id,
-            perf.get("ingest_repo_ms", 0),
-            perf.get("transformation_ms", 0),
-            perf.get("ontology_ms", 0),
-            perf.get("rules_ms", 0),
-            perf.get("ai_inference_ms", 0),
-            perf.get("financial_query_ms", 0)
-        ))
-        
-        evidence_list = capsule_data.get("evidence_provenance_ledger", [])
-        for ev in evidence_list:
-            cursor.execute("""
-                INSERT OR REPLACE INTO atomic_evidence 
-                (evidence_id, decision_id, stage, evidence_direction, source_component, assertion_key, confidence_weight, source_transformation_id, text_start_offset, text_end_offset)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-            """, (
-                ev["evidence_id"],
-                dec_id,
-                ev["stage"],
-                ev["evidence_direction"],
-                ev["source_component"],
-                ev["assertion_key"],
-                ev["confidence_weight"],
-                ev.get("source_transformation_id"),
-                ev.get("text_start_offset"),
-                ev.get("text_end_offset")
-            ))
-            
-        ai_data = capsule_data.get("ai_core_inference", {})
-        if ai_data:
-            conf = ai_data.get("confidence_decomposition", {})
-            cursor.execute("""
-                INSERT OR REPLACE INTO ai_core_inference 
-                (decision_id, raw_provider_json, parsed_structural_properties, semantic_interpretation, ontology_confidence, rules_confidence, ai_confidence, financial_confidence, aggregate_confidence)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
-            """, (
-                dec_id,
-                ai_data.get("raw_provider_json", "{}"),
-                json.dumps(ai_data.get("parsed_structural_properties", {})),
-                ai_data.get("semantic_interpretation", ""),
-                conf.get("ontology_score", 0.0),
-                conf.get("rules_score", 0.0),
-                conf.get("ai_node", 0.0),
-                conf.get("financial_node", 0.0),
-                ai_data.get("aggregate_confidence", 0.0)
-            ))
-            
-        if manifest_json:
-            manifest_str = json.dumps(manifest_json)
-            d_conn = sqlite3.connect(DEVOPS_DB_PATH)
-            d_conn.execute("INSERT OR REPLACE INTO dashboard_state_kv (key, value) VALUES (?, ?);", 
-                           (f"MANIFEST:{dec_id}", manifest_str))
-            d_conn.commit()
-            d_conn.close()
-
         conn.commit()
         conn.close()
     except Exception as e:
@@ -539,57 +400,7 @@ def save_workflow_health(health_data=None):
         pass
 
 def save_exception_log(run_id="UNKNOWN", timestamp=None, exc_type="", stack_trace="", module="", func_name="", article_url="", severity="ERROR"):
-    try:
-        gmt_now = timestamp or datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
-        conn = sqlite3.connect(DEVOPS_DB_PATH)
-        conn.execute("""
-            INSERT INTO exception_logs (run_id, timestamp, exc_type, stack_trace, module, func_name, article_url, severity)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?);
-        """, (run_id, gmt_now, exc_type, stack_trace, module, func_name, article_url, severity))
-        conn.commit()
-        conn.close()
-    except Exception:
-        pass
-
-def save_ai_usage(rows):
-    try:
-        conn = sqlite3.connect(DEVOPS_DB_PATH)
-        conn.executemany("""
-            INSERT INTO ai_usage_log (run_id, timestamp, provider, key_id, requests, success, failures, errors_429, errors_503, timeouts, retries, fallbacks, response_time_sum, max_latency, last_success_ts, last_failure_ts)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-        """, rows)
-        conn.commit()
-        conn.close()
-    except Exception:
-        pass
+    pass
 
 def save_source_stats(rows):
-    try:
-        conn = sqlite3.connect(DEVOPS_DB_PATH)
-        conn.executemany("""
-            INSERT OR REPLACE INTO source_stats_log (run_id, timestamp, source, downloaded, survived_regex, survived_ontology, survived_rules, reached_ai, alerts, processing_time_sum, processed_count)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-        """, rows)
-        conn.commit()
-        conn.close()
-    except Exception:
-        pass
-
-# Backward compatibility stubs
-def article_exists(identifier): return False
-def save_article(**kwargs): pass
-def save_lifecycle_logs(logs): pass
-def get_recent_lifecycle_logs(limit=50): return []
-def get_dashboard_state(key): return None
-def set_dashboard_state(key, value): pass
-def track_company(ticker): pass
-def create_event_if_new(event_family, ticker): return f"{ticker}_{event_family}", True
-def get_pending_reminders(): return []
-def mark_reminder_sent(*args, **kwargs): pass
-def save_reminder(*args, **kwargs): pass
-def perform_housekeeping(): pass
-def log_research(*args, **kwargs): pass
-def get_30_day_average(): return 0.0
-def get_30_day_source_averages(): return {}
-def export_archive_json(filepath): pass
-def generate_archive_html(*args, **kwargs): pass
+    pass
