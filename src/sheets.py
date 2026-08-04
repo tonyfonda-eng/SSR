@@ -11,28 +11,71 @@ _cached_client = None
 _cached_spreadsheet = None
 
 def _sanitize_private_key(raw_pk: str) -> str:
+    # Normalize to Python string
     if isinstance(raw_pk, bytes):
         pk = raw_pk.decode("utf-8", "strict")
     else:
         pk = str(raw_pk)
 
-    # Quick common-case: replace JSON-escaped newlines
-    if "\\r\\n" in pk or "\\n" in pk or "\\\\n" in pk:
-        pk = pk.replace("\\r\\n", "\n").replace("\\\\n", "\n").replace("\\n", "\n")
+    # Quick accept: already valid PEM
+    if pk.startswith("-----BEGIN ") and "-----END " in pk:
+        pk = pk.strip()
+        if not pk.endswith("\n"):
+            pk += "\n"
+        return pk
 
-    # If there are still literal backslashes, try a conservative unicode-escape decode as fallback
-    if "\\n" in pk or "\\\\" in pk:
+    # Remove accidental surrounding quotes
+    if (pk.startswith('"') and pk.endswith('"')) or (pk.startswith("'") and pk.endswith("'")):
+        pk = pk[1:-1]
+
+    # Iteratively try to unwrap encodings/escapes (handles double-encoded cases)
+    for _ in range(5):
+        prev = pk
+        # If it's a JSON-encoded string, decode
         try:
-            pk = pk.encode("utf-8").decode("unicode_escape")
+            decoded = json.loads(pk)
+            if isinstance(decoded, str):
+                pk = decoded
         except Exception:
             pass
+        # If it's a Python literal-encoded string, decode
+        try:
+            decoded = ast.literal_eval(pk)
+            if isinstance(decoded, str):
+                pk = decoded
+        except Exception:
+            pass
+        # Replace common escaped newline sequences (more-escaped first)
+        pk = pk.replace("\\r\\n", "\n").replace("\\\\n", "\n").replace("\\n", "\n")
+        # stop if nothing changed
+        if pk == prev:
+            break
 
-    # Trim and ensure proper PEM framing / final newline
+    # Last-resort: decode escape sequences (use cautiously)
+    if ("\\n" in pk or "\\\\" in pk) and not (pk.startswith("-----BEGIN ") and "-----END " in pk):
+        try:
+            pk_candidate = pk.encode("utf-8").decode("unicode_escape")
+            pk = pk_candidate
+        except Exception:
+            # leave as-is; we will validate below and raise if malformed
+            pass
+
+    # Trim and sanity-check framing
     pk = pk.strip()
-    if not pk.startswith("-----BEGIN "):
-        raise ValueError("private_key appears malformed (missing PEM header)")
+    if not pk.startswith("-----BEGIN ") or "-----END " not in pk:
+        raise ValueError("private_key appears malformed after sanitization (missing PEM header/footer)")
+
     if not pk.endswith("\n"):
         pk += "\n"
+
+    # Validate PEM by attempting to parse it (fails fast with clearer message)
+    try:
+        from cryptography.hazmat.primitives.serialization import load_pem_private_key
+        from cryptography.hazmat.backends import default_backend
+        load_pem_private_key(pk.encode("utf-8"), password=None, backend=default_backend())
+    except Exception as e:
+        # Do NOT include the key in the error message
+        raise ValueError(f"private_key failed PEM parse validation after sanitization: {e}")
 
     return pk
 
@@ -53,7 +96,7 @@ def get_client():
         except json.JSONDecodeError:
             creds_dict = ast.literal_eval(creds_dict)
 
-    # --- BULLETPROOF LOCAL PRIVATE KEY SANITIZATION ---
+    # --- PRIVATE KEY SANITIZATION & VALIDATION ---
     if creds_dict and "private_key" in creds_dict:
         creds_dict["private_key"] = _sanitize_private_key(creds_dict["private_key"])
 
