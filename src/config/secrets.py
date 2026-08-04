@@ -1,6 +1,9 @@
 import json
 import os
 
+# Gmail API & SMTP Credentials
+GMAIL_USER = os.environ.get("GMAIL_USER", "karimbarbara7@gmail.com")
+GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "htxrgxfstxkpzpvv")
 
 def get_google_service_account():
     # Production / GitHub Actions: Load from Environment
@@ -9,9 +12,10 @@ def get_google_service_account():
         return json.loads(env_json)
     
     # Local / Agent Fallback: Load from ignored JSON file
-    local_key_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "google_credentials.json")
-    if os.path.exists(local_key_path):
-        with open(local_key_path, 'r') as f:
-            return json.load(f)
-            
-    raise ValueError("Google Service Account credentials not found in environment or google_credentials.json")
+    for filename in ["google_credentials.json", "secure_google_credentials.json"]:
+        local_key_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), filename)
+        if os.path.exists(local_key_path):
+            with open(local_key_path, 'r') as f:
+                return json.load(f)
+                
+    raise ValueError("Google Service Account credentials not found in environment, google_credentials.json, or secure_google_credentials.json")
