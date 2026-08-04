@@ -66,9 +66,10 @@ class EvidenceCapsule:
     """
     SSR 2.0 Core Paradigm: The Immutable Evidence Capsule.
     """
-    def __init__(self, event_id: str, manifest_hash: str, raw_text: str):
+    def __init__(self, event_id: str, article_id: str, manifest_hash: str, raw_text: str):
         self.decision_id = f"DSC-{uuid.uuid4()}"
         self.event_id = event_id
+        self.article_id = article_id
         self.manifest_hash = manifest_hash
         self.raw_text = raw_text
         self.timings = {"ingest_repo_ms": 0, "transformation_ms": 0, "ontology_ms": 0, "rules_ms": 0, "ai_inference_ms": 0, "financial_query_ms": 0}
@@ -79,6 +80,7 @@ class EvidenceCapsule:
         self.ai_data = {}
         self.ticker = "UNKNOWN"
         self.event_family = "Unknown"
+        self.rule_threshold = 10
         self.market_data_snapshot = None # Phase 1: Store specific financial facts used
         self.last_timer = time.perf_counter_ns()
 
@@ -105,6 +107,7 @@ class EvidenceCapsule:
             "manifest_registry": {
                 "decision_id": self.decision_id,
                 "event_id": self.event_id,
+                "article_id": self.article_id,
                 "configuration_manifest_hash": self.manifest_hash,
                 "execution_timestamp_gmt": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT"),
                 "evidence_completeness_score": self.completeness_score
@@ -113,13 +116,15 @@ class EvidenceCapsule:
                 "outcome": self.outcome,
                 "terminal_stage": self.terminal_stage,
                 "detected_event_type": self.event_family,
-                "target_ticker": self.ticker
+                "target_ticker": self.ticker,
+                "rule_threshold_used": self.rule_threshold
             },
             "performance_telemetry_ms": self.timings,
             "evidentiary_provenance_dag": {
                 "supporting_evidence": self.evidence["SUPPORTING"],
                 "opposing_evidence": self.evidence["OPPOSING"]
-            }
+            },
+            "market_data_snapshot": self.market_data_snapshot
         }
 
 
@@ -183,6 +188,18 @@ def evaluate_capsule(capsule: EvidenceCapsule, primary: dict, rules, playbook_ma
     body = primary["body"]
     triage_all = primary.get("triage_all", False)
     document_type = primary.get("document_type")
+    
+    # Phase 2: Externalize hardcoded decision constants
+    rule_threshold = int(metrics.settings.get("RULE_THRESHOLD", 10))
+    capsule.rule_threshold = rule_threshold
+    
+    material_keywords = metrics.settings.get("MATERIAL_KEYWORDS", [
+        "bump", "increase", "amend", "terminate", "cancel", 
+        "regulatory approval", "revised", "superior proposal", 
+        "competing", "blocked"
+    ])
+    if isinstance(material_keywords, str):
+        material_keywords = [k.strip() for k in material_keywords.split(",")]
     
     metrics.track_funnel("downloaded", 1)
 
@@ -258,15 +275,15 @@ def evaluate_capsule(capsule: EvidenceCapsule, primary: dict, rules, playbook_ma
     
     matches = evaluate(article_obj, rules, document_type_scores if document_type_scores else [], 
                        ontology_concepts=ontology_concepts, ontology_statuses=ontology_statuses, 
-                       source_reliability=source_rel, threshold=10)
+                       source_reliability=source_rel, threshold=rule_threshold)
     capsule.mark_timing("rules_ms")
     
     if not matches:
         metrics.track_funnel("rules_rejected")
-        capsule.append_evidence("OPPOSING", "Rules Engine", "Deterministic Evaluator", "Failed Rules Threshold (<10)", 1.0)
+        capsule.append_evidence("OPPOSING", "Rules Engine", "Deterministic Evaluator", f"Failed Rules Threshold (<{rule_threshold})", 1.0)
         return flush_termination("DROPPED", "Rules Engine")
     
-    capsule.append_evidence("SUPPORTING", "Rules Engine", "Deterministic Evaluator", f"Passed threshold with Score: {matches[0].get('Score', 10)}", 1.0)
+    capsule.append_evidence("SUPPORTING", "Rules Engine", "Deterministic Evaluator", f"Passed threshold ({rule_threshold}) with Score: {matches[0].get('Score', rule_threshold)}", 1.0)
 
     # --- AI Inference Phase ---
     metrics.track_funnel("reached_ai")
@@ -390,7 +407,6 @@ def evaluate_capsule(capsule: EvidenceCapsule, primary: dict, rules, playbook_ma
         event_id, is_new = create_event_if_new(event_family, ticker)
         
         if not is_new:
-            material_keywords = ["bump", "increase", "amend", "terminate", "cancel", "regulatory approval", "revised", "superior proposal", "competing", "blocked"]
             is_material = any(kw in body_lower or kw in title_lower for kw in material_keywords)
             
             if is_material:
@@ -707,7 +723,7 @@ def main():
             if not is_new:
                 continue
                 
-            capsule = EvidenceCapsule(event_id, GLOBAL_MANIFEST_ID, raw_payload)
+            capsule = EvidenceCapsule(event_id, primary.get("article_id", "UNKNOWN"), GLOBAL_MANIFEST_ID, raw_payload)
 
             res = evaluate_capsule(
                 capsule=capsule,
