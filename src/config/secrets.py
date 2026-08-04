@@ -1,5 +1,5 @@
-import json
 import os
+import json
 import ast
 import re
 
@@ -127,15 +127,18 @@ def get_google_service_account():
 
     # Local file fallback
     if not creds_dict:
-        for filename in ["google_credentials.json", "secure_google_credentials.json"]:
+        for filename in ["google_credentials.json", "secure_google_credentials.json", "credentials.json"]:
             local_key_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), filename)
             if os.path.exists(local_key_path):
-                with open(local_key_path, 'r', encoding='utf-8') as f:
-                    creds_dict = json.load(f)
-                break
-
+                try:
+                    with open(local_key_path, 'r', encoding='utf-8') as f:
+                        creds_dict = json.load(f)
+                    break
+                except Exception:
+                    pass
+                
     if not creds_dict:
-        raise ValueError("Google Service Account credentials not found in environment or local files")
+        raise ValueError("Google Service Account credentials not found in environment or local credential files.")
 
     # Coerce to dict if it's still a string
     if isinstance(creds_dict, str):

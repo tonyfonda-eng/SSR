@@ -10,7 +10,8 @@ import logging
 from dataclasses import dataclass
 from typing import Dict, Any, Tuple
 from src.providers.router import ProviderRouter
-from src.config.settings import get_system_settings, SHEET_URL
+from src.sheets import get_system_settings
+from src.config.settings import SHEET_URL
 
 logger = logging.getLogger(__name__)
 

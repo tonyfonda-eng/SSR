@@ -41,7 +41,34 @@ def _safe_get_records(sheet_url, sheet_names, retries=3, backoff=2.0):
         for name in sheet_names:
             try:
                 worksheet = spreadsheet.worksheet(name)
-                return worksheet.get_all_records()
+                # ---------------------------------------------------------
+                # AUDIT FIX: Robust manual header parsing to prevent gspread
+                # from crashing on duplicate or empty [''] header columns.
+                # ---------------------------------------------------------
+                raw_values = worksheet.get_all_values()
+                if not raw_values:
+                    return []
+                    
+                headers = raw_values[0]
+                unique_headers = []
+                seen = set()
+                
+                for i, h in enumerate(headers):
+                    h_str = str(h).strip()
+                    if not h_str or h_str in seen:
+                        h_str = f"Unnamed_Col_{i+1}"
+                    seen.add(h_str)
+                    unique_headers.append(h_str)
+                    
+                records = []
+                for row in raw_values[1:]:
+                    # Pad the row if it's shorter than the headers array
+                    padded_row = row + [""] * (len(unique_headers) - len(row))
+                    # Only add rows that actually contain data
+                    if any(str(v).strip() for v in padded_row):
+                        records.append(dict(zip(unique_headers, padded_row)))
+                        
+                return records
             except gspread.exceptions.WorksheetNotFound:
                 continue 
             except Exception as e:
@@ -53,7 +80,7 @@ def _safe_get_records(sheet_url, sheet_names, retries=3, backoff=2.0):
 
 
 def load_rules(sheet_url):
-    return _safe_get_records(sheet_url, ["Rules"])
+    return _safe_get_records(sheet_url, ["Rules", "RegexRules"])
 
 
 def load_sources(sheet_url):
@@ -61,7 +88,7 @@ def load_sources(sheet_url):
 
 
 def load_playbooks(sheet_url):
-    return _safe_get_records(sheet_url, ["Playbooks"])
+    return _safe_get_records(sheet_url, ["Playbooks", "StrategyPlaybooks"])
 
 
 def load_global_exclusions(sheet_url):

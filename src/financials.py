@@ -5,6 +5,7 @@ Outputs deterministic evidence records for the Causal DAG.
 """
 
 import yfinance as yf
+import pandas as pd
 import logging
 from dataclasses import dataclass
 from typing import Optional, Dict, Any
@@ -23,9 +24,9 @@ class FinancialSnapshot:
     options_available: bool = False
     raw_data: Optional[Dict[str, Any]] = None
 
-def query_financial_snapshot(ticker: str) -> FinancialSnapshot:
+def query_financial_snapshot(ticker: str, as_of_date: str = None) -> FinancialSnapshot:
     """
-    Retrieves real-time fundamental data to support evidentiary assertions.
+    Retrieves real-time or historical fundamental data to support evidentiary assertions.
     """
     if not ticker or ticker == "UNKNOWN" or "MOCK AI" in ticker:
         return FinancialSnapshot(ticker=ticker, is_complete=False)
@@ -34,9 +35,24 @@ def query_financial_snapshot(ticker: str) -> FinancialSnapshot:
         y_tick = yf.Ticker(ticker)
         info = y_tick.info
         
+        # AUDIT FIX 14: Use historical spot price if as_of_date is provided
+        current_price = None
+        if as_of_date:
+            try:
+                # Add 1 day to end_date to ensure the as_of_date is included in the fetch
+                end_date = pd.to_datetime(as_of_date) + pd.Timedelta(days=1)
+                hist = y_tick.history(end=end_date.strftime('%Y-%m-%d'), period="1mo")
+                if not hist.empty:
+                    current_price = float(hist['Close'].iloc[-1])
+            except Exception as e:
+                logger.warning(f"[FINANCIALS] Failed historical price fetch for {ticker} on {as_of_date}: {e}")
+                
+        # Fallback to current spot price if historical fails or isn't requested
+        if current_price is None:
+            current_price = info.get('currentPrice', info.get('regularMarketPrice'))
+        
         # Standard Fundamentals
         market_cap = info.get('marketCap')
-        current_price = info.get('currentPrice', info.get('regularMarketPrice'))
         
         # Cash Fundamentals
         total_cash = info.get('totalCash', 0)
@@ -89,7 +105,7 @@ def get_t12_metrics(ticker: str, pre_halt_price: float = None, halt_date_str: st
         result["reason"] = "Missing ticker identification"
         return result
 
-    snap = query_financial_snapshot(ticker)
+    snap = query_financial_snapshot(ticker, as_of_date=halt_date_str)
     
     if not snap.is_complete or snap.net_cash_per_share is None:
         result["reason"] = "Fundamental cash metrics unavailable via Yahoo Finance"
@@ -102,10 +118,13 @@ def get_t12_metrics(ticker: str, pre_halt_price: float = None, halt_date_str: st
         return result
 
     # Check margin of safety if pre-halt price is known
-    if pre_halt_price:
-        downside = (pre_halt_price - snap.net_cash_per_share) / pre_halt_price
+    # If pre_halt_price isn't explicitly passed, try to use the point-in-time price we just fetched
+    eval_price = pre_halt_price if pre_halt_price else snap.current_price
+    
+    if eval_price:
+        downside = (eval_price - snap.net_cash_per_share) / eval_price
         if downside > 0.85: # If cash floor requires an 85%+ drop, it's not a safe floor
-            result["reason"] = f"Unsafe margin: Cash floor (${snap.net_cash_per_share:.2f}) is {downside*100:.1f}% below pre-halt price (${pre_halt_price:.2f})"
+            result["reason"] = f"Unsafe margin: Cash floor (${snap.net_cash_per_share:.2f}) is {downside*100:.1f}% below pre-halt price (${eval_price:.2f})"
             return result
 
     result["valid"] = True

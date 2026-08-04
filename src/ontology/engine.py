@@ -45,28 +45,33 @@ def load_ontology(sheet_url: str) -> None:
         sheet_id = sheet_url.split('/d/')[1].split('/')[0]
         sheet = service.spreadsheets()
         
-        # Load Core Concepts
-        concept_res = sheet.values().get(spreadsheetId=sheet_id, range="Ontology_Concepts!A2:E").execute()
-        for row in concept_res.get('values', []):
-            if len(row) >= 4 and str(row[3]).strip().upper() == "TRUE":
-                cid = row[0]
-                phrases = [p.strip() for p in row[2].split(",") if p.strip()]
-                # Store default weight if present, else 1.0
-                weight = float(row[4]) if len(row) > 4 and row[4] else 1.0
-                _KNOWLEDGE_GRAPH[cid] = {"phrases": phrases, "weight": weight}
+        # Load Core Concepts (Aligned with 'Semantic Concepts' tab)
+        try:
+            concept_res = sheet.values().get(spreadsheetId=sheet_id, range="'Semantic Concepts'!A2:E").execute()
+            for row in concept_res.get('values', []):
+                if len(row) >= 4 and str(row[3]).strip().upper() == "TRUE":
+                    cid = row[0]
+                    phrases = [p.strip() for p in row[2].split(",") if p.strip()]
+                    # Store default weight if present, else 1.0
+                    weight = float(row[4]) if len(row) > 4 and row[4] else 1.0
+                    _KNOWLEDGE_GRAPH[cid] = {"phrases": phrases, "weight": weight}
+        except Exception as e:
+            logger.warning(f"[ONTOLOGY] Semantic Concepts tab fetch failed: {e}")
 
-        # Load Deal Statuses
-        status_res = sheet.values().get(spreadsheetId=sheet_id, range="Ontology_Statuses!A2:D").execute()
-        for row in status_res.get('values', []):
-            if len(row) >= 3 and str(row[2]).strip().upper() == "TRUE":
-                sid = row[0]
-                phrases = [p.strip() for p in row[1].split(",") if p.strip()]
-                _STATUS_GRAPH[sid] = {"phrases": phrases}
-                
+        # Load Deal Statuses (Aligned with 'Event Status' tab)
+        try:
+            status_res = sheet.values().get(spreadsheetId=sheet_id, range="'Event Status'!A2:D").execute()
+            for row in status_res.get('values', []):
+                if len(row) >= 3 and str(row[2]).strip().upper() == "TRUE":
+                    sid = row[0]
+                    phrases = [p.strip() for p in row[1].split(",") if p.strip()]
+                    _STATUS_GRAPH[sid] = {"phrases": phrases}
+        except Exception as e:
+            logger.warning(f"[ONTOLOGY] Event Status tab fetch failed: {e}")
+            
         logger.info(f"[ONTOLOGY] Initialization complete. Loaded {len(_KNOWLEDGE_GRAPH)} concepts and {len(_STATUS_GRAPH)} statuses.")
     except Exception as e:
         logger.error(f"[ONTOLOGY ERROR] Taxonomy bootstrap failed: {e}")
-
 
 def extract_concepts(raw_text: str) -> List[Tuple[str, float]]:
     """

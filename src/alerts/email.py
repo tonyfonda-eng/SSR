@@ -11,8 +11,8 @@ def send_alert(decision_manifest: dict, recipient: str = "tony.fonda@gmail.com")
     """
     Parses the Canonical Decision Manifest to construct and dispatch an alert email.
     """
-    # Defensive check: ensure credentials are loaded
-    if not GMAIL_USER or not GMAIL_APP_PASSWORD:
+    # AUDIT FIX 2.4 & 15: Defensive check properly guards against literal placeholder defaults
+    if not GMAIL_USER or not GMAIL_APP_PASSWORD or GMAIL_USER == "your-email@gmail.com":
         print(" [WARNING] Email credentials not configured. Skipping alert dispatch.")
         return
 
@@ -28,10 +28,6 @@ def send_alert(decision_manifest: dict, recipient: str = "tony.fonda@gmail.com")
     sensor = lineage.get("canonical_sensor_id", "Unknown Source")
     timestamp = reg.get("execution_timestamp_gmt", "Unknown Time")
 
-    # The title and URL are not strictly in the manifest structure shown previously, 
-    # but practically they'd be passed down. For backward compatibility with the existing
-    # code calling signature, we assume they might be added or we use defaults if missing.
-    # We'll try to extract them if they are in the manifest, otherwise fallback.
     article_title = decision_manifest.get("headline", f"Event Detected for {ticker}")
     article_url = decision_manifest.get("url", "#")
     research_summary = decision_manifest.get("research_summary", "No summary provided.")

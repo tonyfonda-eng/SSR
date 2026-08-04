@@ -31,7 +31,6 @@ def init_db():
     r_conn = sqlite3.connect(RESEARCH_DB_PATH)
     r_conn.execute("PRAGMA foreign_keys = ON;")
     
-    # Phase 1: Configuration Manifest Snapshots
     r_conn.execute("""
         CREATE TABLE IF NOT EXISTS config_snapshots (
             hash TEXT PRIMARY KEY,
@@ -41,7 +40,6 @@ def init_db():
         );
     """)
 
-    # Legacy Configuration tracking (kept for backward compatibility during transition)
     r_conn.execute("""
         CREATE TABLE IF NOT EXISTS configuration_manifests (
             manifest_hash TEXT PRIMARY KEY,
@@ -101,7 +99,6 @@ def init_db():
         );
     """)
 
-    # Core Evaluation Ledger
     r_conn.execute("""
         CREATE TABLE IF NOT EXISTS evaluation_ledger (
             decision_id TEXT PRIMARY KEY,
@@ -118,11 +115,20 @@ def init_db():
         );
     """)
 
-    # Attempt to gracefully alter the table if it exists but is missing the new column (Phase 1 Migration)
+    r_conn.execute("""
+        CREATE TABLE IF NOT EXISTS factual_metadata (
+            decision_id TEXT PRIMARY KEY,
+            headline TEXT,
+            source_url TEXT,
+            published_timestamp TEXT,
+            FOREIGN KEY (decision_id) REFERENCES evaluation_ledger(decision_id)
+        );
+    """)
+
     try:
         r_conn.execute("ALTER TABLE evaluation_ledger ADD COLUMN market_data_snapshot TEXT;")
     except sqlite3.OperationalError:
-        pass # Column already exists
+        pass 
 
     r_conn.execute("""
         CREATE TABLE IF NOT EXISTS execution_performance (
@@ -185,9 +191,7 @@ def init_db():
     r_conn.commit()
     r_conn.close()
 
-    # -------------------------------------------------------------------------
-    # 2. DEVOPS & INFRASTRUCTURE LOGS
-    # -------------------------------------------------------------------------
+    # DEVOPS DB
     os.makedirs(os.path.dirname(os.path.abspath(DEVOPS_DB_PATH)), exist_ok=True)
     d_conn = sqlite3.connect(DEVOPS_DB_PATH)
     
@@ -282,7 +286,6 @@ def init_db():
 # -------------------------------------------------------------------------
 
 def get_latest_config_snapshot() -> dict:
-    """Retrieves the most recent config hash snapshot to evaluate diffs."""
     try:
         conn = sqlite3.connect(RESEARCH_DB_PATH)
         cursor = conn.cursor()
