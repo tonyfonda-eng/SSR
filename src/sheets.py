@@ -129,20 +129,55 @@ def _safe_get_records(sheet_url, sheet_names, retries=3, backoff=2.0):
                     time.sleep(backoff * (attempt + 1))
     return [] 
 
+# =====================================================================
+# CONFIGURATION LOADERS (Granular Breakdown)
+# =====================================================================
+
 def load_rules(sheet_url):
-    return _safe_get_records(sheet_url, ["Rules"])
+    return _safe_get_records(sheet_url, ["Rules", "RegexRules"])
 
 def load_sources(sheet_url):
     return _safe_get_records(sheet_url, ["Sources"])
 
 def load_playbooks(sheet_url):
-    return _safe_get_records(sheet_url, ["Playbooks"])
+    return _safe_get_records(sheet_url, ["Playbooks", "StrategyPlaybooks"])
 
 def load_global_exclusions(sheet_url):
     return _safe_get_records(sheet_url, ["GlobalExclusions", "Global Exclusions"])
 
 def load_gold_standards(sheet_url):
     return _safe_get_records(sheet_url, ["GoldStandards", "Gold Standards"])
+
+def load_source_reliability(sheet_url, *args, **kwargs):
+    return _safe_get_records(sheet_url, ["SourceReliability", "Source Reliability"])
+
+def load_document_type_scores(sheet_url):
+    return _safe_get_records(sheet_url, ["DocumentScores", "Document Scores", "Document Types"])
+
+def get_system_settings(sheet_url):
+    return _safe_get_records(sheet_url, ["Settings", "SystemSettings"])
+
+def load_semantic_concepts(sheet_url):
+    return _safe_get_records(sheet_url, ["Semantic Concepts", "SemanticConcepts"])
+
+def load_event_statuses(sheet_url):
+    return _safe_get_records(sheet_url, ["Event Status", "EventStatus"])
+
+def load_pipeline_config(sheet_url):
+    """Fetches the highly granular adaptive execution order from the 'Pipeline' tab."""
+    return _safe_get_records(sheet_url, ["Pipeline", "Process", "Execution Pipeline"])
+
+def load_ai_configurations(sheet_url):
+    """Fetches specific granular settings for AI Inference stages."""
+    return _safe_get_records(sheet_url, ["AI Configs", "AI Prompts"])
+
+def load_financial_constraints(sheet_url):
+    """Fetches specific granular constraints for Strategy Engine stages."""
+    return _safe_get_records(sheet_url, ["Financial Rules", "Constraints"])
+
+# =====================================================================
+# STATE MANAGEMENT
+# =====================================================================
 
 def load_daily_memory(sheet_url, *args, **kwargs):
     spreadsheet = get_spreadsheet(sheet_url)
@@ -195,21 +230,6 @@ def load_daily_memory(sheet_url, *args, **kwargs):
 
     print(f"[DAILY MEMORY] Cleanly loaded {len(processed_records)} active tracking issuers from Google Sheets.")
     return processed_records
-
-def load_source_reliability(sheet_url, *args, **kwargs):
-    return _safe_get_records(sheet_url, ["SourceReliability", "Source Reliability"])
-
-def load_document_type_scores(sheet_url):
-    return _safe_get_records(sheet_url, ["DocumentScores", "Document Scores", "Document Types"])
-
-def get_system_settings(sheet_url):
-    return _safe_get_records(sheet_url, ["Settings", "SystemSettings"])
-
-def load_semantic_concepts(sheet_url):
-    return _safe_get_records(sheet_url, ["Semantic Concepts", "SemanticConcepts"])
-
-def load_event_statuses(sheet_url):
-    return _safe_get_records(sheet_url, ["Event Status", "EventStatus"])
 
 def append_to_research_queue(sheet_url, data_row):
     spreadsheet = get_spreadsheet(sheet_url)
@@ -300,9 +320,6 @@ def update_last_checked(sheet_url, source_name):
     except Exception as e:
         pass 
 
-def update_pipeline_metrics(sheet_url, *args, **kwargs):
-    pass 
-
 def batch_append_daily_memory(sheet_url, new_issuers):
     if not new_issuers:
         return
@@ -324,11 +341,8 @@ def batch_append_daily_memory(sheet_url, new_issuers):
     rows = [[issuer, ts] for issuer in new_issuers]
     worksheet.append_rows(rows)
 
-def prune_daily_memory(sheet_url, *args, **kwargs):
-    pass
-
-def log_ontology_review(sheet_url, *args, **kwargs):
-    pass
-
-def aggregate_and_sync_yesterday(sheet_url, *args, **kwargs):
-    pass
+# Backward Compatibility Stubs
+def update_pipeline_metrics(sheet_url, *args, **kwargs): pass 
+def prune_daily_memory(sheet_url, *args, **kwargs): pass
+def log_ontology_review(sheet_url, *args, **kwargs): pass
+def aggregate_and_sync_yesterday(sheet_url, *args, **kwargs): pass
