@@ -9,7 +9,9 @@ import logging
 import re
 from dataclasses import dataclass
 from typing import List, Dict, Tuple, Any
-from src.utils.sheets_client import get_sheets_service
+from googleapiclient.discovery import build
+from google.oauth2.service_account import Credentials
+from src.config.secrets import get_google_service_account
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +29,18 @@ class ConceptMatch:
     matched_string: str
     text_start_offset: int
     text_end_offset: int
+
+
+def get_sheets_service():
+    """Initializes the Google Sheets API client service."""
+    try:
+        creds_dict = get_google_service_account()
+        scopes = ["https://www.googleapis.com/auth/spreadsheets.readonly"]
+        creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
+        return build('sheets', 'v4', credentials=creds)
+    except Exception as e:
+        logger.error(f"[ONTOLOGY] Failed to build Google Sheets service: {e}")
+        return None
 
 
 def load_ontology(sheet_url: str) -> None:
@@ -52,7 +66,6 @@ def load_ontology(sheet_url: str) -> None:
                 if len(row) >= 4 and str(row[3]).strip().upper() == "TRUE":
                     cid = row[0]
                     phrases = [p.strip() for p in row[2].split(",") if p.strip()]
-                    # Store default weight if present, else 1.0
                     weight = float(row[4]) if len(row) > 4 and row[4] else 1.0
                     _KNOWLEDGE_GRAPH[cid] = {"phrases": phrases, "weight": weight}
         except Exception as e:
@@ -79,7 +92,6 @@ def extract_concepts(raw_text: str) -> List[Tuple[str, float]]:
     Returns a list of tuples: (ConceptID, Weight/Confidence).
     """
     matches = get_concept_matches(raw_text)
-    # Deduplicate by concept ID, keeping the highest weight
     deduped = {}
     for m in matches:
         if m.concept_id not in deduped or m.confidence > deduped[m.concept_id]:
@@ -130,7 +142,6 @@ def get_concept_matches(raw_text: str) -> List[ConceptMatch]:
             if not phrase: continue
             
             try:
-                # Find all occurrences with exact character offsets
                 for match in re.finditer(r'\b' + re.escape(phrase) + r'\b', raw_text, re.IGNORECASE):
                     matches.append(ConceptMatch(
                         concept_id=cid,
