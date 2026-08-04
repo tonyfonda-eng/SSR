@@ -8,6 +8,7 @@ import logging
 import traceback
 import hashlib
 import time
+import json
 from datetime import datetime, timezone
 
 # 1. Database & Telemetry Imports
@@ -16,18 +17,29 @@ from src.database import (
     get_or_create_event,
     commit_decision_capsule,
     save_workflow_health,
-    save_exception_log
+    save_exception_log,
+    save_config_snapshot
 )
 
-# 2. Pipeline Stage Imports (Assume these exist in your src directory)
+# 2. Pipeline Stage Imports
 from src.ingestion.scrapers import fetch_all_feeds
 from src.ontology import evaluate_ontology
-from src.rules import evaluate_deterministic_rules, matches_global_exclusion, matches_issuer_exclusion
+from src.ontology.engine import load_ontology
+from src.rules import matches_global_exclusion, matches_issuer_exclusion
+from src.rules_engine import evaluate as evaluate_deterministic_rules
 from src.ai import extract_target_ticker, classify_event
 
 # 3. Export & Sync Imports
 from src.validation import export_frontend_data
 import src.sheets_sync as sheets_sync
+
+# 4. Configuration & "Brain" Imports
+from src.config.settings import SHEET_URL
+from src.sheets import (
+    load_rules, load_global_exclusions, load_document_type_scores,
+    load_semantic_concepts, load_event_statuses, get_system_settings,
+    load_playbooks, load_sources
+)
 
 # Setup Logging
 logging.basicConfig(
@@ -35,10 +47,6 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(module)s - %(message)s"
 )
 logger = logging.getLogger(__name__)
-
-# Configurable Thresholds
-MIN_ONTOLOGY_SCORE = 0.65
-MIN_AI_CONFIDENCE = 0.75
 
 class PipelineTelemetry:
     """Tracks metrics across the 10-stage funnel to ensure accurate dashboard reporting."""
@@ -67,13 +75,20 @@ class PipelineTelemetry:
         return round(time.time() - self.start_time, 2)
 
 
-def process_article(article: dict, telemetry: PipelineTelemetry):
+def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest: dict, manifest_hash: str):
     """
-    Executes the strict 10-stage funnel for a single article.
-    Returns True if an alert was generated, False otherwise.
+    Executes the strict 10-stage funnel for a single article, completely driven 
+    by the dynamically injected config_manifest (The Brain).
     """
     article_url = article.get("url", "UNKNOWN")
     article_body = article.get("body", "")
+    
+    # Extract dynamic thresholds from the settings sheet (fallback to safe defaults)
+    settings = config_manifest.get("settings", [])
+    sys_settings = settings[0] if settings else {}
+    min_ontology_score = float(sys_settings.get("MIN_ONTOLOGY_SCORE", 0.65))
+    min_ai_confidence = float(sys_settings.get("MIN_AI_CONFIDENCE", 0.75))
+    rule_threshold = int(sys_settings.get("RULE_THRESHOLD", 10))
     
     # ---------------------------------------------------------
     # STAGE 2: Deduplication (Cheap Database Check)
@@ -88,35 +103,43 @@ def process_article(article: dict, telemetry: PipelineTelemetry):
     # ---------------------------------------------------------
     # STAGE 3 & 4: Global & Issuer Exclusions (Cheap String Match)
     # ---------------------------------------------------------
-    if matches_global_exclusion(article_body):
+    if matches_global_exclusion(article_body, config_manifest.get("global_exclusions", [])):
         telemetry.track("global_excluded")
         return False
         
-    if matches_issuer_exclusion(article.get("source", "")):
+    if matches_issuer_exclusion(article.get("source", ""), config_manifest.get("sources", [])):
         telemetry.track("issuer_excluded")
         return False
 
     # ---------------------------------------------------------
     # STAGE 5: Ontology Check (Deterministic Pattern Matching)
     # ---------------------------------------------------------
-    ontology_score = evaluate_ontology(article_body)
-    if ontology_score < MIN_ONTOLOGY_SCORE:
+    ontology_score = evaluate_ontology(article_body, config_manifest.get("semantic_concepts", []))
+    if ontology_score < min_ontology_score:
         telemetry.track("ontology_rejected")
         return False
 
     # ---------------------------------------------------------
     # STAGE 6: Rules & Regex Playbook (Deterministic Validation)
     # ---------------------------------------------------------
-    rule_score = evaluate_deterministic_rules(article_body)
-    if rule_score < 0.5:
+    # Dynamically evaluate the text against the latest version-locked rule packs
+    rule_results = evaluate_deterministic_rules(
+        article={"raw_text": article_body, "document_type": article.get("document_type", "Unknown")},
+        rules=config_manifest.get("rules", []),
+        document_type_scores=config_manifest.get("document_type_scores", []),
+        ontology_concepts=[(c.get("Concept ID"), c.get("Weight", 1.0)) for c in config_manifest.get("semantic_concepts", []) if str(c.get("Active", "TRUE")).upper() == "TRUE"],
+        ontology_statuses=config_manifest.get("event_statuses", []),
+        threshold=rule_threshold
+    )
+    
+    if not rule_results:
         telemetry.track("rules_rejected")
         return False
 
     # ---------------------------------------------------------
     # STAGE 7 & 8: Candidate Promotion
     # ---------------------------------------------------------
-    # The article has survived all cheap Python filters. 
-    # It is now a high-value candidate worthy of AI API spend.
+    # The article has survived all dynamic Python filters dictated by the worksheet.
     telemetry.track("reached_ai")
     logger.info(f"Article {event_id} promoted to AI inference.")
 
@@ -127,7 +150,6 @@ def process_article(article: dict, telemetry: PipelineTelemetry):
     # 9A: Ticker Extraction
     ticker = extract_target_ticker(article_body)
     if ticker in ["EXHAUSTED", "ERROR"]:
-        # CRITICAL FIX: Do not crash the pipeline. Log, track, and skip.
         logger.warning(f"[AI EXHAUSTED] Failed to extract ticker for {event_id}. Skipping.")
         telemetry.track("ai_exhausted")
         return False
@@ -139,7 +161,7 @@ def process_article(article: dict, telemetry: PipelineTelemetry):
         telemetry.track("ai_exhausted")
         return False
 
-    if ai_result.get("confidence", 0.0) < MIN_AI_CONFIDENCE:
+    if ai_result.get("confidence", 0.0) < min_ai_confidence:
         telemetry.track("ai_rejected")
         return False
 
@@ -149,7 +171,7 @@ def process_article(article: dict, telemetry: PipelineTelemetry):
     decision_capsule = {
         "decision_id": f"DEC-{hashlib.md5(f'{event_id}:{ticker}'.encode()).hexdigest()[:12].upper()}",
         "event_id": event_id,
-        "manifest_hash": "CFG-LATEST", # This would be fetched from config system in full implementation
+        "manifest_hash": manifest_hash,
         "runtime_timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT"),
         "detection_outcome": ai_result.get("classification", "UNKNOWN"),
         "terminal_stage": "AI_APPROVED",
@@ -180,6 +202,39 @@ def main():
 
     telemetry = PipelineTelemetry()
     
+    # =========================================================
+    # THE BRAIN: Sync and Lock Configuration Manifest
+    # =========================================================
+    try:
+        logger.info("Syncing Configuration Manifest from Google Sheets (The Brain)...")
+        
+        # Bootstrap global Ontology Taxonomy mappings
+        load_ontology(SHEET_URL)
+        
+        # Load all dynamic tables
+        config_manifest = {
+            "rules": load_rules(SHEET_URL),
+            "global_exclusions": load_global_exclusions(SHEET_URL),
+            "sources": load_sources(SHEET_URL),
+            "document_type_scores": load_document_type_scores(SHEET_URL),
+            "semantic_concepts": load_semantic_concepts(SHEET_URL),
+            "event_statuses": load_event_statuses(SHEET_URL),
+            "settings": get_system_settings(SHEET_URL),
+            "playbooks": load_playbooks(SHEET_URL)
+        }
+        
+        # Compute exact SHA-256 signature and lock it into the database for the run
+        config_json = json.dumps(config_manifest, sort_keys=True)
+        manifest_hash = f"CFG-{hashlib.sha256(config_json.encode('utf-8')).hexdigest()[:12].upper()}"
+        save_config_snapshot(manifest_hash, telemetry.run_id, config_json)
+        
+        logger.info(f"Locked Immutable Configuration Manifest: {manifest_hash}")
+        
+    except Exception as e:
+        logger.critical(f"Failed to fetch Configuration Manifest from Google Sheets: {e}")
+        save_exception_log(run_id=telemetry.run_id, exc_type="FATAL_CONFIG", stack_trace=traceback.format_exc())
+        sys.exit(1)
+    
     try:
         # STAGE 1: Download/Ingest
         logger.info("Fetching articles from sources...")
@@ -187,10 +242,10 @@ def main():
         telemetry.metrics["downloaded"] = len(articles)
         logger.info(f"Ingested {len(articles)} raw articles.")
 
-        # Process Funnel
+        # Process Funnel (Injecting the dynamic config_manifest payload)
         for article in articles:
             try:
-                process_article(article, telemetry)
+                process_article(article, telemetry, config_manifest, manifest_hash)
             except Exception as e:
                 logger.error(f"Error processing article: {e}")
                 telemetry.track("errors")
@@ -231,7 +286,6 @@ def main():
             logger.error(f"Failed to export frontend data: {e}")
             
         try:
-            # Assuming sheets_sync has a main() or sync() function
             if hasattr(sheets_sync, 'main'):
                 sheets_sync.main()
             elif hasattr(sheets_sync, 'sync_metrics'):
