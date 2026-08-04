@@ -2,12 +2,39 @@ import os
 import json
 import time
 import datetime
+import ast
 import gspread
 from google.oauth2.service_account import Credentials
 from src.config.secrets import get_google_service_account
 
 _cached_client = None
 _cached_spreadsheet = None
+
+def _sanitize_private_key(raw_pk: str) -> str:
+    if isinstance(raw_pk, bytes):
+        pk = raw_pk.decode("utf-8", "strict")
+    else:
+        pk = str(raw_pk)
+
+    # Quick common-case: replace JSON-escaped newlines
+    if "\\r\\n" in pk or "\\n" in pk or "\\\\n" in pk:
+        pk = pk.replace("\\r\\n", "\n").replace("\\\\n", "\n").replace("\\n", "\n")
+
+    # If there are still literal backslashes, try a conservative unicode-escape decode as fallback
+    if "\\n" in pk or "\\\\" in pk:
+        try:
+            pk = pk.encode("utf-8").decode("unicode_escape")
+        except Exception:
+            pass
+
+    # Trim and ensure proper PEM framing / final newline
+    pk = pk.strip()
+    if not pk.startswith("-----BEGIN "):
+        raise ValueError("private_key appears malformed (missing PEM header)")
+    if not pk.endswith("\n"):
+        pk += "\n"
+
+    return pk
 
 def get_client():
     global _cached_client
@@ -19,14 +46,16 @@ def get_client():
     # Retrieve credentials dictionary through the centralized secrets manager
     creds_dict = get_google_service_account()
 
+    # If credentials returned as a string, parse to dict
+    if isinstance(creds_dict, str):
+        try:
+            creds_dict = json.loads(creds_dict)
+        except json.JSONDecodeError:
+            creds_dict = ast.literal_eval(creds_dict)
+
     # --- BULLETPROOF LOCAL PRIVATE KEY SANITIZATION ---
     if creds_dict and "private_key" in creds_dict:
-        pk = str(creds_dict["private_key"])
-        # Unescape literal backslashes and carriage returns into true cryptographic newlines
-        pk = pk.replace("\\r\\n", "\n").replace("\\n", "\n").replace("\\\\n", "\n")
-        if not pk.endswith("\n"):
-            pk += "\n"
-        creds_dict["private_key"] = pk
+        creds_dict["private_key"] = _sanitize_private_key(creds_dict["private_key"])
 
     creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
     _cached_client = gspread.authorize(creds)
