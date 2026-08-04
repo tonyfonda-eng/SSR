@@ -37,11 +37,14 @@ def get_client():
     if not creds_dict:
         raise ValueError("[CRITICAL] No valid Google service account credentials found anywhere!")
 
-    # --- ROBUST FIX: Clean up escaped newlines in the private key ---
+    # --- BULLETPROOF PEM PRIVATE KEY SANITIZATION ---
     if "private_key" in creds_dict:
-        pk = creds_dict["private_key"]
-        if "\\n" in pk:
-            creds_dict["private_key"] = pk.replace("\\n", "\n")
+        pk = str(creds_dict["private_key"])
+        # Replace all possible forms of escaped newlines with actual platform newlines
+        pk = pk.replace("\\\\n", "\n").replace("\\n", "\n")
+        # Strip extraneous quotes if present
+        pk = pk.strip('"').strip("'")
+        creds_dict["private_key"] = pk
 
     creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
     _cached_client = gspread.authorize(creds)
