@@ -16,6 +16,9 @@ logger = logging.getLogger(__name__)
 RESEARCH_DB_PATH = "ssr_observability.db"
 DEVOPS_DB_PATH = "ssr_devops.db"
 
+# Alias for legacy modules expecting DB_PATH
+DB_PATH = RESEARCH_DB_PATH
+
 
 def init_db():
     """
