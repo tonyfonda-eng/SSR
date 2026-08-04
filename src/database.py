@@ -116,6 +116,17 @@ def init_db():
         );
     """)
 
+    # Factual Metadata mapping table for frontend export compatibility
+    r_conn.execute("""
+        CREATE TABLE IF NOT EXISTS factual_metadata (
+            decision_id TEXT PRIMARY KEY,
+            headline TEXT,
+            source_url TEXT,
+            published_timestamp TEXT,
+            FOREIGN KEY (decision_id) REFERENCES evaluation_ledger(decision_id)
+        );
+    """)
+
     # Attempt to gracefully alter the table if it exists but is missing the new column (Phase 1 Migration)
     try:
         r_conn.execute("ALTER TABLE evaluation_ledger ADD COLUMN market_data_snapshot TEXT;")
@@ -418,6 +429,17 @@ def commit_decision_capsule(capsule_data: dict, manifest_json: dict = None):
             capsule_data.get("evidence_completeness_score", 1.0),
             capsule_data.get("parent_decision_id"),
             capsule_data.get("market_data_snapshot")
+        ))
+        
+        # Populate Factual Metadata table for frontend export compatibility
+        cursor.execute("""
+            INSERT OR REPLACE INTO factual_metadata (decision_id, headline, source_url, published_timestamp)
+            VALUES (?, ?, ?, ?);
+        """, (
+            dec_id,
+            capsule_data.get("headline", "Corporate Announcement"),
+            capsule_data.get("url", "http://local.endpoint"),
+            capsule_data.get("runtime_timestamp")
         ))
         
         perf = capsule_data.get("performance_telemetry_ms", {})
