@@ -21,11 +21,18 @@ def get_client():
             creds_dict = json.loads(creds_json)
             creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
             _cached_client = gspread.authorize(creds)
+            return _cached_client
         except json.JSONDecodeError:
-            print("[CRITICAL] GOOGLE_SERVICE_ACCOUNT_JSON is malformed. Falling back to local credentials.json")
-            _cached_client = gspread.service_account(filename="credentials.json")
-    else:
-        _cached_client = gspread.service_account(filename="credentials.json")
+            print("[CRITICAL] GOOGLE_SERVICE_ACCOUNT_JSON is malformed. Falling back to local secure files.")
+            
+    # Look for the new secure credentials file first
+    for filename in ["secure_google_credentials.json", "credentials.json", "google_credentials.json"]:
+        if os.path.exists(filename):
+            _cached_client = gspread.service_account(filename=filename)
+            return _cached_client
+            
+    # Fallback default if files aren't found locally (will raise an error telling us it's missing)
+    _cached_client = gspread.service_account(filename="secure_google_credentials.json")
         
     return _cached_client
 
