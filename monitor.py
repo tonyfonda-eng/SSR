@@ -78,6 +78,25 @@ def stage_exclude_issuer_feed(article: dict, ctx: dict) -> tuple:
         return False, "dropped_issuer_exclusion"
     return True, "passed"
 
+def stage_exclude_source_specific(article: dict, ctx: dict) -> tuple:
+    """Drops noise based on the specific behavior/garbage profile of individual feeds."""
+    source = article.get("source", "").lower()
+    text = article.get("body", "").lower()
+    
+    # TODO: Migrate these dictionaries to a 'Source Profiles' tab in Google Sheets
+    source_noise_profiles = {
+        "pr newswire": ["new appointment", "product launch", "esg", "conference", "trade show"],
+        "business wire": ["exhibition", "quarterly dividend", "monthly dividend"],
+        "globenewswire": ["award", "recognition", "thrilled to welcome"]
+    }
+    
+    for src, noise_keywords in source_noise_profiles.items():
+        if src in source:
+            for noise in noise_keywords:
+                if noise in text:
+                    return False, "dropped_source_specific_noise"
+    return True, "passed"
+
 # --- ONTOLOGY & RULES (PHASE 2 - MOVED UP TO MINIMIZE CPU LOAD) ---
 
 def stage_ontology_concepts(article: dict, ctx: dict) -> tuple:
@@ -105,22 +124,22 @@ def stage_regex_rules(article: dict, ctx: dict) -> tuple:
         threshold=threshold
     )
     if not rule_results: return False, "dropped_rules_threshold"
+    # Save the matched families for playbook eligibility checking
+    article["_deterministic_families"] = rule_results if isinstance(rule_results, list) else []
     return True, "passed"
 
-# --- DETERMINISTIC STAGES (PHASE 3 - EXECUTED ONLY ON FILTERED HIGH-VALUE TEXT) ---
+# --- DETERMINISTIC ENTITY STAGES (PHASE 3) ---
 
 def stage_python_issuer_extraction(article: dict, ctx: dict) -> tuple:
-    """Deterministic issuer extraction (regex, source parsing, dictionaries)."""
     text = article.get("body", "")
     match = re.search(r'([A-Z][A-Za-z0-9\,\.\&\s]{3,40})\s+\([A-Z]{3,6}\s*:\s*[A-Z]{1,5}\)', text[:1000])
     if match:
         article["_deterministic_issuer"] = match.group(1).strip()
     else:
-        article["_deterministic_issuer"] = article.get("source", "UNKNOWN")
+        article["_deterministic_issuer"] = "UNKNOWN"
     return True, "passed"
 
 def stage_python_ticker_lookup(article: dict, ctx: dict) -> tuple:
-    """Resolve ticker from issuer without AI."""
     text = article.get("body", "")
     match = re.search(r'\b(?:NYSE|NASDAQ|AMEX|OTC|TSX|LSE|NYSE MKT|NYSE ARCA)[^A-Z]{1,3}([A-Z]{1,5})\b', text, re.IGNORECASE)
     if match:
@@ -129,18 +148,34 @@ def stage_python_ticker_lookup(article: dict, ctx: dict) -> tuple:
         article["_deterministic_ticker"] = "UNKNOWN"
     return True, "passed"
 
+def stage_entity_confidence_gate(article: dict, ctx: dict) -> tuple:
+    """Blocks execution if deterministic extraction yields garbage."""
+    issuer = article.get("_deterministic_issuer", "UNKNOWN")
+    ticker = article.get("_deterministic_ticker", "UNKNOWN")
+    
+    confidence = 0
+    if ticker != "UNKNOWN" and issuer != "UNKNOWN":
+        confidence = 100
+    elif ticker != "UNKNOWN":
+        confidence = 90
+    elif issuer != "UNKNOWN":
+        confidence = 40
+        
+    if confidence < 80:
+        return False, "dropped_entity_confidence"
+        
+    return True, "passed"
+
+# --- FINANCIAL CONSTRAINTS (PHASE 4) ---
+
 def stage_financial_market_cap(article: dict, ctx: dict) -> tuple:
     return True, "passed"
 
 def stage_tradeability_check(article: dict, ctx: dict) -> tuple:
-    """Reject private/untradeable/non-supported securities."""
     ticker = article.get("_deterministic_ticker", "UNKNOWN")
-    if ticker != "UNKNOWN":
-        if ".PK" in ticker or ".OB" in ticker or ".OTC" in ticker:
-            return False, "dropped_untradeable_otc"
+    if ".PK" in ticker or ".OB" in ticker or ".OTC" in ticker:
+        return False, "dropped_untradeable_otc"
     return True, "passed"
-
-# --- FINANCIAL CONSTRAINTS (PHASE 4) ---
 
 def stage_financial_t12_floor(article: dict, ctx: dict) -> tuple:
     ticker = article.get("_deterministic_ticker", "UNKNOWN")
@@ -150,18 +185,6 @@ def stage_financial_t12_floor(article: dict, ctx: dict) -> tuple:
     return True, "passed"
 
 def stage_options_chain_check(article: dict, ctx: dict) -> tuple:
-    """Reject strategies requiring options where none exist."""
-    ticker = article.get("_deterministic_ticker", "UNKNOWN")
-    if ticker != "UNKNOWN":
-        options_only = str(ctx.get("sys_settings", {}).get("Options Tradable Only", "False")).lower() == "true"
-        if options_only:
-            snap = query_financial_snapshot(ticker)
-            if snap.is_complete and not snap.options_available:
-                return False, "dropped_no_options"
-    return True, "passed"
-
-def stage_options_chain_check(article: dict, ctx: dict) -> tuple:
-    """Reject strategies requiring options where none exist."""
     ticker = article.get("_deterministic_ticker", "UNKNOWN")
     if ticker != "UNKNOWN":
         options_only = str(ctx.get("sys_settings", {}).get("Options Tradable Only", "False")).lower() == "true"
@@ -172,13 +195,28 @@ def stage_options_chain_check(article: dict, ctx: dict) -> tuple:
     return True, "passed"
 
 def stage_liquidity_check(article: dict, ctx: dict) -> tuple:
-    """Minimum liquidity / volume constraints."""
     return True, "passed"
 
-# --- AI SPECIALIST FALLBACKS (PHASE 5) ---
+# --- PLAYBOOK GATE (PHASE 5 - FINAL DETERMINISTIC FILTER) ---
+
+def stage_playbook_eligibility_check(article: dict, ctx: dict) -> tuple:
+    """Drops the article if no active playbook exists for the detected event family."""
+    # Ensure there is at least one playbook defined for the deterministic families found
+    active_playbooks = [str(p.get("Playbook", "")).lower() for p in ctx.get("playbooks", []) if str(p.get("Active", "TRUE")).upper() == "TRUE"]
+    detected_families = [str(f).lower() for f in article.get("_deterministic_families", [])]
+    
+    # If the rules engine flagged families, but NONE map to a playbook (e.g. Dividend), drop it.
+    if detected_families:
+        has_playbook = any(family in active_playbooks for family in detected_families)
+        if not has_playbook:
+            return False, "dropped_no_playbook"
+            
+    return True, "passed"
+
+# --- THE AI SPECIALIST (PHASE 6 - AMBIGUITY, CLASSIFICATION, SUMMARIZATION ONLY) ---
 
 def stage_ai_ticker_resolution(article: dict, ctx: dict) -> tuple:
-    """LLM call 1: Purely extracts target company ticker (Fallback)."""
+    # Deterministic logic already proved highly confident, bypass AI extraction
     if article.get("_deterministic_ticker", "UNKNOWN") != "UNKNOWN":
         article["_ai_ticker"] = article.get("_deterministic_ticker")
         return True, "passed"
@@ -216,17 +254,20 @@ STAGE_REGISTRY = {
     "dedupe_issuer_memory": stage_dedupe_issuer_memory,
     "exclude_global_keywords": stage_exclude_global_keywords,
     "exclude_issuer_feed": stage_exclude_issuer_feed,
+    "exclude_source_specific": stage_exclude_source_specific,
     "ontology_concepts": stage_ontology_concepts,
     "ontology_status": stage_ontology_status,
     "document_scoring": stage_document_scoring,
     "regex_rules": stage_regex_rules,
     "python_issuer_extraction": stage_python_issuer_extraction,
     "python_ticker_lookup": stage_python_ticker_lookup,
+    "entity_confidence_gate": stage_entity_confidence_gate,
     "financial_market_cap": stage_financial_market_cap,
     "tradeability_check": stage_tradeability_check,
     "financial_t12_floor": stage_financial_t12_floor,
     "options_chain_check": stage_options_chain_check,
     "liquidity_check": stage_liquidity_check,
+    "playbook_eligibility_check": stage_playbook_eligibility_check,
     "ai_ticker_resolution": stage_ai_ticker_resolution,
     "ai_event_classification": stage_ai_event_classification,
     "ai_confidence_gate": stage_ai_confidence_gate
@@ -242,13 +283,29 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
         sorted_stages = sorted([s for s in raw_pipeline_sheet if str(s.get("Active", "TRUE")).upper() == "TRUE"], key=lambda x: int(x.get("Order", 99)))
         execution_order = [s.get("Stage_ID") for s in sorted_stages]
     else:
+        # Fallback Strict DAG
         execution_order = [
-            "dedupe_hash", "dedupe_issuer_memory", "exclude_global_keywords", 
-            "exclude_issuer_feed", "ontology_concepts", "ontology_status", 
-            "document_scoring", "regex_rules", "python_issuer_extraction", 
-            "python_ticker_lookup", "financial_market_cap", "tradeability_check", 
-            "financial_t12_floor", "options_chain_check", "liquidity_check", 
-            "ai_ticker_resolution", "ai_event_classification", "ai_confidence_gate"
+            "dedupe_hash", 
+            "dedupe_issuer_memory", 
+            "exclude_global_keywords", 
+            "exclude_issuer_feed", 
+            "exclude_source_specific",
+            "ontology_concepts", 
+            "ontology_status", 
+            "document_scoring", 
+            "regex_rules", 
+            "python_issuer_extraction", 
+            "python_ticker_lookup", 
+            "entity_confidence_gate",
+            "financial_market_cap",
+            "tradeability_check", 
+            "financial_t12_floor", 
+            "options_chain_check", 
+            "liquidity_check", 
+            "playbook_eligibility_check",
+            "ai_ticker_resolution", 
+            "ai_event_classification", 
+            "ai_confidence_gate"
         ]
 
     for stage_name in execution_order:
