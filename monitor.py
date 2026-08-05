@@ -440,6 +440,10 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
             return False
             
     telemetry.track("alerts_generated")
+    mode = article.get("_ingestion_mode")
+    if mode == "RSS": telemetry.track("RSS_alerts")
+    elif mode == "HTML": telemetry.track("HTML_alerts")
+    
     event_id = article.get("_internal_event_id", "UNKNOWN")
     ticker = article.get("_ai_ticker", "UNKNOWN")
     event_family = article.get("_ai_classification", "Corporate Announcement")
@@ -522,10 +526,35 @@ def main():
         sys.exit(1)
     
     try:
-        articles = fetch_all_feeds(config_manifest.get("sources", [])) 
-        telemetry.metrics["downloaded"] = len(articles)
+        raw_articles = fetch_all_feeds(config_manifest.get("sources", [])) 
+        telemetry.metrics["downloaded"] = len(raw_articles)
+        telemetry.metrics["RSS_downloaded"] = sum(1 for a in raw_articles if a.get("_ingestion_mode") == "RSS")
+        telemetry.metrics["HTML_downloaded"] = sum(1 for a in raw_articles if a.get("_ingestion_mode") == "HTML")
+        
+        # Immediate Global Deduplication
+        unique_articles = []
+        seen_hashes = set()
+        for article in raw_articles:
+            title = article.get("headline", "").strip().lower()
+            source = article.get("source", "").strip().lower()
+            if not title or title == "no title" or title == "html document":
+                title = article.get("body", "")[:200].strip().lower()
+                
+            dup_hash = hashlib.md5(f"{source}::{title}".encode('utf-8')).hexdigest()
+            
+            if dup_hash not in seen_hashes:
+                seen_hashes.add(dup_hash)
+                unique_articles.append(article)
+            else:
+                logger.debug(f"[DEDUPE] Dropped overlapping article: {article.get('headline')} from {article.get('source')} ({article.get('_ingestion_mode')})")
+        
+        telemetry.metrics["RSS_unique"] = sum(1 for a in unique_articles if a.get("_ingestion_mode") == "RSS")
+        telemetry.metrics["HTML_unique"] = sum(1 for a in unique_articles if a.get("_ingestion_mode") == "HTML")
+        telemetry.metrics["unique_articles"] = len(unique_articles)
+        
+        logger.info(f"Global deduplication complete: {len(raw_articles)} raw -> {len(unique_articles)} unique.")
 
-        for article in articles:
+        for article in unique_articles:
             try:
                 process_article(article, telemetry, config_manifest, manifest_hash)
             except Exception as e:
@@ -553,6 +582,13 @@ def main():
             "daily": {
                 "run_id": telemetry.run_id,
                 "downloaded": telemetry.metrics.get("downloaded", 0),
+                "RSS_downloaded": telemetry.metrics.get("RSS_downloaded", 0),
+                "HTML_downloaded": telemetry.metrics.get("HTML_downloaded", 0),
+                "RSS_unique": telemetry.metrics.get("RSS_unique", 0),
+                "HTML_unique": telemetry.metrics.get("HTML_unique", 0),
+                "RSS_alerts": telemetry.metrics.get("RSS_alerts", 0),
+                "HTML_alerts": telemetry.metrics.get("HTML_alerts", 0),
+                "unique_articles": telemetry.metrics.get("unique_articles", 0),
                 "health_score": 100.0,
                 "funnel": telemetry.stage_analytics
             },

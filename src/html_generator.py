@@ -286,6 +286,16 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
     
     eng_ai = _get_stage_raw_count(funnel_counts, ["dropped_entity_confidence", "dropped_entity_missing_ticker", "dropped_entity_unknown_issuer", "dropped_entity_missing_both", "ai_rejected_private", "dropped_ai_confidence", "ai_exhausted"]) or 0 
     
+    eng_rss_down = _daily(metrics, "RSS_downloaded", 0)
+    eng_html_down = _daily(metrics, "HTML_downloaded", 0)
+    eng_rss_uniq = _daily(metrics, "RSS_unique", 0)
+    eng_html_uniq = _daily(metrics, "HTML_unique", 0)
+    eng_rss_alerts = _daily(metrics, "RSS_alerts", 0)
+    eng_html_alerts = _daily(metrics, "HTML_alerts", 0)
+    
+    unique_arts = _daily(metrics, "unique_articles", eng_downloaded)
+    global_dedupe = eng_downloaded - unique_arts if eng_downloaded > unique_arts else 0
+    
     trust_row = "".join([
         f'<div class="stat-tile"><div class="stat-label">Articles Downloaded</div><div class="stat-value">{eng_downloaded}</div></div>',
         f'<div class="stat-tile"><div class="stat-label">Duplicates Removed</div><div class="stat-value">{eng_duplicates}</div></div>',
@@ -338,6 +348,19 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
     <div class="subline">Manifest Configuration Hash: CFG-LATEST &bull; Re-Evaluated {esc(now_str)}</div></div></header>
     
     <div class="card" style="margin-bottom: 12px;"><h2>1. Engineering Metrics</h2><div class="tile-grid" style="grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));">{trust_row}</div></div>
+    
+    <div class="card" style="margin-bottom: 12px; display: flex; gap: 20px;">
+        <div style="flex: 1;">
+            <h2>Acquisition Channels (RSS vs HTML)</h2>
+            <div class="tile-grid" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
+                <div class="stat-tile" style="border:none; background:transparent;"><div class="stat-label">&nbsp;</div><div class="stat-value" style="font-size: 0.9em; color:var(--muted);">RSS</div><div class="stat-value" style="font-size: 0.9em; margin-top: 8px; color:var(--muted);">HTML</div></div>
+                <div class="stat-tile"><div class="stat-label">Raw Downloaded</div><div class="stat-value" style="font-size: 0.9em;">{eng_rss_down}</div><div class="stat-value" style="font-size: 0.9em; margin-top: 8px;">{eng_html_down}</div></div>
+                <div class="stat-tile"><div class="stat-label">Unique Yield</div><div class="stat-value" style="font-size: 0.9em;">{eng_rss_uniq}</div><div class="stat-value" style="font-size: 0.9em; margin-top: 8px;">{eng_html_uniq}</div></div>
+                <div class="stat-tile"><div class="stat-label">Alerts Contributed</div><div class="stat-value" style="font-size: 0.9em; color:var(--green)">{eng_rss_alerts}</div><div class="stat-value" style="font-size: 0.9em; margin-top: 8px; color:var(--green)">{eng_html_alerts}</div></div>
+            </div>
+            <div style="margin-top: 10px; font-size: 0.85em; color: var(--yellow);">Global deduplication dropped <strong>{global_dedupe}</strong> overlapping cross-channel articles before processing.</div>
+        </div>
+    </div>
     
     <div class="card" style="margin-bottom: 12px; overflow-x: auto;"><h2>2. Sensor Feed Quality & Pipeline Yield</h2>
     <table><thead><tr><th>Sensor Identity</th><th>Articles Downloaded</th><th>Alerts Generated</th><th>Capture Share</th><th>Alert %</th><th>Ontology Yield %</th><th>Rules Yield %</th><th>Failures</th><th>Reliability</th><th>Avg Latency</th><th>Cost/Yield</th></tr></thead><tbody>{source_row_html}</tbody></table></div>

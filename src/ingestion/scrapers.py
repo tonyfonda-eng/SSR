@@ -14,48 +14,15 @@ logger = logging.getLogger(__name__)
 
 from src.scrapers import get_scraper_for_source
 
-def _fetch_single_source(source: dict) -> tuple:
-    """Worker function to fetch a single source feed or HTML fallback."""
+def _fetch_rss_channel(source: dict) -> tuple:
     articles = []
     source_name = source.get("Source Name", source.get("Source", "Unknown"))
-    url = source.get("URL", source.get("HTML URL", ""))
+    url = source.get("RSS URL", source.get("URL", ""))
     
-    # 1. Try Custom Scraper First
-    scraper = get_scraper_for_source(source_name)
-    if scraper:
-        try:
-            logger.info(f"[INGESTION] Using dedicated scraper for '{source_name}'")
-            raw_articles = scraper.get_latest_articles(url=url)
-            for ra in raw_articles:
-                body_text = ra.get("body", "")
-                # If body is missing or very short, try to fetch the full text
-                if not body_text or len(body_text) < 500:
-                    try:
-                        fetched_body = scraper.get_article_body(ra["url"])
-                        if fetched_body:
-                            body_text = fetched_body
-                    except Exception as body_err:
-                        logger.debug(f"Failed to fetch full body for {ra['url']}: {body_err}")
-                        
-                articles.append({
-                    "source": source_name,
-                    "url": ra.get("url", url),
-                    "headline": ra.get("title", "No Title"),
-                    "body": body_text,
-                    "document_type": source.get("Type", "Press Release"),
-                    "_ingestion_mode": "CUSTOM_SCRAPER"
-                })
-            return articles, source_name
-        except Exception as e:
-            logger.error(f"[INGESTION] Custom scraper for '{source_name}' failed: {e}")
-            # Do not fallback to raw HTML if custom scraper fails; usually that means source is down.
-            return [], None
-
     if not url:
         return articles, None
         
     try:
-        # 2. Parse as RSS (Primary Fallback Method)
         feed = feedparser.parse(url)
         if feed.entries:
             for entry in feed.entries:
@@ -73,27 +40,65 @@ def _fetch_single_source(source: dict) -> tuple:
                     "document_type": source.get("Type", "Press Release"),
                     "_ingestion_mode": "RSS"
                 })
-        else:
-            # 3. Fallback: Parse as raw HTML if it's not an RSS feed
-            logger.warning(f"[INGESTION] '{source_name}' has no valid RSS/Atom entries at {url} — "
-                            f"falling back to raw HTML scrape. This will likely re-ingest the same "
-                            f"static page every run. Check/update this source's URL in the Sheet.")
-            headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
-            resp = requests.get(url, headers=headers, timeout=10)
-            if resp.status_code == 200:
-                soup = BeautifulSoup(resp.text, "html.parser")
-                articles.append({
-                    "source": source_name,
-                    "url": url,
-                    "headline": soup.title.string if soup.title else "HTML Document",
-                    "body": soup.get_text(separator=" ", strip=True)[:8000],
-                    "document_type": source.get("Type", "HTML"),
-                    "_ingestion_mode": "HTML_FALLBACK"
-                })
-                
         return articles, source_name
     except Exception as e:
-        logger.error(f"[INGESTION] Failed to poll {source_name}: {e}")
+        logger.error(f"[INGESTION] RSS fetch failed for {source_name}: {e}")
+        return [], None
+
+def _fetch_html_channel(source: dict) -> tuple:
+    articles = []
+    source_name = source.get("Source Name", source.get("Source", "Unknown"))
+    url = source.get("HTML URL", "")
+    
+    if not url:
+        return articles, None
+        
+    scraper = get_scraper_for_source(source_name)
+    if scraper:
+        try:
+            logger.info(f"[INGESTION] Using dedicated HTML scraper for '{source_name}'")
+            raw_articles = scraper.get_latest_articles(url=url)
+            for ra in raw_articles:
+                body_text = ra.get("body", "")
+                # If body is missing or very short, try to fetch the full text
+                if not body_text or len(body_text) < 500:
+                    try:
+                        fetched_body = scraper.get_article_body(ra["url"])
+                        if fetched_body:
+                            body_text = fetched_body
+                    except Exception as body_err:
+                        logger.debug(f"Failed to fetch full HTML body for {ra['url']}: {body_err}")
+                        
+                articles.append({
+                    "source": source_name,
+                    "url": ra.get("url", url),
+                    "headline": ra.get("title", "No Title"),
+                    "body": body_text,
+                    "document_type": source.get("Type", "Press Release"),
+                    "_ingestion_mode": "HTML"
+                })
+            return articles, source_name
+        except Exception as e:
+            logger.error(f"[INGESTION] HTML scraper for '{source_name}' failed: {e}")
+            return [], None
+            
+    # Generic HTML Fallback
+    try:
+        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
+        resp = requests.get(url, headers=headers, timeout=10)
+        if resp.status_code == 200:
+            soup = BeautifulSoup(resp.text, "html.parser")
+            articles.append({
+                "source": source_name,
+                "url": url,
+                "headline": soup.title.string if soup.title else "HTML Document",
+                "body": soup.get_text(separator=" ", strip=True)[:8000],
+                "document_type": source.get("Type", "HTML"),
+                "_ingestion_mode": "HTML"
+            })
+        return articles, source_name
+    except Exception as e:
+        logger.error(f"[INGESTION] Generic HTML fetch failed for {source_name}: {e}")
         return [], None
 
 
@@ -108,33 +113,36 @@ def fetch_all_feeds(active_sources: list = None) -> list:
         return articles
         
     active_targets = [s for s in active_sources if str(s.get("Enabled", str(s.get("Active", "TRUE")))).upper() == "TRUE"]
+    logger.info(f"[INGESTION] Booting concurrent multi-channel ingestion for {len(active_targets)} active sources...")
     
-    # Also ensure we don't try to scrape completely blank sources
-    active_targets = [s for s in active_targets if s.get("URL") or s.get("HTML URL")]
+    successful_sources = set()
     
-    logger.info(f"[INGESTION] Booting concurrent ingestion sequence for {len(active_targets)} active sources...")
-    
-    successful_sources = []
-    
-    # Use ThreadPoolExecutor to fetch all feeds in parallel
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        future_to_source = {executor.submit(_fetch_single_source, source): source for source in active_targets}
-        for future in concurrent.futures.as_completed(future_to_source):
+        futures = []
+        for source in active_targets:
+            # RSS collector
+            if source.get("RSS URL") or source.get("URL"):
+                futures.append(executor.submit(_fetch_rss_channel, source))
+            
+            # HTML collector
+            if source.get("HTML URL"):
+                futures.append(executor.submit(_fetch_html_channel, source))
+                
+        for future in concurrent.futures.as_completed(futures):
             try:
                 arts, source_name = future.result()
                 if arts:
                     articles.extend(arts)
                 if source_name:
-                    successful_sources.append(source_name)
+                    successful_sources.add(source_name)
             except Exception as e:
                 logger.error(f"[INGESTION] Thread fetch failed: {e}")
                 
-    # Batch update Google Sheets to avoid API rate limits
     if successful_sources:
         try:
-            batch_update_last_checked(SHEET_URL, successful_sources)
+            batch_update_last_checked(SHEET_URL, list(successful_sources))
         except Exception as sheet_err:
             logger.debug(f"[INGESTION] Failed to batch update Last Checked: {sheet_err}")
             
-    logger.info(f"[INGESTION] Download sequence complete. Downloaded {len(articles)} raw articles.")
+    logger.info(f"[INGESTION] Download sequence complete. Downloaded {len(articles)} raw articles across all channels.")
     return articles
