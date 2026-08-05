@@ -1,3 +1,4 @@
+import re
 """
 Downloads and extracts PR Newswire articles.
 """
@@ -109,7 +110,12 @@ class PRNewsWireScraper(SourceScraper):
                         if small:
                             published = small.get_text(strip=True)
                             small.extract()
-                        title = title_elem.get_text(strip=True)
+                        raw_text = title_elem.get_text(strip=True)
+                        match = re.match(r'^\d{1,2}:\d{2}\s*ET|^[A-Z][a-z]{2}\s+\d{1,2},\s*\d{4},?\s*\d{1,2}:\d{2}\s*ET', raw_text)
+                        if match and not published:
+                            published = match.group(0)
+                            raw_text = raw_text[match.end():].strip()
+                        title = raw_text
                     else:
                         title = a_tag.get_text(strip=True)
                         
