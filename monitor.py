@@ -334,7 +334,9 @@ STAGE_REGISTRY = {
     "playbook_eligibility_check": stage_playbook_eligibility_check,
     "ai_ticker_resolution": stage_ai_ticker_resolution,
     "ai_event_classification": stage_ai_event_classification,
-    "ai_confidence_gate": stage_ai_confidence_gate
+    "ai_confidence_gate": stage_ai_confidence_gate,
+    "entity_confidence": stage_entity_confidence_gate,
+    "playbook_gate": stage_playbook_eligibility_check,
 }
 
 def _record_screening(article: dict, telemetry: PipelineTelemetry, outcome: str, final_stage: str, drop_reason: str = None):
