@@ -1,0 +1,166 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>SSR Article Screening Log</title><style>
+        :root { --bg: #0a0e14; --surface: #11161d; --surface-subtle: #1a2029; --surface-hover: #222933; --border: #2a323d; --text: #c1c9d2; --muted: #79838f; --green: #2ea043; --red: #cb2431; --yellow: #dbab0a; --blue: #4088db; --mono: "SF Mono", "JetBrains Mono", Consolas, "Roboto Mono", monospace; }
+        * { box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 12px; font-size: 13px; line-height: 1.4; }
+        .container { max-width: 1800px; margin: 0 auto; }
+        header { display: flex; justify-content: space-between; align-items: center; background: var(--surface); border: 1px solid var(--border); padding: 12px 18px; margin-bottom: 12px; border-left: 5px solid var(--green); }
+        h1 { margin: 0; font-size: 1.3em; color: #fff; display: flex; align-items: center; gap: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .subline { color: var(--muted); margin-top: 4px; font-size: 0.85em; font-family: var(--mono); }
+        .badge { padding: 2px 6px; border-radius: 3px; font-size: 0.7em; font-weight: 700; letter-spacing: 0.5px; }
+        .badge.success { background: rgba(46,160,67,0.15); color: var(--green); border: 1px solid var(--green); }
+        .badge.danger  { background: rgba(203,36,49,0.15); color: var(--red); border: 1px solid var(--red); }
+        .badge.warn    { background: rgba(219,171,10,0.15); color: var(--yellow); border: 1px solid var(--yellow); }
+        .badge.info    { background: rgba(64,136,219,0.15); color: var(--blue); border: 1px solid var(--blue); }
+        .badge.awaiting{ background: rgba(121,131,143,0.12); color: var(--muted); border: 1px dashed var(--muted); }
+        .nav-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+        .nav-tabs a { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 7px 14px; text-decoration: none; font-weight: 600; font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.5px; }
+        .nav-tabs a.active { background: var(--blue); color: #fff; border-color: var(--blue); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 12px; }
+        .card { background: var(--surface); border: 1px solid var(--border); padding: 14px; }
+        .card h2 { margin: 0 0 10px; font-size: 0.95em; color: #fff; text-transform: uppercase; letter-spacing: 0.8px; display: flex; justify-content: space-between; align-items: center; font-weight: 700; border-bottom: 1px solid var(--border); padding-bottom: 8px;}
+        .tile-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; }
+        .stat-tile { background: var(--surface-subtle); border: 1px solid var(--border); padding: 8px 10px; }
+        .stat-label { font-size: 0.65em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.5px; margin-bottom: 4px; font-weight: 600;}
+        .stat-value { font-family: var(--mono); font-size: 1.15em; font-weight: 700; color: var(--text); }
+        .awaiting { color: var(--muted); font-style: italic; font-size: 0.65em; font-weight: 600; letter-spacing: 0.3px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.85em; }
+        th, td { padding: 6px 8px; border-bottom: 1px solid var(--surface-subtle); text-align: left; vertical-align: top;}
+        th { color: var(--muted); text-transform: uppercase; font-size: 0.7em; letter-spacing: 0.4px; cursor: pointer; user-select: none;}
+        th:hover { color: #fff; background: var(--surface-hover); }
+        .metric-val { text-align: right; font-family: var(--mono); }
+        tr.clickable { cursor: pointer; } tr.clickable:hover { background: var(--surface-hover); }
+        .loss-funnel { display: flex; flex-direction: column; }
+        .loss-row { display: grid; grid-template-columns: 180px 1fr 1fr 1fr 1fr 1fr; gap: 8px; align-items: center; padding: 7px 4px; border-bottom: 1px solid var(--surface-subtle); text-decoration: none; color: var(--text); }
+        .loss-row:hover { background: var(--surface-hover); }
+        .loss-row .lr-name { font-weight: 600; font-size: 0.85em; }
+        .loss-row .lr-val { font-family: var(--mono); text-align: right; font-size: 0.85em; }
+        .loss-row.head { color: var(--muted); text-transform: uppercase; font-size: 0.65em; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+        .kpi-hero { display: flex; align-items: flex-start; gap: 24px; flex-wrap: wrap; }
+        .kpi-number { font-family: var(--mono); font-size: 3em; font-weight: 800; color: #fff; line-height: 1; }
+        .kpi-label { font-size: 0.75em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.5px; margin-bottom: 6px; font-weight: 700;}
+        .kpi-context-row { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); width: 100%; }
+        .kpi-context-item .cx-label { font-size: 0.65em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.4px; }
+        .kpi-context-item .cx-value { font-family: var(--mono); font-weight: 700; font-size: 1.05em; margin-top: 2px; }
+        .empty-note { color: var(--muted); font-style: italic; padding: 8px 0; font-size: 0.85em; }
+        .activity-list { list-style: none; margin: 0; padding: 0; }
+        .activity-list li { padding: 6px 0; border-bottom: 1px solid var(--surface-subtle); font-size: 0.85em; display: flex; justify-content: space-between; gap: 10px; }
+        .activity-list li:last-child { border-bottom: none; }
+        .activity-ts { color: var(--muted); font-family: var(--mono); font-size: 0.82em; white-space: nowrap; }
+ 
+        .table-wrapper { background: var(--surface); border: 1px solid var(--border); overflow-x: auto; }
+        th { background: var(--surface-subtle); position: sticky; top: 0; z-index: 10; }
+        .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; align-items: center; }
+        .filter-bar select, .filter-bar input { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 6px 10px; font-size: 0.85em; font-family: inherit; }
+        .filter-bar input { flex: 1; min-width: 200px; }
+        .filter-bar label { font-size: 0.7em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.4px; }
+        .outcome-passed { color: var(--green); font-weight: 700; }
+        .outcome-dropped { color: var(--red); font-weight: 700; }
+        .reason-tag { font-family: var(--mono); color: var(--yellow); font-size: 0.85em; background: rgba(219,171,10,0.1); padding: 2px 6px; border-radius: 3px; }
+        .headline-cell { max-width: 420px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .headline-cell a { color: var(--text); text-decoration: none; }
+        .headline-cell a:hover { color: var(--blue); text-decoration: underline; }
+        .result-count { color: var(--muted); font-size: 0.8em; margin-bottom: 8px; }
+    </style>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('th').forEach(th => th.addEventListener('click', (() => {
+        const table = th.closest('table');
+        Array.from(table.querySelectorAll('tr:nth-child(n+2)'))
+            .sort(comparer(Array.from(th.parentNode.children).indexOf(th), this.asc = !this.asc))
+            .forEach(tr => table.appendChild(tr) );
+    })));
+});
+const getCellValue = (tr, idx) => tr.children[idx].innerText || tr.children[idx].textContent;
+const comparer = (idx, asc) => (a, b) => ((v1, v2) => 
+    v1 !== '' && v2 !== '' && !isNaN(v1.replace(/[,%]/g,'')) && !isNaN(v2.replace(/[,%]/g,'')) ? v1.replace(/[,%]/g,'') - v2.replace(/[,%]/g,'') : v1.toString().localeCompare(v2)
+    )(getCellValue(asc ? a : b, idx), getCellValue(asc ? b : a, idx));
+</script>
+</head>
+    <body><div class="container">
+            <div class="nav-tabs">
+                <a href="index.html" class="">Operations Centre</a>
+                <a href="decision_analytics.html" class="">Drift & Intelligence</a>
+                <a href="archive.html" class="">Decision Ledger Manifests</a>
+                <a href="screening_log.html" class="active">Article Screening Log</a>
+            </div><header><h1>Article Screening Log</h1></header>
+
+    <div class="filter-bar">
+        <div><label>Outcome</label><br><select id="outcomeFilter"><option value="">All</option><option value="PASSED">Passed</option><option value="DROPPED">Dropped</option></select></div>
+        <div><label>Stage</label><br><select id="stageFilter"><option value="">All Stages</option></select></div>
+        <div style="flex:1;"><label>Search (headline, ticker, source)</label><br><input type="text" id="searchBox" placeholder="Type to filter..."></div>
+    </div>
+    <div class="result-count" id="resultCount"></div>
+
+    <div class="table-wrapper"><table id="screeningTable">
+    <thead><tr><th>Timestamp (GMT)</th><th>Source</th><th>Headline</th><th>Ticker</th><th>Outcome</th><th>Final Stage</th><th>Drop Reason</th></tr></thead>
+    <tbody id="tableBody"><tr><td colspan="7" style="text-align: center; color: var(--muted); padding: 30px;">Loading Screening Log...</td></tr></tbody>
+    </table></div></div>
+
+    <script>
+        let screeningData = [];
+
+        fetch('screening_log.json')
+            .then(res => res.json())
+            .then(data => {
+                screeningData = Array.isArray(data) ? data : (data.screening_log || []);
+                populateStageFilter();
+                renderTable();
+            })
+            .catch(err => {
+                screeningData = [];
+                renderTable();
+            });
+
+        function populateStageFilter() {
+            const stages = [...new Set(screeningData.map(r => r.final_stage).filter(Boolean))].sort();
+            const sel = document.getElementById('stageFilter');
+            stages.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s; opt.textContent = s;
+                sel.appendChild(opt);
+            });
+        }
+
+        document.getElementById('outcomeFilter').addEventListener('change', renderTable);
+        document.getElementById('stageFilter').addEventListener('change', renderTable);
+        document.getElementById('searchBox').addEventListener('input', renderTable);
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            const outcomeVal = document.getElementById('outcomeFilter').value;
+            const stageVal = document.getElementById('stageFilter').value;
+            const searchVal = document.getElementById('searchBox').value.toLowerCase();
+
+            let filtered = screeningData.filter(r => {
+                if (outcomeVal && r.outcome !== outcomeVal) return false;
+                if (stageVal && r.final_stage !== stageVal) return false;
+                if (searchVal) {
+                    const hay = `${r.headline||''} ${r.ticker||''} ${r.source||''}`.toLowerCase();
+                    if (!hay.includes(searchVal)) return false;
+                }
+                return true;
+            });
+
+            document.getElementById('resultCount').textContent = `Showing ${filtered.length} of ${screeningData.length} screened articles`;
+
+            tbody.innerHTML = '';
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">No screened articles match the current filters.</td></tr>';
+                return;
+            }
+
+            filtered.forEach(r => {
+                const tr = document.createElement('tr');
+                const outcomeCls = r.outcome === 'PASSED' ? 'outcome-passed' : 'outcome-dropped';
+                const reasonHtml = r.drop_reason ? `<span class="reason-tag">${r.drop_reason}</span>` : '';
+                tr.innerHTML = `<td>${r.timestamp || ''}</td>
+                                <td>${r.source || 'Unknown'}</td>
+                                <td class="headline-cell"><a href="${r.url || '#'}" target="_blank" title="${(r.headline||'').replace(/"/g,'&quot;')}">${r.headline || 'Untitled'}</a></td>
+                                <td>${r.ticker || 'UNKNOWN'}</td>
+                                <td class="${outcomeCls}">${r.outcome || ''}</td>
+                                <td>${r.final_stage || ''}</td>
+                                <td>${reasonHtml}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
+    </script></body></html>
