@@ -54,10 +54,13 @@ class BusinessWireScraper(SourceScraper):
 
     def get_latest_articles(self, **kwargs):
         import time
+        from src.ingestion.checkpoints import get_checkpoint, set_checkpoint
+        
         articles = []
         seen_ids = set()
 
         for category_name, feed_url in self.RSS_FEEDS:
+            checkpoint = get_checkpoint("Business Wire", f"RSS-{category_name}")
             try:
                 # Fetch with requests to enforce timeout and avoid feedparser hangs
                 headers = {"User-Agent": USER_AGENT}
@@ -65,8 +68,16 @@ class BusinessWireScraper(SourceScraper):
                 response.raise_for_status()
                 feed = feedparser.parse(response.content)
                 new_in_feed = 0
+                first_id = None
+                
                 for entry in feed.entries:
                     article_id = self._extract_article_id(entry.link)
+                    
+                    if not first_id:
+                        first_id = article_id
+                        
+                    if checkpoint and (article_id == checkpoint or entry.link == checkpoint):
+                        break
 
                     if article_id not in seen_ids:
                         seen_ids.add(article_id)
@@ -83,6 +94,9 @@ class BusinessWireScraper(SourceScraper):
 
                 if new_in_feed > 0:
                     print(f"    [BW RSS] {category_name}: {new_in_feed} unique articles")
+                    
+                if first_id:
+                    set_checkpoint("Business Wire", f"RSS-{category_name}", first_id)
             except Exception as e:
                 print(f"[WARNING] BusinessWire RSS feed '{category_name}' failed: {e}")
 
