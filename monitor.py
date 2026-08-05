@@ -29,7 +29,7 @@ from src.html_generator import (
 )
 
 from src.ingestion.scrapers import fetch_all_feeds
-from src.ontology import evaluate_ontology
+from src.ontology import evaluate_ontology, evaluate_ontology_rich
 from src.ontology.engine import load_ontology
 from src.rules import matches_global_exclusion, matches_issuer_exclusion
 from src.rules_engine import evaluate as evaluate_deterministic_rules
@@ -141,7 +141,10 @@ def stage_exclude_source_specific(article: dict, ctx: dict) -> tuple:
 
 def stage_ontology_concepts(article: dict, ctx: dict) -> tuple:
     min_score = float(ctx.get("sys_settings", {}).get("MIN_ONTOLOGY_SCORE", 0.65))
-    score = evaluate_ontology(article.get("body", ""), ctx.get("semantic_concepts", []))
+    rich_result = evaluate_ontology_rich(article.get("body", ""))
+    score = rich_result.get("score", 0.0)
+    article["_ontology_metadata"] = rich_result
+    
     if score < min_score: return False, "dropped_ontology_score"
     return True, "passed"
 
@@ -381,6 +384,8 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
             "ai_ticker_resolution", "ai_event_classification", "ai_confidence_gate"
         ]
 
+    stage_timings = {}
+
     for stage_name in execution_order:
         stage_func = STAGE_REGISTRY.get(stage_name.lower())
         if not stage_func: 
@@ -396,6 +401,8 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
         delta_cpu = time.perf_counter_ns() - start_cpu
         delta_net = article.get("_net_time_accumulator", start_net) - start_net
         delta_api = article.get("_api_call_accumulator", start_api) - start_api
+        
+        stage_timings[stage_name] = round(delta_cpu / 1_000_000, 3)
 
         telemetry.track_stage_performance(
             stage=stage_name,
@@ -409,6 +416,21 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
         if not passed:
             telemetry.track(drop_reason)
             _record_screening(article, telemetry, outcome="DROPPED", final_stage=stage_name, drop_reason=drop_reason)
+            
+            if stage_name != "dedupe_hash":
+                decision_capsule = {
+                    "decision_id": f"DEC-{hashlib.md5(f'{article.get('_internal_event_id', 'UNKNOWN')}:{time.time()}'.encode()).hexdigest()[:12].upper()}",
+                    "event_id": article.get("_internal_event_id", "UNKNOWN"),
+                    "manifest_hash": manifest_hash,
+                    "runtime_timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT"),
+                    "detection_outcome": "DROPPED",
+                    "terminal_stage": stage_name,
+                    "headline": article.get("headline", "Corporate Announcement"),
+                    "url": article.get("url", "UNKNOWN"),
+                    "ontology_metadata": article.get("_ontology_metadata", {}),
+                    "execution_timings": stage_timings
+                }
+                commit_decision_capsule(decision_capsule)
             return False
             
     telemetry.track("alerts_generated")
@@ -428,7 +450,9 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
         "ai_core_inference": {
             "aggregate_confidence": article.get("_ai_confidence", 1.0),
             "parsed_structural_properties": {"ticker": ticker}
-        }
+        },
+        "ontology_metadata": article.get("_ontology_metadata", {}),
+        "execution_timings": stage_timings
     }
     
     commit_decision_capsule(decision_capsule)

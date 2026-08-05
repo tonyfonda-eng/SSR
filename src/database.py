@@ -59,6 +59,8 @@ def init_db():
             evidence_completeness_score REAL NOT NULL,
             parent_decision_id TEXT,
             market_data_snapshot TEXT,
+            ontology_metadata TEXT,
+            execution_timings TEXT,
             FOREIGN KEY (event_id) REFERENCES event_registry(event_id)
         );
     """)
@@ -77,6 +79,12 @@ def init_db():
         r_conn.execute("ALTER TABLE evaluation_ledger ADD COLUMN market_data_snapshot TEXT;")
     except sqlite3.OperationalError:
         pass 
+        
+    try:
+        r_conn.execute("ALTER TABLE evaluation_ledger ADD COLUMN ontology_metadata TEXT;")
+        r_conn.execute("ALTER TABLE evaluation_ledger ADD COLUMN execution_timings TEXT;")
+    except sqlite3.OperationalError:
+        pass
 
     r_conn.execute("""
         CREATE TABLE IF NOT EXISTS atomic_evidence (
@@ -226,8 +234,8 @@ def commit_decision_capsule(capsule_data: dict, manifest_json: dict = None):
         
         cursor.execute("""
             INSERT OR REPLACE INTO evaluation_ledger 
-            (decision_id, event_id, manifest_hash, runtime_timestamp, detection_outcome, terminal_stage, evidence_completeness_score, market_data_snapshot)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+            (decision_id, event_id, manifest_hash, runtime_timestamp, detection_outcome, terminal_stage, evidence_completeness_score, market_data_snapshot, ontology_metadata, execution_timings)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         """, (
             dec_id,
             capsule_data["event_id"],
@@ -236,7 +244,9 @@ def commit_decision_capsule(capsule_data: dict, manifest_json: dict = None):
             capsule_data["detection_outcome"],
             capsule_data["terminal_stage"],
             capsule_data.get("evidence_completeness_score", 1.0),
-            capsule_data.get("market_data_snapshot")
+            capsule_data.get("market_data_snapshot"),
+            json.dumps(capsule_data.get("ontology_metadata", {})),
+            json.dumps(capsule_data.get("execution_timings", {}))
         ))
         
         cursor.execute("""

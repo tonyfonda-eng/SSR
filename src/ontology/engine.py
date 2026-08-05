@@ -93,6 +93,27 @@ def extract_concepts(raw_text: str) -> List[Tuple[str, float]]:
             deduped[m.concept_id] = m.confidence
     return list(deduped.items())
 
+def extract_detailed_concepts(raw_text: str) -> dict:
+    """Returns the total score along with explicitly matched and missing concept IDs."""
+    if not raw_text:
+        return {"score": 0.0, "matched": [], "missing": list(_KNOWLEDGE_GRAPH.keys())}
+        
+    matches = get_concept_matches(raw_text)
+    deduped = {}
+    for m in matches:
+        if m.concept_id not in deduped or m.confidence > deduped[m.concept_id]:
+            deduped[m.concept_id] = m.confidence
+            
+    matched_ids = list(deduped.keys())
+    all_active = list(_KNOWLEDGE_GRAPH.keys())
+    missing_ids = [cid for cid in all_active if cid not in matched_ids]
+    
+    return {
+        "score": sum(deduped.values()),
+        "matched": matched_ids,
+        "missing": missing_ids
+    }
+
 def extract_statuses(raw_text: str) -> List[str]:
     """Legacy wrapper for status extraction."""
     if not raw_text:
