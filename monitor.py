@@ -35,7 +35,7 @@ from src.sheets import (
     load_semantic_concepts, load_event_statuses, get_system_settings,
     load_playbooks, load_sources, load_pipeline_config,
     load_ai_configurations, load_financial_constraints,
-    batch_append_daily_memory, append_to_research_queue  # <-- FIX: Import Sheet Writers
+    batch_append_daily_memory, append_to_research_queue
 )
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -78,6 +78,27 @@ def stage_exclude_issuer_feed(article: dict, ctx: dict) -> tuple:
         return False, "dropped_issuer_exclusion"
     return True, "passed"
 
+# --- NEW DETERMINISTIC STAGES (PHASE 1) ---
+
+def stage_python_issuer_extraction(article: dict, ctx: dict) -> tuple:
+    """Deterministic issuer extraction (regex, source parsing, dictionaries)."""
+    # TODO: Implement local dictionary / regex matching.
+    article["_deterministic_issuer"] = "UNKNOWN"
+    return True, "passed"
+
+def stage_python_ticker_lookup(article: dict, ctx: dict) -> tuple:
+    """Resolve ticker from issuer without AI."""
+    # TODO: Map _deterministic_issuer to a stock ticker locally.
+    article["_deterministic_ticker"] = "UNKNOWN"
+    return True, "passed"
+
+def stage_tradeability_check(article: dict, ctx: dict) -> tuple:
+    """Reject private/untradeable/non-supported securities."""
+    # TODO: Check _deterministic_ticker against valid exchange constraints.
+    return True, "passed"
+
+# --- ONTOLOGY & RULES (PHASE 2) ---
+
 def stage_ontology_concepts(article: dict, ctx: dict) -> tuple:
     min_score = float(ctx.get("sys_settings", {}).get("MIN_ONTOLOGY_SCORE", 0.65))
     score = evaluate_ontology(article.get("body", ""), ctx.get("semantic_concepts", []))
@@ -105,7 +126,38 @@ def stage_regex_rules(article: dict, ctx: dict) -> tuple:
     if not rule_results: return False, "dropped_rules_threshold"
     return True, "passed"
 
-def stage_ai_ticker_extraction(article: dict, ctx: dict) -> tuple:
+# --- FINANCIAL CONSTRAINTS (PHASE 3) ---
+
+def stage_financial_market_cap(article: dict, ctx: dict) -> tuple:
+    return True, "passed"
+
+def stage_financial_t12_floor(article: dict, ctx: dict) -> tuple:
+    # Only evaluates if we successfully resolved a deterministic ticker
+    ticker = article.get("_deterministic_ticker", "UNKNOWN")
+    if ticker != "UNKNOWN":
+        metrics = get_t12_metrics(ticker)
+        if not metrics.get("valid"): return False, "dropped_financial_t12"
+    return True, "passed"
+
+def stage_options_chain_check(article: dict, ctx: dict) -> tuple:
+    """Reject strategies requiring options where none exist."""
+    # TODO: Integrate src.financials to reject non-optionable targets early.
+    return True, "passed"
+
+def stage_liquidity_check(article: dict, ctx: dict) -> tuple:
+    """Minimum liquidity / volume constraints."""
+    # TODO: Ensure average volume > required baseline.
+    return True, "passed"
+
+# --- AI SPECIALIST FALLBACKS (PHASE 4) ---
+
+def stage_ai_ticker_resolution(article: dict, ctx: dict) -> tuple:
+    """LLM call 1: Purely extracts target company ticker (Fallback)."""
+    # Principle #1: Do not use AI if deterministic logic already succeeded
+    if article.get("_deterministic_ticker", "UNKNOWN") != "UNKNOWN":
+        article["_ai_ticker"] = article.get("_deterministic_ticker")
+        return True, "passed"
+        
     ticker = extract_target_ticker(article.get("body", ""))
     if ticker in ["EXHAUSTED", "ERROR", "UNKNOWN"]: 
         return False, "dropped_ai_no_ticker"
@@ -134,31 +186,26 @@ def stage_ai_confidence_gate(article: dict, ctx: dict) -> tuple:
         return False, "dropped_ai_confidence"
     return True, "passed"
 
-def stage_financial_t12_floor(article: dict, ctx: dict) -> tuple:
-    ticker = article.get("_ai_ticker", "UNKNOWN")
-    if ticker == "UNKNOWN": return True, "passed"
-    metrics = get_t12_metrics(ticker)
-    if not metrics.get("valid"): return False, "dropped_financial_t12"
-    return True, "passed"
-
-def stage_financial_market_cap(article: dict, ctx: dict) -> tuple:
-    return True, "passed"
-
 
 STAGE_REGISTRY = {
     "dedupe_hash": stage_dedupe_hash,
     "dedupe_issuer_memory": stage_dedupe_issuer_memory,
     "exclude_global_keywords": stage_exclude_global_keywords,
     "exclude_issuer_feed": stage_exclude_issuer_feed,
+    "python_issuer_extraction": stage_python_issuer_extraction,
+    "python_ticker_lookup": stage_python_ticker_lookup,
+    "tradeability_check": stage_tradeability_check,
     "ontology_concepts": stage_ontology_concepts,
     "ontology_status": stage_ontology_status,
     "document_scoring": stage_document_scoring,
     "regex_rules": stage_regex_rules,
-    "ai_ticker_extraction": stage_ai_ticker_extraction,
-    "ai_event_classification": stage_ai_event_classification,
-    "ai_confidence_gate": stage_ai_confidence_gate,
+    "financial_market_cap": stage_financial_market_cap,
     "financial_t12_floor": stage_financial_t12_floor,
-    "financial_market_cap": stage_financial_market_cap
+    "options_chain_check": stage_options_chain_check,
+    "liquidity_check": stage_liquidity_check,
+    "ai_ticker_resolution": stage_ai_ticker_resolution,
+    "ai_event_classification": stage_ai_event_classification,
+    "ai_confidence_gate": stage_ai_confidence_gate
 }
 
 def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest: dict, manifest_hash: str):
@@ -171,11 +218,21 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
         sorted_stages = sorted([s for s in raw_pipeline_sheet if str(s.get("Active", "TRUE")).upper() == "TRUE"], key=lambda x: int(x.get("Order", 99)))
         execution_order = [s.get("Stage_ID") for s in sorted_stages]
     else:
-        execution_order = ["dedupe_hash", "exclude_global_keywords", "exclude_issuer_feed", "ontology_concepts", "regex_rules", "ai_ticker_extraction", "ai_event_classification"]
+        # Strict hardcoded 18-step fallback mirroring the target architecture
+        execution_order = [
+            "dedupe_hash", "dedupe_issuer_memory", "exclude_global_keywords", 
+            "exclude_issuer_feed", "python_issuer_extraction", "python_ticker_lookup", 
+            "tradeability_check", "ontology_concepts", "ontology_status", 
+            "document_scoring", "regex_rules", "financial_market_cap", 
+            "financial_t12_floor", "options_chain_check", "liquidity_check", 
+            "ai_ticker_resolution", "ai_event_classification", "ai_confidence_gate"
+        ]
 
     for stage_name in execution_order:
         stage_func = STAGE_REGISTRY.get(stage_name.lower())
-        if not stage_func: continue
+        if not stage_func: 
+            logger.warning(f"Configuration requested unknown pipeline stage: {stage_name}")
+            continue
         passed, drop_reason = stage_func(article, ctx)
         if not passed:
             telemetry.track(drop_reason)
