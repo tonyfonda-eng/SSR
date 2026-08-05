@@ -2,6 +2,210 @@
   "ledger": [
     {
       "manifest_registry": {
+        "decision_id": "DEC-795EB42126C3",
+        "event_id": "EVT-CCF0FF52C200",
+        "configuration_manifest_hash": "CFG-E718B2958634",
+        "execution_timestamp_gmt": "2026-08-05 14:21:05 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.362,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.215,
+        "exclude_issuer_feed": 0.016,
+        "ontology_concepts": 2.754
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:21:05 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Home | EMARKET STORAGE - Teleborsa",
+      "url": "https://www.emarketstorage.it/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-077D703F88FD",
+        "event_id": "EVT-344B7D388F17",
+        "configuration_manifest_hash": "CFG-E718B2958634",
+        "execution_timestamp_gmt": "2026-08-05 14:21:04 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.439,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.181,
+        "exclude_issuer_feed": 0.018,
+        "ontology_concepts": 2.586
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:21:04 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Envision and Sasol Advance Future Energy Systems with Green Hydrogen Collaboration in South Africa",
+      "url": "https://www.prnewswire.com/news-releases/envision-and-sasol-advance-future-energy-systems-with-green-hydrogen-collaboration-in-south-africa-302843846.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-A1CE9A5625B5",
+        "event_id": "EVT-EEBAAD392228",
+        "configuration_manifest_hash": "CFG-E718B2958634",
+        "execution_timestamp_gmt": "2026-08-05 14:21:04 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 0.983,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.034,
+        "exclude_issuer_feed": 0.01,
+        "ontology_concepts": 0.449
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:21:04 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "President Trump's Bold Action Ensures Free and Fair Trade for Domestic Quartz Industry, QMAA Industry Executives Say",
+      "url": "https://www.prnewswire.com/news-releases/president-trumps-bold-action-ensures-free-and-fair-trade-for-domestic-quartz-industry-qmaa-industry-executives-say-302843845.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-415F5C911799",
+        "event_id": "EVT-7EE58E8DDF04",
+        "configuration_manifest_hash": "CFG-E718B2958634",
+        "execution_timestamp_gmt": "2026-08-05 14:21:04 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.056,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.032,
+        "exclude_issuer_feed": 0.008,
+        "ontology_concepts": 0.443
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:21:04 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "BGL Announces the Sale of ENTACT to Ridgemont Equity Partners",
+      "url": "https://www.prnewswire.com/news-releases/bgl-announces-the-sale-of-entact-to-ridgemont-equity-partners-302843844.html"
+    },
+    {
+      "manifest_registry": {
         "decision_id": "DEC-873255F4E354",
         "event_id": "EVT-97D97B91E1B3",
         "configuration_manifest_hash": "CFG-3229043E1C58",
