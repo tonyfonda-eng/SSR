@@ -61,7 +61,7 @@ class EdgarItemScraper(SourceScraper):
             # EFTS may not be available; fall back to Atom feed approach
             if response.status_code != 200:
                 print("[INFO] EFTS API unavailable. Using EDGAR Atom feed for 8-K items.")
-                return self._fetch_via_atom(headers)
+                return self._fetch_via_atom(headers, kwargs.get("checkpoint"))
                 
             data = response.json()
             hits = data.get("hits", {}).get("hits", [])
@@ -97,15 +97,15 @@ class EdgarItemScraper(SourceScraper):
                 
         except Exception as e:
             print(f"[WARNING] EFTS search failed: {e}. Falling back to Atom feed.")
-            return self._fetch_via_atom(headers)
+            return self._fetch_via_atom(headers, kwargs.get("checkpoint"))
             
         if not articles:
             # Fallback if EFTS returned no results
-            return self._fetch_via_atom(headers)
+            return self._fetch_via_atom(headers, kwargs.get("checkpoint"))
             
         return articles
     
-    def _fetch_via_atom(self, headers):
+    def _fetch_via_atom(self, headers, checkpoint=None):
         """
         Fallback: fetch recent 8-K filings via the standard EDGAR Atom feed.
         Less structured than EFTS but more reliable.
@@ -113,8 +113,7 @@ class EdgarItemScraper(SourceScraper):
         articles = []
         seen_ids = set()
         
-        # Fetch 3 pages of 100 items each
-        for page in range(3):
+        for page in range(200):
             start = page * 100
             url = (
                 f"https://www.sec.gov/cgi-bin/browse-edgar"
@@ -132,6 +131,11 @@ class EdgarItemScraper(SourceScraper):
                     
                 for entry in feed.entries:
                     filing_id = entry.id
+                    article_link = entry.link
+                    
+                    if checkpoint and (filing_id == checkpoint or article_link == checkpoint):
+                        return articles
+                        
                     if filing_id in seen_ids:
                         continue
                     seen_ids.add(filing_id)
@@ -146,14 +150,21 @@ class EdgarItemScraper(SourceScraper):
                     articles.append({
                         "id": filing_id,
                         "title": title,
-                        "url": entry.link,
+                        "url": article_link,
                         "published": getattr(entry, "published", getattr(entry, "updated", ""))
                     })
+                    
+                    if len(articles) >= 20000:
+                        print(f"[CRITICAL] Edgar Items hit emergency 20,000 article limit!")
+                        return articles
+                        
                 time.sleep(1)
             except Exception as e:
                 print(f"[ERROR] EDGAR 8-K Items Atom fetch failed on page {page+1}: {e}")
                 break
                 
+        if page == 199:
+            print(f"[CRITICAL] Edgar Items hit emergency 200 page limit without finding checkpoint.")
         return articles
 
     def get_article_body(self, url):

@@ -14,6 +14,7 @@ from src.config.settings import SHEET_URL
 logger = logging.getLogger(__name__)
 
 from src.scrapers import get_scraper_for_source
+from src.ingestion.checkpoints import get_checkpoint, set_checkpoint
 
 def _fetch_rss_channel(source: dict) -> tuple:
     start_time = time.time()
@@ -41,9 +42,14 @@ def _fetch_rss_channel(source: dict) -> tuple:
         
     try:
         feed = feedparser.parse(url)
+        checkpoint = get_checkpoint(source_name, "RSS")
         if feed.entries:
             ledger["raw_found"] = len(feed.entries)
             for entry in feed.entries:
+                link = entry.get("link", url)
+                if checkpoint and link == checkpoint:
+                    break
+                    
                 body_text = entry.get("summary", entry.get("description", ""))
                 
                 # Clean HTML tags out of RSS summaries if they exist
@@ -52,13 +58,15 @@ def _fetch_rss_channel(source: dict) -> tuple:
                     
                 articles.append({
                     "source": source_name,
-                    "url": entry.get("link", url),
+                    "url": link,
                     "headline": entry.get("title", "No Title"),
                     "body": body_text,
                     "document_type": source.get("Type", "Press Release"),
                     "_ingestion_mode": "RSS"
                 })
             ledger["parsed_found"] = len(articles)
+            if articles:
+                set_checkpoint(source_name, "RSS", articles[0]["url"])
         
         if len(articles) == 0:
             ledger["status"] = "EMPTY"
@@ -99,8 +107,12 @@ def _fetch_html_channel(source: dict) -> tuple:
     if scraper:
         try:
             logger.info(f"[INGESTION] Using dedicated HTML scraper for '{source_name}'")
-            raw_articles = scraper.get_latest_articles(url=url)
+            checkpoint = get_checkpoint(source_name, "HTML")
+            raw_articles = scraper.get_latest_articles(url=url, checkpoint=checkpoint)
             ledger["raw_found"] = len(raw_articles)
+            
+            if raw_articles:
+                set_checkpoint(source_name, "HTML", raw_articles[0].get("url") or raw_articles[0].get("id"))
             
             for ra in raw_articles:
                 body_text = ra.get("body", "")
