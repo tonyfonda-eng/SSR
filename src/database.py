@@ -93,13 +93,18 @@ def init_db():
     """)
 
     r_conn.execute("""
-        CREATE TABLE IF NOT EXISTS ai_core_inference (
-            decision_id TEXT PRIMARY KEY,
-            raw_provider_json TEXT NOT NULL,
-            parsed_structural_properties TEXT,
-            semantic_interpretation TEXT,
-            aggregate_confidence REAL NOT NULL,
-            FOREIGN KEY (decision_id) REFERENCES evaluation_ledger(decision_id)
+        CREATE TABLE IF NOT EXISTS article_screening_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            run_id TEXT NOT NULL,
+            timestamp TEXT NOT NULL,
+            headline TEXT,
+            url TEXT,
+            source TEXT,
+            outcome TEXT NOT NULL,
+            final_stage TEXT NOT NULL,
+            drop_reason TEXT,
+            ticker TEXT,
+            event_family TEXT
         );
     """)
     
@@ -180,6 +185,35 @@ def get_or_create_event(article_hash: str, raw_payload: bytes, mime_type: str = 
         conn.close()
         return f"ERR-{event_id}", True
 
+def log_article_screening(entry: dict) -> None:
+    """
+    Records the outcome of every article the pipeline looked at — passed or dropped —
+    purely for operator visibility. Never raises; a screening-log write failure must
+    never affect pipeline behavior.
+    """
+    try:
+        gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
+        conn = sqlite3.connect(RESEARCH_DB_PATH)
+        conn.execute("""
+            INSERT INTO article_screening_log
+            (run_id, timestamp, headline, url, source, outcome, final_stage, drop_reason, ticker, event_family)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        """, (
+            entry.get("run_id", "UNKNOWN"),
+            gmt_now,
+            (entry.get("headline") or "")[:500],
+            entry.get("url", ""),
+            entry.get("source", ""),
+            entry.get("outcome", "UNKNOWN"),
+            entry.get("final_stage", "UNKNOWN"),
+            entry.get("drop_reason"),
+            entry.get("ticker"),
+            entry.get("event_family")
+        ))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        logger.error(f"[DB FAULT] Failed to write article_screening_log: {e}")
 def commit_decision_capsule(capsule_data: dict, manifest_json: dict = None):
     try:
         conn = sqlite3.connect(RESEARCH_DB_PATH)

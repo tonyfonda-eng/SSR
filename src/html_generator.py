@@ -196,13 +196,15 @@ NAV_TABS = """
                 <a href="index.html" class="{cls_index}">Operations Centre</a>
                 <a href="decision_analytics.html" class="{cls_analytics}">Drift & Intelligence</a>
                 <a href="archive.html" class="{cls_archive}">Decision Ledger Manifests</a>
+                <a href="screening_log.html" class="{cls_screening}">Article Screening Log</a>
             </div>"""
 
 def render_nav(active):
     return NAV_TABS.format(
         cls_index="active" if active == "index" else "",
         cls_analytics="active" if active == "analytics" else "",
-        cls_archive="active" if active == "archive" else ""
+        cls_archive="active" if active == "archive" else "",
+        cls_screening="active" if active == "screening" else ""
     )
 
 SORT_JS = """
@@ -499,5 +501,110 @@ def generate_archive_html(output_path):
     </script></body></html>"""
     
     html = html.replace("__BASE_CSS__", BASE_CSS).replace("__SORT_JS__", SORT_JS).replace("__ARCHIVE_CSS__", archive_css).replace("__NAV__", render_nav("archive"))
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f: f.write(html)
+
+    def generate_screening_log_html(output_path):
+    screening_css = """
+        .table-wrapper { background: var(--surface); border: 1px solid var(--border); overflow-x: auto; }
+        th { background: var(--surface-subtle); position: sticky; top: 0; z-index: 10; }
+        .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; align-items: center; }
+        .filter-bar select, .filter-bar input { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 6px 10px; font-size: 0.85em; font-family: inherit; }
+        .filter-bar input { flex: 1; min-width: 200px; }
+        .filter-bar label { font-size: 0.7em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.4px; }
+        .outcome-passed { color: var(--green); font-weight: 700; }
+        .outcome-dropped { color: var(--red); font-weight: 700; }
+        .reason-tag { font-family: var(--mono); color: var(--yellow); font-size: 0.85em; background: rgba(219,171,10,0.1); padding: 2px 6px; border-radius: 3px; }
+        .headline-cell { max-width: 420px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .headline-cell a { color: var(--text); text-decoration: none; }
+        .headline-cell a:hover { color: var(--blue); text-decoration: underline; }
+        .result-count { color: var(--muted); font-size: 0.8em; margin-bottom: 8px; }
+    """
+
+    html = """<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>SSR Article Screening Log</title><style>__BASE_CSS__ __SCREENING_CSS__</style>__SORT_JS__</head>
+    <body><div class="container">__NAV__<header><h1>Article Screening Log</h1></header>
+
+    <div class="filter-bar">
+        <div><label>Outcome</label><br><select id="outcomeFilter"><option value="">All</option><option value="PASSED">Passed</option><option value="DROPPED">Dropped</option></select></div>
+        <div><label>Stage</label><br><select id="stageFilter"><option value="">All Stages</option></select></div>
+        <div style="flex:1;"><label>Search (headline, ticker, source)</label><br><input type="text" id="searchBox" placeholder="Type to filter..."></div>
+    </div>
+    <div class="result-count" id="resultCount"></div>
+
+    <div class="table-wrapper"><table id="screeningTable">
+    <thead><tr><th>Timestamp (GMT)</th><th>Source</th><th>Headline</th><th>Ticker</th><th>Outcome</th><th>Final Stage</th><th>Drop Reason</th></tr></thead>
+    <tbody id="tableBody"><tr><td colspan="7" style="text-align: center; color: var(--muted); padding: 30px;">Loading Screening Log...</td></tr></tbody>
+    </table></div></div>
+
+    <script>
+        let screeningData = [];
+
+        fetch('screening_log.json')
+            .then(res => res.json())
+            .then(data => {
+                screeningData = Array.isArray(data) ? data : (data.screening_log || []);
+                populateStageFilter();
+                renderTable();
+            })
+            .catch(err => {
+                screeningData = [];
+                renderTable();
+            });
+
+        function populateStageFilter() {
+            const stages = [...new Set(screeningData.map(r => r.final_stage).filter(Boolean))].sort();
+            const sel = document.getElementById('stageFilter');
+            stages.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s; opt.textContent = s;
+                sel.appendChild(opt);
+            });
+        }
+
+        document.getElementById('outcomeFilter').addEventListener('change', renderTable);
+        document.getElementById('stageFilter').addEventListener('change', renderTable);
+        document.getElementById('searchBox').addEventListener('input', renderTable);
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            const outcomeVal = document.getElementById('outcomeFilter').value;
+            const stageVal = document.getElementById('stageFilter').value;
+            const searchVal = document.getElementById('searchBox').value.toLowerCase();
+
+            let filtered = screeningData.filter(r => {
+                if (outcomeVal && r.outcome !== outcomeVal) return false;
+                if (stageVal && r.final_stage !== stageVal) return false;
+                if (searchVal) {
+                    const hay = `${r.headline||''} ${r.ticker||''} ${r.source||''}`.toLowerCase();
+                    if (!hay.includes(searchVal)) return false;
+                }
+                return true;
+            });
+
+            document.getElementById('resultCount').textContent = `Showing ${filtered.length} of ${screeningData.length} screened articles`;
+
+            tbody.innerHTML = '';
+            if (filtered.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">No screened articles match the current filters.</td></tr>';
+                return;
+            }
+
+            filtered.forEach(r => {
+                const tr = document.createElement('tr');
+                const outcomeCls = r.outcome === 'PASSED' ? 'outcome-passed' : 'outcome-dropped';
+                const reasonHtml = r.drop_reason ? `<span class="reason-tag">${r.drop_reason}</span>` : '';
+                tr.innerHTML = `<td>${r.timestamp || ''}</td>
+                                <td>${r.source || 'Unknown'}</td>
+                                <td class="headline-cell"><a href="${r.url || '#'}" target="_blank" title="${(r.headline||'').replace(/"/g,'&quot;')}">${r.headline || 'Untitled'}</a></td>
+                                <td>${r.ticker || 'UNKNOWN'}</td>
+                                <td class="${outcomeCls}">${r.outcome || ''}</td>
+                                <td>${r.final_stage || ''}</td>
+                                <td>${reasonHtml}</td>`;
+                tbody.appendChild(tr);
+            });
+        }
+    </script></body></html>"""
+
+    html = html.replace("__BASE_CSS__", BASE_CSS).replace("__SORT_JS__", SORT_JS).replace("__SCREENING_CSS__", screening_css).replace("__NAV__", render_nav("screening"))
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f: f.write(html)

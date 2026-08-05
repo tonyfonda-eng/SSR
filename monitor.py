@@ -3,6 +3,9 @@ SSR 2.0 — Main Orchestrator
 Highly Granular Adaptive Data-Driven Execution Pipeline (Registry Pattern)
 """
 
+from oauthlib.oauth2.rfc6749.grant_types import resource_owner_password_credentials
+from oauthlib.oauth2.rfc6749.grant_types import resource_owner_password_credentials
+from oauthlib.oauth2.rfc6749.grant_types import resource_owner_password_credentials
 import sys
 import logging
 import hashlib
@@ -13,9 +16,13 @@ from datetime import datetime, timezone
 
 from src.database import (
     initialise_database, get_or_create_event, commit_decision_capsule,
-    save_workflow_health, save_exception_log, save_config_snapshot
+    save_workflow_health, save_exception_log, save_config_snapshot,
+    log_article_screening
 )
 
+from src.validation.export_frontend_data import export_archive_json
+from src.validation.export_screening_log import export_screening_log
+from src.html_generator import generate_archive_html, generate_screening_log_html
 from src.ingestion.scrapers import fetch_all_feeds
 from src.ontology import evaluate_ontology
 from src.ontology.engine import load_ontology
@@ -330,6 +337,25 @@ STAGE_REGISTRY = {
     "ai_confidence_gate": stage_ai_confidence_gate
 }
 
+def _record_screening(article: dict, telemetry: PipelineTelemetry, outcome: str, final_stage: str, drop_reason: str = None):
+    """Logs every screened article (pass or drop) for operator visibility. Display-only — never affects pipeline flow."""
+    entry = {
+        "run_id": telemetry.run_id,
+        "headline": article.get("headline", "Untitled"),
+        "url": article.get("url", "UNKNOWN"),
+        "source": article.get("source", "UNKNOWN"),
+        "outcome": outcome,
+        "final_stage": final_stage,
+        "drop_reason": drop_reason,
+        "ticker": article.get("_ai_ticker") or article.get("_deterministic_ticker") or "UNKNOWN",
+        "event_family": article.get("_ai_classification")
+    }
+    logger.info(f"[SCREENED] '{entry['headline'][:80]}' -> {outcome} @ {final_stage}" + (f" ({drop_reason})" if drop_reason else ""))
+    try:
+        log_article_screening(entry)
+    except Exception as e:
+        logger.error(f"[SCREENING LOG FAULT] {e}")
+
 def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest: dict, manifest_hash: str):
     settings = config_manifest.get("settings", [])
     ctx = config_manifest.copy()
@@ -378,7 +404,8 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
 
         if not passed:
             telemetry.track(drop_reason)
-            return False 
+            _record_screening(article, telemetry, outcome="DROPPED", final_stage=stage_name, drop_reason=drop_reason)
+            return False
             
     telemetry.track("alerts_generated")
     event_id = article.get("_internal_event_id", "UNKNOWN")
@@ -402,6 +429,7 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
     
     commit_decision_capsule(decision_capsule)
     logger.info(f"[ALERT GENERATED] {ticker} - {event_family}")
+    _record_screening(article, telemetry, outcome="PASSED", final_stage="AI_APPROVED")
     
     try:
         if ticker != "UNKNOWN":
@@ -498,6 +526,10 @@ def main():
             
             logger.info("Rebuilding HTML Dashboards...")
             generate_archive_html("docs/archive.html")
+
+            logger.info("Exporting article screening log...")
+            export_screening_log("docs/screening_log.json")
+            generate_screening_log_html("docs/screening_log.html")
         except Exception as e:
             logger.error(f"Frontend Data & HTML Export failed: {e}")
 
