@@ -504,7 +504,7 @@ def generate_archive_html(output_path):
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f: f.write(html)
 
-    def generate_screening_log_html(output_path):
+def generate_screening_log_html(output_path):
     screening_css = """
         .table-wrapper { background: var(--surface); border: 1px solid var(--border); overflow-x: auto; }
         th { background: var(--surface-subtle); position: sticky; top: 0; z-index: 10; }
