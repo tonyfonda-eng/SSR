@@ -352,6 +352,53 @@ def update_last_checked(sheet_url, source_name):
     except Exception as e:
         pass 
 
+def batch_update_last_checked(sheet_url, source_names):
+    if not source_names:
+        return
+    spreadsheet = get_spreadsheet(sheet_url)
+    try:
+        worksheet = spreadsheet.worksheet("Sources")
+    except gspread.exceptions.WorksheetNotFound:
+        return
+        
+    try:
+        # Get all values to find rows efficiently in memory instead of multiple API calls
+        all_values = worksheet.get_all_values()
+        if not all_values: return
+        
+        headers = all_values[0]
+        col_index = None
+        for i, header in enumerate(headers):
+            if "checked" in header.lower() or "timestamp" in header.lower():
+                col_index = i
+                break
+                
+        if col_index is None: return
+        
+        ts = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S GMT")
+        cells_to_update = []
+        source_set = set(source_names)
+        
+        # Find which rows match the successful sources (assuming Source is column index 2)
+        source_col_idx = None
+        for i, h in enumerate(headers):
+            if "source" in h.lower() and "name" not in h.lower() and "url" not in h.lower():
+                source_col_idx = i
+                break
+        if source_col_idx is None:
+            source_col_idx = 2 # fallback to index 2
+            
+        for row_idx, row in enumerate(all_values):
+            if row_idx == 0: continue
+            if len(row) > source_col_idx and row[source_col_idx].strip() in source_set:
+                cells_to_update.append(gspread.Cell(row=row_idx+1, col=col_index+1, value=ts))
+                
+        if cells_to_update:
+            worksheet.update_cells(cells_to_update)
+    except Exception as e:
+        print(f"Failed batch update last checked: {e}")
+
+
 def batch_append_daily_memory(sheet_url, new_issuers):
     if not new_issuers:
         return
