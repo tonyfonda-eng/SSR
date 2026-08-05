@@ -1,6 +1,6 @@
 
 def _safe_json(resp):
-    try: return _safe_json(resp)
+    try: return resp.json()
     except Exception:
         print("    [ASX WAF] HTML Challenge Blocked JSON payload. Skipping.")
         return {}
@@ -25,9 +25,9 @@ class ASXScraper:
     """Dedicated scraper for ASX corporate announcements."""
     
     @staticmethod
-    def get_latest_articles(rss_url=None):
+    def get_latest_articles(**kwargs):
         print("[ASX SCRAPER] Polling Australian Stock Exchange announcements...")
-        url = "https://www.asx.com.au/asx/v2/statistics/announcements.do?by=latest&timeframe=d&fmt=json"
+        url = kwargs.get('url') or kwargs.get('rss_url') or "https://www.asx.com.au/asx/v2/statistics/announcements.do?by=latest&timeframe=d&fmt=json"
         articles = []
         try:
             headers = {"User-Agent": "Mozilla/5.0"}
