@@ -2,7 +2,7 @@ class SourceScraper:
     def __init__(self):
         pass
 
-    def get_latest_articles(self, rss_url=None):
+    def get_latest_articles(self, **kwargs):
         """
         Returns a list of dictionaries with keys:
         - id

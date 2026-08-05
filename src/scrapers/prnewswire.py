@@ -72,8 +72,9 @@ class PRNewsWireScraper(SourceScraper):
         }
         
         articles = []
-        # Fetch 5 pages of 100 articles each = 500 articles per run
-        for page in range(1, 6):
+        checkpoint = kwargs.get("checkpoint")
+        
+        for page in range(1, 201):
             url = f"https://www.prnewswire.com/news-releases/news-releases-list/?page={page}&pagesize=100"
             
             try:
@@ -94,6 +95,9 @@ class PRNewsWireScraper(SourceScraper):
                         continue
                     
                     full_url = href if href.startswith("http") else "https://www.prnewswire.com" + href
+                    if checkpoint and (full_url == checkpoint or href == checkpoint):
+                        return articles
+                        
                     article_id = full_url.rstrip("/").split("-")[-1].replace(".html", "")
                     
                     articles.append({
@@ -103,12 +107,19 @@ class PRNewsWireScraper(SourceScraper):
                         "published": ""  # Could be parsed from HTML, but keep simple for now
                     })
                     
+                    if len(articles) >= 20000:
+                        print(f"[CRITICAL] PR Newswire hit emergency 20,000 article limit!")
+                        return articles
+                    
                 time.sleep(1) # Be polite to their server between pagination requests
                 
             except Exception as e:
                 print(f"[WARNING] PR Newswire pagination failed on page {page}: {e}")
                 break
                 
+        if page == 200:
+            print("[CRITICAL] PR Newswire hit emergency 200 page limit without finding checkpoint.")
         return articles
+        
     def get_article_body(self, url):
         return download_article(url)

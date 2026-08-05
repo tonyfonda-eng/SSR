@@ -28,9 +28,9 @@ class GlobeNewswireScraper(SourceScraper):
         headers = {"User-Agent": USER_AGENT}
         articles = []
         seen_ids = set()
+        checkpoint = kwargs.get("checkpoint")
         
-        # GlobeNewswire has 10 articles per page. 50 pages = 500 articles.
-        for page in range(1, 51):
+        for page in range(1, 201):
             url = f"https://www.globenewswire.com/NewsRoom?page={page}"
             try:
                 response = requests.get(url, headers=headers, timeout=15)
@@ -47,6 +47,8 @@ class GlobeNewswireScraper(SourceScraper):
                         continue
                         
                     full_url = href if href.startswith("http") else "https://www.globenewswire.com" + href
+                    if checkpoint and (full_url == checkpoint or href == checkpoint):
+                        return articles
                     
                     # Use the path as the unique ID to avoid language-code collisions
                     article_id = href if not href.startswith("http") else full_url.replace("https://www.globenewswire.com", "")
@@ -62,11 +64,17 @@ class GlobeNewswireScraper(SourceScraper):
                         "published": ""
                     })
                     
+                    if len(articles) >= 20000:
+                        print(f"[CRITICAL] GlobeNewswire hit emergency 20,000 article limit!")
+                        return articles
+                    
                 time.sleep(1)
             except Exception as e:
                 print(f"[WARNING] GlobeNewswire pagination failed on page {page}: {e}")
                 break
                 
+        if page == 200:
+            print("[CRITICAL] GlobeNewswire hit emergency 200 page limit without finding checkpoint.")
         return articles
 
     def get_article_body(self, url):
