@@ -2,6 +2,166 @@
   "ledger": [
     {
       "manifest_registry": {
+        "decision_id": "DEC-7C16B4C36DC0",
+        "event_id": "EVT-B5A00AFB1142",
+        "configuration_manifest_hash": "CFG-221290BB074F",
+        "execution_timestamp_gmt": "2026-08-05 14:25:57 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 2.108,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.216,
+        "exclude_issuer_feed": 0.02,
+        "ontology_concepts": 1.891
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:25:57 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "The Mr. Christmas Original \"Message in a Bottle\" Keepsake Becomes a Breakout Hit of the Season",
+      "url": "https://www.prnewswire.com/news-releases/the-mr-christmas-original-message-in-a-bottle-keepsake-becomes-a-breakout-hit-of-the-season-302843849.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-C746CB738951",
+        "event_id": "EVT-427385BB9F9F",
+        "configuration_manifest_hash": "CFG-221290BB074F",
+        "execution_timestamp_gmt": "2026-08-05 14:25:57 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "entity_confidence",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 40.0,
+        "matched": [
+          "ACQUISITION"
+        ],
+        "missing": [
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.402,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.368,
+        "exclude_issuer_feed": 0.014,
+        "ontology_concepts": 8.289,
+        "ontology_status": 0.001,
+        "document_scoring": 0.0,
+        "regex_rules": 0.052,
+        "python_issuer_extraction": 0.304,
+        "python_ticker_lookup": 0.702,
+        "entity_confidence": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:25:57 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "entity_confidence",
+      "headline": "EQS News \u2013 Financial News & Events Directly From The Source",
+      "url": "https://www.eqs-news.com/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-7ED4360EEF4C",
+        "event_id": "EVT-68CA9270A6F4",
+        "configuration_manifest_hash": "CFG-221290BB074F",
+        "execution_timestamp_gmt": "2026-08-05 14:25:57 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.403,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.164,
+        "exclude_issuer_feed": 0.021,
+        "ontology_concepts": 3.238
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:25:57 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Home | EMARKET STORAGE - Teleborsa",
+      "url": "https://www.emarketstorage.it/"
+    },
+    {
+      "manifest_registry": {
         "decision_id": "DEC-795EB42126C3",
         "event_id": "EVT-CCF0FF52C200",
         "configuration_manifest_hash": "CFG-E718B2958634",
