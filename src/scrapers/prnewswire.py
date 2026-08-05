@@ -101,11 +101,23 @@ class PRNewsWireScraper(SourceScraper):
                         
                     article_id = full_url.rstrip("/").split("-")[-1].replace(".html", "")
                     
+                    title_elem = a_tag.find('h3')
+                    title = ""
+                    published = ""
+                    if title_elem:
+                        small = title_elem.find('small')
+                        if small:
+                            published = small.get_text(strip=True)
+                            small.extract()
+                        title = title_elem.get_text(strip=True)
+                    else:
+                        title = a_tag.get_text(strip=True)
+                        
                     articles.append({
                         "id": article_id,
-                        "title": a_tag.get_text(strip=True),
+                        "title": title,
                         "url": full_url,
-                        "published": ""  # Could be parsed from HTML, but keep simple for now
+                        "published": published
                     })
                     new_articles_on_page += 1
                     
