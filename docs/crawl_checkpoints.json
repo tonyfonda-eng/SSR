@@ -11,5 +11,6 @@
   "SIX Exchange (Switzerland)::HTML": "https://news.google.com/rss/articles/CBMizgFBVV95cUxQWVRNeGh6eXI4bGFCWGdaLWVlUTNoZWp5OE1wdFZETDg3b0NmSk9YWVozR2FEZ2ZpVzV2dTNSOXRORDR6N1pKc1U1RTBhZm5pQWVvM3RKSkJhWXVyamZjMlhuZkpFSWJGeUVMNjh0SUxDSS1VYU94cGhqdFRLenBESmJPSXpabVhycmEyaXlGanZqTFF6bGg2dmRzbGY2RW1yOWVyaEY3WFk1M1NzWktxYTYwWFFkYlhudEt4TEtQMFVJVnBwMWNGXzEwUnFrdw?oc=5",
   "AFM (Netherlands)::HTML": "https://news.google.com/rss/articles/CBMickFVX3lxTE9aUEl2VldzMVdCVXFsOE5TWXNfM01YYnBKcUJzS083aEhCcDhZYlFHRGpEcDQ4S3NZTUVIdjlSWFVjWUZja0k3ZE5ZTFM3emtFWUh5TlFwOEF6THVzb0NOQXB6dkpoRE96YTFEaWJDSGtCQQ?oc=5",
   "Business Wire::HTML": "http://www.businesswire.com/news/home/20260805913969/en/Bilt-and-Qatar-Airways-Privilege-Club-Expand-Collaboration-to-Unlock-3X-Avios-on-Rent-for-Qatar-Airways-Privilege-Club-Credit-Cardholders/",
-  "SEC EDGAR - Form 10 (Spin-Offs)::HTML": "https://www.sec.gov/Archives/edgar/data/1658678/000121390026084943/0001213900-26-084943-index.htm"
+  "SEC EDGAR - Form 10 (Spin-Offs)::HTML": "https://www.sec.gov/Archives/edgar/data/1658678/000121390026084943/0001213900-26-084943-index.htm",
+  "SEC Edgar::HTML": "https://www.sec.gov/Archives/edgar/data/1996192/000121390026085554/0001213900-26-085554-index.htm"
 }
