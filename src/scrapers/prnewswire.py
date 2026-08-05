@@ -89,6 +89,7 @@ class PRNewsWireScraper(SourceScraper):
                 if not article_links:
                     break # No more articles found, stop pagination
                     
+                new_articles_on_page = 0
                 for a_tag in article_links:
                     href = a_tag.get('href')
                     if not href:
@@ -106,11 +107,14 @@ class PRNewsWireScraper(SourceScraper):
                         "url": full_url,
                         "published": ""  # Could be parsed from HTML, but keep simple for now
                     })
+                    new_articles_on_page += 1
                     
                     if len(articles) >= 20000:
                         print(f"[CRITICAL] PR Newswire hit emergency 20,000 article limit!")
                         return articles
                     
+                if new_articles_on_page == 0:
+                    break
                 time.sleep(1) # Be polite to their server between pagination requests
                 
             except Exception as e:

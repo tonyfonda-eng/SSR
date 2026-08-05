@@ -41,6 +41,7 @@ class GlobeNewswireScraper(SourceScraper):
                 if not article_links:
                     break
                     
+                new_articles_on_page = 0
                 for a_tag in article_links:
                     href = a_tag.get('href')
                     if not href:
@@ -63,11 +64,14 @@ class GlobeNewswireScraper(SourceScraper):
                         "url": full_url,
                         "published": ""
                     })
+                    new_articles_on_page += 1
                     
                     if len(articles) >= 20000:
                         print(f"[CRITICAL] GlobeNewswire hit emergency 20,000 article limit!")
                         return articles
                     
+                if new_articles_on_page == 0:
+                    break
                 time.sleep(1)
             except Exception as e:
                 print(f"[WARNING] GlobeNewswire pagination failed on page {page}: {e}")
