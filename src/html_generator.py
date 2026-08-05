@@ -515,10 +515,29 @@ def generate_screening_log_html(output_path):
         .warn { color: var(--yellow); border-color: rgba(219,171,10,0.3); }
         .mode-fallback { color: var(--yellow); font-weight: 700; font-size: 0.8em; }
         .mode-rss { color: var(--muted); font-size: 0.8em; }
+        /* Modal Styles */
+        .modal { display: none; position: fixed; z-index: 100; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.8); }
+        .modal-content { background-color: var(--surface); margin: 5% auto; padding: 20px; border: 1px solid var(--border); width: 80%; max-width: 900px; color: var(--text); border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); }
+        .close { color: var(--muted); float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
+        .close:hover { color: #fff; }
+        .modal-body { margin-top: 15px; white-space: pre-wrap; font-family: var(--mono); font-size: 0.9em; background: var(--bg); padding: 15px; border: 1px solid var(--border); border-radius: 4px; max-height: 60vh; overflow-y: auto;}
+        .modal-title { font-size: 1.2em; font-weight: 600; margin-bottom: 10px; color: #fff;}
+        .modal-meta { font-size: 0.8em; color: var(--muted); margin-bottom: 15px; }
     """
 
     html = """<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>Daily Master Log</title><style>__BASE_CSS__ __SCREENING_CSS__</style>__SORT_JS__</head>
-    <body><div class="container">__NAV__<header><h1>Daily Master Log</h1></header>
+    <body>
+    
+    <div id="articleModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <div id="modalTitle" class="modal-title"></div>
+            <div id="modalMeta" class="modal-meta"></div>
+            <div id="modalBody" class="modal-body"></div>
+        </div>
+    </div>
+    
+    <div class="container">__NAV__<header><h1>Daily Master Log</h1></header>
 
     <div class="filter-bar">
         <div><label>News Source</label><br><select id="sourceFilter"><option value="">All Sources</option></select></div>
@@ -529,12 +548,13 @@ def generate_screening_log_html(output_path):
     <div class="result-count" id="resultCount"></div>
 
     <div class="table-wrapper"><table id="screeningTable">
-    <thead><tr><th>Timestamp (GMT)</th><th>Status</th><th>Source</th><th>Headline</th><th>Mode</th><th>Outcome</th><th>Final Stage</th><th>Drop Reason</th></tr></thead>
-    <tbody id="tableBody"><tr><td colspan="8" style="text-align: center; color: var(--muted); padding: 30px;">Loading Master Log...</td></tr></tbody>
+    <thead><tr><th>Timestamp (GMT)</th><th>Status</th><th>Company</th><th>Source</th><th>Headline (Click to Read)</th><th>Mode</th><th>Outcome</th><th>Final Stage</th><th>Drop Reason</th></tr></thead>
+    <tbody id="tableBody"><tr><td colspan="9" style="text-align: center; color: var(--muted); padding: 30px;">Loading Master Log...</td></tr></tbody>
     </table></div></div>
 
     <script>
         let screeningData = [];
+        let filteredData = [];
         const todayGMT = new Date().toISOString().split('T')[0];
 
         fetch('screening_log.json')
@@ -574,6 +594,23 @@ def generate_screening_log_html(output_path):
         document.getElementById('outcomeFilter').addEventListener('change', renderTable);
         document.getElementById('searchBox').addEventListener('input', renderTable);
 
+        function showModal(idx) {
+            const r = filteredData[idx];
+            if (!r) return;
+            document.getElementById('modalTitle').textContent = r.headline || 'Untitled';
+            document.getElementById('modalMeta').innerHTML = `<strong>Source:</strong> ${r.source || 'Unknown'} | <strong>Company:</strong> ${r.company_name || 'UNKNOWN'} | <a href="${r.url || '#'}" target="_blank" style="color:var(--blue)">Original Link</a>`;
+            document.getElementById('modalBody').textContent = r.body_snippet || 'No article body available.';
+            document.getElementById('articleModal').style.display = "block";
+        }
+        function closeModal() {
+            document.getElementById('articleModal').style.display = "none";
+        }
+        window.onclick = function(event) {
+            if (event.target == document.getElementById('articleModal')) {
+                closeModal();
+            }
+        }
+
         function renderTable() {
             const tbody = document.getElementById('tableBody');
             const sourceVal = document.getElementById('sourceFilter').value;
@@ -581,7 +618,7 @@ def generate_screening_log_html(output_path):
             const outcomeVal = document.getElementById('outcomeFilter').value;
             const searchVal = document.getElementById('searchBox').value.toLowerCase();
 
-            let filtered = screeningData.filter(r => {
+            filteredData = screeningData.filter(r => {
                 if (sourceVal && r.source !== sourceVal) return false;
                 if (reasonVal && r.drop_reason !== reasonVal) return false;
                 if (outcomeVal && r.outcome !== outcomeVal) return false;
@@ -592,15 +629,15 @@ def generate_screening_log_html(output_path):
                 return true;
             });
 
-            document.getElementById('resultCount').textContent = `Showing ${filtered.length} of ${screeningData.length} articles for today (${todayGMT})`;
+            document.getElementById('resultCount').textContent = `Showing ${filteredData.length} of ${screeningData.length} articles for today (${todayGMT})`;
 
             tbody.innerHTML = '';
-            if (filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px;">No articles match the current filters.</td></tr>';
+            if (filteredData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:20px;">No articles match the current filters.</td></tr>';
                 return;
             }
 
-            filtered.forEach(r => {
+            filteredData.forEach((r, idx) => {
                 const tr = document.createElement('tr');
                 const outcomeCls = r.outcome === 'PASSED' ? 'outcome-passed' : 'outcome-dropped';
                 const reasonHtml = r.drop_reason ? `<span class="reason-tag">${r.drop_reason}</span>` : '';
@@ -613,8 +650,9 @@ def generate_screening_log_html(output_path):
                 
                 tr.innerHTML = `<td>${r.timestamp || ''}</td>
                                 <td>${statusHtml}</td>
+                                <td style="font-weight:bold; color:var(--blue);">${r.company_name || 'UNKNOWN'}</td>
                                 <td>${r.source || 'Unknown'}</td>
-                                <td class="headline-cell"><a href="${r.url || '#'}" target="_blank" title="${(r.headline||'').replace(/"/g,'&quot;')}">${r.headline || 'Untitled'}</a></td>
+                                <td class="headline-cell"><a href="javascript:void(0)" onclick="showModal(${idx})" title="${(r.headline||'').replace(/"/g,'&quot;')}">${r.headline || 'Untitled'}</a></td>
                                 <td class="${modeCls}">${modeLabel}</td>
                                 <td class="${outcomeCls}">${r.outcome || ''}</td>
                                 <td>${r.final_stage || ''}</td>
