@@ -89,7 +89,6 @@ jobs:
       - name: Generate HTML Dashboard
         if: always()
         run: |
-          python -m src.validation.export_frontend_data
           python src/html_generator.py
 
       - name: Commit Dashboard
@@ -99,7 +98,7 @@ jobs:
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           
           # Stage artifacts safely
-          git add docs/index.html docs/pipeline_health.html docs/archive.html docs/decision_analytics.html docs/ontology_debug.html docs/archive_data.json docs/dashboard_metrics.json docs/screening_log.html docs/screening_log.json || true
+          git add docs/index.html docs/pipeline_health.html docs/archive.html docs/decision_analytics.html docs/ontology_debug.html docs/archive_data.json docs/dashboard_metrics.json docs/screening_log.html docs/screening_log.json docs/crawl_checkpoints.json docs/ingestion_ledger.json || true
           
           # Check if there's actually anything to commit
           git diff --staged --quiet || git commit -m "chore: update operational dashboard and archive"
