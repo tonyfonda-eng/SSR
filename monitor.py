@@ -162,17 +162,22 @@ def stage_regex_rules(article: dict, ctx: dict) -> tuple:
 # --- DETERMINISTIC ENTITY STAGES (PHASE 3) ---
 
 def stage_python_issuer_extraction(article: dict, ctx: dict) -> tuple:
-    text = article.get("body", "")
-    match = re.search(r'([A-Z][A-Za-z0-9\,\.\&\s]{3,40})\s+\([A-Z]{3,6}\s*:\s*[A-Z]{1,5}\)', text[:1000])
+    """Deterministic issuer extraction via regex header and body patterns."""
+    text = article.get("body", "") + " " + article.get("headline", "")
+    match = re.search(r'([A-Z][A-Za-z0-9\,\.\&\s]{2,40})\s+\((?:NYSE|NASDAQ|AMEX|OTC|TSX|LSE)\s*:\s*[A-Z]{1,5}\)', text[:1500])
     if match:
         article["_deterministic_issuer"] = match.group(1).strip()
     else:
-        article["_deterministic_issuer"] = "UNKNOWN"
+        article["_deterministic_issuer"] = article.get("source", "UNKNOWN")
     return True, "passed"
 
 def stage_python_ticker_lookup(article: dict, ctx: dict) -> tuple:
-    text = article.get("body", "")
-    match = re.search(r'\b(?:NYSE|NASDAQ|AMEX|OTC|TSX|LSE|NYSE MKT|NYSE ARCA)[^A-Z]{1,3}([A-Z]{1,5})\b', text, re.IGNORECASE)
+    """Resolve ticker symbol deterministically from text structure."""
+    text = article.get("body", "") + " " + article.get("headline", "")
+    match = re.search(r'\b(?:NYSE|NASDAQ|AMEX|OTC|TSX|LSE|NYSE MKT|NYSE ARCA)\s*[:]\s*([A-Z]{1,5})\b', text, re.IGNORECASE)
+    if not match:
+        match = re.search(r'\((?:NYSE|NASDAQ|AMEX|OTC|TSX|LSE)\s*:\s*([A-Z]{1,5})\)', text, re.IGNORECASE)
+    
     if match:
         article["_deterministic_ticker"] = match.group(1).upper()
     else:
@@ -203,8 +208,13 @@ def stage_financial_market_cap(article: dict, ctx: dict) -> tuple:
     return True, "passed"
 
 def stage_tradeability_check(article: dict, ctx: dict) -> tuple:
+    """Reject untradeable securities, pink sheets, and OTC bulletin boards."""
     ticker = article.get("_deterministic_ticker", "UNKNOWN")
-    if ".PK" in ticker or ".OB" in ticker or ".OTC" in ticker:
+    if ticker == "UNKNOWN":
+        return True, "passed"
+        
+    untradeable_suffixes = [".PK", ".OB", ".OTC", "PINK"]
+    if any(suffix in ticker.upper() for suffix in untradeable_suffixes):
         return False, "dropped_untradeable_otc"
     return True, "passed"
 
@@ -216,16 +226,36 @@ def stage_financial_t12_floor(article: dict, ctx: dict) -> tuple:
     return True, "passed"
 
 def stage_options_chain_check(article: dict, ctx: dict) -> tuple:
+    """Reject target securities requiring options where none exist."""
     ticker = article.get("_deterministic_ticker", "UNKNOWN")
-    if ticker != "UNKNOWN":
-        options_only = str(ctx.get("sys_settings", {}).get("Options Tradable Only", "False")).lower() == "true"
-        if options_only:
+    if ticker == "UNKNOWN":
+        return True, "passed"
+        
+    options_only = str(ctx.get("sys_settings", {}).get("Options Tradable Only", "True")).lower() == "true"
+    if options_only:
+        try:
             snap = query_financial_snapshot(ticker)
-            if snap.is_complete and not snap.options_available:
-                return False, "dropped_no_options"
+            if snap and snap.is_complete and not snap.options_available:
+                return False, "dropped_no_options_chain"
+        except Exception as e:
+            logger.debug(f"Options chain check skipped for {ticker} due to query exception: {e}")
     return True, "passed"
 
 def stage_liquidity_check(article: dict, ctx: dict) -> tuple:
+    """Enforce minimum liquidity and average volume thresholds."""
+    ticker = article.get("_deterministic_ticker", "UNKNOWN")
+    if ticker == "UNKNOWN":
+        return True, "passed"
+        
+    min_volume = int(ctx.get("sys_settings", {}).get("Minimum Average Volume", 50000))
+    try:
+        metrics = get_t12_metrics(ticker)
+        if metrics and metrics.get("valid"):
+            avg_vol = metrics.get("average_volume", 0)
+            if avg_vol > 0 and avg_vol < min_volume:
+                return False, "dropped_insufficient_liquidity"
+    except Exception as e:
+        logger.debug(f"Liquidity check skipped for {ticker} due to metric fetch error: {e}")
     return True, "passed"
 
 # --- PLAYBOOK GATE (PHASE 5 - FINAL DETERMINISTIC FILTER) ---
