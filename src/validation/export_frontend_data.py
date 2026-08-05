@@ -100,7 +100,7 @@ def export_archive_json(filepath="docs/archive_data.json"):
         return False
 
 
-def export_screening_log(filepath="docs/screening_log.json", limit=1000):
+def export_screening_log(filepath="docs/screening_log.json", limit=5000):
     """
     Exports the most recent N screened articles (passed AND dropped) so the
     dashboard can show exactly what the pipeline looked at and what happened to it.

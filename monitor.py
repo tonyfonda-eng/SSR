@@ -311,8 +311,9 @@ def stage_ai_event_classification(article: dict, ctx: dict) -> tuple:
 
 def stage_ai_confidence_gate(article: dict, ctx: dict) -> tuple:
     min_conf = float(ctx.get("sys_settings", {}).get("MIN_AI_CONFIDENCE", 0.75))
-    if article.get("_ai_confidence", 0.0) < min_conf:
-        return False, "dropped_ai_confidence"
+    score = article.get("_ai_confidence", 0.0)
+    if score < min_conf:
+        return False, f"dropped_ai_confidence (scored {score:.2f} < {min_conf:.2f})"
     return True, "passed"
 
 STAGE_REGISTRY = {
