@@ -20,9 +20,9 @@ class TSXScraper:
     """Dedicated scraper for TSX and Canadian newswire feeds."""
     
     @staticmethod
-    def get_latest_articles(rss_url=None):
+    def get_latest_articles(**kwargs):
         print("[TSX SCRAPER] Polling Canadian exchange feeds...")
-        target_url = rss_url or "https://www.tsx.com/news/rss"
+        target_url = kwargs.get('url') or kwargs.get('rss_url') or "https://www.tsx.com/news/rss"
         articles = []
         try:
             headers = {"User-Agent": "Mozilla/5.0"}
