@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>SSR Decision Ledger</title><style>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>SSR Canonical Decision Manifests</title><style>
         :root { --bg: #0a0e14; --surface: #11161d; --surface-subtle: #1a2029; --surface-hover: #222933; --border: #2a323d; --text: #c1c9d2; --muted: #79838f; --green: #2ea043; --red: #cb2431; --yellow: #dbab0a; --blue: #4088db; --mono: "SF Mono", "JetBrains Mono", Consolas, "Roboto Mono", monospace; }
         * { box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 12px; font-size: 13px; line-height: 1.4; }
@@ -41,7 +41,6 @@
         .kpi-context-row { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); width: 100%; }
         .kpi-context-item .cx-label { font-size: 0.65em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.4px; }
         .kpi-context-item .cx-value { font-family: var(--mono); font-weight: 700; font-size: 1.05em; margin-top: 2px; }
-        .telemetry-sub { margin-top: 16px; } .telemetry-sub:first-child { margin-top: 0; }
         .empty-note { color: var(--muted); font-style: italic; padding: 8px 0; font-size: 0.85em; }
         .activity-list { list-style: none; margin: 0; padding: 0; }
         .activity-list li { padding: 6px 0; border-bottom: 1px solid var(--surface-subtle); font-size: 0.85em; display: flex; justify-content: space-between; gap: 10px; }
@@ -52,15 +51,17 @@
         th { background: var(--surface-subtle); position: sticky; top: 0; z-index: 10; }
         .decision-report-row { display: none; background: #0f131a; }
         .decision-report-row.expanded { display: table-row; }
-        .decision-report { padding: 16px 24px; border-left: 4px solid var(--blue); display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;}
+        .decision-report { padding: 16px 24px; border-left: 4px solid var(--blue); display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;}
         .drop-reason { font-family: var(--mono); color: var(--yellow); font-size: 0.9em; background: rgba(219,171,10,0.1); padding: 2px 6px; border-radius: 3px;}
         .dr-block h4 { margin: 0 0 8px; font-size: 0.8em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.5px; border-bottom: 1px solid var(--border); padding-bottom: 4px;}
         .dr-list { list-style: none; margin: 0; padding: 0; font-size: 0.85em; }
-        .dr-list li { margin-bottom: 4px; display: flex; justify-content: space-between; }
-        .dr-list li strong { color: var(--text); font-weight: normal; }
+        .dr-list li { margin-bottom: 6px; display: flex; justify-content: space-between; gap: 12px; }
+        .dr-list li strong { color: var(--text); font-weight: normal; white-space: nowrap;}
         .dr-list li span { font-family: var(--mono); color: #fff; text-align: right; }
         .replay-btn { background: var(--surface-subtle); color: var(--text); border: 1px solid var(--border); padding: 6px 12px; cursor: pointer; border-radius: 4px; font-weight: 600; text-transform: uppercase; font-size: 0.75em; letter-spacing: 0.5px; width: 100%; margin-top: 10px;}
         .replay-btn:hover { background: var(--blue); color: #fff; border-color: var(--blue); }
+        .evidence-for { border-left: 3px solid var(--green); padding-left: 8px; margin-bottom: 8px;}
+        .evidence-against { border-left: 3px solid var(--red); padding-left: 8px; margin-bottom: 8px;}
     </style>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -80,13 +81,13 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
     <body><div class="container">
             <div class="nav-tabs">
                 <a href="index.html" class="">Operations Centre</a>
-                <a href="decision_analytics.html" class="">Decision Analytics</a>
-                <a href="archive.html" class="active">Decision Ledger</a>
-            </div><header><h1>Decision Ledger</h1></header>
+                <a href="decision_analytics.html" class="">Drift & Intelligence</a>
+                <a href="archive.html" class="active">Decision Ledger Manifests</a>
+            </div><header><h1>Canonical Decision Manifests</h1></header>
     
     <div class="table-wrapper"><table id="archiveTable">
-    <thead><tr><th>Timestamp (GMT)</th><th>Source / Issuer</th><th>Headline</th><th>Outcome</th><th>Pipeline Stage</th><th>Drop Reason</th><th>Proc Time</th></tr></thead>
-    <tbody id="tableBody"><tr><td colspan="7" style="text-align: center; color: var(--muted); padding: 30px;">Loading immutable event stream...</td></tr></tbody>
+    <thead><tr><th>Execution Timestamp (GMT)</th><th>Canonical Sensor</th><th>Entity / Target</th><th>Final Outcome</th><th>Terminal Stage</th><th>Confidence Score</th></tr></thead>
+    <tbody id="tableBody"><tr><td colspan="6" style="text-align: center; color: var(--muted); padding: 30px;">Mounting Canonical Decision Manifest API...</td></tr></tbody>
     </table></div></div>
     
     <script>
@@ -107,9 +108,7 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
         
         function toggleRow(idx) {
             const el = document.getElementById('detail-' + idx);
-            if (el) {
-                el.classList.toggle('expanded');
-            }
+            if (el) el.classList.toggle('expanded');
         }
         
         function renderTable() {
@@ -117,82 +116,100 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
             tbody.innerHTML = '';
             
             if (!archiveData || archiveData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">No decisions currently in ledger.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No decision manifests exposed in API.</td></tr>';
                 return;
             }
             
-            archiveData.forEach((row, index) => {
-                let ts = row.timestamp || '';
-                if (ts && !ts.includes('GMT') && !ts.includes('UTC')) ts += ' GMT';
-                let reasonHtml = row.reason ? `<span class="drop-reason">${row.reason}</span>` : '';
+            archiveData.forEach((manifest, index) => {
+                // Parse SSR 2.0 Canonical Structure with Legacy Fallbacks
+                const reg = manifest.manifest_registry || {};
+                const det = manifest.detection_vector || {};
+                const prov = manifest.evidentiary_provenance_dag || {supporting_evidence: [], opposing_evidence: []};
+                const perf = manifest.performance_telemetry_ms || {};
+                const line = manifest.syndication_lineage || {};
+                
+                let ts = reg.execution_timestamp_gmt || manifest.timestamp || '';
+                let outcome = det.outcome || manifest.outcome || 'PENDING';
+                let stage = det.terminal_stage || manifest.pipeline_stage || 'Unknown';
+                let sensor = line.canonical_sensor_id || manifest.source || 'Unknown Sensor';
+                let ticker = det.target_ticker || manifest.issuer || 'UNKNOWN';
+                
+                let confDecomp = det.confidence_decomposition || {};
+                let aggConf = confDecomp.aggregate_confidence || manifest.confidence || 0.0;
+                let confStr = aggConf > 0 ? (aggConf * 100).toFixed(1) + '%' : '<span class="awaiting">N/A</span>';
                 
                 // Main Row
                 const tr = document.createElement('tr');
                 tr.className = 'clickable';
                 tr.onclick = () => toggleRow(index);
                 tr.innerHTML = `<td>${ts}</td>
-                                <td><strong>${row.source || ''}</strong><br><small>${row.issuer || 'Unknown Issuer'}</small></td>
-                                <td style="max-width:350px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${row.headline || ''}"><a href="${row.url || '#'}">${row.headline || ''}</a></td>
-                                <td><strong>${row.outcome || ''}</strong></td>
-                                <td>${row.pipeline_stage || ''}</td>
-                                <td>${reasonHtml}</td>
-                                <td class="metric-val">${row.processing_time || ''}</td>`;
+                                <td><strong>${sensor}</strong></td>
+                                <td>${ticker}</td>
+                                <td><strong>${outcome}</strong></td>
+                                <td>${stage}</td>
+                                <td class="metric-val">${confStr}</td>`;
                 
-                // Expanded Decision Report Row
+                // Build Supporting Evidence HTML
+                let suppHtml = prov.supporting_evidence.map(e => `
+                    <div class="evidence-for">
+                        <div style="font-size:0.8em; color:var(--muted); text-transform:uppercase;">${e.component || e.stage} (Wt: ${e.weight || e.confidence_weight || 1.0})</div>
+                        <div>${e.assertion || e.assertion_key}</div>
+                    </div>`).join('');
+                if(!suppHtml) suppHtml = '<div class="empty-note">No supporting causal links recorded.</div>';
+
+                // Build Opposing Evidence HTML
+                let oppHtml = prov.opposing_evidence.map(e => `
+                    <div class="evidence-against">
+                        <div style="font-size:0.8em; color:var(--muted); text-transform:uppercase;">${e.component || e.stage} (Wt: ${e.weight || e.confidence_weight || 1.0})</div>
+                        <div>${e.assertion || e.assertion_key}</div>
+                    </div>`).join('');
+                // Legacy support for single "drop reason" mapped to opposing evidence
+                if(!oppHtml && manifest.reason) {
+                    oppHtml = `<div class="evidence-against"><div>Legacy Termination: ${manifest.reason}</div></div>`;
+                }
+                if(!oppHtml) oppHtml = '<div class="empty-note">No opposing causal links recorded.</div>';
+
+                // Expanded Manifest Report Row
                 const dTr = document.createElement('tr');
                 dTr.id = 'detail-' + index;
                 dTr.className = 'decision-report-row';
                 dTr.innerHTML = `
-                    <td colspan="7" style="padding: 0;">
+                    <td colspan="6" style="padding: 0;">
                         <div class="decision-report">
                             <div class="dr-block">
-                                <h4>Decision Summary</h4>
+                                <h4>Manifest Identifiers & Lineage</h4>
                                 <ul class="dr-list">
-                                    <li><strong>Outcome:</strong> <span>${row.outcome || ''}</span></li>
-                                    <li><strong>Stage Exited:</strong> <span>${row.pipeline_stage || ''}</span></li>
-                                    <li><strong>Authority:</strong> <span>${row.pipeline_stage || ''} Engine</span></li>
-                                    <li><strong>Confidence:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
-                                    <li><strong>Processing Time:</strong> <span>${row.processing_time || ''}</span></li>
-                                    <li><strong>Validation Status:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
+                                    <li><strong>Decision ID:</strong> <span>${reg.decision_id || 'Legacy-Data'}</span></li>
+                                    <li><strong>Core Event ID:</strong> <span>${reg.event_id || 'Legacy-Data'}</span></li>
+                                    <li><strong>Config Manifest:</strong> <span>${reg.configuration_manifest_hash || 'SSR-CFG-LEGACY'}</span></li>
+                                    <li><strong>Completeness Score:</strong> <span>${reg.evidence_completeness_score ? (reg.evidence_completeness_score*100).toFixed(0)+'%' : '100%'}</span></li>
+                                </ul>
+                                <h4 style="margin-top:16px;">Execution Timings (ms)</h4>
+                                <ul class="dr-list">
+                                    <li><strong>Repo Ingest:</strong> <span>${perf.ingest_repo_ms || perf.download || 0}</span></li>
+                                    <li><strong>Text Transforms:</strong> <span>${perf.transformation_ms || perf.transformation || 0}</span></li>
+                                    <li><strong>Ontology Engine:</strong> <span>${perf.ontology_ms || perf.ontology || 0}</span></li>
+                                    <li><strong>Rules Engine:</strong> <span>${perf.rules_ms || perf.rules || 0}</span></li>
+                                    <li><strong>AI Inference:</strong> <span>${perf.ai_inference_ms || perf.ai || 0}</span></li>
                                 </ul>
                             </div>
                             <div class="dr-block">
-                                <h4>Positive Evidence</h4>
-                                <ul class="dr-list">
-                                    <li><strong>Ontology Concepts:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
-                                    <li><strong>Matched Rules:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
-                                    <li><strong>Extracted Issuer:</strong> <span>${row.issuer || 'None'}</span></li>
-                                    <li><strong>Supporting Evidence:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
-                                </ul>
+                                <h4>Supporting Causal DAG</h4>
+                                ${suppHtml}
                             </div>
                             <div class="dr-block">
-                                <h4>Missing Evidence</h4>
-                                <ul class="dr-list">
-                                    <li><strong>Missing Concepts:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
-                                    <li><strong>Missing Rules:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
-                                    <li><strong>Missing Issuer:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
-                                    <li><strong>Missing AI Auth:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
-                                </ul>
+                                <h4>Opposing / Terminal Causal DAG</h4>
+                                ${oppHtml}
                             </div>
                             <div class="dr-block">
-                                <h4>Execution Timeline</h4>
+                                <h4>Strategy Decoupling & Human Audit</h4>
                                 <ul class="dr-list">
-                                    <li><strong>Start Time:</strong> <span>${ts}</span></li>
-                                    <li><strong>Duration:</strong> <span>${row.processing_time || ''}</span></li>
-                                    <li><strong>Component:</strong> <span>${row.pipeline_stage || ''}</span></li>
-                                    <li><strong>Status:</strong> <span>${row.outcome || ''}</span></li>
+                                    <li><strong>Human Override:</strong> <span><span class="awaiting">None</span></span></li>
+                                    <li><strong>Strategy Validation:</strong> <span><span class="awaiting">Pending Sync</span></span></li>
+                                    <li><strong>Market Cap Floor:</strong> <span><span class="awaiting">Unavailable</span></span></li>
+                                    <li><strong>Options Verification:</strong> <span><span class="awaiting">Unavailable</span></span></li>
                                 </ul>
-                            </div>
-                            <div class="dr-block">
-                                <h4>Version Metadata</h4>
-                                <ul class="dr-list">
-                                    <li><strong>Parser Version:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
-                                    <li><strong>Ontology Version:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
-                                    <li><strong>Rule Pack Version:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
-                                    <li><strong>Prompt Version:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
-                                    <li><strong>Generator Version:</strong> <span><span class="awaiting">Awaiting Data</span></span></li>
-                                </ul>
-                                <button class="replay-btn" onclick="alert('Replay endpoint not implemented. Event ID: ${row.id || index}')">Replay Event</button>
+                                <button class="replay-btn" onclick="alert('Immutable Replay triggered for Event ID: ${reg.event_id || 'Unknown'} via Configuration Manifest ${reg.configuration_manifest_hash || 'Latest'}.')">Trigger Deterministic Replay</button>
                             </div>
                         </div>
                     </td>
