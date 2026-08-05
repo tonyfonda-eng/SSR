@@ -43,12 +43,45 @@ logger = logging.getLogger(__name__)
 
 class PipelineTelemetry:
     def __init__(self):
-        self.metrics = {"downloaded": 0, "alerts_generated": 0, "errors": 0}
-        self.start_time = time.time()
         self.run_id = f"RUN-{datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')}"
+        self.start_time = time.time()
+        
+        # Volumetric counters
+        self.metrics = {"downloaded": 0, "alerts_generated": 0, "errors": 0}
+        
+        # High-resolution metrics ledger for cost accounting
+        self.stage_analytics = {}
 
-    def track(self, stage: str):
-        self.metrics[stage] = self.metrics.get(stage, 0) + 1
+    def track_stage_performance(self, stage: str, outcome: str, cpu_ns: int, network_ns: int, api_calls: int, reason: str = "N/A"):
+        """Records precise granular economics for pipeline observability."""
+        if stage not in self.stage_analytics:
+            self.stage_analytics[stage] = {
+                "entered": 0,
+                "passed": 0,
+                "rejected": 0,
+                "cpu_ms": 0.0,
+                "network_ms": 0.0,
+                "api_calls": 0,
+                "drop_reasons": {}
+            }
+            
+        metrics = self.stage_analytics[stage]
+        metrics["entered"] += 1
+        
+        if outcome == "passed":
+            metrics["passed"] += 1
+        else:
+            metrics["rejected"] += 1
+            if reason != "N/A":
+                metrics["drop_reasons"][reason] = metrics["drop_reasons"].get(reason, 0) + 1
+            
+        metrics["cpu_ms"] += round(cpu_ns / 1_000_000, 3)
+        metrics["network_ms"] += round(network_ns / 1_000_000, 3)
+        metrics["api_calls"] += api_calls
+
+    def track(self, key: str):
+        """Fallback for global counters."""
+        self.metrics[key] = self.metrics.get(key, 0) + 1
 
     def get_runtime(self):
         return round(time.time() - self.start_time, 2)
@@ -83,7 +116,6 @@ def stage_exclude_source_specific(article: dict, ctx: dict) -> tuple:
     source = article.get("source", "").lower()
     text = article.get("body", "").lower()
     
-    # TODO: Migrate these dictionaries to a 'Source Profiles' tab in Google Sheets
     source_noise_profiles = {
         "pr newswire": ["new appointment", "product launch", "esg", "conference", "trade show"],
         "business wire": ["exhibition", "quarterly dividend", "monthly dividend"],
@@ -94,7 +126,7 @@ def stage_exclude_source_specific(article: dict, ctx: dict) -> tuple:
         if src in source:
             for noise in noise_keywords:
                 if noise in text:
-                    return False, "dropped_source_specific_noise"
+                    return False, f"dropped_source_specific_noise_{noise.replace(' ', '_')}"
     return True, "passed"
 
 # --- ONTOLOGY & RULES (PHASE 2 - MOVED UP TO MINIMIZE CPU LOAD) ---
@@ -124,7 +156,6 @@ def stage_regex_rules(article: dict, ctx: dict) -> tuple:
         threshold=threshold
     )
     if not rule_results: return False, "dropped_rules_threshold"
-    # Save the matched families for playbook eligibility checking
     article["_deterministic_families"] = rule_results if isinstance(rule_results, list) else []
     return True, "passed"
 
@@ -201,11 +232,9 @@ def stage_liquidity_check(article: dict, ctx: dict) -> tuple:
 
 def stage_playbook_eligibility_check(article: dict, ctx: dict) -> tuple:
     """Drops the article if no active playbook exists for the detected event family."""
-    # Ensure there is at least one playbook defined for the deterministic families found
     active_playbooks = [str(p.get("Playbook", "")).lower() for p in ctx.get("playbooks", []) if str(p.get("Active", "TRUE")).upper() == "TRUE"]
     detected_families = [str(f).lower() for f in article.get("_deterministic_families", [])]
     
-    # If the rules engine flagged families, but NONE map to a playbook (e.g. Dividend), drop it.
     if detected_families:
         has_playbook = any(family in active_playbooks for family in detected_families)
         if not has_playbook:
@@ -216,7 +245,6 @@ def stage_playbook_eligibility_check(article: dict, ctx: dict) -> tuple:
 # --- THE AI SPECIALIST (PHASE 6 - AMBIGUITY, CLASSIFICATION, SUMMARIZATION ONLY) ---
 
 def stage_ai_ticker_resolution(article: dict, ctx: dict) -> tuple:
-    # Deterministic logic already proved highly confident, bypass AI extraction
     if article.get("_deterministic_ticker", "UNKNOWN") != "UNKNOWN":
         article["_ai_ticker"] = article.get("_deterministic_ticker")
         return True, "passed"
@@ -247,7 +275,6 @@ def stage_ai_confidence_gate(article: dict, ctx: dict) -> tuple:
     if article.get("_ai_confidence", 0.0) < min_conf:
         return False, "dropped_ai_confidence"
     return True, "passed"
-
 
 STAGE_REGISTRY = {
     "dedupe_hash": stage_dedupe_hash,
@@ -285,42 +312,43 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
     else:
         # Fallback Strict DAG
         execution_order = [
-            "dedupe_hash", 
-            "dedupe_issuer_memory", 
-            "exclude_global_keywords", 
-            "exclude_issuer_feed", 
-            "exclude_source_specific",
-            "ontology_concepts", 
-            "ontology_status", 
-            "document_scoring", 
-            "regex_rules", 
-            "python_issuer_extraction", 
-            "python_ticker_lookup", 
-            "entity_confidence_gate",
-            "financial_market_cap",
-            "tradeability_check", 
-            "financial_t12_floor", 
-            "options_chain_check", 
-            "liquidity_check", 
-            "playbook_eligibility_check",
-            "ai_ticker_resolution", 
-            "ai_event_classification", 
-            "ai_confidence_gate"
+            "dedupe_hash", "dedupe_issuer_memory", "exclude_global_keywords", 
+            "exclude_issuer_feed", "exclude_source_specific", "ontology_concepts", 
+            "ontology_status", "document_scoring", "regex_rules", 
+            "python_issuer_extraction", "python_ticker_lookup", "entity_confidence_gate",
+            "financial_market_cap", "tradeability_check", "financial_t12_floor", 
+            "options_chain_check", "liquidity_check", "playbook_eligibility_check",
+            "ai_ticker_resolution", "ai_event_classification", "ai_confidence_gate"
         ]
 
     for stage_name in execution_order:
-        telemetry.track(f"entered_{stage_name}")
-        
         stage_func = STAGE_REGISTRY.get(stage_name.lower())
         if not stage_func: 
             logger.warning(f"Configuration requested unknown pipeline stage: {stage_name}")
             continue
+            
+        start_cpu = time.perf_counter_ns()
+        start_net = article.get("_net_time_accumulator", 0)
+        start_api = article.get("_api_call_accumulator", 0)
+
         passed, drop_reason = stage_func(article, ctx)
+        
+        delta_cpu = time.perf_counter_ns() - start_cpu
+        delta_net = article.get("_net_time_accumulator", start_net) - start_net
+        delta_api = article.get("_api_call_accumulator", start_api) - start_api
+
+        telemetry.track_stage_performance(
+            stage=stage_name,
+            outcome="passed" if passed else "rejected",
+            cpu_ns=delta_cpu,
+            network_ns=delta_net,
+            api_calls=delta_api,
+            reason=drop_reason if not passed else "N/A"
+        )
+
         if not passed:
             telemetry.track(drop_reason)
             return False 
-            
-        telemetry.track(f"survived_{stage_name}")
             
     telemetry.track("alerts_generated")
     event_id = article.get("_internal_event_id", "UNKNOWN")
@@ -417,10 +445,12 @@ def main():
     finally:
         logger.info("Pipeline execution finished. Generating observability exports...")
         
-        logger.info("\n=== 📉 PIPELINE STAGE FUNNEL 📉 ===")
-        for key, count in sorted(telemetry.metrics.items()):
-            logger.info(f"  {key}: {count}")
-        logger.info("===================================\n")
+        logger.info("\n=== 📉 PIPELINE ECONOMICS & STAGE FUNNEL 📉 ===")
+        for stage, data in telemetry.stage_analytics.items():
+            logger.info(f"[{stage.upper()}] Entered: {data['entered']} | Passed: {data['passed']} | Rejected: {data['rejected']} | CPU: {data['cpu_ms']}ms | Net: {data['network_ms']}ms | API: {data['api_calls']}")
+            if data['drop_reasons']:
+                logger.info(f"    Drop Reasons: {data['drop_reasons']}")
+        logger.info("===============================================\n")
         
         health_payload = {
             "run_id": telemetry.run_id,
@@ -428,7 +458,7 @@ def main():
             "articles": telemetry.metrics.get("alerts_generated", 0),
             "errors": telemetry.metrics.get("errors", 0) + telemetry.metrics.get("ai_exhausted", 0),
             "runtime": telemetry.get_runtime(),
-            "funnel": telemetry.metrics
+            "funnel": telemetry.stage_analytics
         }
         save_workflow_health(health_payload)
         
