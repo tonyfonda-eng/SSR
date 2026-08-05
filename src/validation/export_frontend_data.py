@@ -43,7 +43,7 @@ def export_archive_json(filepath="docs/archive_data.json"):
                 FROM evaluation_ledger e
                 LEFT JOIN factual_metadata f ON e.decision_id = f.decision_id
                 ORDER BY e.runtime_timestamp DESC
-                LIMIT 2000
+                LIMIT 50000
             """)
             rows = cursor.fetchall()
             for r in rows:

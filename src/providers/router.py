@@ -1,6 +1,6 @@
 """
 SSR 2.0: AI Provider Router & Resilience Layer
-Handles multi-provider fallback (Anthropic -> OpenAI), comma-separated 
+Handles multi-provider fallback (Gemini -> OpenRouter), comma-separated 
 API key rotation, 401 fail-fast dropping, and 429 exponential backoffs.
 """
 
@@ -17,8 +17,8 @@ class ProviderRouter:
     def __init__(self):
         # Dynamically parse comma-separated API keys from the environment
         self.keys = {
-            "anthropic": self._parse_keys("ANTHROPIC_API_KEY"),
-            "openai": self._parse_keys("OPENAI_API_KEY")
+            "gemini": self._parse_keys("GEMINI_API_KEY"),
+            "openrouter": self._parse_keys("OPENROUTER_API_KEY")
         }
         self.settings = {}
         
@@ -28,7 +28,15 @@ class ProviderRouter:
     def _parse_keys(self, env_var: str) -> List[str]:
         """Parses a comma-separated string of API keys into a clean list."""
         raw = os.environ.get(env_var, "")
-        return [k.strip() for k in raw.split(",") if k.strip()]
+        keys = [k.strip() for k in raw.split(",") if k.strip()]
+        
+        # Support GEMINI_API_KEY_1 through 10 fallback format
+        for i in range(1, 11):
+            val = os.environ.get(f"{env_var}_{i}", "")
+            if val:
+                keys.extend([k.strip() for k in val.split(",") if k.strip()])
+                
+        return keys
 
     def update_config(self, settings: dict):
         """Injects dynamic settings from The Brain (Google Sheets)."""
@@ -39,9 +47,7 @@ class ProviderRouter:
         Executes the prompt against available providers. 
         Implements intelligent fallback and token rotation logic.
         """
-        # Primary: Anthropic (usually better at strict instruction following)
-        # Fallback: OpenAI
-        provider_order = ["anthropic", "openai"]
+        provider_order = ["gemini", "openrouter"]
         
         for provider in provider_order:
             keys = self.keys.get(provider, [])
@@ -49,17 +55,17 @@ class ProviderRouter:
             while keys:
                 current_key = keys[0]
                 try:
-                    if provider == "anthropic":
-                        return self._call_anthropic(prompt, current_key, require_json)
-                    elif provider == "openai":
-                        return self._call_openai(prompt, current_key, require_json)
+                    if provider == "gemini":
+                        return self._call_gemini(prompt, current_key, require_json)
+                    elif provider == "openrouter":
+                        return self._call_openrouter(prompt, current_key, require_json)
                         
                 except requests.exceptions.HTTPError as e:
-                    status_code = e.response.status_code
+                    status_code = getattr(e.response, 'status_code', 500)
                     
-                    if status_code == 401:
+                    if status_code == 401 or status_code == 403:
                         # FAIL-FAST: Unauthorized key. It's dead. Drop it permanently.
-                        logger.warning(f"[AI ROUTER] 401 Unauthorized on {provider}. Purging dead key from rotation.")
+                        logger.warning(f"[AI ROUTER] {status_code} on {provider}. Purging dead key from rotation.")
                         keys.pop(0)
                         
                     elif status_code == 429:
@@ -74,7 +80,7 @@ class ProviderRouter:
                         break 
                         
                     else:
-                        logger.error(f"[AI ROUTER] Unexpected HTTP {status_code} from {provider}: {e.response.text}")
+                        logger.error(f"[AI ROUTER] Unexpected HTTP {status_code} from {provider}: {e}")
                         break
                         
                 except Exception as e:
@@ -84,51 +90,67 @@ class ProviderRouter:
         # If the loop exhausts without returning, we are completely out of AI credits/keys.
         return "EXHAUSTED"
 
-    def _call_anthropic(self, prompt: str, api_key: str, require_json: bool) -> str:
-        """Executes API call to Anthropic Claude models."""
-        url = "https://api.anthropic.com/v1/messages"
-        headers = {
-            "x-api-key": api_key,
-            "anthropic-version": "2023-06-01",
-            "content-type": "application/json"
-        }
+    def _call_gemini(self, prompt: str, api_key: str, require_json: bool) -> str:
+        """Executes API call to Google Gemini REST API."""
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+        headers = {"Content-Type": "application/json"}
         
-        # Enforce JSON formatting instructions if required
         system_prompt = "You are a specialized corporate events data extractor."
         if require_json:
             system_prompt += " You must respond strictly with valid JSON. Do not include markdown formatting or commentary."
             
         payload = {
-            "model": "claude-3-haiku-20240307", # Fast, cheap, capable model
-            "system": system_prompt,
-            "max_tokens": 1024,
-            "messages": [{"role": "user", "content": prompt}]
+            "system_instruction": {
+                "parts": [{"text": system_prompt}]
+            },
+            "contents": [{
+                "parts": [{"text": prompt}]
+            }],
+            "generationConfig": {
+                "temperature": 0.0
+            }
         }
         
-        response = requests.post(url, headers=headers, json=payload, timeout=15)
+        if require_json:
+            payload["generationConfig"]["responseMimeType"] = "application/json"
+            
+        response = requests.post(url, headers=headers, json=payload, timeout=20)
         response.raise_for_status()
         
         data = response.json()
-        return data["content"][0]["text"]
+        try:
+            return data["candidates"][0]["content"]["parts"][0]["text"]
+        except (KeyError, IndexError):
+            logger.error(f"[AI ROUTER] Unexpected Gemini response format: {data}")
+            raise requests.exceptions.HTTPError(response=response)
 
-    def _call_openai(self, prompt: str, api_key: str, require_json: bool) -> str:
-        """Executes API call to OpenAI GPT models."""
-        url = "https://api.openai.com/v1/chat/completions"
+    def _call_openrouter(self, prompt: str, api_key: str, require_json: bool) -> str:
+        """Executes API call to OpenRouter."""
+        url = "https://openrouter.ai/api/v1/chat/completions"
         headers = {
             "Authorization": f"Bearer {api_key}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "HTTP-Referer": "https://github.com/tonyfonda-eng/SSR",
+            "X-Title": "Special Situations Radar"
         }
         
+        system_prompt = "You are a specialized corporate events data extractor."
+        if require_json:
+            system_prompt += " You must respond strictly with valid JSON. Do not include markdown formatting or commentary."
+            
         payload = {
-            "model": "gpt-4o-mini", # Fast, cheap, capable model
-            "messages": [{"role": "user", "content": prompt}],
-            "temperature": 0.0 # Deterministic output
+            "model": "google/gemini-1.5-flash", 
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": prompt}
+            ],
+            "temperature": 0.0
         }
         
         if require_json:
             payload["response_format"] = {"type": "json_object"}
             
-        response = requests.post(url, headers=headers, json=payload, timeout=15)
+        response = requests.post(url, headers=headers, json=payload, timeout=20)
         response.raise_for_status()
         
         data = response.json()
