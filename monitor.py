@@ -419,9 +419,11 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
             _record_screening(article, telemetry, outcome="DROPPED", final_stage=stage_name, drop_reason=drop_reason)
             
             if stage_name != "dedupe_hash":
+                evt_id = article.get("_internal_event_id", "UNKNOWN")
+                dec_hash = hashlib.md5(f"{evt_id}:{time.time()}".encode()).hexdigest()[:12].upper()
                 decision_capsule = {
-                    "decision_id": f"DEC-{hashlib.md5(f'{article.get(\"_internal_event_id\", \"UNKNOWN\")}:{time.time()}'.encode()).hexdigest()[:12].upper()}",
-                    "event_id": article.get("_internal_event_id", "UNKNOWN"),
+                    "decision_id": f"DEC-{dec_hash}",
+                    "event_id": evt_id,
                     "manifest_hash": manifest_hash,
                     "runtime_timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT"),
                     "detection_outcome": "DROPPED",
