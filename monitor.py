@@ -25,7 +25,8 @@ except ImportError:
 
 from src.html_generator import (
     generate_archive_html, generate_dashboard_html,
-    generate_decision_analytics_html, generate_screening_log_html
+    generate_decision_analytics_html, generate_screening_log_html,
+    generate_ontology_debug_html
 )
 
 from src.ingestion.scrapers import fetch_all_feeds
@@ -564,12 +565,13 @@ def main():
             else:
                 export_screening_json("docs/screening_log.json")
 
-            logger.info("Rebuilding ALL 4 HTML Dashboards...")
+            logger.info("Rebuilding ALL HTML Dashboards...")
             generate_dashboard_html([], "docs/index.html", health_payload)
             generate_decision_analytics_html("docs/decision_analytics.html", health_payload)
             generate_archive_html("docs/archive.html")
             generate_screening_log_html("docs/screening_log.html")
-            logger.info("[SUCCESS] All 4 institutional HTML dashboards rebuilt in docs/")
+            generate_ontology_debug_html("docs/ontology_debug.html")
+            logger.info("[SUCCESS] All institutional HTML dashboards rebuilt in docs/")
         except Exception as e:
             logger.error(f"Frontend Data & HTML Export failed: {e}")
 

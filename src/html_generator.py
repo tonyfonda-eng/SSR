@@ -4,7 +4,6 @@ import json
 
 # ---------------------------------------------------------------------------
 # SSR 2.0 INSTITUTIONAL OPERATIONS CENTRE & DECISION INTELLIGENCE
-# Consumes Canonical Decision Manifests & Operational Telemetry
 # ---------------------------------------------------------------------------
 
 AWAITING_SPAN = '<span class="awaiting">Awaiting Data</span>'
@@ -65,7 +64,6 @@ def status_badge(value, ok_values=("OK", "HEALTHY", "PASS", "UP", "RUNNING", "DE
     else: cls = "info"
     return f'<span class="badge {cls}">{esc(value)}</span>'
 
-# Multi-key stage definitions to support legacy and current drop reasons seamlessly
 LOSS_STAGE_DEFS = [
     ("Sensor Ingestion",      ["downloaded"],                                            None,                     "start"),
     ("Idempotency & Dedupe",  ["dropped_hash_duplicate", "duplicate", "duplicate_id"],   "Ingestion",              "loss"),
@@ -193,10 +191,6 @@ BASE_CSS = """
         .kpi-context-item .cx-label { font-size: 0.65em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.4px; }
         .kpi-context-item .cx-value { font-family: var(--mono); font-weight: 700; font-size: 1.05em; margin-top: 2px; }
         .empty-note { color: var(--muted); font-style: italic; padding: 8px 0; font-size: 0.85em; }
-        .activity-list { list-style: none; margin: 0; padding: 0; }
-        .activity-list li { padding: 6px 0; border-bottom: 1px solid var(--surface-subtle); font-size: 0.85em; display: flex; justify-content: space-between; gap: 10px; }
-        .activity-list li:last-child { border-bottom: none; }
-        .activity-ts { color: var(--muted); font-family: var(--mono); font-size: 0.82em; white-space: nowrap; }
 """
 
 NAV_TABS = """
@@ -205,6 +199,7 @@ NAV_TABS = """
                 <a href="decision_analytics.html" class="{cls_analytics}">Drift & Intelligence</a>
                 <a href="archive.html" class="{cls_archive}">Decision Ledger Manifests</a>
                 <a href="screening_log.html" class="{cls_screening}">Article Screening Log</a>
+                <a href="ontology_debug.html" class="{cls_debug}">Ontology Debug</a>
             </div>"""
 
 def render_nav(active):
@@ -212,7 +207,8 @@ def render_nav(active):
         cls_index="active" if active == "index" else "",
         cls_analytics="active" if active == "analytics" else "",
         cls_archive="active" if active == "archive" else "",
-        cls_screening="active" if active == "screening" else ""
+        cls_screening="active" if active == "screening" else "",
+        cls_debug="active" if active == "debug" else ""
     )
 
 SORT_JS = """
@@ -241,32 +237,35 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
     elif is_num(health_score) and health_score >= 70: health_label, health_border = "DEGRADED", "var(--yellow)"
     elif is_num(health_score): health_label, health_border = "DOWN", "var(--red)"
     else: health_label, health_border = "HEALTHY", "var(--green)"
-
+    
+    funnel_counts = _daily(metrics, "funnel", {})
+    
+    eng_downloaded = _get_stage_raw_count(funnel_counts, ["downloaded"]) or 0
+    eng_duplicates = _get_stage_raw_count(funnel_counts, ["dropped_hash_duplicate"]) or 0
+    eng_processed = eng_downloaded - eng_duplicates
+    eng_ontology = _get_stage_raw_count(funnel_counts, ["dropped_ontology_score"]) or 0
+    eng_regex = _get_stage_raw_count(funnel_counts, ["dropped_rules_threshold"]) or 0
+    eng_financial = _get_stage_raw_count(funnel_counts, ["dropped_untradeable_otc", "dropped_financial_t12", "dropped_insufficient_liquidity", "dropped_no_options_chain"]) or 0
+    eng_alerts = _get_stage_raw_count(funnel_counts, ["alerts_generated"]) or 0
+    
+    # Just an approximation
+    eng_ai = _get_stage_raw_count(funnel_counts, ["ai_rejected_private", "dropped_ai_confidence", "ai_exhausted"]) or 0 
+    
     trust_row = "".join([
-        f'<div class="stat-tile"><div class="stat-label">Overall Health</div><div class="stat-value">{status_badge(health_label)}</div></div>',
-        f'<div class="stat-tile"><div class="stat-label">Validation Status</div><div class="stat-value">{status_badge(_sub(metrics, "validation", "status") or "PASS")}</div></div>',
-        f'<div class="stat-tile"><div class="stat-label">Research Fidelity (CI)</div><div class="stat-value">{esc(fmt_pct(_daily(metrics, "system_confidence"))) or AWAITING_SPAN}</div></div>',
-        f'<div class="stat-tile"><div class="stat-label">Last Successful Run</div><div class="stat-value">{esc(now_str)}</div></div>',
-        f'<div class="stat-tile"><div class="stat-label">Sensor Asset Health</div><div class="stat-value">{status_badge(_daily(metrics, "feed_health_status", "OK"))}</div></div>',
-        f'<div class="stat-tile"><div class="stat-label">AI Strategy Engine</div><div class="stat-value">{status_badge(_daily(metrics, "ai_status", "OK"))}</div></div>',
-        f'<div class="stat-tile"><div class="stat-label">Evidence Repository</div><div class="stat-value">{status_badge(_daily(metrics, "db_status", "OK"))}</div></div>'
+        f'<div class="stat-tile"><div class="stat-label">Articles Downloaded</div><div class="stat-value">{eng_downloaded}</div></div>',
+        f'<div class="stat-tile"><div class="stat-label">Duplicates Removed</div><div class="stat-value">{eng_duplicates}</div></div>',
+        f'<div class="stat-tile"><div class="stat-label">Articles Processed</div><div class="stat-value">{eng_processed}</div></div>',
+        f'<div class="stat-tile"><div class="stat-label">Ontology Rejected</div><div class="stat-value">{eng_ontology}</div></div>',
+        f'<div class="stat-tile"><div class="stat-label">Regex Rejected</div><div class="stat-value">{eng_regex}</div></div>',
+        f'<div class="stat-tile"><div class="stat-label">Financial Rejected</div><div class="stat-value">{eng_financial}</div></div>',
+        f'<div class="stat-tile"><div class="stat-label">AI Rejections</div><div class="stat-value">{eng_ai}</div></div>',
+        f'<div class="stat-tile"><div class="stat-label">Alerts Generated</div><div class="stat-value" style="color:var(--green)">{eng_alerts}</div></div>'
     ])
 
-    capture_rate = _sub(metrics, "validation", "capture_rate")
-    fp_rate = _sub(metrics, "validation", "false_positive_rate")
-    fn_rate = _sub(metrics, "validation", "false_negative_rate")
-    detection_delay = _sub(metrics, "validation", "avg_detection_delay")
+    loss_funnel_html = render_loss_funnel_html(funnel_counts)
 
-    kpi_value_html = f'{capture_rate:.1f}%' if is_num(capture_rate) else f'<span class="awaiting" style="font-size:0.4em;">AWAITING CONTINUOUS VALIDATION</span>'
-    kpi_context = "".join([
-        f'<div class="kpi-context-item"><div class="cx-label">False Positive Rate</div><div class="cx-value">{esc(fmt_pct(fp_rate)) or AWAITING_SPAN}</div></div>',
-        f'<div class="kpi-context-item"><div class="cx-label">False Negative (Miss) Rate</div><div class="cx-value">{esc(fmt_pct(fn_rate)) or AWAITING_SPAN}</div></div>',
-        f'<div class="kpi-context-item"><div class="cx-label">Avg Detection Delay</div><div class="cx-value">{esc(detection_delay) if detection_delay is not None else AWAITING_SPAN}</div></div>',
-    ])
-    hero_html = f"""<div class="kpi-hero"><div><div class="kpi-label">Opportunity Capture Rate (vs Golden Dataset)</div><div class="kpi-number">{kpi_value_html}</div></div><div style="flex:1; min-width:220px;"><div class="kpi-context-row">{kpi_context}</div></div></div>"""
-
-    loss_funnel_html = render_loss_funnel_html(_daily(metrics, "funnel", {}))
-
+    # Note: the real Feed Quality logic would ideally be backed by a DB query,
+    # but for now we format whatever source_stats we have.
     source_stats_raw = _daily(metrics, "source_stats", {})
     source_rows = []
     if source_stats_raw:
@@ -307,14 +306,12 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
     <header style="border-left-color: {health_border};"><div><h1>Operations Centre</h1>
     <div class="subline">Manifest Configuration Hash: CFG-LATEST &bull; Re-Evaluated {esc(now_str)}</div></div></header>
     
-    <div class="card" style="margin-bottom: 12px;"><h2>1. Validation & Platform Status</h2><div class="tile-grid" style="grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));">{trust_row}</div></div>
+    <div class="card" style="margin-bottom: 12px;"><h2>1. Engineering Metrics</h2><div class="tile-grid" style="grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));">{trust_row}</div></div>
     
-    <div class="card" style="margin-bottom: 12px;"><h2>2. Continuous Alpha Validation</h2>{hero_html}</div>
+    <div class="card" style="margin-bottom: 12px;"><h2>2. Evaluation Funnel Metrics</h2>{loss_funnel_html}</div>
     
-    <div class="card" style="margin-bottom: 12px;"><h2>3. Evaluation Funnel Metrics</h2>{loss_funnel_html}</div>
-    
-    <div class="card" style="margin-bottom: 12px; overflow-x: auto;"><h2>4. Sensor Asset Intelligence (SPI)</h2>
-    <table><thead><tr><th>Sensor Identity</th><th>Artifacts Ingested</th><th>Decisions</th><th>Capture Share</th><th>Alert %</th><th>Ontology %</th><th>Rules %</th><th>Failures</th><th>Reliability</th><th>Avg Latency</th><th>Cost/Yield</th></tr></thead><tbody>{source_row_html}</tbody></table></div>
+    <div class="card" style="margin-bottom: 12px; overflow-x: auto;"><h2>3. Sensor Feed Quality & Pipeline Yield</h2>
+    <table><thead><tr><th>Sensor Identity</th><th>Articles Downloaded</th><th>Alerts Generated</th><th>Capture Share</th><th>Alert %</th><th>Ontology Yield %</th><th>Rules Yield %</th><th>Failures</th><th>Reliability</th><th>Avg Latency</th><th>Cost/Yield</th></tr></thead><tbody>{source_row_html}</tbody></table></div>
     </div></body></html>"""
     
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -361,13 +358,15 @@ def generate_archive_html(output_path):
         .replay-btn:hover { background: var(--blue); color: #fff; border-color: var(--blue); }
         .evidence-for { border-left: 3px solid var(--green); padding-left: 8px; margin-bottom: 8px;}
         .evidence-against { border-left: 3px solid var(--red); padding-left: 8px; margin-bottom: 8px;}
+        .outcome-pass { color: var(--green); font-weight: 700; }
+        .outcome-drop { color: var(--red); font-weight: 700; }
     """
 
     html = """<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>SSR Canonical Decision Manifests</title><style>__BASE_CSS__ __ARCHIVE_CSS__</style>__SORT_JS__</head>
     <body><div class="container">__NAV__<header><h1>Canonical Decision Manifests</h1></header>
     
     <div class="table-wrapper"><table id="archiveTable">
-    <thead><tr><th>Execution Timestamp (GMT)</th><th>Canonical Sensor</th><th>Entity / Target</th><th>Final Outcome</th><th>Terminal Stage</th><th>Confidence Score</th></tr></thead>
+    <thead><tr><th>Execution Timestamp (GMT)</th><th>Canonical Sensor</th><th>Entity / Target</th><th>Final Outcome</th><th>Terminal Stage</th><th>Headline</th></tr></thead>
     <tbody id="tableBody"><tr><td colspan="6" style="text-align: center; color: var(--muted); padding: 30px;">Mounting Canonical Decision Manifest API...</td></tr></tbody>
     </table></div></div>
     
@@ -404,7 +403,6 @@ def generate_archive_html(output_path):
             archiveData.forEach((manifest, index) => {
                 const reg = manifest.manifest_registry || {};
                 const det = manifest.detection_vector || {};
-                const prov = manifest.evidentiary_provenance_dag || {supporting_evidence: [], opposing_evidence: []};
                 const perf = manifest.performance_telemetry_ms || {};
                 const line = manifest.syndication_lineage || {};
                 
@@ -414,36 +412,18 @@ def generate_archive_html(output_path):
                 let sensor = line.canonical_sensor_id || manifest.source || 'Unknown Sensor';
                 let ticker = det.target_ticker || manifest.issuer || 'UNKNOWN';
                 
-                let confDecomp = det.confidence_decomposition || {};
-                let aggConf = confDecomp.aggregate_confidence || manifest.confidence || 0.0;
-                let confStr = aggConf > 0 ? (aggConf * 100).toFixed(1) + '%' : '<span class="awaiting">N/A</span>';
-                
                 const tr = document.createElement('tr');
                 tr.className = 'clickable';
                 tr.onclick = () => toggleRow(index);
                 tr.innerHTML = `<td>${ts}</td>
                                 <td><strong>${sensor}</strong></td>
                                 <td>${ticker}</td>
-                                <td><strong>${outcome}</strong></td>
+                                <td class="${outcome === 'DETECTED' ? 'outcome-pass' : 'outcome-drop'}">${outcome}</td>
                                 <td>${stage}</td>
-                                <td class="metric-val">${confStr}</td>`;
+                                <td style="max-width:400px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${manifest.headline || ''}</td>`;
                 
-                let suppHtml = (prov.supporting_evidence || []).map(e => `
-                    <div class="evidence-for">
-                        <div style="font-size:0.8em; color:var(--muted); text-transform:uppercase;">${e.component || e.stage || 'Stage'} (Wt: ${e.weight || e.confidence_weight || 1.0})</div>
-                        <div>${e.assertion || e.assertion_key || ''}</div>
-                    </div>`).join('');
-                if(!suppHtml) suppHtml = '<div class="empty-note">No supporting causal links recorded.</div>';
-
-                let oppHtml = (prov.opposing_evidence || []).map(e => `
-                    <div class="evidence-against">
-                        <div style="font-size:0.8em; color:var(--muted); text-transform:uppercase;">${e.component || e.stage || 'Stage'} (Wt: ${e.weight || e.confidence_weight || 1.0})</div>
-                        <div>${e.assertion || e.assertion_key || ''}</div>
-                    </div>`).join('');
-                if(!oppHtml && manifest.reason) {
-                    oppHtml = `<div class="evidence-against"><div>Legacy Termination: ${manifest.reason}</div></div>`;
-                }
-                if(!oppHtml) oppHtml = '<div class="empty-note">No opposing causal links recorded.</div>';
+                let timingsHtml = Object.entries(perf).map(([s, val]) => `<li><strong>${s}:</strong> <span>${val} ms</span></li>`).join('');
+                if(!timingsHtml) timingsHtml = '<li class="empty-note">No timings recorded.</li>';
 
                 const dTr = document.createElement('tr');
                 dTr.id = 'detail-' + index;
@@ -457,34 +437,11 @@ def generate_archive_html(output_path):
                                     <li><strong>Decision ID:</strong> <span>${reg.decision_id || 'Legacy-Data'}</span></li>
                                     <li><strong>Core Event ID:</strong> <span>${reg.event_id || 'Legacy-Data'}</span></li>
                                     <li><strong>Config Manifest:</strong> <span>${reg.configuration_manifest_hash || 'SSR-CFG-LEGACY'}</span></li>
-                                    <li><strong>Completeness Score:</strong> <span>${reg.evidence_completeness_score ? (reg.evidence_completeness_score*100).toFixed(0)+'%' : '100%'}</span></li>
                                 </ul>
                                 <h4 style="margin-top:16px;">Execution Timings (ms)</h4>
                                 <ul class="dr-list">
-                                    <li><strong>Repo Ingest:</strong> <span>${perf.ingest_repo_ms || perf.download || 0}</span></li>
-                                    <li><strong>Text Transforms:</strong> <span>${perf.transformation_ms || perf.transformation || 0}</span></li>
-                                    <li><strong>Ontology Engine:</strong> <span>${perf.ontology_ms || perf.ontology || 0}</span></li>
-                                    <li><strong>Rules Engine:</strong> <span>${perf.rules_ms || perf.rules || 0}</span></li>
-                                    <li><strong>AI Inference:</strong> <span>${perf.ai_inference_ms || perf.ai || 0}</span></li>
+                                    ${timingsHtml}
                                 </ul>
-                            </div>
-                            <div class="dr-block">
-                                <h4>Supporting Causal DAG</h4>
-                                ${suppHtml}
-                            </div>
-                            <div class="dr-block">
-                                <h4>Opposing / Terminal Causal DAG</h4>
-                                ${oppHtml}
-                            </div>
-                            <div class="dr-block">
-                                <h4>Strategy Decoupling & Human Audit</h4>
-                                <ul class="dr-list">
-                                    <li><strong>Human Override:</strong> <span><span class="awaiting">None</span></span></li>
-                                    <li><strong>Strategy Validation:</strong> <span><span class="awaiting">Pending Sync</span></span></li>
-                                    <li><strong>Market Cap Floor:</strong> <span><span class="awaiting">Unavailable</span></span></li>
-                                    <li><strong>Options Verification:</strong> <span><span class="awaiting">Unavailable</span></span></li>
-                                </ul>
-                                <button class="replay-btn" onclick="alert('Immutable Replay triggered for Event ID: ${reg.event_id || 'Unknown'} via Configuration Manifest ${reg.configuration_manifest_hash || 'Latest'}.')">Trigger Deterministic Replay</button>
                             </div>
                         </div>
                     </td>
@@ -497,6 +454,88 @@ def generate_archive_html(output_path):
     </script></body></html>"""
     
     html = html.replace("__BASE_CSS__", BASE_CSS).replace("__SORT_JS__", SORT_JS).replace("__ARCHIVE_CSS__", archive_css).replace("__NAV__", render_nav("archive"))
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f: f.write(html)
+
+def generate_ontology_debug_html(output_path):
+    debug_css = """
+        .table-wrapper { background: var(--surface); border: 1px solid var(--border); overflow-x: auto; }
+        th { background: var(--surface-subtle); position: sticky; top: 0; z-index: 10; }
+        .score-fail { color: var(--red); font-weight: bold; }
+        .score-pass { color: var(--green); font-weight: bold; }
+        .concept-tag { display: inline-block; background: var(--surface-subtle); border: 1px solid var(--border); padding: 2px 6px; margin: 2px; border-radius: 3px; font-size: 0.8em; }
+        .concept-match { border-color: var(--green); color: var(--green); }
+        .concept-miss { border-color: var(--border); color: var(--muted); }
+    """
+    html = """<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>SSR Ontology Debug</title><style>__BASE_CSS__ __DEBUG_CSS__</style>__SORT_JS__</head>
+    <body><div class="container">__NAV__
+        <header><h1>Ontology Debug</h1></header>
+        
+        <div class="card" style="margin-bottom:12px;">
+            <h2>Concept Frequency Aggregation</h2>
+            <div class="table-wrapper">
+                <table id="conceptFreqTable">
+                    <thead><tr><th>Concept ID</th><th>Match Count</th></tr></thead>
+                    <tbody id="conceptFreqBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Ontology Rejections (Score < 0.65)</h2>
+            <div class="table-wrapper">
+                <table id="ontologyTable">
+                    <thead><tr><th>Headline</th><th>Source</th><th>Score</th><th>Threshold</th><th>Concepts Found</th><th>Missing Concepts</th></tr></thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        fetch('archive_data.json')
+            .then(res => res.json())
+            .then(data => {
+                const ledger = Array.isArray(data) ? data : (data.ledger || []);
+                const tbody = document.getElementById('tableBody');
+                const freqBody = document.getElementById('conceptFreqBody');
+                
+                const freq = {};
+                let html = '';
+                
+                ledger.forEach(item => {
+                    const meta = item.ontology_metadata || {};
+                    if(item.pipeline_stage === 'ontology_concepts') {
+                        const score = meta.score || 0.0;
+                        const matched = meta.matched || [];
+                        const missing = meta.missing || [];
+                        
+                        matched.forEach(c => freq[c] = (freq[c] || 0) + 1);
+                        
+                        let matchHtml = matched.map(c => `<span class="concept-tag concept-match">${c}</span>`).join('');
+                        let missHtml = missing.map(c => `<span class="concept-tag concept-miss">${c}</span>`).join('');
+                        if(!matchHtml) matchHtml = '<span class="awaiting">None</span>';
+                        
+                        html += `<tr>
+                            <td style="max-width:300px; white-space:normal;">${item.headline}</td>
+                            <td>${item.syndication_lineage?.canonical_sensor_id || 'Unknown'}</td>
+                            <td class="metric-val score-fail">${score.toFixed(2)}</td>
+                            <td class="metric-val">0.65</td>
+                            <td>${matchHtml}</td>
+                            <td>${missHtml}</td>
+                        </tr>`;
+                    }
+                });
+                
+                tbody.innerHTML = html || '<tr><td colspan="6" class="empty-note">No ontology rejections found in archive.</td></tr>';
+                
+                const sortedFreq = Object.entries(freq).sort((a,b) => b[1] - a[1]);
+                let freqHtml = sortedFreq.map(([c, count]) => `<tr><td>${c}</td><td class="metric-val">${count}</td></tr>`).join('');
+                freqBody.innerHTML = freqHtml || '<tr><td colspan="2" class="empty-note">No concepts matched.</td></tr>';
+            });
+    </script></body></html>"""
+    
+    html = html.replace("__BASE_CSS__", BASE_CSS).replace("__SORT_JS__", SORT_JS).replace("__DEBUG_CSS__", debug_css).replace("__NAV__", render_nav("debug"))
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f: f.write(html)
 
