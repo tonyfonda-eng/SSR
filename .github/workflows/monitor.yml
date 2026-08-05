@@ -102,7 +102,7 @@ jobs:
           git add docs/index.html docs/archive.html docs/decision_analytics.html docs/archive_data.json docs/dashboard_metrics.json docs/screening_log.html docs/screening_log.json || true
           
           # Check if there's actually anything to commit
-          git diff --staged --quiet || git commit -m "chore: update operational dashboard and archive [skip ci]"
+          git diff --staged --quiet || git commit -m "chore: update operational dashboard and archive"
           
           # Pull with rebase using '-X theirs' strategy to automatically prefer the runner's fresh metrics/HTML
           git pull --rebase -X theirs origin main || git rebase --abort
