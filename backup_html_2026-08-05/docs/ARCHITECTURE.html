@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture - SSR Living Documentation</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-color: #f1f5f9;
+            --border-color: #334155;
+            --accent: #3b82f6;
+            --sidebar-width: 250px;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--panel-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            position: fixed;
+            height: 100%;
+            overflow-y: auto;
+        }
+        .sidebar h2 {
+            color: var(--accent);
+            font-size: 1.2rem;
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar li {
+            margin-bottom: 10px;
+        }
+        .sidebar a {
+            color: var(--text-color);
+            text-decoration: none;
+            display: block;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--accent);
+        }
+        .content {
+            margin-left: var(--sidebar-width);
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            line-height: 1.6;
+        }
+        h1, h2, h3, h4 {
+            color: #ffffff;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+        h1 { font-size: 2.2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        code {
+            background-color: rgba(0,0,0,0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        pre code {
+            display: block;
+            padding: 15px;
+            overflow-x: auto;
+            background-color: #000;
+            border: 1px solid var(--border-color);
+        }
+        blockquote {
+            border-left: 4px solid var(--accent);
+            margin: 0;
+            padding-left: 15px;
+            color: #cbd5e1;
+            background-color: rgba(59, 130, 246, 0.05);
+            padding: 10px 15px;
+            border-radius: 0 4px 4px 0;
+        }
+        ul, ol { margin-top: 0.5em; margin-bottom: 1.5em; padding-left: 25px; }
+        li { margin-bottom: 0.5em; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 10px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        th {
+            background-color: rgba(0,0,0,0.2);
+            font-weight: 600;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 20px 0;
+            background: white; /* For SVG contrast if needed */
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>SSR Manual</h2>
+        <ul>
+            <li><a href="PROJECT_STATE.html" id="link-PROJECT_STATE">Project State</a></li>
+            <li><a href="ARCHITECTURE.html" id="link-ARCHITECTURE">Architecture</a></li>
+            <li><a href="PIPELINE.html" id="link-PIPELINE">The Pipeline</a></li>
+            <li><a href="WORKBOOK.html" id="link-WORKBOOK">Workbook Schema</a></li>
+            <li><a href="OPERATIONS.html" id="link-OPERATIONS">Operations</a></li>
+            <li><a href="CHANGELOG.html" id="link-CHANGELOG">Changelog</a></li>
+            <li style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="index.html">Live Dashboard</a>
+            </li>
+        </ul>
+    </div>
+    <div class="content">
+        <h1>System Architecture</h1>
+<h2>Mission</h2>
+<p>Special Situations Radar (SSR) is an AI-assisted event-driven research platform. Its mission is to identify announced future cash events affecting publicly traded securities worldwide as early as possible, perform structured research using user-defined protocols, and present the findings for investment decision-making.</p>
+<p>SSR does not make investment decisions. SSR discovers, researches, and organises information. The user allocates capital.</p>
+<h2>Core Principles</h2>
+<ol>
+<li>Never miss a defined future cash event.</li>
+<li>The Google Workbook is the Knowledge Base.</li>
+<li>Analysis protocols are the firm's intellectual property.</li>
+<li>AI models are replaceable.</li>
+<li>News sources are replaceable.</li>
+<li>Unknown events are never ignored.</li>
+<li>Every protocol improves over time.</li>
+</ol>
+<h2>High-Level Pipeline</h2>
+<p>See the <a href="PIPELINE.html">Pipeline Specification</a> for detailed step-by-step documentation of how data flows through the system.</p>
+<h2>Knowledge Base (Google Workbook)</h2>
+<p>See the <a href="WORKBOOK.html">Workbook Schema</a> for detailed documentation of all configuration tabs. The workbook serves as the brain of the operation, controlling all filtering rules, ontology mappings, and AI playbooks.</p>
+<h2>Cash Event Philosophy</h2>
+<p>SSR searches for announced future cash events. The list is intentionally expandable through the Google Workbook configuration, but primary examples include:</p>
+<ul>
+<li>Cash mergers</li>
+<li>Tender offers</li>
+<li>Odd-lot tenders</li>
+<li>ETF/Fund liquidations</li>
+<li>Company liquidations</li>
+<li>Special dividends</li>
+<li>Return of capital</li>
+<li>Capital reductions</li>
+<li>Litigation distributions</li>
+<li>Mandatory offers</li>
+<li>Schemes of arrangement</li>
+<li>Squeeze-outs</li>
+</ul>
+<h2>Continuous Learning</h2>
+<p>Whenever SSR encounters an event that does not fit an existing protocol, it must:
+*   Flag the event to the <code>Unknown Events</code> tab.
+*   Explain why no protocol matched.
+*   Suggest a new protocol if appropriate.</p>
+<p>The user then decides whether to extend the Knowledge Base by modifying the Ontology or Rules.</p>
+<h2>Design Goals</h2>
+<ul>
+<li><strong>Modular:</strong> Components can be swapped easily.</li>
+<li><strong>Source-agnostic:</strong> Custom HTML scrapers or RSS feeds can be attached to the ingestion engine with minimal configuration.</li>
+<li><strong>AI-agnostic:</strong> Google Gemini and OpenRouter integrations are abstracted behind simple retry logic and can be swapped.</li>
+<li><strong>Broker-agnostic:</strong> Pure intelligence output; no execution logic.</li>
+<li><strong>Globally scalable:</strong> Driven by a language-agnostic ontology rather than English regex strings.</li>
+<li><strong>Maintainable:</strong> Code is lightweight, avoiding sprawling dependencies. The Knowledge Base evolves continuously while the engine simply executes it.
+\n## Pipeline Diagram\n\n<img alt="Architecture Diagram" src="ARCHITECTURE.svg" />\n</li>
+</ul>
+    </div>
+    <script>
+        // Simple script to highlight the active sidebar link
+        const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
+        const activeLink = document.getElementById('link-' + currentPage);
+        if (activeLink) {
+            activeLink.classList.add('active');
+        }
+    </script>
+</body>
+</html>

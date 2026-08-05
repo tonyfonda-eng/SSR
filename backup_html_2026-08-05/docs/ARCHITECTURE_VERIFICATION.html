@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture Verification - SSR Living Documentation</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-color: #f1f5f9;
+            --border-color: #334155;
+            --accent: #3b82f6;
+            --sidebar-width: 250px;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+        .sidebar {
+            width: var(--sidebar-width);
+            background-color: var(--panel-bg);
+            border-right: 1px solid var(--border-color);
+            padding: 20px;
+            position: fixed;
+            height: 100%;
+            overflow-y: auto;
+        }
+        .sidebar h2 {
+            color: var(--accent);
+            font-size: 1.2rem;
+            margin-top: 0;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar li {
+            margin-bottom: 10px;
+        }
+        .sidebar a {
+            color: var(--text-color);
+            text-decoration: none;
+            display: block;
+            padding: 8px 12px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        .sidebar a:hover, .sidebar a.active {
+            background-color: rgba(59, 130, 246, 0.1);
+            color: var(--accent);
+        }
+        .content {
+            margin-left: var(--sidebar-width);
+            padding: 40px;
+            max-width: 900px;
+            width: 100%;
+            line-height: 1.6;
+        }
+        h1, h2, h3, h4 {
+            color: #ffffff;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+        h1 { font-size: 2.2rem; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+        a { color: var(--accent); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        code {
+            background-color: rgba(0,0,0,0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+        pre code {
+            display: block;
+            padding: 15px;
+            overflow-x: auto;
+            background-color: #000;
+            border: 1px solid var(--border-color);
+        }
+        blockquote {
+            border-left: 4px solid var(--accent);
+            margin: 0;
+            padding-left: 15px;
+            color: #cbd5e1;
+            background-color: rgba(59, 130, 246, 0.05);
+            padding: 10px 15px;
+            border-radius: 0 4px 4px 0;
+        }
+        ul, ol { margin-top: 0.5em; margin-bottom: 1.5em; padding-left: 25px; }
+        li { margin-bottom: 0.5em; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            padding: 10px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        th {
+            background-color: rgba(0,0,0,0.2);
+            font-weight: 600;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            margin: 20px 0;
+            background: white; /* For SVG contrast if needed */
+        }
+    </style>
+</head>
+<body>
+    <div class="sidebar">
+        <h2>SSR Manual</h2>
+        <ul>
+            <li><a href="PROJECT_STATE.html" id="link-PROJECT_STATE">Project State</a></li>
+            <li><a href="ARCHITECTURE.html" id="link-ARCHITECTURE">Architecture</a></li>
+            <li><a href="PIPELINE.html" id="link-PIPELINE">The Pipeline</a></li>
+            <li><a href="WORKBOOK.html" id="link-WORKBOOK">Workbook Schema</a></li>
+            <li><a href="OPERATIONS.html" id="link-OPERATIONS">Operations</a></li>
+            <li><a href="CHANGELOG.html" id="link-CHANGELOG">Changelog</a></li>
+            <li style="margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 20px;">
+                <a href="index.html">Live Dashboard</a>
+            </li>
+        </ul>
+    </div>
+    <div class="content">
+        <h1>SSR Architecture Verification &amp; Drift Analysis</h1>
+<p><em>Document Version: 1.0.0 (System Governance Audit)</em></p>
+<p>This document compares the intended modular architecture of the Special Situations Radar against its actual runtime implementation (<code>monitor.py</code>), identifying structural drift, layer violations, hidden coupling, and improper responsibility allocations.</p>
+<hr />
+<h2>🔍 Intended vs. Actual Architecture Comparison</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Architectural Dimension</th>
+<th style="text-align: left;">Intended Design</th>
+<th style="text-align: left;">Actual Implementation</th>
+<th style="text-align: left;">Drift Severity</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>Control Flow</strong></td>
+<td style="text-align: left;">Pure event-driven orchestrator invoking decoupled modules.</td>
+<td style="text-align: left;">Procedural "God Object" script (<code>monitor.py</code>) executing inline business logic.</td>
+<td style="text-align: left;">🔴 <strong>High</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Data Access</strong></td>
+<td style="text-align: left;">Isolated repository and service layers abstracting persistence.</td>
+<td style="text-align: left;">Direct, inline SQLite cursor executions (<code>cursor.execute()</code>) scattered across loops.</td>
+<td style="text-align: left;">🟡 <strong>Medium</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Configuration State</strong></td>
+<td style="text-align: left;">Immutable configuration objects injected at runtime.</td>
+<td style="text-align: left;">Dynamic, synchronous API pulls from Google Sheets V4 embedded in runtime routines.</td>
+<td style="text-align: left;">🟡 <strong>Medium</strong></td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Validation Bounds</strong></td>
+<td style="text-align: left;">Independent QA pipeline operating on read-only snapshots.</td>
+<td style="text-align: left;">Isolated validation schema (<code>validation.db</code>) successfully decoupled from production.</td>
+<td style="text-align: left;">✅ <strong>Aligned</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>🛑 Architectural Findings &amp; Violations</h2>
+<h3>1. Layer Violations</h3>
+<ul>
+<li><strong>Observation:</strong> The root orchestrator (<code>monitor.py</code>) directly invokes SQLite database operations, HTTP wire polling, regular expression evaluations, and external API requests within the same execution stack.</li>
+<li><strong>Impact:</strong> Blurs the line between presentation/orchestration logic and persistence/domain layers, making isolated unit testing impossible without live network and database mocking.</li>
+</ul>
+<h3>2. Hidden Coupling</h3>
+<ul>
+<li><strong>Observation:</strong> Runtime evaluation is tightly coupled to external Google Sheets spreadsheets for issuer watchlists and ontology pattern rules (<code>load_issuer_cache()</code> and <code>load_ontology_rules()</code>).</li>
+<li><strong>Impact:</strong> If the Google Sheets API experiences latency or authentication timeouts during a polling cycle, the entire financial monitoring thread stalls or fails.</li>
+</ul>
+<h3>3. Missing Abstractions</h3>
+<ul>
+<li><strong>Observation:</strong> Filings and articles are passed between pipeline stages as raw, untyped Python dictionaries (<code>dict</code>), leading to fragile key-lookup access patterns across modules.</li>
+<li><strong>Impact:</strong> Increases vulnerability to <code>KeyError</code> exceptions if upstream scrapers alter raw metadata keys.</li>
+</ul>
+<h3>4. State Duplication</h3>
+<ul>
+<li><strong>Observation:</strong> Article lifecycle states are split redundantly across the <code>articles</code> persistence table (tracking primary ingest status) and the <code>article_lifecycle_log</code> audit table.</li>
+<li><strong>Impact:</strong> Risk of state drift between primary record status and audit log outcomes if a transaction commit fails mid-stream.</li>
+</ul>
+<h3>5. Improper Responsibility Allocation</h3>
+<ul>
+<li><strong>Observation:</strong> <code>monitor.py</code> acts as the traffic controller, data transformer, regex matcher, rules scorer, AI client wrapper, and alerting dispatcher simultaneously.</li>
+<li><strong>Impact:</strong> Violates the Single Responsibility Principle (SRP), resulting in high cyclomatic complexity ($\text{CC} = 14$) as noted in the complexity report.</li>
+</ul>
+<hr />
+<h2>🚀 Refactoring Roadmap Ranked by ROI</h2>
+<h3><strong>Priority 1: Extract Persistence &amp; Ingestion Repositories</strong></h3>
+<ul>
+<li><strong>Target:</strong> Abstract SQLite queries into <code>src/database/repository.py</code> and wire scraping loops into <code>src/ingestion/scrapers.py</code>.</li>
+<li><strong>ROI:</strong> <strong>Highest.</strong> Eliminates database clutter from the orchestrator and enables clean, mocked unit testing of core filters.</li>
+<li><strong>Estimated Effort:</strong> Medium.</li>
+</ul>
+<h3><strong>Priority 2: Introduce Typed Domain Models</strong></h3>
+<ul>
+<li><strong>Target:</strong> Replace raw dictionaries with typed dataclasses (e.g., <code>ArticlePayload</code>, <code>EventMatch</code>) for inter-stage communication.</li>
+<li><strong>ROI:</strong> <strong>High.</strong> Prevents runtime key errors and enforces strict interface contracts between pipeline stages.</li>
+<li><strong>Estimated Effort:</strong> Low.</li>
+</ul>
+<h3><strong>Priority 3: Decouple Google Sheets Dependency</strong></h3>
+<ul>
+<li><strong>Target:</strong> Cache issuer lists and ontology lexicons locally at startup with background async refresh, rather than synchronous blocking calls during live loops.</li>
+<li><strong>ROI:</strong> <strong>Medium.</strong> Eliminates single-point-of-failure network latency during time-sensitive filings.</li>
+<li><strong>Estimated Effort:</strong> Medium.</li>
+</ul>
+    </div>
+    <script>
+        // Simple script to highlight the active sidebar link
+        const currentPage = window.location.pathname.split('/').pop().replace('.html', '');
+        const activeLink = document.getElementById('link-' + currentPage);
+        if (activeLink) {
+            activeLink.classList.add('active');
+        }
+    </script>
+</body>
+</html>
