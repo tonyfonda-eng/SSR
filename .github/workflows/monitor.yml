@@ -69,7 +69,7 @@ jobs:
           KEDM_USER: ${{ secrets.KEDM_USER }}
           KEDM_PASS: ${{ secrets.KEDM_PASS }}
         run: |
-          python tools/setup_ontology_tabs.py
+          python -m tools.setup_ontology_tabs
           python -u monitor.py
 
       - name: Sync Metrics to Google Sheets
