@@ -231,7 +231,9 @@ def stage_financial_t12_floor(article: dict, ctx: dict) -> tuple:
     ticker = article.get("_deterministic_ticker", "UNKNOWN")
     if ticker != "UNKNOWN":
         metrics = get_t12_metrics(ticker)
-        if not metrics.get("valid"): return False, "dropped_financial_t12"
+        if not metrics.get("valid"): 
+            reason = metrics.get("reason", "Unknown reason")
+            return False, f"dropped_financial_t12: {reason}"
     return True, "passed"
 
 def stage_options_chain_check(article: dict, ctx: dict) -> tuple:

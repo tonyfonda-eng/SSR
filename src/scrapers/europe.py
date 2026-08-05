@@ -4,7 +4,7 @@ class EQSScraper(GoogleNewsScraper):
     """Germany / DACH region OAM"""
     def __init__(self):
         super().__init__()
-        self.query = 'site:eqs-news.com "ad-hoc"'
+        self.query = 'site:eqs-news.com/news/ "ad-hoc"'
         self.document_type = 'Ad-hoc'
 
 class BorsaItalianaScraper(GoogleNewsScraper):
@@ -25,7 +25,7 @@ class CNMVScraper(GoogleNewsScraper):
     """Spain OAM (Hechos Relevantes)"""
     def __init__(self):
         super().__init__()
-        self.query = 'site:cnmv.es "información privilegiada" OR "otra información relevante"'
+        self.query = 'site:cnmv.es/Portal/HR/ "información privilegiada" OR "otra información relevante"'
         self.document_type = 'Información Privilegiada'
 
 class FIScraper(GoogleNewsScraper):
@@ -39,19 +39,19 @@ class NewsWebScraper(GoogleNewsScraper):
     """Norway OAM (Oslo Børs)"""
     def __init__(self):
         super().__init__()
-        self.query = 'site:newsweb.oslobors.no "mandatory notification"'
+        self.query = 'site:newsweb.oslobors.no/message/ "mandatory notification"'
         self.document_type = 'Inside Information'
 
 class AFMScraper(GoogleNewsScraper):
     """Netherlands OAM (Autoriteit Financiële Markten)"""
     def __init__(self):
         super().__init__()
-        self.query = 'site:afm.nl "inside information"'
+        self.query = 'site:afm.nl/en/professionals/registers/meldingen-marktmisbruik "inside information"'
         self.document_type = 'Inside Information'
 
 class SIXScraper(GoogleNewsScraper):
     """Switzerland OAM (SIX Exchange)"""
     def __init__(self):
         super().__init__()
-        self.query = 'site:six-group.com "ad hoc announcement"'
+        self.query = 'site:ser-ag.com/en/resources/notifications-market-participants/ "ad hoc announcement"'
         self.document_type = 'Ad-hoc'
