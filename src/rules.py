@@ -7,9 +7,9 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def matches_global_exclusion(body_text: str, global_exclusions: list = None) -> bool:
+def matches_global_exclusion(body_text: str, global_exclusions: list = None) -> tuple:
     if not body_text:
-        return False
+        return False, ""
     default_exclusions = ["Form 4", "Schedule 13G", "Statement of Changes in Ownership"]
     exclusions = [e.get("Keyword", e.get("Pattern", "")) for e in (global_exclusions or []) if e.get("Keyword", e.get("Pattern"))]
     if not exclusions:
@@ -20,11 +20,11 @@ def matches_global_exclusion(body_text: str, global_exclusions: list = None) -> 
             continue
         try:
             if re.search(r'\b' + re.escape(exc.lower()) + r'\b', text_lower):
-                return True
+                return True, exc
         except re.error:
             if exc.lower() in text_lower:
-                return True
-    return False
+                return True, exc
+    return False, ""
 
 def matches_issuer_exclusion(source_name: str, sources_config: list = None) -> bool:
     if not source_name or not sources_config:

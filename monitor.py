@@ -111,8 +111,9 @@ def stage_dedupe_issuer_memory(article: dict, ctx: dict) -> tuple:
     return True, "passed"
 
 def stage_exclude_global_keywords(article: dict, ctx: dict) -> tuple:
-    if matches_global_exclusion(article.get("body", ""), ctx.get("global_exclusions", [])):
-        return False, "dropped_global_keyword"
+    matched, keyword = matches_global_exclusion(article.get("body", ""), ctx.get("global_exclusions", []))
+    if matched:
+        return False, f"dropped_global_keyword: {keyword}"
     return True, "passed"
 
 def stage_exclude_issuer_feed(article: dict, ctx: dict) -> tuple:
@@ -146,7 +147,7 @@ def stage_ontology_concepts(article: dict, ctx: dict) -> tuple:
     score = rich_result.get("score", 0.0)
     article["_ontology_metadata"] = rich_result
     
-    if score < min_score: return False, "dropped_ontology_score"
+    if score < min_score: return False, f"dropped_ontology_score: {score:.2f} < {min_score}"
     return True, "passed"
 
 def stage_ontology_status(article: dict, ctx: dict) -> tuple:
@@ -342,6 +343,10 @@ STAGE_REGISTRY = {
 
 def _record_screening(article: dict, telemetry: PipelineTelemetry, outcome: str, final_stage: str, drop_reason: str = None):
     """Logs every screened article (pass or drop) for operator visibility. Display-only — never affects pipeline flow."""
+    company_name = article.get("_deterministic_issuer")
+    if not company_name or company_name == "UNKNOWN":
+        company_name = article.get("_ai_ticker") or article.get("_deterministic_ticker") or "UNKNOWN"
+        
     entry = {
         "run_id": telemetry.run_id,
         "headline": article.get("headline", "Untitled"),
@@ -351,8 +356,10 @@ def _record_screening(article: dict, telemetry: PipelineTelemetry, outcome: str,
         "final_stage": final_stage,
         "drop_reason": drop_reason,
         "ticker": article.get("_ai_ticker") or article.get("_deterministic_ticker") or "UNKNOWN",
+        "company_name": company_name,
         "event_family": article.get("_ai_classification"),
-        "ingestion_mode": article.get("_ingestion_mode", "UNKNOWN")
+        "ingestion_mode": article.get("_ingestion_mode", "UNKNOWN"),
+        "body_snippet": article.get("body", "")[:3000]
     }
     logger.info(f"[SCREENED] '{entry['headline'][:80]}' -> {outcome} @ {final_stage}" + (f" ({drop_reason})" if drop_reason else ""))
     try:
