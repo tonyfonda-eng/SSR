@@ -526,7 +526,7 @@ def main():
         sys.exit(1)
     
     try:
-        raw_articles = fetch_all_feeds(config_manifest.get("sources", [])) 
+        raw_articles, ingestion_ledger = fetch_all_feeds(config_manifest.get("sources", [])) 
         telemetry.metrics["downloaded"] = len(raw_articles)
         telemetry.metrics["RSS_downloaded"] = sum(1 for a in raw_articles if a.get("_ingestion_mode") == "RSS")
         telemetry.metrics["HTML_downloaded"] = sum(1 for a in raw_articles if a.get("_ingestion_mode") == "HTML")
@@ -534,6 +534,9 @@ def main():
         # Immediate Global Deduplication
         unique_articles = []
         seen_hashes = set()
+        
+        ledger_unique = {f"{entry['source']}::{entry['channel']}": 0 for entry in ingestion_ledger}
+        
         for article in raw_articles:
             title = article.get("headline", "").strip().lower()
             source = article.get("source", "").strip().lower()
@@ -545,8 +548,18 @@ def main():
             if dup_hash not in seen_hashes:
                 seen_hashes.add(dup_hash)
                 unique_articles.append(article)
+                
+                k = f"{article.get('source')}::{article.get('_ingestion_mode')}"
+                if k in ledger_unique:
+                    ledger_unique[k] += 1
             else:
                 logger.debug(f"[DEDUPE] Dropped overlapping article: {article.get('headline')} from {article.get('source')} ({article.get('_ingestion_mode')})")
+                
+        for entry in ingestion_ledger:
+            k = f"{entry['source']}::{entry['channel']}"
+            entry["unique_found"] = ledger_unique.get(k, 0)
+            
+        telemetry.ingestion_ledger = ingestion_ledger
         
         telemetry.metrics["RSS_unique"] = sum(1 for a in unique_articles if a.get("_ingestion_mode") == "RSS")
         telemetry.metrics["HTML_unique"] = sum(1 for a in unique_articles if a.get("_ingestion_mode") == "HTML")
@@ -592,10 +605,32 @@ def main():
                 "health_score": 100.0,
                 "funnel": telemetry.stage_analytics
             },
-            "funnel": telemetry.stage_analytics
+            "funnel": telemetry.stage_analytics,
+            "ingestion_ledger": getattr(telemetry, "ingestion_ledger", [])
         }
         save_workflow_health(health_payload)
         
+        try:
+            import os
+            ledger_path = "docs/ingestion_ledger.json"
+            history = []
+            if os.path.exists(ledger_path):
+                with open(ledger_path, "r") as f:
+                    try:
+                        history = json.load(f)
+                    except:
+                        pass
+            for entry in health_payload["ingestion_ledger"]:
+                entry["run_id"] = telemetry.run_id
+                entry["timestamp"] = datetime.now(timezone.utc).isoformat()
+            history = health_payload["ingestion_ledger"] + history
+            history = history[:1000]
+            os.makedirs(os.path.dirname(ledger_path), exist_ok=True)
+            with open(ledger_path, "w") as f:
+                json.dump(history, f, indent=2)
+        except Exception as e:
+            logger.error(f"Failed to save ingestion ledger history: {e}")
+            
         try:
             logger.info("Dumping Ledger to archive_data.json...")
             export_archive_json("docs/archive_data.json")
