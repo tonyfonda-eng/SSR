@@ -122,7 +122,6 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
             }
             
             archiveData.forEach((manifest, index) => {
-                // Parse SSR 2.0 Canonical Structure with Legacy Fallbacks
                 const reg = manifest.manifest_registry || {};
                 const det = manifest.detection_vector || {};
                 const prov = manifest.evidentiary_provenance_dag || {supporting_evidence: [], opposing_evidence: []};
@@ -139,7 +138,6 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 let aggConf = confDecomp.aggregate_confidence || manifest.confidence || 0.0;
                 let confStr = aggConf > 0 ? (aggConf * 100).toFixed(1) + '%' : '<span class="awaiting">N/A</span>';
                 
-                // Main Row
                 const tr = document.createElement('tr');
                 tr.className = 'clickable';
                 tr.onclick = () => toggleRow(index);
@@ -150,7 +148,6 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                                 <td>${stage}</td>
                                 <td class="metric-val">${confStr}</td>`;
                 
-                // Build Supporting Evidence HTML
                 let suppHtml = prov.supporting_evidence.map(e => `
                     <div class="evidence-for">
                         <div style="font-size:0.8em; color:var(--muted); text-transform:uppercase;">${e.component || e.stage} (Wt: ${e.weight || e.confidence_weight || 1.0})</div>
@@ -158,19 +155,16 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                     </div>`).join('');
                 if(!suppHtml) suppHtml = '<div class="empty-note">No supporting causal links recorded.</div>';
 
-                // Build Opposing Evidence HTML
                 let oppHtml = prov.opposing_evidence.map(e => `
                     <div class="evidence-against">
                         <div style="font-size:0.8em; color:var(--muted); text-transform:uppercase;">${e.component || e.stage} (Wt: ${e.weight || e.confidence_weight || 1.0})</div>
                         <div>${e.assertion || e.assertion_key}</div>
                     </div>`).join('');
-                // Legacy support for single "drop reason" mapped to opposing evidence
                 if(!oppHtml && manifest.reason) {
                     oppHtml = `<div class="evidence-against"><div>Legacy Termination: ${manifest.reason}</div></div>`;
                 }
                 if(!oppHtml) oppHtml = '<div class="empty-note">No opposing causal links recorded.</div>';
 
-                // Expanded Manifest Report Row
                 const dTr = document.createElement('tr');
                 dTr.id = 'detail-' + index;
                 dTr.className = 'decision-report-row';
