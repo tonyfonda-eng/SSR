@@ -2,6 +2,421 @@
   "ledger": [
     {
       "manifest_registry": {
+        "decision_id": "DEC-873255F4E354",
+        "event_id": "EVT-97D97B91E1B3",
+        "configuration_manifest_hash": "CFG-3229043E1C58",
+        "execution_timestamp_gmt": "2026-08-05 14:18:25 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.74,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.196,
+        "exclude_issuer_feed": 0.018,
+        "ontology_concepts": 2.714
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:18:25 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Nord Has the Ground, the Mill, and the Tailings. Now It Has the Regulatory Pathway Too",
+      "url": "https://www.prnewswire.com/news-releases/nord-has-the-ground-the-mill-and-the-tailings-now-it-has-the-regulatory-pathway-too-302843843.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-0C7C14F7015E",
+        "event_id": "EVT-79B09E98293A",
+        "configuration_manifest_hash": "CFG-3229043E1C58",
+        "execution_timestamp_gmt": "2026-08-05 14:18:25 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.329,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.039,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 0.475
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:18:25 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "VCSEL Market worth $1.96 billion by 2032 - Exclusive Report by MarketsandMarkets\u2122",
+      "url": "https://www.prnewswire.com/news-releases/vcsel-market-worth-1-96-billion-by-2032---exclusive-report-by-marketsandmarkets-302843471.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-3288C9A21BFB",
+        "event_id": "EVT-3506084CBEF2",
+        "configuration_manifest_hash": "CFG-3229043E1C58",
+        "execution_timestamp_gmt": "2026-08-05 14:18:25 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.225,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.033,
+        "exclude_issuer_feed": 0.008,
+        "ontology_concepts": 0.432
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:18:25 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Chainsight Partners with Anthropic, Expands AI-Native Supply Chain Practice",
+      "url": "https://www.prnewswire.com/news-releases/chainsight-partners-with-anthropic-expands-ai-native-supply-chain-practice-302843818.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-3EF7E00AD7F7",
+        "event_id": "EVT-DCF4CA4D5FB2",
+        "configuration_manifest_hash": "CFG-3229043E1C58",
+        "execution_timestamp_gmt": "2026-08-05 14:18:25 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.416,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.033,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 0.476
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:18:25 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Intelligent Technical Solutions Partners with Velocity IT",
+      "url": "https://www.prnewswire.com/news-releases/intelligent-technical-solutions-partners-with-velocity-it-302843135.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-6FD74D1C143F",
+        "event_id": "EVT-C563C127D98E",
+        "configuration_manifest_hash": "CFG-3229043E1C58",
+        "execution_timestamp_gmt": "2026-08-05 14:18:25 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.317,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.033,
+        "exclude_issuer_feed": 0.008,
+        "ontology_concepts": 0.484
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:18:25 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Timken Declares Quarterly Dividend of 36 Cents Per Share",
+      "url": "https://www.prnewswire.com/news-releases/timken-declares-quarterly-dividend-of-36-cents-per-share-302843822.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-3603DCF9DB3F",
+        "event_id": "EVT-B1B2A84F8FCB",
+        "configuration_manifest_hash": "CFG-3229043E1C58",
+        "execution_timestamp_gmt": "2026-08-05 14:18:25 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.173,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.033,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 0.448
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:18:25 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Hyundai, Baystate Health Foundation, and Gary Rome Hyundai Partner to Promote Child Passenger Safety in Massachusetts",
+      "url": "https://www.prnewswire.com/news-releases/hyundai-baystate-health-foundation-and-gary-rome-hyundai-partner-to-promote-child-passenger-safety-in-massachusetts-302843742.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-F320A2CBC5C4",
+        "event_id": "EVT-662DACBFB896",
+        "configuration_manifest_hash": "CFG-3229043E1C58",
+        "execution_timestamp_gmt": "2026-08-05 14:18:25 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "entity_confidence",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 40.0,
+        "matched": [
+          "ACQUISITION"
+        ],
+        "missing": [
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.531,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.413,
+        "exclude_issuer_feed": 0.015,
+        "ontology_concepts": 9.421,
+        "ontology_status": 0.001,
+        "document_scoring": 0.0,
+        "regex_rules": 0.053,
+        "python_issuer_extraction": 0.37,
+        "python_ticker_lookup": 0.812,
+        "entity_confidence": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:18:25 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "entity_confidence",
+      "headline": "EQS News \u2013 Financial News & Events Directly From The Source",
+      "url": "https://www.eqs-news.com/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-2D498162C5E4",
+        "event_id": "EVT-DC03B07E2D24",
+        "configuration_manifest_hash": "CFG-3229043E1C58",
+        "execution_timestamp_gmt": "2026-08-05 14:18:25 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.075,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.116,
+        "exclude_issuer_feed": 0.011,
+        "ontology_concepts": 2.274
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:18:25 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Home | EMARKET STORAGE - Teleborsa",
+      "url": "https://www.emarketstorage.it/"
+    },
+    {
+      "manifest_registry": {
         "decision_id": "DEC-E83930C80E4B",
         "event_id": "EVT-CC88E185E969",
         "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
