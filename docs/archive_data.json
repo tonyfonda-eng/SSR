@@ -2,6 +2,2077 @@
   "ledger": [
     {
       "manifest_registry": {
+        "decision_id": "DEC-E7C7054B0D00",
+        "event_id": "EVT-DF525528F4D4",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:37:23 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ai_ticker_resolution",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 40.0,
+        "matched": [
+          "ACQUISITION"
+        ],
+        "missing": [
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 7.745,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.669,
+        "exclude_issuer_feed": 0.016,
+        "ontology_concepts": 13.034,
+        "ontology_status": 0.001,
+        "document_scoring": 0.0,
+        "regex_rules": 0.061,
+        "python_issuer_extraction": 0.158,
+        "python_ticker_lookup": 0.293,
+        "ai_ticker_resolution": 13211.121
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:37:23 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ai_ticker_resolution",
+      "headline": "Man Group PLC : Form 8.3 - AMG Critical Materials N.V",
+      "url": "https://www.globenewswire.com/news-release/2026/07/09/3324766/0/en/man-group-plc-form-8-3-amg-critical-materials-n-v.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-3D009837771F",
+        "event_id": "EVT-73B95076B666",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:37:23 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 10.217,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.319,
+        "exclude_issuer_feed": 0.012,
+        "ontology_concepts": 7.47
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:37:23 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Proof and Enigma Partner to Launch Verified Business Identity to Secure Businesses' Brands Online and Combat Fraud in Agentic Commerce",
+      "url": "https://www.globenewswire.com/news-release/2026/07/09/3324725/0/en/proof-and-enigma-partner-to-launch-verified-business-identity-to-secure-businesses-brands-online-and-combat-fraud-in-agentic-commerce.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-04FAB1271D6B",
+        "event_id": "EVT-F88BBC7C34E1",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:37:23 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 5.961,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.183,
+        "exclude_issuer_feed": 0.011,
+        "ontology_concepts": 3.238
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:37:23 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "CCIB recognizes Jordan Baptiste as the recipient of the 2026 Excellence in Indigenous Relations Award",
+      "url": "https://www.globenewswire.com/news-release/2026/07/09/3324727/0/en/ccib-recognizes-jordan-baptiste-as-the-recipient-of-the-2026-excellence-in-indigenous-relations-award.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-7197B5152C20",
+        "event_id": "EVT-76FC0FE285CC",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:37:23 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 31.013,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.41,
+        "exclude_issuer_feed": 0.015,
+        "ontology_concepts": 6.838
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:37:23 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Board of Trustees Chair Gregory Morrison and Wife Debra Establish Distinguished Endowed Chair to Advance Scientific Excellence at Clark Atlanta University",
+      "url": "https://www.globenewswire.com/news-release/2026/07/09/3324733/0/en/board-of-trustees-chair-gregory-morrison-and-wife-debra-establish-distinguished-endowed-chair-to-advance-scientific-excellence-at-clark-atlanta-university.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-390194B9E5AF",
+        "event_id": "EVT-4C261EC215EC",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:37:09 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "options_chain_check",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 40.0,
+        "matched": [
+          "ACQUISITION"
+        ],
+        "missing": [
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 6.732,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.45,
+        "exclude_issuer_feed": 0.013,
+        "ontology_concepts": 10.185,
+        "ontology_status": 0.001,
+        "document_scoring": 0.0,
+        "regex_rules": 0.041,
+        "python_issuer_extraction": 0.036,
+        "python_ticker_lookup": 0.024,
+        "ai_ticker_resolution": 0.001,
+        "entity_confidence": 0.001,
+        "tradeability_check": 0.008,
+        "liquidity_check": 335.087,
+        "financial_market_cap": 0.003,
+        "financial_t12_floor": 71.277,
+        "options_chain_check": 71.96
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:37:09 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "options_chain_check",
+      "headline": "SCIENTURE\u00a0Announces Commercial Inventory Readiness and July Shipments of REZENOPY\u2122 (naloxone hydrochloride) to Wholesalers",
+      "url": "https://www.globenewswire.com/news-release/2026/07/09/3324768/0/en/scienture-announces-commercial-inventory-readiness-and-july-shipments-of-rezenopy-naloxone-hydrochloride-to-wholesalers.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-2AAE9CDC6B77",
+        "event_id": "EVT-4893DB1AD251",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:37:09 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "financial_t12_floor",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 40.0,
+        "matched": [
+          "ACQUISITION"
+        ],
+        "missing": [
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 8.966,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.55,
+        "exclude_issuer_feed": 0.014,
+        "ontology_concepts": 13.828,
+        "ontology_status": 0.001,
+        "document_scoring": 0.0,
+        "regex_rules": 0.054,
+        "python_issuer_extraction": 0.045,
+        "python_ticker_lookup": 0.021,
+        "ai_ticker_resolution": 0.001,
+        "entity_confidence": 0.001,
+        "tradeability_check": 0.008,
+        "liquidity_check": 280.848,
+        "financial_market_cap": 0.001,
+        "financial_t12_floor": 72.248
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:37:09 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "financial_t12_floor",
+      "headline": "MARA Signs Agreement with HIF to Acquire Strategic Powered Land Site in Texas",
+      "url": "https://www.globenewswire.com/news-release/2026/07/09/3324769/0/en/mara-signs-agreement-with-hif-to-acquire-strategic-powered-land-site-in-texas.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-377B07AEBFD4",
+        "event_id": "EVT-05D6380D4A1B",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:37:08 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "financial_t12_floor",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 110.0,
+        "matched": [
+          "ACQUISITION",
+          "MERGER",
+          "SPIN_OFF"
+        ],
+        "missing": [
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 11.297,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.451,
+        "exclude_issuer_feed": 0.019,
+        "ontology_concepts": 9.64,
+        "ontology_status": 0.001,
+        "document_scoring": 0.0,
+        "regex_rules": 0.041,
+        "python_issuer_extraction": 0.062,
+        "python_ticker_lookup": 0.011,
+        "ai_ticker_resolution": 0.001,
+        "entity_confidence": 0.001,
+        "tradeability_check": 0.005,
+        "liquidity_check": 284.276,
+        "financial_market_cap": 0.003,
+        "financial_t12_floor": 75.606
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:37:08 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "financial_t12_floor",
+      "headline": "Texas Ventures Acquisition IV Corp Announces the Separate Trading of its Class A Ordinary Shares and Warrants, Commencing July 13, 2026",
+      "url": "https://www.globenewswire.com/news-release/2026/07/09/3324774/0/en/texas-ventures-acquisition-iv-corp-announces-the-separate-trading-of-its-class-a-ordinary-shares-and-warrants-commencing-july-13-2026.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-F0A15FA67D64",
+        "event_id": "EVT-F3DDA20E6516",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:37:08 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 6.634,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.218,
+        "exclude_issuer_feed": 0.011,
+        "ontology_concepts": 6.119
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:37:08 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "NAPC Defense Surpasses $2.5 Million in Gross Sales During First Three Months under Recent IDIQ Contracts",
+      "url": "https://www.globenewswire.com/news-release/2026/07/09/3324767/0/en/napc-defense-surpasses-2-5-million-in-gross-sales-during-first-three-months-under-recent-idiq-contracts.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-40021D207720",
+        "event_id": "EVT-22B95BF83C1A",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:37:03 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 7.436,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.185,
+        "exclude_issuer_feed": 0.013,
+        "ontology_concepts": 3.501
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:37:03 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "12:33 ETDiego Mesa Puyo selected as next GEF CEO and ChairpersonThe Global Environment Facility (GEF) Council today announced the selection of Diego Mesa Puyo as the family of funds' next CEO and Chairperson. Mesa ...",
+      "url": "https://www.prnewswire.com/news-releases/diego-mesa-puyo-selected-as-next-gef-ceo-and-chairperson-302843974.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-B220D0D2F712",
+        "event_id": "EVT-2E63C64FDCD2",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:37:02 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ai_ticker_resolution",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 40.0,
+        "matched": [
+          "ACQUISITION"
+        ],
+        "missing": [
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 9.657,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.483,
+        "exclude_issuer_feed": 0.011,
+        "ontology_concepts": 14.43,
+        "ontology_status": 0.001,
+        "document_scoring": 0.0,
+        "regex_rules": 0.037,
+        "python_issuer_extraction": 0.058,
+        "python_ticker_lookup": 0.331,
+        "ai_ticker_resolution": 712.974
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:37:02 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ai_ticker_resolution",
+      "headline": "13:14 ETCalifornia housing affordability retreated in the second quarter after reaching a four-year high in early 2026, C.A.R. reportsHousing affordability in California retreated in the second quarter of 2026 after reaching a four-year high in the previous quarter, as higher...",
+      "url": "https://www.prnewswire.com/news-releases/california-housing-affordability-retreated-in-the-second-quarter-after-reaching-a-four-year-high-in-early-2026-car-reports-302844012.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-ADF0AB23B390",
+        "event_id": "EVT-6034A43E8873",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:37:02 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 7.271,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.155,
+        "exclude_issuer_feed": 0.012,
+        "ontology_concepts": 3.003
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:37:02 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "13:12 ETDiego Mesa Puyo choisi comme prochain directeur g\u00e9n\u00e9ral et pr\u00e9sident du GEFLe Conseil du Fonds pour l'environnement mondial (GEF) a annonc\u00e9 aujourd'hui la s\u00e9lection de Diego Mesa Puyo comme prochain directeur g\u00e9n\u00e9ral et...",
+      "url": "https://www.prnewswire.com/news-releases/diego-mesa-puyo-choisi-comme-prochain-directeur-general-et-president-du-gef-302844009.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-5EE15992F96C",
+        "event_id": "EVT-8D7E52733402",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:37:02 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 8.17,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.224,
+        "exclude_issuer_feed": 0.011,
+        "ontology_concepts": 4.737
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:37:02 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "13:11 ETWhy Baton Rouge's Humid Climate Can Contribute to Carpenter Ant Damage -- J&J Exterminating Explains How to Protect Your HomeJ&J Exterminating is reminding Baton Rouge homeowners that the area's warm, humid climate can create favorable conditions for carpenter ants. Because ...",
+      "url": "https://www.prnewswire.com/news-releases/why-baton-rouges-humid-climate-can-contribute-to-carpenter-ant-damage--jj-exterminating-explains-how-to-protect-your-home-302844004.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-A1186A02EF17",
+        "event_id": "EVT-5CB653D7ED1E",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:37:02 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 7.726,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.248,
+        "exclude_issuer_feed": 0.015,
+        "ontology_concepts": 4.457
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:37:02 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "12:59 ETDiego Mesa Puyo selected as next GEF CEO and ChairpersonThe Global Environment Facility (GEF) Council today announced the selection of Diego Mesa Puyo as the family of funds' next CEO and Chairperson. Mesa ...",
+      "url": "https://www.prnewswire.com/news-releases/diego-mesa-puyo-selected-as-next-gef-ceo-and-chairperson-302843999.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-08A885AF355D",
+        "event_id": "EVT-6DB5AF2C1461",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:37:01 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "financial_t12_floor",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 40.0,
+        "matched": [
+          "MERGER"
+        ],
+        "missing": [
+          "ACQUISITION",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 6.822,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.357,
+        "exclude_issuer_feed": 0.019,
+        "ontology_concepts": 6.624,
+        "ontology_status": 0.002,
+        "document_scoring": 0.0,
+        "regex_rules": 0.059,
+        "python_issuer_extraction": 0.178,
+        "python_ticker_lookup": 0.083,
+        "ai_ticker_resolution": 0.002,
+        "entity_confidence": 0.002,
+        "tradeability_check": 0.03,
+        "liquidity_check": 715.742,
+        "financial_market_cap": 0.002,
+        "financial_t12_floor": 77.623
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:37:01 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "financial_t12_floor",
+      "headline": "13:26 ET$HAREHOLDER ALERT: The M&A Class Action Firm Continues To Investigate The Merger--FBRX, LXFR, SMTI, and MKTXClass Action Attorney Juan Monteverde with Monteverde & Associates PC (the \"M&A Class Action Firm\"), has recovered millions of dollars for...",
+      "url": "https://www.prnewswire.com/news-releases/hareholder-alert-the-ma-class-action-firm-continues-to-investigate-the-mergerfbrx-lxfr-smti-and-mktx-302843910.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-599CA6279145",
+        "event_id": "EVT-EF4BA91AEF71",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:37:01 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "financial_t12_floor",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 80.0,
+        "matched": [
+          "ACQUISITION",
+          "MERGER"
+        ],
+        "missing": [
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 11.487,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.561,
+        "exclude_issuer_feed": 0.021,
+        "ontology_concepts": 10.792,
+        "ontology_status": 0.001,
+        "document_scoring": 0.0,
+        "regex_rules": 0.039,
+        "python_issuer_extraction": 0.091,
+        "python_ticker_lookup": 0.022,
+        "ai_ticker_resolution": 0.001,
+        "entity_confidence": 0.001,
+        "tradeability_check": 0.006,
+        "liquidity_check": 589.647,
+        "financial_market_cap": 0.001,
+        "financial_t12_floor": 75.261
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:37:01 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "financial_t12_floor",
+      "headline": "13:23 ETOUTFRONT and New York Jets Announce Exclusive, Multi-Year Partnership to Extend the Fan Experience Beyond MetLife StadiumOUTFRONT Media (NYSE:OUT), one of the largest and most-trusted IRL media companies in the U.S., today announced a multi-year exclusive agreement with ...",
+      "url": "https://www.prnewswire.com/news-releases/outfront-and-new-york-jets-announce-exclusive-multi-year-partnership-to-extend-the-fan-experience-beyond-metlife-stadium-302844017.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-2531280A35CB",
+        "event_id": "EVT-9704F82405D3",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:37:01 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 7.25,
+        "dedupe_issuer_memory": 0.004,
+        "exclude_global_keywords": 0.786,
+        "exclude_issuer_feed": 0.016,
+        "ontology_concepts": 4.35
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:37:01 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "13:20 ETRobert Half honored by Forbes as one of America's Best Employers for Women 2026Global talent solutions and business consulting firm Robert Half (NYSE: RHI) has been recognized by Forbes as one of America's Best Employers for...",
+      "url": "https://www.prnewswire.com/news-releases/robert-half-honored-by-forbes-as-one-of-americas-best-employers-for-women-2026-302844016.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-30031279FFA7",
+        "event_id": "EVT-428ED59E354F",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:37:01 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 7.442,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.204,
+        "exclude_issuer_feed": 0.015,
+        "ontology_concepts": 2.794
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:37:01 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "13:20 ETCapricor Therapeutics, Inc. (CAPR) Shareholders Who Lost Money Have Opportunity to Lead Securities Fraud LawsuitThe Law Offices of Frank R. Cruz announces that investors with losses related to Capricor Therapeutics, Inc. (CAPR) have opportunity to lead the...",
+      "url": "https://www.prnewswire.com/news-releases/capricor-therapeutics-inc-capr-shareholders-who-lost-money-have-opportunity-to-lead-securities-fraud-lawsuit-302843526.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-0930B7511922",
+        "event_id": "EVT-CF7B457CE714",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:37:01 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 7.53,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.231,
+        "exclude_issuer_feed": 0.011,
+        "ontology_concepts": 4.932
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:37:01 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "13:18 ETTC Investment Holdings Announces Gibsons Restaurant Group of Chicago to Open at 414 Union StreetTC Investment Holdings today announced that they have secured a lease to bring in a premier restaurant concept from the renowned Gibsons Restaurant...",
+      "url": "https://www.prnewswire.com/news-releases/tc-investment-holdings-announces-gibsons-restaurant-group-of-chicago-to-open-at-414-union-street-302844014.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-17B04E349F19",
+        "event_id": "EVT-2E59C04C8711",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:37:00 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 7.766,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.379,
+        "exclude_issuer_feed": 0.014,
+        "ontology_concepts": 11.513
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:37:00 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "13:30 ETFrank Russo Announces Commonsense Property Tax Relief Plan for Florida FamiliesFlorida gubernatorial candidate Frank Russo today announced his Commonsense Property Tax Relief Plan, a practical approach to lowering the cost of...",
+      "url": "https://www.prnewswire.com/news-releases/frank-russo-announces-commonsense-property-tax-relief-plan-for-florida-families-302844008.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-366563FBAD0F",
+        "event_id": "EVT-4E6EE8145621",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:37:00 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 9.733,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 1.058,
+        "exclude_issuer_feed": 0.024,
+        "ontology_concepts": 15.488
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:37:00 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "13:30 ETMotorcycle Tires Market to Reach USD 26.94 Billion by 2035, Driven by Asia-Pacific Two-Wheeler Production and Electric Mobility Growth, Reports Radial InsightsThe global Motorcycle Tires Market was valued at USD 14.09 billion in 2025 and is projected to expand from USD 15.23 billion in 2026 to USD 26.94...",
+      "url": "https://www.prnewswire.com/news-releases/motorcycle-tires-market-to-reach-usd-26-94-billion-by-2035--driven-by-asia-pacific-two-wheeler-production-and-electric-mobility-growth-reports-radial-insights-302844023.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-0C448D049D8C",
+        "event_id": "EVT-A9D18996335C",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:37:00 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 9.74,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.236,
+        "exclude_issuer_feed": 0.022,
+        "ontology_concepts": 4.374
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:37:00 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "13:29 ETDiego Mesa Puyo es seleccionado como pr\u00f3ximo director ejecutivo y presidente del GEFEl Consejo del Fondo para el Medio Ambiente Mundial (GEF) anunci\u00f3 hoy el nombramiento de Diego Mesa Puyo como pr\u00f3ximo director ejecutivo y presidente ...",
+      "url": "https://www.prnewswire.com/news-releases/diego-mesa-puyo-es-seleccionado-como-proximo-director-ejecutivo-y-presidente-del-gef-302844022.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-7E499E133AD7",
+        "event_id": "EVT-63592C013CE9",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:36:52 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 9.704,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.133,
+        "exclude_issuer_feed": 0.022,
+        "ontology_concepts": 1.741
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:36:52 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "\u201eiFIT\u201c un \u201eSamsung Health\u201c papla\u0161ina sadarb\u012bbu, ievie\u0161ot lietotni \u201eiFIT Personal Trainer\u201c \u201eGalaxy\u201c ier\u012bc\u0113s",
+      "url": "http://www.businesswire.com/news/home/20260723094376/lv/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-59C046E24D7D",
+        "event_id": "EVT-B1FD1AA92961",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:36:52 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 30.86,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.113,
+        "exclude_issuer_feed": 0.02,
+        "ontology_concepts": 1.516
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:36:52 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "iFIT i Samsung Health pog\u0142\u0119biaj\u0105 wsp\u00f3\u0142prac\u0119 wraz z udost\u0119pnieniem osobistego trenera iFIT na urz\u0105dzeniach Galaxy",
+      "url": "http://www.businesswire.com/news/home/20260723253281/pl/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-BFD70D60C4A4",
+        "event_id": "EVT-9D97682D78CD",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:36:52 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 8.191,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.075,
+        "exclude_issuer_feed": 0.015,
+        "ontology_concepts": 0.896
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:36:52 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Spole\u010dnosti iFIT a Samsung Health prohlubuj\u00ed partnerstv\u00ed uveden\u00edm slu\u017eby iFIT Personal Trainer na za\u0159\u00edzen\u00edch Galaxy",
+      "url": "http://www.businesswire.com/news/home/20260723392915/cs/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-50AEF979C372",
+        "event_id": "EVT-EAC8B2580487",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:36:52 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 30.416,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.107,
+        "exclude_issuer_feed": 0.02,
+        "ontology_concepts": 1.462
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:36:52 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Az iFIT \u00e9s a Samsung Health kib\u0151v\u00edti partners\u00e9g\u00e9t: megjelent az iFIT Personal Trainer a Galaxy k\u00e9sz\u00fcl\u00e9keken",
+      "url": "http://www.businesswire.com/news/home/20260723761613/hu/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-4DD8B0B827BB",
+        "event_id": "EVT-6A5CBBB8D897",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:36:51 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 31.948,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.121,
+        "exclude_issuer_feed": 0.024,
+        "ontology_concepts": 1.509
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:36:51 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "iFIT ja Samsung Health partnerlus laieneb: Galaxy seadmetele j\u00f5uab iFIT Personal Trainer",
+      "url": "http://www.businesswire.com/news/home/20260723006768/et/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-BEC95329E688",
+        "event_id": "EVT-56D3AF2F7C47",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:36:51 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 13.791,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.12,
+        "exclude_issuer_feed": 0.023,
+        "ontology_concepts": 1.686
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:36:51 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "\u201eiFIT\u201c ir \u201eSamsung Health\u201c stiprina partneryst\u0119 pristatydamos \u201eiFIT Personal Trainer\u201c \u201eGalaxy\u201c \u012frenginiuose",
+      "url": "http://www.businesswire.com/news/home/20260723058193/lt/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-6E83E372FBFC",
+        "event_id": "EVT-3402EAAA529E",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:36:43 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 9.201,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.281,
+        "exclude_issuer_feed": 0.02,
+        "ontology_concepts": 4.958
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:36:43 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Latest Press Releases & News | News Wire Newsroom | GlobeNewswire",
+      "url": "https://www.globenewswire.com/NewsRoom"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-54B0643B70F3",
+        "event_id": "EVT-27C62672FF9C",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:36:42 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ai_ticker_resolution",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 40.0,
+        "matched": [
+          "ACQUISITION"
+        ],
+        "missing": [
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 30.046,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.061,
+        "exclude_issuer_feed": 0.014,
+        "ontology_concepts": 0.728,
+        "ontology_status": 0.001,
+        "document_scoring": 0.0,
+        "regex_rules": 0.083,
+        "python_issuer_extraction": 0.435,
+        "python_ticker_lookup": 0.588,
+        "ai_ticker_resolution": 1031.111
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:36:42 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ai_ticker_resolution",
+      "headline": "California housing affordability retreated in the second quarter after reaching a four-year high in early 2026, C.A.R. reports",
+      "url": "https://www.prnewswire.com/news-releases/california-housing-affordability-retreated-in-the-second-quarter-after-reaching-a-four-year-high-in-early-2026-car-reports-302844012.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-5A6EF86C7657",
+        "event_id": "EVT-8A7995942581",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:36:42 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 9.19,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.077,
+        "exclude_issuer_feed": 0.016,
+        "ontology_concepts": 0.68
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:36:42 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Diego Mesa Puyo choisi comme prochain directeur g\u00e9n\u00e9ral et pr\u00e9sident du GEF",
+      "url": "https://www.prnewswire.com/news-releases/diego-mesa-puyo-choisi-comme-prochain-directeur-general-et-president-du-gef-302844009.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-CFB79384F691",
+        "event_id": "EVT-AAD5E0DD2687",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:36:42 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 11.36,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.073,
+        "exclude_issuer_feed": 0.026,
+        "ontology_concepts": 0.789
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:36:42 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Why Baton Rouge's Humid Climate Can Contribute to Carpenter Ant Damage -- J&amp;J Exterminating Explains How to Protect Your Home",
+      "url": "https://www.prnewswire.com/news-releases/why-baton-rouges-humid-climate-can-contribute-to-carpenter-ant-damage--jj-exterminating-explains-how-to-protect-your-home-302844004.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-8B6CEE47327A",
+        "event_id": "EVT-B6B78D3B54F2",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:36:41 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 11.367,
+        "dedupe_issuer_memory": 0.022,
+        "exclude_global_keywords": 0.669,
+        "exclude_issuer_feed": 0.051,
+        "ontology_concepts": 3.114
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:36:41 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Frank Russo Announces Commonsense Property Tax Relief Plan for Florida Families",
+      "url": "https://www.prnewswire.com/news-releases/frank-russo-announces-commonsense-property-tax-relief-plan-for-florida-families-302844008.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-7F2461BCAC85",
+        "event_id": "EVT-C57E34DF2959",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:36:41 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 7.11,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.078,
+        "exclude_issuer_feed": 0.028,
+        "ontology_concepts": 0.811
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:36:41 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Motorcycle Tires Market to Reach USD 26.94 Billion by 2035, Driven by Asia-Pacific Two-Wheeler Production and Electric Mobility Growth, Reports Radial Insights",
+      "url": "https://www.prnewswire.com/news-releases/motorcycle-tires-market-to-reach-usd-26-94-billion-by-2035--driven-by-asia-pacific-two-wheeler-production-and-electric-mobility-growth-reports-radial-insights-302844023.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-144D9C0C299C",
+        "event_id": "EVT-2097403B18C4",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:36:41 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 34.963,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.101,
+        "exclude_issuer_feed": 0.02,
+        "ontology_concepts": 0.899
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:36:41 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Diego Mesa Puyo es seleccionado como pr\u00f3ximo director ejecutivo y presidente del GEF",
+      "url": "https://www.prnewswire.com/news-releases/diego-mesa-puyo-es-seleccionado-como-proximo-director-ejecutivo-y-presidente-del-gef-302844022.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-62C6343D2894",
+        "event_id": "EVT-27E10D9EE1B1",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:36:41 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 32.443,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.099,
+        "exclude_issuer_feed": 0.025,
+        "ontology_concepts": 1.242
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:36:41 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "$HAREHOLDER ALERT: The M&amp;A Class Action Firm Continues To Investigate The Merger--FBRX, LXFR, SMTI, and MKTX",
+      "url": "https://www.prnewswire.com/news-releases/hareholder-alert-the-ma-class-action-firm-continues-to-investigate-the-mergerfbrx-lxfr-smti-and-mktx-302843910.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-AD60D604D3FB",
+        "event_id": "EVT-E03D455F994A",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:36:41 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 7.518,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.048,
+        "exclude_issuer_feed": 0.014,
+        "ontology_concepts": 0.474
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:36:41 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "OUTFRONT and New York Jets Announce Exclusive, Multi-Year Partnership to Extend the Fan Experience Beyond MetLife Stadium",
+      "url": "https://www.prnewswire.com/news-releases/outfront-and-new-york-jets-announce-exclusive-multi-year-partnership-to-extend-the-fan-experience-beyond-metlife-stadium-302844017.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-7AB15A5CE093",
+        "event_id": "EVT-946A85AF701B",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:36:41 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 7.143,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.046,
+        "exclude_issuer_feed": 0.012,
+        "ontology_concepts": 0.467
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:36:41 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Robert Half honored by Forbes as one of America's Best Employers for Women 2026",
+      "url": "https://www.prnewswire.com/news-releases/robert-half-honored-by-forbes-as-one-of-americas-best-employers-for-women-2026-302844016.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-3A464FA0F2EF",
+        "event_id": "EVT-D7D7D2437101",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:36:41 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 9.333,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.045,
+        "exclude_issuer_feed": 0.012,
+        "ontology_concepts": 0.429
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:36:41 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Capricor Therapeutics, Inc. (CAPR) Shareholders Who Lost Money Have Opportunity to Lead Securities Fraud Lawsuit",
+      "url": "https://www.prnewswire.com/news-releases/capricor-therapeutics-inc-capr-shareholders-who-lost-money-have-opportunity-to-lead-securities-fraud-lawsuit-302843526.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-E860BDD89D05",
+        "event_id": "EVT-3E944547CEBD",
+        "configuration_manifest_hash": "CFG-80F1EB7A789A",
+        "execution_timestamp_gmt": "2026-08-05 17:36:41 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 29.047,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.106,
+        "exclude_issuer_feed": 0.026,
+        "ontology_concepts": 0.996
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 17:36:41 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "TC Investment Holdings Announces Gibsons Restaurant Group of Chicago to Open at 414 Union Street",
+      "url": "https://www.prnewswire.com/news-releases/tc-investment-holdings-announces-gibsons-restaurant-group-of-chicago-to-open-at-414-union-street-302844014.html"
+    },
+    {
+      "manifest_registry": {
         "decision_id": "DEC-EDAA4C52199F",
         "event_id": "EVT-9F20B1ECDCD9",
         "configuration_manifest_hash": "CFG-192D264F1A00",
