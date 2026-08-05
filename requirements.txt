@@ -1,12 +1,18 @@
+# Core Framework
+requests
 beautifulsoup4
 feedparser
-requests
-gspread
-google-auth
-google-genai
+
+# Financial & Data Engines
 yfinance
-openai
-PyPDF2
 pandas
-tabulate
-markdown
+
+# Database & Cryptography
+cryptography
+
+# Google Cloud & Sheets API (Fixes Ontology/Sheets loading)
+google-api-python-client
+google-auth
+google-auth-httplib2
+google-auth-oauthlib
+gspread

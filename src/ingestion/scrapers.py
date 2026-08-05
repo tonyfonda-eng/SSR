@@ -35,7 +35,8 @@ def fetch_all_feeds(active_sources: list = None) -> list:
             # 1. Parse as RSS (Primary Method)
             feed = feedparser.parse(url)
             if feed.entries:
-                for entry in feed.entries[:25]:  # Fetch top 25 recent per source
+                # FIX: Removed the [:25] limit. The system will now ingest all available historical articles.
+                for entry in feed.entries:
                     body_text = entry.get("summary", entry.get("description", ""))
                     
                     # Clean HTML tags out of RSS summaries if they exist
@@ -65,6 +66,8 @@ def fetch_all_feeds(active_sources: list = None) -> list:
                     
             # 3. Ping Google Sheets to update Column K (Last Checked)
             try:
+                from src.sheets import update_last_checked
+                from src.config.settings import SHEET_URL
                 update_last_checked(SHEET_URL, source_name)
             except Exception as sheet_err:
                 logger.debug(f"Failed to update Last Checked for {source_name}: {sheet_err}")

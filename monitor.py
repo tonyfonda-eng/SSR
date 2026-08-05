@@ -229,6 +229,8 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
         ]
 
     for stage_name in execution_order:
+        telemetry.track(f"entered_{stage_name}") # Track exactly how many articles enter each stage
+        
         stage_func = STAGE_REGISTRY.get(stage_name.lower())
         if not stage_func: 
             logger.warning(f"Configuration requested unknown pipeline stage: {stage_name}")
@@ -237,6 +239,8 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
         if not passed:
             telemetry.track(drop_reason)
             return False 
+            
+        telemetry.track(f"survived_{stage_name}") # Track exactly how many articles survive each stage
             
     # --- IF IT SURVIVED ALL ADAPTIVE STAGES, COMMIT ALERT ---
     telemetry.track("alerts_generated")
@@ -262,7 +266,7 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
     commit_decision_capsule(decision_capsule)
     logger.info(f"[ALERT GENERATED] {ticker} - {event_family}")
     
-    # --- FIX: WRITE SUCCESSES BACK TO THE GOOGLE SHEET ---
+    # --- WRITE SUCCESSES BACK TO THE GOOGLE SHEET ---
     try:
         if ticker != "UNKNOWN":
             batch_append_daily_memory(SHEET_URL, [ticker])
@@ -284,6 +288,85 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
         logger.error(f"[EMAIL DISPATCH FAILED] Unable to send alert for {ticker}: {e}")
         
     return True
+
+def main():
+    logger.info("Initializing SSR 2.0 Highly Granular Pipeline...")
+    try:
+        initialise_database()
+    except Exception as e:
+        logger.error(f"Failed to initialize database: {e}")
+        sys.exit(1)
+
+    telemetry = PipelineTelemetry()
+    
+    try:
+        load_ontology(SHEET_URL)
+        config_manifest = {
+            "rules": load_rules(SHEET_URL),
+            "global_exclusions": load_global_exclusions(SHEET_URL),
+            "sources": load_sources(SHEET_URL),
+            "document_type_scores": load_document_type_scores(SHEET_URL),
+            "semantic_concepts": load_semantic_concepts(SHEET_URL),
+            "event_statuses": load_event_statuses(SHEET_URL),
+            "settings": get_system_settings(SHEET_URL),
+            "playbooks": load_playbooks(SHEET_URL),
+            "pipeline": load_pipeline_config(SHEET_URL),
+            "ai_configs": load_ai_configurations(SHEET_URL),
+            "financial_rules": load_financial_constraints(SHEET_URL)
+        }
+        
+        config_json = json.dumps(config_manifest, sort_keys=True)
+        manifest_hash = f"CFG-{hashlib.sha256(config_json.encode('utf-8')).hexdigest()[:12].upper()}"
+        save_config_snapshot(manifest_hash, telemetry.run_id, config_json)
+        logger.info(f"Locked Immutable Configuration Manifest: {manifest_hash}")
+    except Exception as e:
+        logger.critical(f"Failed to fetch Configuration Manifest: {e}")
+        sys.exit(1)
+    
+    try:
+        articles = fetch_all_feeds(config_manifest.get("sources", [])) 
+        telemetry.metrics["downloaded"] = len(articles)
+
+        for article in articles:
+            try:
+                process_article(article, telemetry, config_manifest, manifest_hash)
+            except Exception as e:
+                logger.error(f"Error processing article: {e}")
+                telemetry.track("errors")
+    except Exception as e:
+        logger.critical(f"Fatal error in main pipeline loop: {e}")
+    
+    finally:
+        logger.info("Pipeline execution finished. Generating observability exports...")
+        
+        # Print the granular stage-by-stage funnel directly to the CI Action logs!
+        logger.info("\n=== 📉 PIPELINE STAGE FUNNEL 📉 ===")
+        for key, count in sorted(telemetry.metrics.items()):
+            logger.info(f"  {key}: {count}")
+        logger.info("===================================\n")
+        
+        health_payload = {
+            "run_id": telemetry.run_id,
+            "total_scanned": telemetry.metrics.get("downloaded", 0),
+            "articles": telemetry.metrics.get("alerts_generated", 0),
+            "errors": telemetry.metrics.get("errors", 0) + telemetry.metrics.get("ai_exhausted", 0),
+            "runtime": telemetry.get_runtime(),
+            "funnel": telemetry.metrics
+        }
+        save_workflow_health(health_payload)
+        
+        # CALL THE CORRECT EXPORT FUNCTIONS AND GENERATE HTML
+        try:
+            logger.info("Dumping Ledger to archive_data.json...")
+            export_archive_json("docs/archive_data.json")
+            
+            logger.info("Rebuilding HTML Dashboards...")
+            generate_archive_html("docs/archive.html")
+        except Exception as e:
+            logger.error(f"Frontend Data & HTML Export failed: {e}")
+
+if __name__ == "__main__":
+    main()
 
 def main():
     logger.info("Initializing SSR 2.0 Highly Granular Pipeline...")

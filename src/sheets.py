@@ -3,6 +3,7 @@ import json
 import time
 import datetime
 import ast
+import warnings
 import gspread
 from google.oauth2.service_account import Credentials
 from src.config.secrets import get_google_service_account
@@ -38,9 +39,11 @@ def _sanitize_private_key(raw_pk: str) -> str:
                 pk = decoded
         except Exception:
             pass
-        # If it's a Python literal-encoded string, decode
+        # If it's a Python literal-encoded string, decode (with warning suppression)
         try:
-            decoded = ast.literal_eval(pk)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", SyntaxWarning)
+                decoded = ast.literal_eval(pk)
             if isinstance(decoded, str):
                 pk = decoded
         except Exception:
@@ -94,7 +97,9 @@ def get_client():
         try:
             creds_dict = json.loads(creds_dict)
         except json.JSONDecodeError:
-            creds_dict = ast.literal_eval(creds_dict)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", SyntaxWarning)
+                creds_dict = ast.literal_eval(creds_dict)
 
     # --- PRIVATE KEY SANITIZATION & VALIDATION ---
     if creds_dict and "private_key" in creds_dict:
