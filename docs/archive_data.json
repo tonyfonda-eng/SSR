@@ -2,6 +2,2132 @@
   "ledger": [
     {
       "manifest_registry": {
+        "decision_id": "DEC-E83930C80E4B",
+        "event_id": "EVT-CC88E185E969",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "financial_t12_floor",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 40.0,
+        "matched": [
+          "ACQUISITION"
+        ],
+        "missing": [
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.516,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.066,
+        "exclude_issuer_feed": 0.014,
+        "ontology_concepts": 0.761,
+        "ontology_status": 0.001,
+        "document_scoring": 0.0,
+        "regex_rules": 0.053,
+        "python_issuer_extraction": 0.208,
+        "python_ticker_lookup": 0.218,
+        "entity_confidence": 0.001,
+        "tradeability_check": 0.004,
+        "liquidity_check": 774.926,
+        "financial_market_cap": 0.001,
+        "financial_t12_floor": 60.535
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "financial_t12_floor",
+      "headline": "Baxter Announces Cash Tender Offers",
+      "url": "http://www.businesswire.com/news/home/20260803322775/en/Baxter-Announces-Cash-Tender-Offers/?feedref=JjAwJuNHiystnCoBq_hl-Y6W_I0-TRpzG3erz55BOr2Ka1ah7uC6RdZY8DBvigxR7fxFuNFTHSunhvli30RlBNXya2izy9YOgHlBiZQk2LPgxNjXHjsNmKaXEz4koEK2vmqJg40z11ZJQtFClQOcyQ=="
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-5C925F69E3C4",
+        "event_id": "EVT-53504CCB4DFA",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "entity_confidence",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 40.0,
+        "matched": [
+          "ACQUISITION"
+        ],
+        "missing": [
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.208,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.048,
+        "exclude_issuer_feed": 0.016,
+        "ontology_concepts": 0.468,
+        "ontology_status": 0.001,
+        "document_scoring": 0.0,
+        "regex_rules": 0.038,
+        "python_issuer_extraction": 0.015,
+        "python_ticker_lookup": 0.282,
+        "entity_confidence": 0.002
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "entity_confidence",
+      "headline": "P&amp;F Products &amp; Features GmbH Announces Acquisition of AVVie GmbH",
+      "url": "https://www.prnewswire.com/news-releases/pf-products--features-gmbh-announces-acquisition-of-avvie-gmbh-302843841.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-96F0FCA078E4",
+        "event_id": "EVT-67FB645D1264",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.473,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.041,
+        "exclude_issuer_feed": 0.013,
+        "ontology_concepts": 0.449
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "In HelloNation, Towing Expert Michelle Sullivan Explains Why DIY Towing Often Ends in Costly Damage",
+      "url": "https://www.prnewswire.com/news-releases/in-hellonation-towing-expert-michelle-sullivan-explains-why-diy-towing-often-ends-in-costly-damage-302843839.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-90D8FE606F2E",
+        "event_id": "EVT-D72D4641D11A",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.185,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.039,
+        "exclude_issuer_feed": 0.01,
+        "ontology_concepts": 0.438
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Recastia Helps Create PDF to Video With Optional AI Avatar",
+      "url": "https://www.prnewswire.com/news-releases/recastia-helps-create-pdf-to-video-with-optional-ai-avatar-302843703.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-F13A4D9ABC43",
+        "event_id": "EVT-8051D9E565B1",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.115,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.042,
+        "exclude_issuer_feed": 0.01,
+        "ontology_concepts": 0.412
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Impact Technologies Highlights Median Truck Escape Ramp Project in El Paso",
+      "url": "https://www.prnewswire.com/news-releases/impact-technologies-highlights-median-truck-escape-ramp-project-in-el-paso-302843329.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-EB4EF02A3BF2",
+        "event_id": "EVT-86330A0189E7",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.317,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.037,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 0.415
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "FUTU Shareholder Alert: Futu Holdings Limited Securities Class Action Lawsuit - Investors With Losses May Contact Levi &amp; Korsinsky",
+      "url": "https://www.prnewswire.com/news-releases/futu-shareholder-alert-futu-holdings-limited-securities-class-action-lawsuit---investors-with-losses-may-contact-levi--korsinsky-302843310.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-4FE29BB0C438",
+        "event_id": "EVT-9650F3837B49",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.339,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.037,
+        "exclude_issuer_feed": 0.01,
+        "ontology_concepts": 0.436
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "BRCB Deadline Alert: Levi &amp; Korsinsky Reminds Black Rock Coffee Bar, Inc. (BRCB) Investors of Securities Class Action Deadline on August 17, 2026",
+      "url": "https://www.prnewswire.com/news-releases/brcb-deadline-alert-levi--korsinsky-reminds-black-rock-coffee-bar-inc-brcb-investors-of-securities-class-action-deadline-on-august-17-2026-302843315.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-EF9E88C590AE",
+        "event_id": "EVT-A2DBB9930ED6",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.333,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.04,
+        "exclude_issuer_feed": 0.011,
+        "ontology_concepts": 0.508
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "REGN Shareholder Alert: Investors With Losses May Seek to Lead the Class Action in Regeneron Pharmaceuticals Securities Lawsuit - Contact Levi &amp; Korsinsky",
+      "url": "https://www.prnewswire.com/news-releases/regn-shareholder-alert-investors-with-losses-may-seek-to-lead-the-class-action-in-regeneron-pharmaceuticals-securities-lawsuit---contact-levi--korsinsky-302843322.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-406AE8C9DFA1",
+        "event_id": "EVT-B68DE232A6A7",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.347,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.039,
+        "exclude_issuer_feed": 0.01,
+        "ontology_concepts": 0.456
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "MVST Shareholder Alert: Investors With Losses May Seek to Lead the Class Action in Microvast Holdings Securities Lawsuit - Contact Levi &amp; Korsinsky",
+      "url": "https://www.prnewswire.com/news-releases/mvst-shareholder-alert-investors-with-losses-may-seek-to-lead-the-class-action-in-microvast-holdings-securities-lawsuit---contact-levi--korsinsky-302843327.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-1F498C91475B",
+        "event_id": "EVT-ED2B89DEA21C",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.822,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.034,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 0.407
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Capricor (CAPR) Securities Investigation Notice - Levi &amp; Korsinsky",
+      "url": "https://www.prnewswire.com/news-releases/capricor-capr-securities-investigation-notice---levi--korsinsky-302843311.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-3C933DF91D24",
+        "event_id": "EVT-C7C2D96A400D",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.202,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.032,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 0.43
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Levi &amp; Korsinsky Reminds Microsoft Corporation Investors of the Pending Class Action Lawsuit With a Lead Plaintiff Deadline of August 11, 2026 - MSFT",
+      "url": "https://www.prnewswire.com/news-releases/levi--korsinsky-reminds-microsoft-corporation-investors-of-the-pending-class-action-lawsuit-with-a-lead-plaintiff-deadline-of-august-11-2026---msft-302843302.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-84445759361B",
+        "event_id": "EVT-222330C6B41C",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 21.218,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.033,
+        "exclude_issuer_feed": 0.01,
+        "ontology_concepts": 0.408
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Lost Money on Insulet Corporation (PODD)? Join Class Action Suit Seeking Recovery - Contact Levi &amp; Korsinsky",
+      "url": "https://www.prnewswire.com/news-releases/lost-money-on-insulet-corporation-podd-join-class-action-suit-seeking-recovery---contact-levi--korsinsky-302843318.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-C5E9E7265F80",
+        "event_id": "EVT-95B13413B5C3",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.176,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.033,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 0.453
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "PLNT DEADLINE: Levi &amp; Korsinsky Reminds Planet Fitness, Inc. Investors of Upcoming Securities Class Action Deadline",
+      "url": "https://www.prnewswire.com/news-releases/plnt-deadline-levi--korsinsky-reminds-planet-fitness-inc-investors-of-upcoming-securities-class-action-deadline-302843320.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-EC26EF43A636",
+        "event_id": "EVT-E7E39894C839",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "entity_confidence",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 40.0,
+        "matched": [
+          "ACQUISITION"
+        ],
+        "missing": [
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.205,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.031,
+        "exclude_issuer_feed": 0.01,
+        "ontology_concepts": 0.396,
+        "ontology_status": 0.0,
+        "document_scoring": 0.0,
+        "regex_rules": 0.037,
+        "python_issuer_extraction": 0.028,
+        "python_ticker_lookup": 0.017,
+        "entity_confidence": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "entity_confidence",
+      "headline": "EQPT UPCOMING DEADLINE: Levi &amp; Korsinsky Alerts EquipmentShare.com Inc. Stockholders of Securities Class Action - Contact the Firm",
+      "url": "https://www.prnewswire.com/news-releases/eqpt-upcoming-deadline-levi--korsinsky-alerts-equipmentsharecom-inc-stockholders-of-securities-class-action---contact-the-firm-302843305.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-5722B17EB908",
+        "event_id": "EVT-0CF47EF27858",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.194,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.033,
+        "exclude_issuer_feed": 0.01,
+        "ontology_concepts": 0.451
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "CCOI UPCOMING DEADLINE: Levi &amp; Korsinsky Alerts COGENT COMMUNICATIONS HOLDINGS, INC. Stockholders of Securities Class Action - Contact the Firm",
+      "url": "https://www.prnewswire.com/news-releases/ccoi-upcoming-deadline-levi--korsinsky-alerts-cogent-communications-holdings-inc-stockholders-of-securities-class-action---contact-the-firm-302843312.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-B03282BBC155",
+        "event_id": "EVT-2B4D023C71BB",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.33,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.032,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 0.423
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Lost Money on Photronics, Inc. (PLAB)? Join Class Action Suit Seeking Recovery - Contact Levi &amp; Korsinsky",
+      "url": "https://www.prnewswire.com/news-releases/lost-money-on-photronics-inc-plab-join-class-action-suit-seeking-recovery---contact-levi--korsinsky-302843321.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-60CF3235F15A",
+        "event_id": "EVT-2D474BFD09AB",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.137,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.032,
+        "exclude_issuer_feed": 0.008,
+        "ontology_concepts": 0.431
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "PRCT UPCOMING DEADLINE: Levi &amp; Korsinsky Alerts PROCEPT BIOROBOTICS CORPORATION Stockholders of Securities Class Action - Contact the Firm",
+      "url": "https://www.prnewswire.com/news-releases/prct-upcoming-deadline-levi--korsinsky-alerts-procept-biorobotics-corporation-stockholders-of-securities-class-action---contact-the-firm-302843324.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-4E92E44370F8",
+        "event_id": "EVT-E32BC480563F",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.09,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.032,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 0.431
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "WIX UPCOMING DEADLINE: Levi &amp; Korsinsky Alerts Wix.com Ltd. Stockholders of Securities Class Action - Contact the Firm",
+      "url": "https://www.prnewswire.com/news-releases/wix-upcoming-deadline-levi--korsinsky-alerts-wixcom-ltd-stockholders-of-securities-class-action---contact-the-firm-302843326.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-2518D7074FDE",
+        "event_id": "EVT-BF7AD29D40EB",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.186,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.031,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 0.42
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "HTZ UPCOMING DEADLINE: Levi &amp; Korsinsky Alerts Hertz Global Holdings, Inc. Stockholders of Securities Class Action - Contact the Firm",
+      "url": "https://www.prnewswire.com/news-releases/htz-upcoming-deadline-levi--korsinsky-alerts-hertz-global-holdings-inc-stockholders-of-securities-class-action---contact-the-firm-302843314.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-1CC57FB435DF",
+        "event_id": "EVT-FCB97DF0F192",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.126,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.03,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 0.475
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Lost Money on Hub Group, Inc. (HUBG)? Join Class Action Suit Seeking Recovery - Contact Levi &amp; Korsinsky",
+      "url": "https://www.prnewswire.com/news-releases/lost-money-on-hub-group-inc-hubg-join-class-action-suit-seeking-recovery---contact-levi--korsinsky-302843323.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-206C68F56C00",
+        "event_id": "EVT-8AB3CC7B0661",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.426,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.032,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 0.41
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Koppers Holdings Inc. Declares Quarterly Cash Dividend",
+      "url": "https://www.prnewswire.com/news-releases/koppers-holdings-inc-declares-quarterly-cash-dividend-302843836.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-15F180D4C9FD",
+        "event_id": "EVT-CC41014E4A64",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "entity_confidence",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 20.0,
+        "matched": [
+          "ACTIVIST_ACTION"
+        ],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.277,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.028,
+        "exclude_issuer_feed": 0.011,
+        "ontology_concepts": 0.266,
+        "ontology_status": 0.0,
+        "document_scoring": 0.0,
+        "regex_rules": 0.041,
+        "python_issuer_extraction": 0.013,
+        "python_ticker_lookup": 0.011,
+        "entity_confidence": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "entity_confidence",
+      "headline": "Special Situations Digest #26",
+      "url": "https://specialsitsdigest.com/special-situations-digest-26/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-4E0591B88E08",
+        "event_id": "EVT-0280BA36C99F",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "entity_confidence",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 20.0,
+        "matched": [
+          "ACTIVIST_ACTION"
+        ],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.369,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.027,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 0.275,
+        "ontology_status": 0.0,
+        "document_scoring": 0.0,
+        "regex_rules": 0.038,
+        "python_issuer_extraction": 0.011,
+        "python_ticker_lookup": 0.008,
+        "entity_confidence": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "entity_confidence",
+      "headline": "Special Situations Digest #25",
+      "url": "https://specialsitsdigest.com/special-situations-digest-25/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-ECC65128BFCA",
+        "event_id": "EVT-BDE861E21099",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "entity_confidence",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 60.0,
+        "matched": [
+          "TAKE_PRIVATE",
+          "ACTIVIST_ACTION"
+        ],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 3.184,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.024,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 0.24,
+        "ontology_status": 0.0,
+        "document_scoring": 0.0,
+        "regex_rules": 0.033,
+        "python_issuer_extraction": 0.009,
+        "python_ticker_lookup": 0.008,
+        "entity_confidence": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "entity_confidence",
+      "headline": "Special Situations Digest #24",
+      "url": "https://specialsitsdigest.com/special-situations-digest-24/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-529AC75CC3C1",
+        "event_id": "EVT-AE932EF8C378",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "entity_confidence",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 20.0,
+        "matched": [
+          "ACTIVIST_ACTION"
+        ],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 8.806,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.025,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 0.255,
+        "ontology_status": 0.0,
+        "document_scoring": 0.0,
+        "regex_rules": 0.029,
+        "python_issuer_extraction": 0.01,
+        "python_ticker_lookup": 0.008,
+        "entity_confidence": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "entity_confidence",
+      "headline": "Special Situations Digest #23",
+      "url": "https://specialsitsdigest.com/special-situations-digest-23/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-F9208BE09415",
+        "event_id": "EVT-6E8420119609",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "entity_confidence",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 20.0,
+        "matched": [
+          "ACTIVIST_ACTION"
+        ],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.26,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.023,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 0.233,
+        "ontology_status": 0.001,
+        "document_scoring": 0.0,
+        "regex_rules": 0.032,
+        "python_issuer_extraction": 0.011,
+        "python_ticker_lookup": 0.008,
+        "entity_confidence": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "entity_confidence",
+      "headline": "Special Situations Digest #22",
+      "url": "https://specialsitsdigest.com/special-situations-digest-22/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-4F87A8233A85",
+        "event_id": "EVT-DB3618CBC782",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "entity_confidence",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 20.0,
+        "matched": [
+          "ACTIVIST_ACTION"
+        ],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 5.639,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.024,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 0.241,
+        "ontology_status": 0.0,
+        "document_scoring": 0.0,
+        "regex_rules": 0.025,
+        "python_issuer_extraction": 0.01,
+        "python_ticker_lookup": 0.007,
+        "entity_confidence": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "entity_confidence",
+      "headline": "Special Situations Digest #21",
+      "url": "https://specialsitsdigest.com/special-situations-digest-21/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-18503F3ED68D",
+        "event_id": "EVT-B57027EB2087",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "entity_confidence",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 20.0,
+        "matched": [
+          "ACTIVIST_ACTION"
+        ],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 2.896,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.037,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 0.234,
+        "ontology_status": 0.0,
+        "document_scoring": 0.0,
+        "regex_rules": 0.029,
+        "python_issuer_extraction": 0.008,
+        "python_ticker_lookup": 0.007,
+        "entity_confidence": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "entity_confidence",
+      "headline": "Special Situations Digest #20",
+      "url": "https://specialsitsdigest.com/special-situations-digest-20/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-613DFC70DCDB",
+        "event_id": "EVT-ACF216469D8A",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "entity_confidence",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 20.0,
+        "matched": [
+          "ACTIVIST_ACTION"
+        ],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.075,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.024,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 0.235,
+        "ontology_status": 0.0,
+        "document_scoring": 0.0,
+        "regex_rules": 0.026,
+        "python_issuer_extraction": 0.009,
+        "python_ticker_lookup": 0.007,
+        "entity_confidence": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "entity_confidence",
+      "headline": "Special Situations Digest #19",
+      "url": "https://specialsitsdigest.com/special-situations-digest-19/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-97CEDE3AFCE5",
+        "event_id": "EVT-61AD3F65B86E",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "entity_confidence",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 20.0,
+        "matched": [
+          "ACTIVIST_ACTION"
+        ],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.237,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.024,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 0.238,
+        "ontology_status": 0.0,
+        "document_scoring": 0.0,
+        "regex_rules": 0.03,
+        "python_issuer_extraction": 0.009,
+        "python_ticker_lookup": 0.007,
+        "entity_confidence": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "entity_confidence",
+      "headline": "Special Situations Digest #18",
+      "url": "https://specialsitsdigest.com/special-situations-digest-18/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-3028C1ADC1D0",
+        "event_id": "EVT-175EA6959BB1",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "entity_confidence",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 60.0,
+        "matched": [
+          "TAKE_PRIVATE",
+          "ACTIVIST_ACTION"
+        ],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.142,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.029,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 0.373,
+        "ontology_status": 0.0,
+        "document_scoring": 0.0,
+        "regex_rules": 0.024,
+        "python_issuer_extraction": 0.009,
+        "python_ticker_lookup": 0.012,
+        "entity_confidence": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "entity_confidence",
+      "headline": "Special Situations Digest #17",
+      "url": "https://specialsitsdigest.com/special-situations-digest-17/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-693D945AF424",
+        "event_id": "EVT-A8E398FAD30D",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "entity_confidence",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 20.0,
+        "matched": [
+          "ACTIVIST_ACTION"
+        ],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.082,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.065,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 0.251,
+        "ontology_status": 0.0,
+        "document_scoring": 0.0,
+        "regex_rules": 0.025,
+        "python_issuer_extraction": 0.009,
+        "python_ticker_lookup": 0.007,
+        "entity_confidence": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "entity_confidence",
+      "headline": "Special Situations Digest #16",
+      "url": "https://specialsitsdigest.com/special-situations-digest-16/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-0E4D79927517",
+        "event_id": "EVT-59490D790D9C",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "entity_confidence",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 20.0,
+        "matched": [
+          "ACTIVIST_ACTION"
+        ],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.856,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.025,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 0.239,
+        "ontology_status": 0.0,
+        "document_scoring": 0.0,
+        "regex_rules": 0.025,
+        "python_issuer_extraction": 0.01,
+        "python_ticker_lookup": 0.007,
+        "entity_confidence": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "entity_confidence",
+      "headline": "Special Situations Digest #15",
+      "url": "https://specialsitsdigest.com/special-situations-digest-15/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-968606862612",
+        "event_id": "EVT-4EED95E7F64F",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "entity_confidence",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 20.0,
+        "matched": [
+          "ACTIVIST_ACTION"
+        ],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.057,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.024,
+        "exclude_issuer_feed": 0.008,
+        "ontology_concepts": 0.246,
+        "ontology_status": 0.0,
+        "document_scoring": 0.0,
+        "regex_rules": 0.026,
+        "python_issuer_extraction": 0.01,
+        "python_ticker_lookup": 0.007,
+        "entity_confidence": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "entity_confidence",
+      "headline": "Special Situations Digest #14",
+      "url": "https://specialsitsdigest.com/special-situations-digest-14/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-AEEE4EEF21D3",
+        "event_id": "EVT-9C566E8DACDD",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "entity_confidence",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 20.0,
+        "matched": [
+          "ACTIVIST_ACTION"
+        ],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.307,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.023,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 0.239,
+        "ontology_status": 0.0,
+        "document_scoring": 0.0,
+        "regex_rules": 0.024,
+        "python_issuer_extraction": 0.009,
+        "python_ticker_lookup": 0.007,
+        "entity_confidence": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "entity_confidence",
+      "headline": "Special Situations Digest #13",
+      "url": "https://specialsitsdigest.com/special-situations-digest-13/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-4F55FB54D48C",
+        "event_id": "EVT-451247609EED",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "entity_confidence",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 20.0,
+        "matched": [
+          "ACTIVIST_ACTION"
+        ],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.47,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.027,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 0.238,
+        "ontology_status": 0.0,
+        "document_scoring": 0.0,
+        "regex_rules": 0.029,
+        "python_issuer_extraction": 0.009,
+        "python_ticker_lookup": 0.007,
+        "entity_confidence": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "entity_confidence",
+      "headline": "Special Situations Digest #12",
+      "url": "https://specialsitsdigest.com/special-situations-digest-12/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-7C198190D749",
+        "event_id": "EVT-24B3D0E2CC15",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "entity_confidence",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 40.0,
+        "matched": [
+          "ACQUISITION"
+        ],
+        "missing": [
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.456,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.357,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 8.262,
+        "ontology_status": 0.001,
+        "document_scoring": 0.0,
+        "regex_rules": 0.025,
+        "python_issuer_extraction": 0.111,
+        "python_ticker_lookup": 0.262,
+        "entity_confidence": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "entity_confidence",
+      "headline": "EQS News \u2013 Financial News & Events Directly From The Source",
+      "url": "https://www.eqs-news.com/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-54F3DF96D076",
+        "event_id": "EVT-18328DF86D81",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:16 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 1.159,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.101,
+        "exclude_issuer_feed": 0.009,
+        "ontology_concepts": 2.043
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:16 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Home | EMARKET STORAGE - Teleborsa",
+      "url": "https://www.emarketstorage.it/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-28977225FDE1",
+        "event_id": "EVT-EFFF37DBA38F",
+        "configuration_manifest_hash": "CFG-D6ACF1D49D3D",
+        "execution_timestamp_gmt": "2026-08-05 14:16:15 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 2.851,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.255,
+        "exclude_issuer_feed": 0.019,
+        "ontology_concepts": 2.313
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 14:16:15 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Newell Brands Announces Offering of $500 Million of Senior Notes",
+      "url": "http://www.businesswire.com/news/home/20260804830191/en/Newell-Brands-Announces-Offering-of-500-Million-of-Senior-Notes/?feedref=JjAwJuNHiystnCoBq_hl-Y6W_I0-TRpzG3erz55BOr2Ka1ah7uC6RdZY8DBvigxR7fxFuNFTHSunhvli30RlBNXya2izy9YOgHlBiZQk2LPgxNjXHjsNmKaXEz4koEK2vmqJg40z11ZJQtFClQOcyQ=="
+    },
+    {
+      "manifest_registry": {
         "decision_id": "DEC-29AE2E26FAB7",
         "event_id": "EVT-95EECC6E8043",
         "configuration_manifest_hash": "CFG-3D4679188DA7",
