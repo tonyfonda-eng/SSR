@@ -25,7 +25,7 @@ from src.ai import extract_target_ticker, classify_event
 from src.financials import get_t12_metrics 
 from src.alerts.email import send_alert
 
-# --- FIX: Import Correct Frontend Exporter & HTML Generators ---
+# --- Frontend Exporter & HTML Generators ---
 from src.validation.export_frontend_data import export_archive_json
 from src.html_generator import generate_archive_html
 
@@ -78,7 +78,7 @@ def stage_exclude_issuer_feed(article: dict, ctx: dict) -> tuple:
         return False, "dropped_issuer_exclusion"
     return True, "passed"
 
-# --- NEW DETERMINISTIC STAGES (PHASE 1) ---
+# --- DETERMINISTIC STAGES (PHASE 1) ---
 
 def stage_python_issuer_extraction(article: dict, ctx: dict) -> tuple:
     """Deterministic issuer extraction (regex, source parsing, dictionaries)."""
@@ -113,7 +113,8 @@ def stage_document_scoring(article: dict, ctx: dict) -> tuple:
 
 def stage_regex_rules(article: dict, ctx: dict) -> tuple:
     threshold = int(ctx.get("sys_settings", {}).get("RULE_THRESHOLD", 10))
-    active_concepts = [(c.get("Concept ID"), c.get("Weight", 1.0)) for c in ctx.get("semantic_concepts", []) if str(c.get("Active", "TRUE")).upper() == "TRUE"]
+    # Parsed accurately mapping Concept_ID and Score from the dynamic Sheets loader
+    active_concepts = [(c.get("Concept_ID", c.get("Concept ID")), c.get("Score", c.get("Weight", 1.0))) for c in ctx.get("semantic_concepts", []) if str(c.get("Active", "TRUE")).upper() == "TRUE"]
     
     rule_results = evaluate_deterministic_rules(
         article={"raw_text": article.get("body", ""), "document_type": article.get("document_type", "Unknown")},
@@ -339,7 +340,7 @@ def main():
     finally:
         logger.info("Pipeline execution finished. Generating observability exports...")
         
-        # Print the granular stage-by-stage funnel directly to the CI Action logs!
+        # Print the granular stage-by-stage funnel directly to the CI Action logs
         logger.info("\n=== 📉 PIPELINE STAGE FUNNEL 📉 ===")
         for key, count in sorted(telemetry.metrics.items()):
             logger.info(f"  {key}: {count}")
@@ -356,79 +357,6 @@ def main():
         save_workflow_health(health_payload)
         
         # CALL THE CORRECT EXPORT FUNCTIONS AND GENERATE HTML
-        try:
-            logger.info("Dumping Ledger to archive_data.json...")
-            export_archive_json("docs/archive_data.json")
-            
-            logger.info("Rebuilding HTML Dashboards...")
-            generate_archive_html("docs/archive.html")
-        except Exception as e:
-            logger.error(f"Frontend Data & HTML Export failed: {e}")
-
-if __name__ == "__main__":
-    main()
-
-def main():
-    logger.info("Initializing SSR 2.0 Highly Granular Pipeline...")
-    try:
-        initialise_database()
-    except Exception as e:
-        logger.error(f"Failed to initialize database: {e}")
-        sys.exit(1)
-
-    telemetry = PipelineTelemetry()
-    
-    try:
-        load_ontology(SHEET_URL)
-        config_manifest = {
-            "rules": load_rules(SHEET_URL),
-            "global_exclusions": load_global_exclusions(SHEET_URL),
-            "sources": load_sources(SHEET_URL),
-            "document_type_scores": load_document_type_scores(SHEET_URL),
-            "semantic_concepts": load_semantic_concepts(SHEET_URL),
-            "event_statuses": load_event_statuses(SHEET_URL),
-            "settings": get_system_settings(SHEET_URL),
-            "playbooks": load_playbooks(SHEET_URL),
-            "pipeline": load_pipeline_config(SHEET_URL),
-            "ai_configs": load_ai_configurations(SHEET_URL),
-            "financial_rules": load_financial_constraints(SHEET_URL)
-        }
-        
-        config_json = json.dumps(config_manifest, sort_keys=True)
-        manifest_hash = f"CFG-{hashlib.sha256(config_json.encode('utf-8')).hexdigest()[:12].upper()}"
-        save_config_snapshot(manifest_hash, telemetry.run_id, config_json)
-        logger.info(f"Locked Immutable Configuration Manifest: {manifest_hash}")
-    except Exception as e:
-        logger.critical(f"Failed to fetch Configuration Manifest: {e}")
-        sys.exit(1)
-    
-    try:
-        articles = fetch_all_feeds(config_manifest.get("sources", [])) 
-        telemetry.metrics["downloaded"] = len(articles)
-
-        for article in articles:
-            try:
-                process_article(article, telemetry, config_manifest, manifest_hash)
-            except Exception as e:
-                logger.error(f"Error processing article: {e}")
-                telemetry.track("errors")
-    except Exception as e:
-        logger.critical(f"Fatal error in main pipeline loop: {e}")
-    
-    finally:
-        logger.info("Pipeline execution finished. Generating observability exports...")
-        health_payload = {
-            "run_id": telemetry.run_id,
-            "total_scanned": telemetry.metrics.get("downloaded", 0),
-            "articles": telemetry.metrics.get("alerts_generated", 0),
-            "errors": telemetry.metrics.get("errors", 0) + telemetry.metrics.get("ai_exhausted", 0),
-            "runtime": telemetry.get_runtime(),
-            "failed": telemetry.metrics.get("errors", 0),
-            "succeeded": telemetry.metrics.get("alerts_generated", 0),
-        }
-        save_workflow_health(health_payload)
-        
-        # --- FIX: CALL THE CORRECT EXPORT FUNCTIONS AND GENERATE HTML ---
         try:
             logger.info("Dumping Ledger to archive_data.json...")
             export_archive_json("docs/archive_data.json")
