@@ -420,7 +420,7 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
             
             if stage_name != "dedupe_hash":
                 decision_capsule = {
-                    "decision_id": f"DEC-{hashlib.md5(f'{article.get('_internal_event_id', 'UNKNOWN')}:{time.time()}'.encode()).hexdigest()[:12].upper()}",
+                    "decision_id": f"DEC-{hashlib.md5(f'{article.get(\"_internal_event_id\", \"UNKNOWN\")}:{time.time()}'.encode()).hexdigest()[:12].upper()}",
                     "event_id": article.get("_internal_event_id", "UNKNOWN"),
                     "manifest_hash": manifest_hash,
                     "runtime_timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT"),
