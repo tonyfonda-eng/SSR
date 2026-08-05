@@ -92,7 +92,8 @@ def init_db():
         );
     """)
 
-r_conn.execute("""
+    # --- FIXED: Brought properly inside init_db() scope ---
+    r_conn.execute("""
         CREATE TABLE IF NOT EXISTS article_screening_log (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             run_id TEXT NOT NULL,
@@ -107,6 +108,7 @@ r_conn.execute("""
             event_family TEXT
         );
     """)
+    
     try:
         r_conn.execute("ALTER TABLE article_screening_log ADD COLUMN ingestion_mode TEXT;")
     except sqlite3.OperationalError:
@@ -131,7 +133,6 @@ r_conn.execute("""
         );
     """)
     
-    # FIX D: Dynamically alter the table to track our new granular stage funnels
     try:
         d_conn.execute("ALTER TABLE workflow_health ADD COLUMN funnel_telemetry TEXT;")
     except sqlite3.OperationalError:
@@ -258,7 +259,6 @@ def save_workflow_health(health_data=None):
         gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
         conn = sqlite3.connect(DEVOPS_DB_PATH)
         
-        # Serialize the granular funnel metrics mapping to JSON for storage
         funnel_json = json.dumps(health_data.get('funnel', {})) if health_data else "{}"
         
         conn.execute("""
