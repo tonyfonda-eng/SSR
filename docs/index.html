@@ -42,10 +42,6 @@
         .kpi-context-item .cx-label { font-size: 0.65em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.4px; }
         .kpi-context-item .cx-value { font-family: var(--mono); font-weight: 700; font-size: 1.05em; margin-top: 2px; }
         .empty-note { color: var(--muted); font-style: italic; padding: 8px 0; font-size: 0.85em; }
-        .activity-list { list-style: none; margin: 0; padding: 0; }
-        .activity-list li { padding: 6px 0; border-bottom: 1px solid var(--surface-subtle); font-size: 0.85em; display: flex; justify-content: space-between; gap: 10px; }
-        .activity-list li:last-child { border-bottom: none; }
-        .activity-ts { color: var(--muted); font-family: var(--mono); font-size: 0.82em; white-space: nowrap; }
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -68,18 +64,17 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 <a href="decision_analytics.html" class="">Drift & Intelligence</a>
                 <a href="archive.html" class="">Decision Ledger Manifests</a>
                 <a href="screening_log.html" class="">Article Screening Log</a>
+                <a href="ontology_debug.html" class="">Ontology Debug</a>
             </div>
     <header style="border-left-color: var(--green);"><div><h1>Operations Centre</h1>
-    <div class="subline">Manifest Configuration Hash: CFG-LATEST &bull; Re-Evaluated 2026-08-05 13:42:16 UTC</div></div></header>
+    <div class="subline">Manifest Configuration Hash: CFG-LATEST &bull; Re-Evaluated 2026-08-05 13:43:25 UTC</div></div></header>
     
-    <div class="card" style="margin-bottom: 12px;"><h2>1. Validation & Platform Status</h2><div class="tile-grid" style="grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));"><div class="stat-tile"><div class="stat-label">Overall Health</div><div class="stat-value"><span class="badge success">HEALTHY</span></div></div><div class="stat-tile"><div class="stat-label">Validation Status</div><div class="stat-value"><span class="badge success">PASS</span></div></div><div class="stat-tile"><div class="stat-label">Research Fidelity (CI)</div><div class="stat-value"><span class="awaiting">Awaiting Data</span></div></div><div class="stat-tile"><div class="stat-label">Last Successful Run</div><div class="stat-value">2026-08-05 13:42:16 UTC</div></div><div class="stat-tile"><div class="stat-label">Sensor Asset Health</div><div class="stat-value"><span class="badge success">OK</span></div></div><div class="stat-tile"><div class="stat-label">AI Strategy Engine</div><div class="stat-value"><span class="badge success">OK</span></div></div><div class="stat-tile"><div class="stat-label">Evidence Repository</div><div class="stat-value"><span class="badge success">OK</span></div></div></div></div>
+    <div class="card" style="margin-bottom: 12px;"><h2>1. Engineering Metrics</h2><div class="tile-grid" style="grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));"><div class="stat-tile"><div class="stat-label">Articles Downloaded</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Duplicates Removed</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Articles Processed</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Ontology Rejected</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Regex Rejected</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Financial Rejected</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">AI Rejections</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Alerts Generated</div><div class="stat-value" style="color:var(--green)">0</div></div></div></div>
     
-    <div class="card" style="margin-bottom: 12px;"><h2>2. Continuous Alpha Validation</h2><div class="kpi-hero"><div><div class="kpi-label">Opportunity Capture Rate (vs Golden Dataset)</div><div class="kpi-number"><span class="awaiting" style="font-size:0.4em;">AWAITING CONTINUOUS VALIDATION</span></div></div><div style="flex:1; min-width:220px;"><div class="kpi-context-row"><div class="kpi-context-item"><div class="cx-label">False Positive Rate</div><div class="cx-value"><span class="awaiting">Awaiting Data</span></div></div><div class="kpi-context-item"><div class="cx-label">False Negative (Miss) Rate</div><div class="cx-value"><span class="awaiting">Awaiting Data</span></div></div><div class="kpi-context-item"><div class="cx-label">Avg Detection Delay</div><div class="cx-value"><span class="awaiting">Awaiting Data</span></div></div></div></div></div></div>
+    <div class="card" style="margin-bottom: 12px;"><h2>2. Evaluation Funnel Metrics</h2><div class="empty-note">Awaiting Data &mdash; pipeline has not reported an ingestion total.</div></div>
     
-    <div class="card" style="margin-bottom: 12px;"><h2>3. Evaluation Funnel Metrics</h2><div class="empty-note">Awaiting Data &mdash; pipeline has not reported an ingestion total.</div></div>
-    
-    <div class="card" style="margin-bottom: 12px; overflow-x: auto;"><h2>4. Sensor Asset Intelligence (SPI)</h2>
-    <table><thead><tr><th>Sensor Identity</th><th>Artifacts Ingested</th><th>Decisions</th><th>Capture Share</th><th>Alert %</th><th>Ontology %</th><th>Rules %</th><th>Failures</th><th>Reliability</th><th>Avg Latency</th><th>Cost/Yield</th></tr></thead><tbody><tr>
+    <div class="card" style="margin-bottom: 12px; overflow-x: auto;"><h2>3. Sensor Feed Quality & Pipeline Yield</h2>
+    <table><thead><tr><th>Sensor Identity</th><th>Articles Downloaded</th><th>Alerts Generated</th><th>Capture Share</th><th>Alert %</th><th>Ontology Yield %</th><th>Rules Yield %</th><th>Failures</th><th>Reliability</th><th>Avg Latency</th><th>Cost/Yield</th></tr></thead><tbody><tr>
             <td><strong>Awaiting Sensor Integration</strong></td>
             <td class="metric-val">0</td>
             <td class="metric-val">0</td>

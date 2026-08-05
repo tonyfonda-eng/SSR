@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>SSR Concept Drift Analytics</title><style>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>SSR Ontology Debug</title><style>
         :root { --bg: #0a0e14; --surface: #11161d; --surface-subtle: #1a2029; --surface-hover: #222933; --border: #2a323d; --text: #c1c9d2; --muted: #79838f; --green: #2ea043; --red: #cb2431; --yellow: #dbab0a; --blue: #4088db; --mono: "SF Mono", "JetBrains Mono", Consolas, "Roboto Mono", monospace; }
         * { box-sizing: border-box; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: var(--bg); color: var(--text); margin: 0; padding: 12px; font-size: 13px; line-height: 1.4; }
@@ -42,7 +42,15 @@
         .kpi-context-item .cx-label { font-size: 0.65em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.4px; }
         .kpi-context-item .cx-value { font-family: var(--mono); font-weight: 700; font-size: 1.05em; margin-top: 2px; }
         .empty-note { color: var(--muted); font-style: italic; padding: 8px 0; font-size: 0.85em; }
-</style>
+ 
+        .table-wrapper { background: var(--surface); border: 1px solid var(--border); overflow-x: auto; }
+        th { background: var(--surface-subtle); position: sticky; top: 0; z-index: 10; }
+        .score-fail { color: var(--red); font-weight: bold; }
+        .score-pass { color: var(--green); font-weight: bold; }
+        .concept-tag { display: inline-block; background: var(--surface-subtle); border: 1px solid var(--border); padding: 2px 6px; margin: 2px; border-radius: 3px; font-size: 0.8em; }
+        .concept-match { border-color: var(--green); color: var(--green); }
+        .concept-miss { border-color: var(--border); color: var(--muted); }
+    </style>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('th').forEach(th => th.addEventListener('click', (() => {
@@ -61,15 +69,73 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
     <body><div class="container">
             <div class="nav-tabs">
                 <a href="index.html" class="">Operations Centre</a>
-                <a href="decision_analytics.html" class="active">Drift & Intelligence</a>
+                <a href="decision_analytics.html" class="">Drift & Intelligence</a>
                 <a href="archive.html" class="">Decision Ledger Manifests</a>
                 <a href="screening_log.html" class="">Article Screening Log</a>
-                <a href="ontology_debug.html" class="">Ontology Debug</a>
-            </div><header><h1>Concept Drift & Rules Intelligence</h1></header>
+                <a href="ontology_debug.html" class="active">Ontology Debug</a>
+            </div>
+        <header><h1>Ontology Debug</h1></header>
+        
+        <div class="card" style="margin-bottom:12px;">
+            <h2>Concept Frequency Aggregation</h2>
+            <div class="table-wrapper">
+                <table id="conceptFreqTable">
+                    <thead><tr><th>Concept ID</th><th>Match Count</th></tr></thead>
+                    <tbody id="conceptFreqBody"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>Ontology Rejections (Score < 0.65)</h2>
+            <div class="table-wrapper">
+                <table id="ontologyTable">
+                    <thead><tr><th>Headline</th><th>Source</th><th>Score</th><th>Threshold</th><th>Concepts Found</th><th>Missing Concepts</th></tr></thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
     
-    <div class="card" style="margin-bottom: 12px; overflow-x: auto;"><h2>Determinism Lineage: Rules Intelligence</h2>
-    <table><thead><tr><th>Rule Component Version</th><th>Total Evaluated</th><th>Alerts Issued</th><th>Human Overrides</th><th>FP Contrib %</th><th>FN Contrib %</th><th>Capture Contrib</th><th>Avg DAG Weight</th></tr></thead><tbody><tr><td colspan='8' class='empty-note'>Awaiting Evidentiary DAG Replays</td></tr></tbody></table></div>
-    
-    <div class="card" style="overflow-x: auto;"><h2>Ontology Lineage: Concept Drift Monitor</h2>
-    <table><thead><tr><th>Taxonomy Concept Node</th><th>Observation Frequency</th><th>Drift Z-Score</th><th>FP Contrib</th><th>FN Contrib</th><th>Alert Conversion %</th></tr></thead><tbody><tr><td colspan='6' class='empty-note'>Awaiting Evidentiary DAG Replays</td></tr></tbody></table></div>
-    </div></body></html>
+    <script>
+        fetch('archive_data.json')
+            .then(res => res.json())
+            .then(data => {
+                const ledger = Array.isArray(data) ? data : (data.ledger || []);
+                const tbody = document.getElementById('tableBody');
+                const freqBody = document.getElementById('conceptFreqBody');
+                
+                const freq = {};
+                let html = '';
+                
+                ledger.forEach(item => {
+                    const meta = item.ontology_metadata || {};
+                    if(item.pipeline_stage === 'ontology_concepts') {
+                        const score = meta.score || 0.0;
+                        const matched = meta.matched || [];
+                        const missing = meta.missing || [];
+                        
+                        matched.forEach(c => freq[c] = (freq[c] || 0) + 1);
+                        
+                        let matchHtml = matched.map(c => `<span class="concept-tag concept-match">${c}</span>`).join('');
+                        let missHtml = missing.map(c => `<span class="concept-tag concept-miss">${c}</span>`).join('');
+                        if(!matchHtml) matchHtml = '<span class="awaiting">None</span>';
+                        
+                        html += `<tr>
+                            <td style="max-width:300px; white-space:normal;">${item.headline}</td>
+                            <td>${item.syndication_lineage?.canonical_sensor_id || 'Unknown'}</td>
+                            <td class="metric-val score-fail">${score.toFixed(2)}</td>
+                            <td class="metric-val">0.65</td>
+                            <td>${matchHtml}</td>
+                            <td>${missHtml}</td>
+                        </tr>`;
+                    }
+                });
+                
+                tbody.innerHTML = html || '<tr><td colspan="6" class="empty-note">No ontology rejections found in archive.</td></tr>';
+                
+                const sortedFreq = Object.entries(freq).sort((a,b) => b[1] - a[1]);
+                let freqHtml = sortedFreq.map(([c, count]) => `<tr><td>${c}</td><td class="metric-val">${count}</td></tr>`).join('');
+                freqBody.innerHTML = freqHtml || '<tr><td colspan="2" class="empty-note">No concepts matched.</td></tr>';
+            });
+    </script></body></html>

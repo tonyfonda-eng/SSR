@@ -42,10 +42,6 @@
         .kpi-context-item .cx-label { font-size: 0.65em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.4px; }
         .kpi-context-item .cx-value { font-family: var(--mono); font-weight: 700; font-size: 1.05em; margin-top: 2px; }
         .empty-note { color: var(--muted); font-style: italic; padding: 8px 0; font-size: 0.85em; }
-        .activity-list { list-style: none; margin: 0; padding: 0; }
-        .activity-list li { padding: 6px 0; border-bottom: 1px solid var(--surface-subtle); font-size: 0.85em; display: flex; justify-content: space-between; gap: 10px; }
-        .activity-list li:last-child { border-bottom: none; }
-        .activity-ts { color: var(--muted); font-family: var(--mono); font-size: 0.82em; white-space: nowrap; }
  
         .table-wrapper { background: var(--surface); border: 1px solid var(--border); overflow-x: auto; }
         th { background: var(--surface-subtle); position: sticky; top: 0; z-index: 10; }
@@ -62,6 +58,8 @@
         .replay-btn:hover { background: var(--blue); color: #fff; border-color: var(--blue); }
         .evidence-for { border-left: 3px solid var(--green); padding-left: 8px; margin-bottom: 8px;}
         .evidence-against { border-left: 3px solid var(--red); padding-left: 8px; margin-bottom: 8px;}
+        .outcome-pass { color: var(--green); font-weight: 700; }
+        .outcome-drop { color: var(--red); font-weight: 700; }
     </style>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -84,10 +82,11 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 <a href="decision_analytics.html" class="">Drift & Intelligence</a>
                 <a href="archive.html" class="active">Decision Ledger Manifests</a>
                 <a href="screening_log.html" class="">Article Screening Log</a>
+                <a href="ontology_debug.html" class="">Ontology Debug</a>
             </div><header><h1>Canonical Decision Manifests</h1></header>
     
     <div class="table-wrapper"><table id="archiveTable">
-    <thead><tr><th>Execution Timestamp (GMT)</th><th>Canonical Sensor</th><th>Entity / Target</th><th>Final Outcome</th><th>Terminal Stage</th><th>Confidence Score</th></tr></thead>
+    <thead><tr><th>Execution Timestamp (GMT)</th><th>Canonical Sensor</th><th>Entity / Target</th><th>Final Outcome</th><th>Terminal Stage</th><th>Headline</th></tr></thead>
     <tbody id="tableBody"><tr><td colspan="6" style="text-align: center; color: var(--muted); padding: 30px;">Mounting Canonical Decision Manifest API...</td></tr></tbody>
     </table></div></div>
     
@@ -124,7 +123,6 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
             archiveData.forEach((manifest, index) => {
                 const reg = manifest.manifest_registry || {};
                 const det = manifest.detection_vector || {};
-                const prov = manifest.evidentiary_provenance_dag || {supporting_evidence: [], opposing_evidence: []};
                 const perf = manifest.performance_telemetry_ms || {};
                 const line = manifest.syndication_lineage || {};
                 
@@ -134,36 +132,18 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 let sensor = line.canonical_sensor_id || manifest.source || 'Unknown Sensor';
                 let ticker = det.target_ticker || manifest.issuer || 'UNKNOWN';
                 
-                let confDecomp = det.confidence_decomposition || {};
-                let aggConf = confDecomp.aggregate_confidence || manifest.confidence || 0.0;
-                let confStr = aggConf > 0 ? (aggConf * 100).toFixed(1) + '%' : '<span class="awaiting">N/A</span>';
-                
                 const tr = document.createElement('tr');
                 tr.className = 'clickable';
                 tr.onclick = () => toggleRow(index);
                 tr.innerHTML = `<td>${ts}</td>
                                 <td><strong>${sensor}</strong></td>
                                 <td>${ticker}</td>
-                                <td><strong>${outcome}</strong></td>
+                                <td class="${outcome === 'DETECTED' ? 'outcome-pass' : 'outcome-drop'}">${outcome}</td>
                                 <td>${stage}</td>
-                                <td class="metric-val">${confStr}</td>`;
+                                <td style="max-width:400px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${manifest.headline || ''}</td>`;
                 
-                let suppHtml = (prov.supporting_evidence || []).map(e => `
-                    <div class="evidence-for">
-                        <div style="font-size:0.8em; color:var(--muted); text-transform:uppercase;">${e.component || e.stage || 'Stage'} (Wt: ${e.weight || e.confidence_weight || 1.0})</div>
-                        <div>${e.assertion || e.assertion_key || ''}</div>
-                    </div>`).join('');
-                if(!suppHtml) suppHtml = '<div class="empty-note">No supporting causal links recorded.</div>';
-
-                let oppHtml = (prov.opposing_evidence || []).map(e => `
-                    <div class="evidence-against">
-                        <div style="font-size:0.8em; color:var(--muted); text-transform:uppercase;">${e.component || e.stage || 'Stage'} (Wt: ${e.weight || e.confidence_weight || 1.0})</div>
-                        <div>${e.assertion || e.assertion_key || ''}</div>
-                    </div>`).join('');
-                if(!oppHtml && manifest.reason) {
-                    oppHtml = `<div class="evidence-against"><div>Legacy Termination: ${manifest.reason}</div></div>`;
-                }
-                if(!oppHtml) oppHtml = '<div class="empty-note">No opposing causal links recorded.</div>';
+                let timingsHtml = Object.entries(perf).map(([s, val]) => `<li><strong>${s}:</strong> <span>${val} ms</span></li>`).join('');
+                if(!timingsHtml) timingsHtml = '<li class="empty-note">No timings recorded.</li>';
 
                 const dTr = document.createElement('tr');
                 dTr.id = 'detail-' + index;
@@ -177,34 +157,11 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                                     <li><strong>Decision ID:</strong> <span>${reg.decision_id || 'Legacy-Data'}</span></li>
                                     <li><strong>Core Event ID:</strong> <span>${reg.event_id || 'Legacy-Data'}</span></li>
                                     <li><strong>Config Manifest:</strong> <span>${reg.configuration_manifest_hash || 'SSR-CFG-LEGACY'}</span></li>
-                                    <li><strong>Completeness Score:</strong> <span>${reg.evidence_completeness_score ? (reg.evidence_completeness_score*100).toFixed(0)+'%' : '100%'}</span></li>
                                 </ul>
                                 <h4 style="margin-top:16px;">Execution Timings (ms)</h4>
                                 <ul class="dr-list">
-                                    <li><strong>Repo Ingest:</strong> <span>${perf.ingest_repo_ms || perf.download || 0}</span></li>
-                                    <li><strong>Text Transforms:</strong> <span>${perf.transformation_ms || perf.transformation || 0}</span></li>
-                                    <li><strong>Ontology Engine:</strong> <span>${perf.ontology_ms || perf.ontology || 0}</span></li>
-                                    <li><strong>Rules Engine:</strong> <span>${perf.rules_ms || perf.rules || 0}</span></li>
-                                    <li><strong>AI Inference:</strong> <span>${perf.ai_inference_ms || perf.ai || 0}</span></li>
+                                    ${timingsHtml}
                                 </ul>
-                            </div>
-                            <div class="dr-block">
-                                <h4>Supporting Causal DAG</h4>
-                                ${suppHtml}
-                            </div>
-                            <div class="dr-block">
-                                <h4>Opposing / Terminal Causal DAG</h4>
-                                ${oppHtml}
-                            </div>
-                            <div class="dr-block">
-                                <h4>Strategy Decoupling & Human Audit</h4>
-                                <ul class="dr-list">
-                                    <li><strong>Human Override:</strong> <span><span class="awaiting">None</span></span></li>
-                                    <li><strong>Strategy Validation:</strong> <span><span class="awaiting">Pending Sync</span></span></li>
-                                    <li><strong>Market Cap Floor:</strong> <span><span class="awaiting">Unavailable</span></span></li>
-                                    <li><strong>Options Verification:</strong> <span><span class="awaiting">Unavailable</span></span></li>
-                                </ul>
-                                <button class="replay-btn" onclick="alert('Immutable Replay triggered for Event ID: ${reg.event_id || 'Unknown'} via Configuration Manifest ${reg.configuration_manifest_hash || 'Latest'}.')">Trigger Deterministic Replay</button>
                             </div>
                         </div>
                     </td>
