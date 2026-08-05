@@ -2,6 +2,57 @@
   "ledger": [
     {
       "manifest_registry": {
+        "decision_id": "DEC-4AA1485A9F53",
+        "event_id": "EVT-2FBC4441EDD3",
+        "configuration_manifest_hash": "CFG-D424EA14E73C",
+        "execution_timestamp_gmt": "2026-08-05 13:57:18 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 2.417,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.355,
+        "exclude_issuer_feed": 0.021,
+        "ontology_concepts": 4.736
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-05 13:57:18 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Home | EMARKET STORAGE - Teleborsa",
+      "url": "https://www.emarketstorage.it/"
+    },
+    {
+      "manifest_registry": {
         "decision_id": "DEC-2F2B2F7DA3CF",
         "event_id": "EVT-D9B1EE9BA49A",
         "configuration_manifest_hash": "CFG-91B68344453D",
