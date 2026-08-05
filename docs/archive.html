@@ -12,7 +12,7 @@
         .badge.warn    { background: rgba(219,171,10,0.15); color: var(--yellow); border: 1px solid var(--yellow); }
         .badge.info    { background: rgba(64,136,219,0.15); color: var(--blue); border: 1px solid var(--blue); }
         .badge.awaiting{ background: rgba(121,131,143,0.12); color: var(--muted); border: 1px dashed var(--muted); }
-        .nav-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+        .nav-tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;}
         .nav-tabs a { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 7px 14px; text-decoration: none; font-weight: 600; font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.5px; }
         .nav-tabs a.active { background: var(--blue); color: #fff; border-color: var(--blue); }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 12px; }
@@ -30,7 +30,7 @@
         .metric-val { text-align: right; font-family: var(--mono); }
         tr.clickable { cursor: pointer; } tr.clickable:hover { background: var(--surface-hover); }
         .loss-funnel { display: flex; flex-direction: column; }
-        .loss-row { display: grid; grid-template-columns: 180px 1fr 1fr 1fr 1fr 1fr; gap: 8px; align-items: center; padding: 7px 4px; border-bottom: 1px solid var(--surface-subtle); text-decoration: none; color: var(--text); }
+        .loss-row { display: grid; grid-template-columns: 240px 1fr 1fr 1fr 1fr 1fr; gap: 8px; align-items: center; padding: 7px 4px; border-bottom: 1px solid var(--surface-subtle); text-decoration: none; color: var(--text); }
         .loss-row:hover { background: var(--surface-hover); }
         .loss-row .lr-name { font-weight: 600; font-size: 0.85em; }
         .loss-row .lr-val { font-family: var(--mono); text-align: right; font-size: 0.85em; }
@@ -42,6 +42,9 @@
         .kpi-context-item .cx-label { font-size: 0.65em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.4px; }
         .kpi-context-item .cx-value { font-family: var(--mono); font-weight: 700; font-size: 1.05em; margin-top: 2px; }
         .empty-note { color: var(--muted); font-style: italic; padding: 8px 0; font-size: 0.85em; }
+        .dr-breakdown { font-size: 0.75em; color: var(--muted); margin-top: 4px; }
+        .dr-item { display: flex; justify-content: space-between; border-left: 2px solid var(--yellow); padding-left: 6px; margin-top: 2px; }
+        .dr-count { font-family: var(--mono); color: var(--yellow); font-weight: bold;}
  
         .table-wrapper { background: var(--surface); border: 1px solid var(--border); overflow-x: auto; }
         th { background: var(--surface-subtle); position: sticky; top: 0; z-index: 10; }
@@ -60,6 +63,8 @@
         .evidence-against { border-left: 3px solid var(--red); padding-left: 8px; margin-bottom: 8px;}
         .outcome-pass { color: var(--green); font-weight: 700; }
         .outcome-drop { color: var(--red); font-weight: 700; }
+        .filter-bar { display: flex; gap: 10px; margin-bottom: 12px; align-items: center; }
+        .filter-bar select { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 6px 10px; font-size: 0.85em; font-family: inherit; }
     </style>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -79,11 +84,18 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
     <body><div class="container">
             <div class="nav-tabs">
                 <a href="index.html" class="">Operations Centre</a>
+                <a href="pipeline_health.html" class="">Pipeline Health</a>
                 <a href="decision_analytics.html" class="">Drift & Intelligence</a>
                 <a href="archive.html" class="active">Decision Ledger Manifests</a>
                 <a href="screening_log.html" class="">Article Screening Log</a>
                 <a href="ontology_debug.html" class="">Ontology Debug</a>
             </div><header><h1>Canonical Decision Manifests</h1></header>
+    
+    <div class="filter-bar">
+        <label style="font-size: 0.7em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.4px;">Filter by Stage:</label>
+        <select id="stageFilter" onchange="applyFilters()"><option value="">All Stages</option></select>
+        <span id="resultCount" style="color:var(--muted); font-size:0.85em; margin-left: 10px;"></span>
+    </div>
     
     <div class="table-wrapper"><table id="archiveTable">
     <thead><tr><th>Execution Timestamp (GMT)</th><th>Canonical Sensor</th><th>Entity / Target</th><th>Final Outcome</th><th>Terminal Stage</th><th>Headline</th></tr></thead>
@@ -104,23 +116,54 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 init();
             });
 
-        function init() { renderTable(); }
+        function init() { 
+            populateFilters();
+            
+            // Check query string
+            const urlParams = new URLSearchParams(window.location.search);
+            const stage = urlParams.get('stage');
+            if(stage) {
+                document.getElementById('stageFilter').value = stage;
+            }
+            
+            applyFilters(); 
+        }
+        
+        function populateFilters() {
+            const stages = [...new Set(archiveData.map(r => r.pipeline_stage).filter(Boolean))].sort();
+            const sel = document.getElementById('stageFilter');
+            stages.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s; opt.textContent = s;
+                sel.appendChild(opt);
+            });
+        }
+        
+        function applyFilters() {
+            const stageVal = document.getElementById('stageFilter').value;
+            let filtered = archiveData.filter(r => {
+                if (stageVal && r.pipeline_stage !== stageVal) return false;
+                return true;
+            });
+            document.getElementById('resultCount').textContent = `Showing ${filtered.length} manifests`;
+            renderTable(filtered);
+        }
         
         function toggleRow(idx) {
             const el = document.getElementById('detail-' + idx);
             if (el) el.classList.toggle('expanded');
         }
         
-        function renderTable() {
+        function renderTable(filteredData) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
             
-            if (!archiveData || archiveData.length === 0) {
+            if (!filteredData || filteredData.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No decision manifests exposed in API.</td></tr>';
                 return;
             }
             
-            archiveData.forEach((manifest, index) => {
+            filteredData.forEach((manifest, index) => {
                 const reg = manifest.manifest_registry || {};
                 const det = manifest.detection_vector || {};
                 const perf = manifest.performance_telemetry_ms || {};

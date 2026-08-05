@@ -12,7 +12,7 @@
         .badge.warn    { background: rgba(219,171,10,0.15); color: var(--yellow); border: 1px solid var(--yellow); }
         .badge.info    { background: rgba(64,136,219,0.15); color: var(--blue); border: 1px solid var(--blue); }
         .badge.awaiting{ background: rgba(121,131,143,0.12); color: var(--muted); border: 1px dashed var(--muted); }
-        .nav-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+        .nav-tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;}
         .nav-tabs a { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 7px 14px; text-decoration: none; font-weight: 600; font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.5px; }
         .nav-tabs a.active { background: var(--blue); color: #fff; border-color: var(--blue); }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 12px; }
@@ -30,7 +30,7 @@
         .metric-val { text-align: right; font-family: var(--mono); }
         tr.clickable { cursor: pointer; } tr.clickable:hover { background: var(--surface-hover); }
         .loss-funnel { display: flex; flex-direction: column; }
-        .loss-row { display: grid; grid-template-columns: 180px 1fr 1fr 1fr 1fr 1fr; gap: 8px; align-items: center; padding: 7px 4px; border-bottom: 1px solid var(--surface-subtle); text-decoration: none; color: var(--text); }
+        .loss-row { display: grid; grid-template-columns: 240px 1fr 1fr 1fr 1fr 1fr; gap: 8px; align-items: center; padding: 7px 4px; border-bottom: 1px solid var(--surface-subtle); text-decoration: none; color: var(--text); }
         .loss-row:hover { background: var(--surface-hover); }
         .loss-row .lr-name { font-weight: 600; font-size: 0.85em; }
         .loss-row .lr-val { font-family: var(--mono); text-align: right; font-size: 0.85em; }
@@ -42,6 +42,9 @@
         .kpi-context-item .cx-label { font-size: 0.65em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.4px; }
         .kpi-context-item .cx-value { font-family: var(--mono); font-weight: 700; font-size: 1.05em; margin-top: 2px; }
         .empty-note { color: var(--muted); font-style: italic; padding: 8px 0; font-size: 0.85em; }
+        .dr-breakdown { font-size: 0.75em; color: var(--muted); margin-top: 4px; }
+        .dr-item { display: flex; justify-content: space-between; border-left: 2px solid var(--yellow); padding-left: 6px; margin-top: 2px; }
+        .dr-count { font-family: var(--mono); color: var(--yellow); font-weight: bold;}
 </style>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
@@ -61,19 +64,18 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
     <body><div class="container">
             <div class="nav-tabs">
                 <a href="index.html" class="active">Operations Centre</a>
+                <a href="pipeline_health.html" class="">Pipeline Health</a>
                 <a href="decision_analytics.html" class="">Drift & Intelligence</a>
                 <a href="archive.html" class="">Decision Ledger Manifests</a>
                 <a href="screening_log.html" class="">Article Screening Log</a>
                 <a href="ontology_debug.html" class="">Ontology Debug</a>
             </div>
     <header style="border-left-color: var(--green);"><div><h1>Operations Centre</h1>
-    <div class="subline">Manifest Configuration Hash: CFG-LATEST &bull; Re-Evaluated 2026-08-05 13:53:33 UTC</div></div></header>
+    <div class="subline">Manifest Configuration Hash: CFG-LATEST &bull; Re-Evaluated 2026-08-05 14:04:43 UTC</div></div></header>
     
-    <div class="card" style="margin-bottom: 12px;"><h2>1. Engineering Metrics</h2><div class="tile-grid" style="grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));"><div class="stat-tile"><div class="stat-label">Articles Downloaded</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Duplicates Removed</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Articles Processed</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Ontology Rejected</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Regex Rejected</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Financial Rejected</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">AI Rejections</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Alerts Generated</div><div class="stat-value" style="color:var(--green)">0</div></div></div></div>
+    <div class="card" style="margin-bottom: 12px;"><h2>1. Engineering Metrics</h2><div class="tile-grid" style="grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));"><div class="stat-tile"><div class="stat-label">Articles Downloaded</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Duplicates Removed</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Articles Processed</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Ontology Rejected</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Regex Rejected</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Financial Rejected</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Entity / AI Rejections</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Alerts Generated</div><div class="stat-value" style="color:var(--green)">0</div></div></div></div>
     
-    <div class="card" style="margin-bottom: 12px;"><h2>2. Evaluation Funnel Metrics</h2><div class="empty-note">Awaiting Data &mdash; pipeline has not reported an ingestion total.</div></div>
-    
-    <div class="card" style="margin-bottom: 12px; overflow-x: auto;"><h2>3. Sensor Feed Quality & Pipeline Yield</h2>
+    <div class="card" style="margin-bottom: 12px; overflow-x: auto;"><h2>2. Sensor Feed Quality & Pipeline Yield</h2>
     <table><thead><tr><th>Sensor Identity</th><th>Articles Downloaded</th><th>Alerts Generated</th><th>Capture Share</th><th>Alert %</th><th>Ontology Yield %</th><th>Rules Yield %</th><th>Failures</th><th>Reliability</th><th>Avg Latency</th><th>Cost/Yield</th></tr></thead><tbody><tr>
             <td><strong>Awaiting Sensor Integration</strong></td>
             <td class="metric-val">0</td>

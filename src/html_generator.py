@@ -83,17 +83,7 @@ def _get_stage_raw_count(funnel_counts, keys):
     for k in keys:
         if k in funnel_counts and is_num(funnel_counts[k]):
             return funnel_counts[k]
-        
-    # Also sum if we can't find the exact key, but we have partial matches for the category
-    total = 0
-    found = False
-    for k, v in funnel_counts.items():
-        for candidate in keys:
-            if candidate in k:
-                total += v
-                found = True
-                break
-    return total if found else None
+    return None
 
 def build_loss_funnel(funnel_counts):
     funnel_counts = funnel_counts if isinstance(funnel_counts, dict) else {}
