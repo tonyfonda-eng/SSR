@@ -348,7 +348,8 @@ def _record_screening(article: dict, telemetry: PipelineTelemetry, outcome: str,
         "final_stage": final_stage,
         "drop_reason": drop_reason,
         "ticker": article.get("_ai_ticker") or article.get("_deterministic_ticker") or "UNKNOWN",
-        "event_family": article.get("_ai_classification")
+        "event_family": article.get("_ai_classification"),
+        "ingestion_mode": article.get("_ingestion_mode", "UNKNOWN")
     }
     logger.info(f"[SCREENED] '{entry['headline'][:80]}' -> {outcome} @ {final_stage}" + (f" ({drop_reason})" if drop_reason else ""))
     try:

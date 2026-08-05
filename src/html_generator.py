@@ -127,7 +127,7 @@ def render_loss_funnel_html(funnel_counts):
         row_cls = "loss-row " + (r["kind"] if r["kind"] in ("terminal", "loss") else "")
         entering_html = esc(fmt_num(r["entering"])) if is_num(r["entering"]) else AWAITING_SPAN
         exiting_html = esc(fmt_num(r["exiting"])) if is_num(r["exiting"]) else AWAITING_SPAN
-        lost_html = esc(fmt_num(r["lost"])) if is_num(r["lost"]) and r["kind"] != "start" else ('â€”' if r["kind"] == "start" else AWAITING_SPAN)
+        lost_html = esc(fmt_num(r["lost"])) if is_num(r["lost"]) and r["kind"] != "start" else ('—' if r["kind"] == "start" else AWAITING_SPAN)
         
         body += f"""
             <a class="{row_cls}" href="{href}" title="Inspect this stage in the Decision Ledger">
@@ -135,8 +135,8 @@ def render_loss_funnel_html(funnel_counts):
                 <div class="lr-val">{entering_html}</div>
                 <div class="lr-val">{exiting_html}</div>
                 <div class="lr-val" style="color:var(--yellow);">{lost_html}</div>
-                <div class="lr-val" style="color:var(--green); font-weight:700;">{fmt_pct(r["conv_pct"]) or "â€”"}</div>
-                <div class="lr-val" style="color:var(--red);">{fmt_pct(r["loss_pct"]) or "â€”"}</div>
+                <div class="lr-val" style="color:var(--green); font-weight:700;">{fmt_pct(r["conv_pct"]) or "—"}</div>
+                <div class="lr-val" style="color:var(--red);">{fmt_pct(r["loss_pct"]) or "—"}</div>
             </a>"""
     return f'<div class="loss-funnel">{header}{body}</div>'
 
@@ -234,7 +234,6 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
     elif is_num(health_score): health_label, health_border = "DOWN", "var(--red)"
     else: health_label, health_border = None, "var(--border)"
 
-    # Section 1: Trust & Operational Status
     trust_row = "".join([
         f'<div class="stat-tile"><div class="stat-label">Overall Health</div><div class="stat-value">{status_badge(health_label)}</div></div>',
         f'<div class="stat-tile"><div class="stat-label">Validation Status</div><div class="stat-value">{status_badge(_sub(metrics, "validation", "status"))}</div></div>',
@@ -245,7 +244,6 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
         f'<div class="stat-tile"><div class="stat-label">Evidence Repository</div><div class="stat-value">{status_badge(_daily(metrics, "db_status", "OK"))}</div></div>'
     ])
 
-    # Section 2: Opportunity Capture
     capture_rate = _sub(metrics, "validation", "capture_rate")
     fp_rate = _sub(metrics, "validation", "false_positive_rate")
     fn_rate = _sub(metrics, "validation", "false_negative_rate")
@@ -259,10 +257,8 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
     ])
     hero_html = f"""<div class="kpi-hero"><div><div class="kpi-label">Opportunity Capture Rate (vs Golden Dataset)</div><div class="kpi-number">{kpi_value_html}</div></div><div style="flex:1; min-width:220px;"><div class="kpi-context-row">{kpi_context}</div></div></div>"""
 
-    # Section 3: Pipeline Loss Analysis
     loss_funnel_html = render_loss_funnel_html(_daily(metrics, "funnel", {}))
 
-    # Section 4: Sensor Intelligence
     source_stats_raw = _daily(metrics, "source_stats", {})
     source_rows = []
     if source_stats_raw:
@@ -321,11 +317,9 @@ def generate_decision_analytics_html(output_path, metrics, avg_30=None):
     rule_data = _daily(metrics, "rule_analytics") or []
     ontology_data = _daily(metrics, "ontology_conversion") or []
 
-    # Section 5: Rule Intelligence
     rule_rows_html = "".join([f"<tr><td>{esc(_bag(r, 'rule'))}</td><td class='metric-val'>{esc(_bag(r, 'evaluated'))}</td><td class='metric-val'>{esc(_bag(r, 'alerts'))}</td><td class='metric-val'>{AWAITING_SPAN}</td><td class='metric-val'>{AWAITING_SPAN}</td><td class='metric-val'>{AWAITING_SPAN}</td><td class='metric-val'>{AWAITING_SPAN}</td><td class='metric-val'>{AWAITING_SPAN}</td></tr>" for r in rule_data])
     if not rule_data: rule_rows_html = "<tr><td colspan='8' class='empty-note'>Awaiting Evidentiary DAG Replays</td></tr>"
 
-    # Section 6: Ontology Intelligence
     ontology_rows_html = "".join([f"<tr><td>{esc(_bag(o, 'concept'))}</td><td class='metric-val'>{esc(_bag(o, 'frequency'))}</td><td class='metric-val'>{AWAITING_SPAN}</td><td class='metric-val'>{AWAITING_SPAN}</td><td class='metric-val'>{AWAITING_SPAN}</td><td class='metric-val'>{AWAITING_SPAN}</td></tr>" for o in ontology_data])
     if not ontology_data: ontology_rows_html = "<tr><td colspan='6' class='empty-note'>Awaiting Evidentiary DAG Replays</td></tr>"
     
@@ -400,7 +394,6 @@ def generate_archive_html(output_path):
             }
             
             archiveData.forEach((manifest, index) => {
-                // Parse SSR 2.0 Canonical Structure with Legacy Fallbacks
                 const reg = manifest.manifest_registry || {};
                 const det = manifest.detection_vector || {};
                 const prov = manifest.evidentiary_provenance_dag || {supporting_evidence: [], opposing_evidence: []};
@@ -417,7 +410,6 @@ def generate_archive_html(output_path):
                 let aggConf = confDecomp.aggregate_confidence || manifest.confidence || 0.0;
                 let confStr = aggConf > 0 ? (aggConf * 100).toFixed(1) + '%' : '<span class="awaiting">N/A</span>';
                 
-                // Main Row
                 const tr = document.createElement('tr');
                 tr.className = 'clickable';
                 tr.onclick = () => toggleRow(index);
@@ -428,7 +420,6 @@ def generate_archive_html(output_path):
                                 <td>${stage}</td>
                                 <td class="metric-val">${confStr}</td>`;
                 
-                // Build Supporting Evidence HTML
                 let suppHtml = prov.supporting_evidence.map(e => `
                     <div class="evidence-for">
                         <div style="font-size:0.8em; color:var(--muted); text-transform:uppercase;">${e.component || e.stage} (Wt: ${e.weight || e.confidence_weight || 1.0})</div>
@@ -436,19 +427,16 @@ def generate_archive_html(output_path):
                     </div>`).join('');
                 if(!suppHtml) suppHtml = '<div class="empty-note">No supporting causal links recorded.</div>';
 
-                // Build Opposing Evidence HTML
                 let oppHtml = prov.opposing_evidence.map(e => `
                     <div class="evidence-against">
                         <div style="font-size:0.8em; color:var(--muted); text-transform:uppercase;">${e.component || e.stage} (Wt: ${e.weight || e.confidence_weight || 1.0})</div>
                         <div>${e.assertion || e.assertion_key}</div>
                     </div>`).join('');
-                // Legacy support for single "drop reason" mapped to opposing evidence
                 if(!oppHtml && manifest.reason) {
                     oppHtml = `<div class="evidence-against"><div>Legacy Termination: ${manifest.reason}</div></div>`;
                 }
                 if(!oppHtml) oppHtml = '<div class="empty-note">No opposing causal links recorded.</div>';
 
-                // Expanded Manifest Report Row
                 const dTr = document.createElement('tr');
                 dTr.id = 'detail-' + index;
                 dTr.className = 'decision-report-row';
@@ -519,6 +507,8 @@ def generate_screening_log_html(output_path):
         .headline-cell a { color: var(--text); text-decoration: none; }
         .headline-cell a:hover { color: var(--blue); text-decoration: underline; }
         .result-count { color: var(--muted); font-size: 0.8em; margin-bottom: 8px; }
+        .mode-fallback { color: var(--yellow); font-weight: 700; font-size: 0.8em; }
+        .mode-rss { color: var(--muted); font-size: 0.8em; }
     """
 
     html = """<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>SSR Article Screening Log</title><style>__BASE_CSS__ __SCREENING_CSS__</style>__SORT_JS__</head>
@@ -532,8 +522,8 @@ def generate_screening_log_html(output_path):
     <div class="result-count" id="resultCount"></div>
 
     <div class="table-wrapper"><table id="screeningTable">
-    <thead><tr><th>Timestamp (GMT)</th><th>Source</th><th>Headline</th><th>Ticker</th><th>Outcome</th><th>Final Stage</th><th>Drop Reason</th></tr></thead>
-    <tbody id="tableBody"><tr><td colspan="7" style="text-align: center; color: var(--muted); padding: 30px;">Loading Screening Log...</td></tr></tbody>
+    <thead><tr><th>Timestamp (GMT)</th><th>Source</th><th>Headline</th><th>Ticker</th><th>Mode</th><th>Outcome</th><th>Final Stage</th><th>Drop Reason</th></tr></thead>
+    <tbody id="tableBody"><tr><td colspan="8" style="text-align: center; color: var(--muted); padding: 30px;">Loading Screening Log...</td></tr></tbody>
     </table></div></div>
 
     <script>
@@ -585,7 +575,7 @@ def generate_screening_log_html(output_path):
 
             tbody.innerHTML = '';
             if (filtered.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">No screened articles match the current filters.</td></tr>';
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:20px;">No screened articles match the current filters.</td></tr>';
                 return;
             }
 
@@ -593,10 +583,14 @@ def generate_screening_log_html(output_path):
                 const tr = document.createElement('tr');
                 const outcomeCls = r.outcome === 'PASSED' ? 'outcome-passed' : 'outcome-dropped';
                 const reasonHtml = r.drop_reason ? `<span class="reason-tag">${r.drop_reason}</span>` : '';
+                const modeCls = r.ingestion_mode === 'HTML_FALLBACK' ? 'mode-fallback' : 'mode-rss';
+                const modeLabel = r.ingestion_mode === 'HTML_FALLBACK' ? 'FALLBACK' : (r.ingestion_mode || '');
+                
                 tr.innerHTML = `<td>${r.timestamp || ''}</td>
                                 <td>${r.source || 'Unknown'}</td>
                                 <td class="headline-cell"><a href="${r.url || '#'}" target="_blank" title="${(r.headline||'').replace(/"/g,'&quot;')}">${r.headline || 'Untitled'}</a></td>
                                 <td>${r.ticker || 'UNKNOWN'}</td>
+                                <td class="${modeCls}">${modeLabel}</td>
                                 <td class="${outcomeCls}">${r.outcome || ''}</td>
                                 <td>${r.final_stage || ''}</td>
                                 <td>${reasonHtml}</td>`;

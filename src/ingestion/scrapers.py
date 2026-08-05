@@ -48,10 +48,14 @@ def fetch_all_feeds(active_sources: list = None) -> list:
                         "url": entry.get("link", url),
                         "headline": entry.get("title", "No Title"),
                         "body": body_text,
-                        "document_type": source.get("Type", "Press Release")
+                        "document_type": source.get("Type", "Press Release"),
+                        "_ingestion_mode": "RSS"
                     })
             else:
                 # 2. Fallback: Parse as raw HTML if it's not an RSS feed
+                logger.warning(f"[INGESTION] '{source_name}' has no valid RSS/Atom entries at {url} — "
+                                f"falling back to raw HTML scrape. This will likely re-ingest the same "
+                                f"static page every run. Check/update this source's URL in the Sheet.")
                 headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
                 resp = requests.get(url, headers=headers, timeout=10)
                 if resp.status_code == 200:
@@ -61,7 +65,8 @@ def fetch_all_feeds(active_sources: list = None) -> list:
                         "url": url,
                         "headline": soup.title.string if soup.title else "HTML Document",
                         "body": soup.get_text(separator=" ", strip=True)[:8000],
-                        "document_type": source.get("Type", "HTML")
+                        "document_type": source.get("Type", "HTML"),
+                        "_ingestion_mode": "HTML_FALLBACK"
                     })
                     
             # 3. Ping Google Sheets to update Column K (Last Checked)
