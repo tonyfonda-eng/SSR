@@ -342,6 +342,39 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
         </tr>""" for r in source_rows
     ])
 
+    ledger_rows_html = ""
+    ingestion_ledger = metrics.get("ingestion_ledger", [])
+    if ingestion_ledger:
+        for row in sorted(ingestion_ledger, key=lambda x: (x.get("source", ""), x.get("channel", ""))):
+            status = row.get("status", "UNKNOWN")
+            if status == "OK" and row.get("parsed_found", 0) > 0:
+                status_html = f'<span class="badge success">OK</span>'
+                row_style = ""
+            elif status == "EMPTY" or (status == "OK" and row.get("parsed_found", 0) == 0):
+                status_html = f'<span class="badge warn">ZERO YIELD</span>'
+                row_style = "color: var(--yellow);"
+            else:
+                status_html = f'<span class="badge danger">{esc(status)}</span>'
+                row_style = "color: var(--red);"
+                
+            err = row.get("error_message", "")
+            if err:
+                err = f'<span style="font-size:0.85em; opacity:0.8;">{esc(err[:50])}</span>'
+                
+            ledger_rows_html += f"""<tr style="{row_style}">
+                <td><strong>{esc(row.get('source'))}</strong></td>
+                <td>{esc(row.get('channel'))}</td>
+                <td><a href="{esc(row.get('url'))}" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">{esc(row.get('duration_sec'))}s</td>
+                <td>{status_html}</td>
+                <td class="metric-val">{esc(row.get('raw_found', 0))}</td>
+                <td class="metric-val">{esc(row.get('parsed_found', 0))}</td>
+                <td class="metric-val" style="font-weight:bold;">{esc(row.get('unique_found', 0))}</td>
+                <td>{err}</td>
+            </tr>"""
+    else:
+        ledger_rows_html = "<tr><td colspan='9' class='empty-note'>Awaiting next ingestion cycle to populate ledger.</td></tr>"
+
     html = f"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>SSR Operations Centre</title><style>{BASE_CSS}</style>{SORT_JS}</head>
     <body><div class="container">{render_nav("index")}
     <header style="border-left-color: {health_border};"><div><h1>Operations Centre</h1>
@@ -364,6 +397,10 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
     
     <div class="card" style="margin-bottom: 12px; overflow-x: auto;"><h2>2. Sensor Feed Quality & Pipeline Yield</h2>
     <table><thead><tr><th>Sensor Identity</th><th>Articles Downloaded</th><th>Alerts Generated</th><th>Capture Share</th><th>Alert %</th><th>Ontology Yield %</th><th>Rules Yield %</th><th>Failures</th><th>Reliability</th><th>Avg Latency</th><th>Cost/Yield</th></tr></thead><tbody>{source_row_html}</tbody></table></div>
+    
+    <div class="card" style="margin-bottom: 12px; overflow-x: auto;"><h2>3. Source Acquisition Health & Ledger</h2>
+    <div style="margin-bottom: 8px; font-size: 0.85em; color: var(--muted);">Real-time log of the most recent fetch cycle per channel. A <span style="color:var(--yellow)">ZERO YIELD</span> status indicates the channel successfully responded but provided no usable articles (often caused by navigation loops or static landing pages).</div>
+    <table><thead><tr><th>Source</th><th>Channel</th><th>URL</th><th style="text-align:right;">Duration</th><th>Status</th><th style="text-align:right;">Raw Discovered</th><th style="text-align:right;">Parsed Successfully</th><th style="text-align:right;">Unique Yield</th><th>Error Context</th></tr></thead><tbody>{ledger_rows_html}</tbody></table></div>
     </div></body></html>"""
     
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
