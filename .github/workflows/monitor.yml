@@ -99,7 +99,7 @@ jobs:
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
           
           # Stage artifacts safely
-          git add docs/index.html docs/archive.html docs/decision_analytics.html docs/ontology_debug.html docs/archive_data.json docs/dashboard_metrics.json docs/screening_log.html docs/screening_log.json || true
+          git add docs/index.html docs/pipeline_health.html docs/archive.html docs/decision_analytics.html docs/ontology_debug.html docs/archive_data.json docs/dashboard_metrics.json docs/screening_log.html docs/screening_log.json || true
           
           # Check if there's actually anything to commit
           git diff --staged --quiet || git commit -m "chore: update operational dashboard and archive"

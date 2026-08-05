@@ -64,16 +64,17 @@ def status_badge(value, ok_values=("OK", "HEALTHY", "PASS", "UP", "RUNNING", "DE
     else: cls = "info"
     return f'<span class="badge {cls}">{esc(value)}</span>'
 
+# Multi-key stage definitions to support legacy and current drop reasons seamlessly
 LOSS_STAGE_DEFS = [
     ("Sensor Ingestion",      ["downloaded"],                                            None,                     "start"),
     ("Idempotency & Dedupe",  ["dropped_hash_duplicate", "duplicate", "duplicate_id"],   "Ingestion",              "loss"),
-    ("Global Exclusions",     ["dropped_global_keyword", "exclusion", "global_exclusion"],"Global Exclusions",      "loss"),
-    ("Ontology Extraction",   ["dropped_ontology_score", "ontology"],                    "Ontology",               "loss"),
-    ("Deterministic Rules",   ["dropped_rules_threshold", "rules", "rules_rejected"],    "Rules Engine",           "loss"),
-    ("AI Entity Resolution",  ["dropped_ai_no_ticker", "ai_rejected_private"],           "AI Core",                "loss"),
-    ("AI Strategy Playbook",  ["dropped_ai_confidence", "ai", "ai_exhausted"],           "AI Classification",      "loss"),
-    ("Financial Verification",["dropped_untradeable_otc", "dropped_financial_t12", "financial"], "Financial Verification", "loss"),
-    ("Detected & Dispatched", ["alerts_generated", "alerts", "alerts_sent"],            "Complete",               "terminal"),
+    ("Global Exclusions",     ["dropped_global_keyword", "exclusion", "global_exclusion", "dropped_issuer_exclusion", "dropped_source_specific_noise"], "Global Exclusions", "loss"),
+    ("Ontology Extraction",   ["dropped_ontology_score", "ontology"],                    "ontology_concepts",      "loss"),
+    ("Deterministic Rules",   ["dropped_rules_threshold", "rules", "rules_rejected"],    "regex_rules",            "loss"),
+    ("Entity Resolution",     ["dropped_entity_confidence", "dropped_entity_missing_ticker", "dropped_entity_unknown_issuer", "dropped_entity_missing_both", "dropped_ai_no_ticker"], "entity_confidence", "loss"),
+    ("Financial Verification",["dropped_untradeable_otc", "dropped_financial_t12", "dropped_insufficient_liquidity", "dropped_no_options_chain"], "Financial Verification", "loss"),
+    ("AI Strategy Playbook",  ["dropped_ai_confidence", "ai", "ai_exhausted"],           "ai_confidence_gate",     "loss"),
+    ("Detected & Dispatched", ["alerts_generated", "alerts", "alerts_sent"],             "AI_APPROVED",            "terminal"),
 ]
 
 def _get_stage_raw_count(funnel_counts, keys):
@@ -82,7 +83,17 @@ def _get_stage_raw_count(funnel_counts, keys):
     for k in keys:
         if k in funnel_counts and is_num(funnel_counts[k]):
             return funnel_counts[k]
-    return None
+        
+    # Also sum if we can't find the exact key, but we have partial matches for the category
+    total = 0
+    found = False
+    for k, v in funnel_counts.items():
+        for candidate in keys:
+            if candidate in k:
+                total += v
+                found = True
+                break
+    return total if found else None
 
 def build_loss_funnel(funnel_counts):
     funnel_counts = funnel_counts if isinstance(funnel_counts, dict) else {}
@@ -91,9 +102,32 @@ def build_loss_funnel(funnel_counts):
     entering = total if have_total else None
     rows = []
     
+    # We want to extract specific drop reasons from the funnel counts payload
+    # In monitor.py, telemetry.stage_analytics maps stage name to a dict with "drop_reasons"
+    
     for label, keys, stage_token, kind in LOSS_STAGE_DEFS:
         raw = _get_stage_raw_count(funnel_counts, keys)
         awaiting = raw is None and kind != "start"
+        
+        specific_reasons = {}
+        if kind == "loss":
+            # Search funnel_counts for specific drop reasons matching this stage
+            for k, v in funnel_counts.items():
+                if isinstance(v, dict) and "drop_reasons" in v:
+                    # check if the drop reasons in this stage map to the keys
+                    for dr_key, dr_val in v["drop_reasons"].items():
+                        for candidate in keys:
+                            if candidate in dr_key:
+                                specific_reasons[dr_key] = specific_reasons.get(dr_key, 0) + dr_val
+                                break
+                                
+            # If the funnel counts is flat
+            for dr_key, dr_val in funnel_counts.items():
+                if not isinstance(dr_val, dict):
+                    for candidate in keys:
+                        if candidate in dr_key and dr_key not in ["downloaded", "alerts_generated"]:
+                            specific_reasons[dr_key] = dr_val
+                            break
         
         if kind == "start":
             exiting = total
@@ -107,7 +141,7 @@ def build_loss_funnel(funnel_counts):
             conv_pct = safe_div(exiting, entering) * 100 if have_total and is_num(exiting) and is_num(entering) else None
             loss_pct = 0.0 if is_num(conv_pct) else None
         else:
-            lost = raw
+            lost = sum(specific_reasons.values()) if specific_reasons else (raw or 0)
             if is_num(entering) and is_num(lost):
                 exiting = entering - lost
                 loss_pct = safe_div(lost, entering) * 100 if entering else None
@@ -115,7 +149,7 @@ def build_loss_funnel(funnel_counts):
             else:
                 exiting, conv_pct, loss_pct = None, None, None
                 
-        rows.append(dict(label=label, entering=entering, exiting=exiting, lost=lost, conv_pct=conv_pct, loss_pct=loss_pct, stage_token=stage_token, kind=kind, awaiting=awaiting))
+        rows.append(dict(label=label, entering=entering, exiting=exiting, lost=lost, conv_pct=conv_pct, loss_pct=loss_pct, stage_token=stage_token, kind=kind, awaiting=awaiting, reasons=specific_reasons))
         
         if is_num(exiting):
             entering = exiting
@@ -135,12 +169,23 @@ def render_loss_funnel_html(funnel_counts):
         exiting_html = esc(fmt_num(r["exiting"])) if is_num(r["exiting"]) else AWAITING_SPAN
         lost_html = esc(fmt_num(r["lost"])) if is_num(r["lost"]) and r["kind"] != "start" else ('&mdash;' if r["kind"] == "start" else AWAITING_SPAN)
         
+        reasons_html = ""
+        if r.get("reasons"):
+            reasons_html = '<div class="dr-breakdown">'
+            for reason, count in r["reasons"].items():
+                friendly_reason = reason.replace("dropped_", "").replace("_", " ").title()
+                reasons_html += f'<div class="dr-item"><span>{friendly_reason}</span><span class="dr-count">{count}</span></div>'
+            reasons_html += '</div>'
+            
         body += f"""
             <a class="{row_cls}" href="{href}" title="Inspect this stage in the Decision Ledger">
-                <div class="lr-name">{esc(r["label"])}</div>
+                <div>
+                    <div class="lr-name">{esc(r["label"])}</div>
+                    {reasons_html}
+                </div>
                 <div class="lr-val">{entering_html}</div>
                 <div class="lr-val">{exiting_html}</div>
-                <div class="lr-val" style="color:var(--yellow);">{lost_html}</div>
+                <div class="lr-val" style="color:var(--yellow); font-weight: bold;">{lost_html}</div>
                 <div class="lr-val" style="color:var(--green); font-weight:700;">{fmt_pct(r["conv_pct"]) or "&mdash;"}</div>
                 <div class="lr-val" style="color:var(--red);">{fmt_pct(r["loss_pct"]) or "&mdash;"}</div>
             </a>"""
@@ -161,7 +206,7 @@ BASE_CSS = """
         .badge.warn    { background: rgba(219,171,10,0.15); color: var(--yellow); border: 1px solid var(--yellow); }
         .badge.info    { background: rgba(64,136,219,0.15); color: var(--blue); border: 1px solid var(--blue); }
         .badge.awaiting{ background: rgba(121,131,143,0.12); color: var(--muted); border: 1px dashed var(--muted); }
-        .nav-tabs { display: flex; gap: 8px; margin-bottom: 12px; }
+        .nav-tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;}
         .nav-tabs a { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 7px 14px; text-decoration: none; font-weight: 600; font-size: 0.9em; text-transform: uppercase; letter-spacing: 0.5px; }
         .nav-tabs a.active { background: var(--blue); color: #fff; border-color: var(--blue); }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 12px; }
@@ -179,7 +224,7 @@ BASE_CSS = """
         .metric-val { text-align: right; font-family: var(--mono); }
         tr.clickable { cursor: pointer; } tr.clickable:hover { background: var(--surface-hover); }
         .loss-funnel { display: flex; flex-direction: column; }
-        .loss-row { display: grid; grid-template-columns: 180px 1fr 1fr 1fr 1fr 1fr; gap: 8px; align-items: center; padding: 7px 4px; border-bottom: 1px solid var(--surface-subtle); text-decoration: none; color: var(--text); }
+        .loss-row { display: grid; grid-template-columns: 240px 1fr 1fr 1fr 1fr 1fr; gap: 8px; align-items: center; padding: 7px 4px; border-bottom: 1px solid var(--surface-subtle); text-decoration: none; color: var(--text); }
         .loss-row:hover { background: var(--surface-hover); }
         .loss-row .lr-name { font-weight: 600; font-size: 0.85em; }
         .loss-row .lr-val { font-family: var(--mono); text-align: right; font-size: 0.85em; }
@@ -191,11 +236,15 @@ BASE_CSS = """
         .kpi-context-item .cx-label { font-size: 0.65em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.4px; }
         .kpi-context-item .cx-value { font-family: var(--mono); font-weight: 700; font-size: 1.05em; margin-top: 2px; }
         .empty-note { color: var(--muted); font-style: italic; padding: 8px 0; font-size: 0.85em; }
+        .dr-breakdown { font-size: 0.75em; color: var(--muted); margin-top: 4px; }
+        .dr-item { display: flex; justify-content: space-between; border-left: 2px solid var(--yellow); padding-left: 6px; margin-top: 2px; }
+        .dr-count { font-family: var(--mono); color: var(--yellow); font-weight: bold;}
 """
 
 NAV_TABS = """
             <div class="nav-tabs">
                 <a href="index.html" class="{cls_index}">Operations Centre</a>
+                <a href="pipeline_health.html" class="{cls_health}">Pipeline Health</a>
                 <a href="decision_analytics.html" class="{cls_analytics}">Drift & Intelligence</a>
                 <a href="archive.html" class="{cls_archive}">Decision Ledger Manifests</a>
                 <a href="screening_log.html" class="{cls_screening}">Article Screening Log</a>
@@ -205,6 +254,7 @@ NAV_TABS = """
 def render_nav(active):
     return NAV_TABS.format(
         cls_index="active" if active == "index" else "",
+        cls_health="active" if active == "health" else "",
         cls_analytics="active" if active == "analytics" else "",
         cls_archive="active" if active == "archive" else "",
         cls_screening="active" if active == "screening" else "",
@@ -241,15 +291,14 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
     funnel_counts = _daily(metrics, "funnel", {})
     
     eng_downloaded = _get_stage_raw_count(funnel_counts, ["downloaded"]) or 0
-    eng_duplicates = _get_stage_raw_count(funnel_counts, ["dropped_hash_duplicate"]) or 0
+    eng_duplicates = _get_stage_raw_count(funnel_counts, ["dropped_hash_duplicate", "duplicate"]) or 0
     eng_processed = eng_downloaded - eng_duplicates
-    eng_ontology = _get_stage_raw_count(funnel_counts, ["dropped_ontology_score"]) or 0
-    eng_regex = _get_stage_raw_count(funnel_counts, ["dropped_rules_threshold"]) or 0
-    eng_financial = _get_stage_raw_count(funnel_counts, ["dropped_untradeable_otc", "dropped_financial_t12", "dropped_insufficient_liquidity", "dropped_no_options_chain"]) or 0
+    eng_ontology = _get_stage_raw_count(funnel_counts, ["dropped_ontology_score", "ontology"]) or 0
+    eng_regex = _get_stage_raw_count(funnel_counts, ["dropped_rules_threshold", "rules"]) or 0
+    eng_financial = _get_stage_raw_count(funnel_counts, ["dropped_untradeable_otc", "dropped_financial_t12", "dropped_insufficient_liquidity", "dropped_no_options_chain", "financial"]) or 0
     eng_alerts = _get_stage_raw_count(funnel_counts, ["alerts_generated"]) or 0
     
-    # Just an approximation
-    eng_ai = _get_stage_raw_count(funnel_counts, ["ai_rejected_private", "dropped_ai_confidence", "ai_exhausted"]) or 0 
+    eng_ai = _get_stage_raw_count(funnel_counts, ["dropped_entity_confidence", "dropped_entity_missing_ticker", "dropped_entity_unknown_issuer", "dropped_entity_missing_both", "ai_rejected_private", "dropped_ai_confidence", "ai_exhausted"]) or 0 
     
     trust_row = "".join([
         f'<div class="stat-tile"><div class="stat-label">Articles Downloaded</div><div class="stat-value">{eng_downloaded}</div></div>',
@@ -258,14 +307,10 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
         f'<div class="stat-tile"><div class="stat-label">Ontology Rejected</div><div class="stat-value">{eng_ontology}</div></div>',
         f'<div class="stat-tile"><div class="stat-label">Regex Rejected</div><div class="stat-value">{eng_regex}</div></div>',
         f'<div class="stat-tile"><div class="stat-label">Financial Rejected</div><div class="stat-value">{eng_financial}</div></div>',
-        f'<div class="stat-tile"><div class="stat-label">AI Rejections</div><div class="stat-value">{eng_ai}</div></div>',
+        f'<div class="stat-tile"><div class="stat-label">Entity / AI Rejections</div><div class="stat-value">{eng_ai}</div></div>',
         f'<div class="stat-tile"><div class="stat-label">Alerts Generated</div><div class="stat-value" style="color:var(--green)">{eng_alerts}</div></div>'
     ])
 
-    loss_funnel_html = render_loss_funnel_html(funnel_counts)
-
-    # Note: the real Feed Quality logic would ideally be backed by a DB query,
-    # but for now we format whatever source_stats we have.
     source_stats_raw = _daily(metrics, "source_stats", {})
     source_rows = []
     if source_stats_raw:
@@ -308,10 +353,51 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
     
     <div class="card" style="margin-bottom: 12px;"><h2>1. Engineering Metrics</h2><div class="tile-grid" style="grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));">{trust_row}</div></div>
     
-    <div class="card" style="margin-bottom: 12px;"><h2>2. Evaluation Funnel Metrics</h2>{loss_funnel_html}</div>
-    
-    <div class="card" style="margin-bottom: 12px; overflow-x: auto;"><h2>3. Sensor Feed Quality & Pipeline Yield</h2>
+    <div class="card" style="margin-bottom: 12px; overflow-x: auto;"><h2>2. Sensor Feed Quality & Pipeline Yield</h2>
     <table><thead><tr><th>Sensor Identity</th><th>Articles Downloaded</th><th>Alerts Generated</th><th>Capture Share</th><th>Alert %</th><th>Ontology Yield %</th><th>Rules Yield %</th><th>Failures</th><th>Reliability</th><th>Avg Latency</th><th>Cost/Yield</th></tr></thead><tbody>{source_row_html}</tbody></table></div>
+    </div></body></html>"""
+    
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f: f.write(html)
+
+
+def generate_pipeline_health_html(output_path, metrics):
+    now_str = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    funnel_counts = _daily(metrics, "funnel", {})
+    loss_funnel_html = render_loss_funnel_html(funnel_counts)
+    
+    # Calculate total runtime, API calls, CPU time
+    total_cpu_ms = 0.0
+    total_net_ms = 0.0
+    total_api = 0
+    for stage, data in funnel_counts.items():
+        if isinstance(data, dict):
+            total_cpu_ms += data.get("cpu_ms", 0.0)
+            total_net_ms += data.get("network_ms", 0.0)
+            total_api += data.get("api_calls", 0)
+            
+    stats_row = "".join([
+        f'<div class="stat-tile"><div class="stat-label">Total Execution Runtime</div><div class="stat-value">{metrics.get("runtime", 0.0)}s</div></div>',
+        f'<div class="stat-tile"><div class="stat-label">Aggregate CPU Time</div><div class="stat-value">{round(total_cpu_ms, 2)}ms</div></div>',
+        f'<div class="stat-tile"><div class="stat-label">Aggregate Network Latency</div><div class="stat-value">{round(total_net_ms, 2)}ms</div></div>',
+        f'<div class="stat-tile"><div class="stat-label">External API Calls</div><div class="stat-value">{total_api}</div></div>'
+    ])
+
+    html = f"""<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>SSR Pipeline Health</title><style>{BASE_CSS}</style>{SORT_JS}</head>
+    <body><div class="container">{render_nav("health")}
+    <header><div><h1>Pipeline Health & Conversion</h1>
+    <div class="subline">High-Resolution Pipeline Stage Diagnostics &bull; Re-Evaluated {esc(now_str)}</div></div></header>
+    
+    <div class="card" style="margin-bottom: 12px;">
+        <h2>Pipeline Conversion Sankey / Funnel</h2>
+        {loss_funnel_html}
+    </div>
+    
+    <div class="card" style="margin-bottom: 12px;">
+        <h2>Execution Telemetry Aggregates</h2>
+        <div class="tile-grid">{stats_row}</div>
+    </div>
+    
     </div></body></html>"""
     
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
@@ -360,10 +446,18 @@ def generate_archive_html(output_path):
         .evidence-against { border-left: 3px solid var(--red); padding-left: 8px; margin-bottom: 8px;}
         .outcome-pass { color: var(--green); font-weight: 700; }
         .outcome-drop { color: var(--red); font-weight: 700; }
+        .filter-bar { display: flex; gap: 10px; margin-bottom: 12px; align-items: center; }
+        .filter-bar select { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 6px 10px; font-size: 0.85em; font-family: inherit; }
     """
 
     html = """<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>SSR Canonical Decision Manifests</title><style>__BASE_CSS__ __ARCHIVE_CSS__</style>__SORT_JS__</head>
     <body><div class="container">__NAV__<header><h1>Canonical Decision Manifests</h1></header>
+    
+    <div class="filter-bar">
+        <label style="font-size: 0.7em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.4px;">Filter by Stage:</label>
+        <select id="stageFilter" onchange="applyFilters()"><option value="">All Stages</option></select>
+        <span id="resultCount" style="color:var(--muted); font-size:0.85em; margin-left: 10px;"></span>
+    </div>
     
     <div class="table-wrapper"><table id="archiveTable">
     <thead><tr><th>Execution Timestamp (GMT)</th><th>Canonical Sensor</th><th>Entity / Target</th><th>Final Outcome</th><th>Terminal Stage</th><th>Headline</th></tr></thead>
@@ -384,23 +478,54 @@ def generate_archive_html(output_path):
                 init();
             });
 
-        function init() { renderTable(); }
+        function init() { 
+            populateFilters();
+            
+            // Check query string
+            const urlParams = new URLSearchParams(window.location.search);
+            const stage = urlParams.get('stage');
+            if(stage) {
+                document.getElementById('stageFilter').value = stage;
+            }
+            
+            applyFilters(); 
+        }
+        
+        function populateFilters() {
+            const stages = [...new Set(archiveData.map(r => r.pipeline_stage).filter(Boolean))].sort();
+            const sel = document.getElementById('stageFilter');
+            stages.forEach(s => {
+                const opt = document.createElement('option');
+                opt.value = s; opt.textContent = s;
+                sel.appendChild(opt);
+            });
+        }
+        
+        function applyFilters() {
+            const stageVal = document.getElementById('stageFilter').value;
+            let filtered = archiveData.filter(r => {
+                if (stageVal && r.pipeline_stage !== stageVal) return false;
+                return true;
+            });
+            document.getElementById('resultCount').textContent = `Showing ${filtered.length} manifests`;
+            renderTable(filtered);
+        }
         
         function toggleRow(idx) {
             const el = document.getElementById('detail-' + idx);
             if (el) el.classList.toggle('expanded');
         }
         
-        function renderTable() {
+        function renderTable(filteredData) {
             const tbody = document.getElementById('tableBody');
             tbody.innerHTML = '';
             
-            if (!archiveData || archiveData.length === 0) {
+            if (!filteredData || filteredData.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No decision manifests exposed in API.</td></tr>';
                 return;
             }
             
-            archiveData.forEach((manifest, index) => {
+            filteredData.forEach((manifest, index) => {
                 const reg = manifest.manifest_registry || {};
                 const det = manifest.detection_vector || {};
                 const perf = manifest.performance_telemetry_ms || {};

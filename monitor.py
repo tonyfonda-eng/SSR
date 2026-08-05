@@ -26,7 +26,7 @@ except ImportError:
 from src.html_generator import (
     generate_archive_html, generate_dashboard_html,
     generate_decision_analytics_html, generate_screening_log_html,
-    generate_ontology_debug_html
+    generate_ontology_debug_html, generate_pipeline_health_html
 )
 
 from src.ingestion.scrapers import fetch_all_feeds
@@ -201,16 +201,12 @@ def stage_entity_confidence_gate(article: dict, ctx: dict) -> tuple:
     issuer = article.get("_deterministic_issuer", "UNKNOWN")
     ticker = article.get("_deterministic_ticker", "UNKNOWN")
     
-    confidence = 0
-    if ticker != "UNKNOWN" and issuer != "UNKNOWN":
-        confidence = 100
-    elif ticker != "UNKNOWN":
-        confidence = 90
-    elif issuer != "UNKNOWN":
-        confidence = 40
-        
-    if confidence < 80:
-        return False, "dropped_entity_confidence"
+    if ticker == "UNKNOWN" and issuer == "UNKNOWN":
+        return False, "dropped_entity_missing_both"
+    elif ticker == "UNKNOWN":
+        return False, "dropped_entity_missing_ticker"
+    elif issuer == "UNKNOWN":
+        return False, "dropped_entity_unknown_issuer"
         
     return True, "passed"
 
@@ -569,6 +565,7 @@ def main():
 
             logger.info("Rebuilding ALL HTML Dashboards...")
             generate_dashboard_html([], "docs/index.html", health_payload)
+            generate_pipeline_health_html("docs/pipeline_health.html", health_payload)
             generate_decision_analytics_html("docs/decision_analytics.html", health_payload)
             generate_archive_html("docs/archive.html")
             generate_screening_log_html("docs/screening_log.html")
