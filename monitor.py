@@ -5,10 +5,10 @@ Highly Granular Adaptive Data-Driven Execution Pipeline (Registry Pattern)
 
 import sys
 import logging
-import traceback
 import hashlib
 import time
 import json
+import re
 from datetime import datetime, timezone
 
 from src.database import (
@@ -22,7 +22,7 @@ from src.ontology.engine import load_ontology
 from src.rules import matches_global_exclusion, matches_issuer_exclusion
 from src.rules_engine import evaluate as evaluate_deterministic_rules
 from src.ai import extract_target_ticker, classify_event
-from src.financials import get_t12_metrics 
+from src.financials import get_t12_metrics, query_financial_snapshot
 from src.alerts.email import send_alert
 
 # --- Frontend Exporter & HTML Generators ---
@@ -78,26 +78,7 @@ def stage_exclude_issuer_feed(article: dict, ctx: dict) -> tuple:
         return False, "dropped_issuer_exclusion"
     return True, "passed"
 
-# --- DETERMINISTIC STAGES (PHASE 1) ---
-
-def stage_python_issuer_extraction(article: dict, ctx: dict) -> tuple:
-    """Deterministic issuer extraction (regex, source parsing, dictionaries)."""
-    # TODO: Implement local dictionary / regex matching.
-    article["_deterministic_issuer"] = "UNKNOWN"
-    return True, "passed"
-
-def stage_python_ticker_lookup(article: dict, ctx: dict) -> tuple:
-    """Resolve ticker from issuer without AI."""
-    # TODO: Map _deterministic_issuer to a stock ticker locally.
-    article["_deterministic_ticker"] = "UNKNOWN"
-    return True, "passed"
-
-def stage_tradeability_check(article: dict, ctx: dict) -> tuple:
-    """Reject private/untradeable/non-supported securities."""
-    # TODO: Check _deterministic_ticker against valid exchange constraints.
-    return True, "passed"
-
-# --- ONTOLOGY & RULES (PHASE 2) ---
+# --- ONTOLOGY & RULES (PHASE 2 - MOVED UP TO MINIMIZE CPU LOAD) ---
 
 def stage_ontology_concepts(article: dict, ctx: dict) -> tuple:
     min_score = float(ctx.get("sys_settings", {}).get("MIN_ONTOLOGY_SCORE", 0.65))
@@ -113,7 +94,6 @@ def stage_document_scoring(article: dict, ctx: dict) -> tuple:
 
 def stage_regex_rules(article: dict, ctx: dict) -> tuple:
     threshold = int(ctx.get("sys_settings", {}).get("RULE_THRESHOLD", 10))
-    # Parsed accurately mapping Concept_ID and Score from the dynamic Sheets loader
     active_concepts = [(c.get("Concept_ID", c.get("Concept ID")), c.get("Score", c.get("Weight", 1.0))) for c in ctx.get("semantic_concepts", []) if str(c.get("Active", "TRUE")).upper() == "TRUE"]
     
     rule_results = evaluate_deterministic_rules(
@@ -127,13 +107,42 @@ def stage_regex_rules(article: dict, ctx: dict) -> tuple:
     if not rule_results: return False, "dropped_rules_threshold"
     return True, "passed"
 
-# --- FINANCIAL CONSTRAINTS (PHASE 3) ---
+# --- DETERMINISTIC STAGES (PHASE 3 - EXECUTED ONLY ON FILTERED HIGH-VALUE TEXT) ---
+
+def stage_python_issuer_extraction(article: dict, ctx: dict) -> tuple:
+    """Deterministic issuer extraction (regex, source parsing, dictionaries)."""
+    text = article.get("body", "")
+    match = re.search(r'([A-Z][A-Za-z0-9\,\.\&\s]{3,40})\s+\([A-Z]{3,6}\s*:\s*[A-Z]{1,5}\)', text[:1000])
+    if match:
+        article["_deterministic_issuer"] = match.group(1).strip()
+    else:
+        article["_deterministic_issuer"] = article.get("source", "UNKNOWN")
+    return True, "passed"
+
+def stage_python_ticker_lookup(article: dict, ctx: dict) -> tuple:
+    """Resolve ticker from issuer without AI."""
+    text = article.get("body", "")
+    match = re.search(r'\b(?:NYSE|NASDAQ|AMEX|OTC|TSX|LSE|NYSE MKT|NYSE ARCA)[^A-Z]{1,3}([A-Z]{1,5})\b', text, re.IGNORECASE)
+    if match:
+        article["_deterministic_ticker"] = match.group(1).upper()
+    else:
+        article["_deterministic_ticker"] = "UNKNOWN"
+    return True, "passed"
 
 def stage_financial_market_cap(article: dict, ctx: dict) -> tuple:
     return True, "passed"
 
+def stage_tradeability_check(article: dict, ctx: dict) -> tuple:
+    """Reject private/untradeable/non-supported securities."""
+    ticker = article.get("_deterministic_ticker", "UNKNOWN")
+    if ticker != "UNKNOWN":
+        if ".PK" in ticker or ".OB" in ticker or ".OTC" in ticker:
+            return False, "dropped_untradeable_otc"
+    return True, "passed"
+
+# --- FINANCIAL CONSTRAINTS (PHASE 4) ---
+
 def stage_financial_t12_floor(article: dict, ctx: dict) -> tuple:
-    # Only evaluates if we successfully resolved a deterministic ticker
     ticker = article.get("_deterministic_ticker", "UNKNOWN")
     if ticker != "UNKNOWN":
         metrics = get_t12_metrics(ticker)
@@ -142,19 +151,34 @@ def stage_financial_t12_floor(article: dict, ctx: dict) -> tuple:
 
 def stage_options_chain_check(article: dict, ctx: dict) -> tuple:
     """Reject strategies requiring options where none exist."""
-    # TODO: Integrate src.financials to reject non-optionable targets early.
+    ticker = article.get("_deterministic_ticker", "UNKNOWN")
+    if ticker != "UNKNOWN":
+        options_only = str(ctx.get("sys_settings", {}).get("Options Tradable Only", "False")).lower() == "true"
+        if options_only:
+            snap = query_financial_snapshot(ticker)
+            if snap.is_complete and not snap.options_available:
+                return False, "dropped_no_options"
+    return True, "passed"
+
+def stage_options_chain_check(article: dict, ctx: dict) -> tuple:
+    """Reject strategies requiring options where none exist."""
+    ticker = article.get("_deterministic_ticker", "UNKNOWN")
+    if ticker != "UNKNOWN":
+        options_only = str(ctx.get("sys_settings", {}).get("Options Tradable Only", "False")).lower() == "true"
+        if options_only:
+            snap = query_financial_snapshot(ticker)
+            if snap.is_complete and not snap.options_available:
+                return False, "dropped_no_options"
     return True, "passed"
 
 def stage_liquidity_check(article: dict, ctx: dict) -> tuple:
     """Minimum liquidity / volume constraints."""
-    # TODO: Ensure average volume > required baseline.
     return True, "passed"
 
-# --- AI SPECIALIST FALLBACKS (PHASE 4) ---
+# --- AI SPECIALIST FALLBACKS (PHASE 5) ---
 
 def stage_ai_ticker_resolution(article: dict, ctx: dict) -> tuple:
     """LLM call 1: Purely extracts target company ticker (Fallback)."""
-    # Principle #1: Do not use AI if deterministic logic already succeeded
     if article.get("_deterministic_ticker", "UNKNOWN") != "UNKNOWN":
         article["_ai_ticker"] = article.get("_deterministic_ticker")
         return True, "passed"
@@ -169,7 +193,6 @@ def stage_ai_event_classification(article: dict, ctx: dict) -> tuple:
     ticker = article.get("_ai_ticker", "UNKNOWN")
     ai_result = classify_event(article.get("body", ""), ticker)
     
-    # If the AI returns a string, format it safely (Legacy wrapper compatibility)
     if isinstance(ai_result, str):
         if ai_result in ["EXHAUSTED", "ERROR"]: return False, "ai_exhausted"
         article["_ai_classification"] = ai_result
@@ -193,14 +216,14 @@ STAGE_REGISTRY = {
     "dedupe_issuer_memory": stage_dedupe_issuer_memory,
     "exclude_global_keywords": stage_exclude_global_keywords,
     "exclude_issuer_feed": stage_exclude_issuer_feed,
-    "python_issuer_extraction": stage_python_issuer_extraction,
-    "python_ticker_lookup": stage_python_ticker_lookup,
-    "tradeability_check": stage_tradeability_check,
     "ontology_concepts": stage_ontology_concepts,
     "ontology_status": stage_ontology_status,
     "document_scoring": stage_document_scoring,
     "regex_rules": stage_regex_rules,
+    "python_issuer_extraction": stage_python_issuer_extraction,
+    "python_ticker_lookup": stage_python_ticker_lookup,
     "financial_market_cap": stage_financial_market_cap,
+    "tradeability_check": stage_tradeability_check,
     "financial_t12_floor": stage_financial_t12_floor,
     "options_chain_check": stage_options_chain_check,
     "liquidity_check": stage_liquidity_check,
@@ -219,18 +242,17 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
         sorted_stages = sorted([s for s in raw_pipeline_sheet if str(s.get("Active", "TRUE")).upper() == "TRUE"], key=lambda x: int(x.get("Order", 99)))
         execution_order = [s.get("Stage_ID") for s in sorted_stages]
     else:
-        # Strict hardcoded 18-step fallback mirroring the target architecture
         execution_order = [
             "dedupe_hash", "dedupe_issuer_memory", "exclude_global_keywords", 
-            "exclude_issuer_feed", "python_issuer_extraction", "python_ticker_lookup", 
-            "tradeability_check", "ontology_concepts", "ontology_status", 
-            "document_scoring", "regex_rules", "financial_market_cap", 
+            "exclude_issuer_feed", "ontology_concepts", "ontology_status", 
+            "document_scoring", "regex_rules", "python_issuer_extraction", 
+            "python_ticker_lookup", "financial_market_cap", "tradeability_check", 
             "financial_t12_floor", "options_chain_check", "liquidity_check", 
             "ai_ticker_resolution", "ai_event_classification", "ai_confidence_gate"
         ]
 
     for stage_name in execution_order:
-        telemetry.track(f"entered_{stage_name}") # Track exactly how many articles enter each stage
+        telemetry.track(f"entered_{stage_name}")
         
         stage_func = STAGE_REGISTRY.get(stage_name.lower())
         if not stage_func: 
@@ -241,9 +263,8 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
             telemetry.track(drop_reason)
             return False 
             
-        telemetry.track(f"survived_{stage_name}") # Track exactly how many articles survive each stage
+        telemetry.track(f"survived_{stage_name}")
             
-    # --- IF IT SURVIVED ALL ADAPTIVE STAGES, COMMIT ALERT ---
     telemetry.track("alerts_generated")
     event_id = article.get("_internal_event_id", "UNKNOWN")
     ticker = article.get("_ai_ticker", "UNKNOWN")
@@ -267,7 +288,6 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
     commit_decision_capsule(decision_capsule)
     logger.info(f"[ALERT GENERATED] {ticker} - {event_family}")
     
-    # --- WRITE SUCCESSES BACK TO THE GOOGLE SHEET ---
     try:
         if ticker != "UNKNOWN":
             batch_append_daily_memory(SHEET_URL, [ticker])
@@ -340,7 +360,6 @@ def main():
     finally:
         logger.info("Pipeline execution finished. Generating observability exports...")
         
-        # Print the granular stage-by-stage funnel directly to the CI Action logs
         logger.info("\n=== 📉 PIPELINE STAGE FUNNEL 📉 ===")
         for key, count in sorted(telemetry.metrics.items()):
             logger.info(f"  {key}: {count}")
@@ -356,7 +375,6 @@ def main():
         }
         save_workflow_health(health_payload)
         
-        # CALL THE CORRECT EXPORT FUNCTIONS AND GENERATE HTML
         try:
             logger.info("Dumping Ledger to archive_data.json...")
             export_archive_json("docs/archive_data.json")
