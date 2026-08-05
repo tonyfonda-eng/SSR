@@ -105,5 +105,5 @@ jobs:
           git diff --staged --quiet || git commit -m "chore: update operational dashboard and archive"
           
           # Pull with rebase using '-X theirs' strategy to automatically prefer the runner's fresh metrics/HTML
-          git pull --rebase -X theirs origin main || git rebase --abort
+          git pull origin main --rebase --autostash -X theirs || git rebase --abort
           git push origin main
