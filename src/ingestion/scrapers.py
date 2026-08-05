@@ -12,17 +12,50 @@ from src.config.settings import SHEET_URL
 
 logger = logging.getLogger(__name__)
 
+from src.scrapers import get_scraper_for_source
+
 def _fetch_single_source(source: dict) -> tuple:
     """Worker function to fetch a single source feed or HTML fallback."""
     articles = []
     source_name = source.get("Source Name", source.get("Source", "Unknown"))
     url = source.get("URL", source.get("HTML URL", ""))
     
+    # 1. Try Custom Scraper First
+    scraper = get_scraper_for_source(source_name)
+    if scraper:
+        try:
+            logger.info(f"[INGESTION] Using dedicated scraper for '{source_name}'")
+            raw_articles = scraper.get_latest_articles(url=url)
+            for ra in raw_articles:
+                body_text = ra.get("body", "")
+                # If body is missing or very short, try to fetch the full text
+                if not body_text or len(body_text) < 500:
+                    try:
+                        fetched_body = scraper.get_article_body(ra["url"])
+                        if fetched_body:
+                            body_text = fetched_body
+                    except Exception as body_err:
+                        logger.debug(f"Failed to fetch full body for {ra['url']}: {body_err}")
+                        
+                articles.append({
+                    "source": source_name,
+                    "url": ra.get("url", url),
+                    "headline": ra.get("title", "No Title"),
+                    "body": body_text,
+                    "document_type": source.get("Type", "Press Release"),
+                    "_ingestion_mode": "CUSTOM_SCRAPER"
+                })
+            return articles, source_name
+        except Exception as e:
+            logger.error(f"[INGESTION] Custom scraper for '{source_name}' failed: {e}")
+            # Do not fallback to raw HTML if custom scraper fails; usually that means source is down.
+            return [], None
+
     if not url:
         return articles, None
         
     try:
-        # 1. Parse as RSS (Primary Method)
+        # 2. Parse as RSS (Primary Fallback Method)
         feed = feedparser.parse(url)
         if feed.entries:
             for entry in feed.entries:
@@ -41,7 +74,7 @@ def _fetch_single_source(source: dict) -> tuple:
                     "_ingestion_mode": "RSS"
                 })
         else:
-            # 2. Fallback: Parse as raw HTML if it's not an RSS feed
+            # 3. Fallback: Parse as raw HTML if it's not an RSS feed
             logger.warning(f"[INGESTION] '{source_name}' has no valid RSS/Atom entries at {url} — "
                             f"falling back to raw HTML scrape. This will likely re-ingest the same "
                             f"static page every run. Check/update this source's URL in the Sheet.")
