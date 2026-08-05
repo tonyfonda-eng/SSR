@@ -236,9 +236,7 @@ NAV_TABS = """
                 <a href="index.html" class="{cls_index}">Operations Centre</a>
                 <a href="pipeline_health.html" class="{cls_health}">Pipeline Health</a>
                 <a href="decision_analytics.html" class="{cls_analytics}">Drift & Intelligence</a>
-                <a href="archive.html" class="{cls_archive}">Decision Ledger Manifests</a>
-                <a href="screening_log.html" class="{cls_screening}">Article Screening Log</a>
-                <a href="ontology_debug.html" class="{cls_debug}">Ontology Debug</a>
+                <a href="archive.html" class="{cls_archive}">Daily Master Log</a>
             </div>"""
 
 def render_nav(active):
@@ -246,9 +244,7 @@ def render_nav(active):
         cls_index="active" if active == "index" else "",
         cls_health="active" if active == "health" else "",
         cls_analytics="active" if active == "analytics" else "",
-        cls_archive="active" if active == "archive" else "",
-        cls_screening="active" if active == "screening" else "",
-        cls_debug="active" if active == "debug" else ""
+        cls_archive="active" if active == "archive" else ""
     )
 
 SORT_JS = """
@@ -416,161 +412,6 @@ def generate_decision_analytics_html(output_path, metrics, avg_30=None):
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f: f.write(html)
 
-
-def generate_archive_html(output_path):
-    archive_css = """
-        .table-wrapper { background: var(--surface); border: 1px solid var(--border); overflow-x: auto; }
-        th { background: var(--surface-subtle); position: sticky; top: 0; z-index: 10; }
-        .decision-report-row { display: none; background: #0f131a; }
-        .decision-report-row.expanded { display: table-row; }
-        .decision-report { padding: 16px 24px; border-left: 4px solid var(--blue); display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px;}
-        .drop-reason { font-family: var(--mono); color: var(--yellow); font-size: 0.9em; background: rgba(219,171,10,0.1); padding: 2px 6px; border-radius: 3px;}
-        .dr-block h4 { margin: 0 0 8px; font-size: 0.8em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.5px; border-bottom: 1px solid var(--border); padding-bottom: 4px;}
-        .dr-list { list-style: none; margin: 0; padding: 0; font-size: 0.85em; }
-        .dr-list li { margin-bottom: 6px; display: flex; justify-content: space-between; gap: 12px; }
-        .dr-list li strong { color: var(--text); font-weight: normal; white-space: nowrap;}
-        .dr-list li span { font-family: var(--mono); color: #fff; text-align: right; }
-        .replay-btn { background: var(--surface-subtle); color: var(--text); border: 1px solid var(--border); padding: 6px 12px; cursor: pointer; border-radius: 4px; font-weight: 600; text-transform: uppercase; font-size: 0.75em; letter-spacing: 0.5px; width: 100%; margin-top: 10px;}
-        .replay-btn:hover { background: var(--blue); color: #fff; border-color: var(--blue); }
-        .evidence-for { border-left: 3px solid var(--green); padding-left: 8px; margin-bottom: 8px;}
-        .evidence-against { border-left: 3px solid var(--red); padding-left: 8px; margin-bottom: 8px;}
-        .outcome-pass { color: var(--green); font-weight: 700; }
-        .outcome-drop { color: var(--red); font-weight: 700; }
-        .filter-bar { display: flex; gap: 10px; margin-bottom: 12px; align-items: center; }
-        .filter-bar select { background: var(--surface); border: 1px solid var(--border); color: var(--text); padding: 6px 10px; font-size: 0.85em; font-family: inherit; }
-    """
-
-    html = """<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><title>SSR Canonical Decision Manifests</title><style>__BASE_CSS__ __ARCHIVE_CSS__</style>__SORT_JS__</head>
-    <body><div class="container">__NAV__<header><h1>Canonical Decision Manifests</h1></header>
-    
-    <div class="filter-bar">
-        <label style="font-size: 0.7em; text-transform: uppercase; color: var(--muted); letter-spacing: 0.4px;">Filter by Stage:</label>
-        <select id="stageFilter" onchange="applyFilters()"><option value="">All Stages</option></select>
-        <span id="resultCount" style="color:var(--muted); font-size:0.85em; margin-left: 10px;"></span>
-    </div>
-    
-    <div class="table-wrapper"><table id="archiveTable">
-    <thead><tr><th>Execution Timestamp (GMT)</th><th>Canonical Sensor</th><th>Entity / Target</th><th>Final Outcome</th><th>Terminal Stage</th><th>Headline</th></tr></thead>
-    <tbody id="tableBody"><tr><td colspan="6" style="text-align: center; color: var(--muted); padding: 30px;">Mounting Canonical Decision Manifest API...</td></tr></tbody>
-    </table></div></div>
-    
-    <script>
-        let archiveData = [];
-        
-        fetch('archive_data.json')
-            .then(res => res.json())
-            .then(data => {
-                archiveData = Array.isArray(data) ? data : (data.ledger || []); 
-                init();
-            })
-            .catch(err => {
-                archiveData = []; 
-                init();
-            });
-
-        function init() { 
-            populateFilters();
-            
-            // Check query string
-            const urlParams = new URLSearchParams(window.location.search);
-            const stage = urlParams.get('stage');
-            if(stage) {
-                document.getElementById('stageFilter').value = stage;
-            }
-            
-            applyFilters(); 
-        }
-        
-        function populateFilters() {
-            const stages = [...new Set(archiveData.map(r => r.pipeline_stage).filter(Boolean))].sort();
-            const sel = document.getElementById('stageFilter');
-            stages.forEach(s => {
-                const opt = document.createElement('option');
-                opt.value = s; opt.textContent = s;
-                sel.appendChild(opt);
-            });
-        }
-        
-        function applyFilters() {
-            const stageVal = document.getElementById('stageFilter').value;
-            let filtered = archiveData.filter(r => {
-                if (stageVal && r.pipeline_stage !== stageVal) return false;
-                return true;
-            });
-            document.getElementById('resultCount').textContent = `Showing ${filtered.length} manifests`;
-            renderTable(filtered);
-        }
-        
-        function toggleRow(idx) {
-            const el = document.getElementById('detail-' + idx);
-            if (el) el.classList.toggle('expanded');
-        }
-        
-        function renderTable(filteredData) {
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '';
-            
-            if (!filteredData || filteredData.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">No decision manifests exposed in API.</td></tr>';
-                return;
-            }
-            
-            filteredData.forEach((manifest, index) => {
-                const reg = manifest.manifest_registry || {};
-                const det = manifest.detection_vector || {};
-                const perf = manifest.performance_telemetry_ms || {};
-                const line = manifest.syndication_lineage || {};
-                
-                let ts = reg.execution_timestamp_gmt || manifest.timestamp || '';
-                let outcome = det.outcome || manifest.outcome || 'PENDING';
-                let stage = det.terminal_stage || manifest.pipeline_stage || 'Unknown';
-                let sensor = line.canonical_sensor_id || manifest.source || 'Unknown Sensor';
-                let ticker = det.target_ticker || manifest.issuer || 'UNKNOWN';
-                
-                const tr = document.createElement('tr');
-                tr.className = 'clickable';
-                tr.onclick = () => toggleRow(index);
-                tr.innerHTML = `<td>${ts}</td>
-                                <td><strong>${sensor}</strong></td>
-                                <td>${ticker}</td>
-                                <td class="${outcome === 'DETECTED' ? 'outcome-pass' : 'outcome-drop'}">${outcome}</td>
-                                <td>${stage}</td>
-                                <td style="max-width:400px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${manifest.headline || ''}</td>`;
-                
-                let timingsHtml = Object.entries(perf).map(([s, val]) => `<li><strong>${s}:</strong> <span>${val} ms</span></li>`).join('');
-                if(!timingsHtml) timingsHtml = '<li class="empty-note">No timings recorded.</li>';
-
-                const dTr = document.createElement('tr');
-                dTr.id = 'detail-' + index;
-                dTr.className = 'decision-report-row';
-                dTr.innerHTML = `
-                    <td colspan="6" style="padding: 0;">
-                        <div class="decision-report">
-                            <div class="dr-block">
-                                <h4>Manifest Identifiers & Lineage</h4>
-                                <ul class="dr-list">
-                                    <li><strong>Decision ID:</strong> <span>${reg.decision_id || 'Legacy-Data'}</span></li>
-                                    <li><strong>Core Event ID:</strong> <span>${reg.event_id || 'Legacy-Data'}</span></li>
-                                    <li><strong>Config Manifest:</strong> <span>${reg.configuration_manifest_hash || 'SSR-CFG-LEGACY'}</span></li>
-                                </ul>
-                                <h4 style="margin-top:16px;">Execution Timings (ms)</h4>
-                                <ul class="dr-list">
-                                    ${timingsHtml}
-                                </ul>
-                            </div>
-                        </div>
-                    </td>
-                `;
-                
-                tbody.appendChild(tr);
-                tbody.appendChild(dTr);
-            });
-        }
-    </script></body></html>"""
-    
-    html = html.replace("__BASE_CSS__", BASE_CSS).replace("__SORT_JS__", SORT_JS).replace("__ARCHIVE_CSS__", archive_css).replace("__NAV__", render_nav("archive"))
-    os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    with open(output_path, "w", encoding="utf-8") as f: f.write(html)
 
 def generate_ontology_debug_html(output_path):
     debug_css = """

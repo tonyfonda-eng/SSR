@@ -24,9 +24,9 @@ except ImportError:
     export_screening_log = export_screening_json
 
 from src.html_generator import (
-    generate_archive_html, generate_dashboard_html,
+    generate_dashboard_html,
     generate_decision_analytics_html, generate_screening_log_html,
-    generate_ontology_debug_html, generate_pipeline_health_html
+    generate_pipeline_health_html
 )
 
 from src.ingestion.scrapers import fetch_all_feeds
@@ -567,9 +567,7 @@ def main():
             generate_dashboard_html([], "docs/index.html", health_payload)
             generate_pipeline_health_html("docs/pipeline_health.html", health_payload)
             generate_decision_analytics_html("docs/decision_analytics.html", health_payload)
-            generate_archive_html("docs/archive.html")
-            generate_screening_log_html("docs/screening_log.html")
-            generate_ontology_debug_html("docs/ontology_debug.html")
+            generate_screening_log_html("docs/archive.html")
             logger.info("[SUCCESS] All institutional HTML dashboards rebuilt in docs/")
         except Exception as e:
             logger.error(f"Frontend Data & HTML Export failed: {e}")
