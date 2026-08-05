@@ -197,9 +197,9 @@ def stage_python_ticker_lookup(article: dict, ctx: dict) -> tuple:
     return True, "passed"
 
 def stage_entity_confidence_gate(article: dict, ctx: dict) -> tuple:
-    """Blocks execution if deterministic extraction yields garbage."""
+    """Blocks execution if deterministic/AI extraction yields garbage."""
     issuer = article.get("_deterministic_issuer", "UNKNOWN")
-    ticker = article.get("_deterministic_ticker", "UNKNOWN")
+    ticker = article.get("_ai_ticker", "UNKNOWN")
     
     if ticker == "UNKNOWN" and issuer == "UNKNOWN":
         return False, "dropped_entity_missing_both"
@@ -375,10 +375,10 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
             "dedupe_hash", "dedupe_issuer_memory", "exclude_global_keywords", 
             "exclude_issuer_feed", "exclude_source_specific", "ontology_concepts", 
             "ontology_status", "document_scoring", "regex_rules", 
-            "python_issuer_extraction", "python_ticker_lookup", "entity_confidence_gate",
-            "financial_market_cap", "tradeability_check", "financial_t12_floor", 
-            "options_chain_check", "liquidity_check", "playbook_eligibility_check",
-            "ai_ticker_resolution", "ai_event_classification", "ai_confidence_gate"
+            "python_issuer_extraction", "python_ticker_lookup", "ai_ticker_resolution",
+            "entity_confidence_gate", "financial_market_cap", "tradeability_check", 
+            "financial_t12_floor", "options_chain_check", "liquidity_check", 
+            "playbook_eligibility_check", "ai_event_classification", "ai_confidence_gate"
         ]
 
     stage_timings = {}
