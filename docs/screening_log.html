@@ -156,7 +156,7 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 const outcomeCls = r.outcome === 'PASSED' ? 'outcome-passed' : 'outcome-dropped';
                 const reasonHtml = r.drop_reason ? `<span class="reason-tag">${r.drop_reason}</span>` : '';
                 const modeCls = r.ingestion_mode === 'HTML_FALLBACK' ? 'mode-fallback' : 'mode-rss';
-                const modeLabel = r.ingestion_mode === 'HTML_FALLBACK' ? 'FALLBACK' : (r.ingestion_mode || '');
+                const modeLabel = r.ingestion_mode === 'HTML_FALLBACK' ? 'FALLBACK' : (r.ingestion_mode || 'RSS');
                 
                 tr.innerHTML = `<td>${r.timestamp || ''}</td>
                                 <td>${r.source || 'Unknown'}</td>

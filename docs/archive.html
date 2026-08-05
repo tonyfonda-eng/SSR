@@ -148,17 +148,17 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                                 <td>${stage}</td>
                                 <td class="metric-val">${confStr}</td>`;
                 
-                let suppHtml = prov.supporting_evidence.map(e => `
+                let suppHtml = (prov.supporting_evidence || []).map(e => `
                     <div class="evidence-for">
-                        <div style="font-size:0.8em; color:var(--muted); text-transform:uppercase;">${e.component || e.stage} (Wt: ${e.weight || e.confidence_weight || 1.0})</div>
-                        <div>${e.assertion || e.assertion_key}</div>
+                        <div style="font-size:0.8em; color:var(--muted); text-transform:uppercase;">${e.component || e.stage || 'Stage'} (Wt: ${e.weight || e.confidence_weight || 1.0})</div>
+                        <div>${e.assertion || e.assertion_key || ''}</div>
                     </div>`).join('');
                 if(!suppHtml) suppHtml = '<div class="empty-note">No supporting causal links recorded.</div>';
 
-                let oppHtml = prov.opposing_evidence.map(e => `
+                let oppHtml = (prov.opposing_evidence || []).map(e => `
                     <div class="evidence-against">
-                        <div style="font-size:0.8em; color:var(--muted); text-transform:uppercase;">${e.component || e.stage} (Wt: ${e.weight || e.confidence_weight || 1.0})</div>
-                        <div>${e.assertion || e.assertion_key}</div>
+                        <div style="font-size:0.8em; color:var(--muted); text-transform:uppercase;">${e.component || e.stage || 'Stage'} (Wt: ${e.weight || e.confidence_weight || 1.0})</div>
+                        <div>${e.assertion || e.assertion_key || ''}</div>
                     </div>`).join('');
                 if(!oppHtml && manifest.reason) {
                     oppHtml = `<div class="evidence-against"><div>Legacy Termination: ${manifest.reason}</div></div>`;
