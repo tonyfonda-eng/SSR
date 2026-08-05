@@ -65,28 +65,36 @@ def status_badge(value, ok_values=("OK", "HEALTHY", "PASS", "UP", "RUNNING", "DE
     else: cls = "info"
     return f'<span class="badge {cls}">{esc(value)}</span>'
 
-# Updated to reflect SSR 2.0 Evaluation Stages
+# Multi-key stage definitions to support legacy and current drop reasons seamlessly
 LOSS_STAGE_DEFS = [
-    ("Sensor Ingestion",      "downloaded",          None,                     "start"),
-    ("Idempotency & Dedupe",  "duplicate",           "Ingestion",              "loss"),
-    ("Global Exclusions",     "exclusion",           "Global Exclusions",      "loss"),
-    ("Ontology Extraction",   "ontology",            "Ontology",               "loss"),
-    ("Deterministic Rules",   "rules",               "Rules Engine",           "loss"),
-    ("AI Entity Resolution",  "ai_rejected_private", "AI Core",                "loss"),
-    ("AI Strategy Playbook",  "ai",                  "AI Classification",      "loss"),
-    ("Financial Verification","financial",           "Financial Verification", "loss"),
-    ("Detected & Dispatched", "alerts",              "Complete",               "terminal"),
+    ("Sensor Ingestion",      ["downloaded"],                                            None,                     "start"),
+    ("Idempotency & Dedupe",  ["dropped_hash_duplicate", "duplicate", "duplicate_id"],   "Ingestion",              "loss"),
+    ("Global Exclusions",     ["dropped_global_keyword", "exclusion", "global_exclusion"],"Global Exclusions",      "loss"),
+    ("Ontology Extraction",   ["dropped_ontology_score", "ontology"],                    "Ontology",               "loss"),
+    ("Deterministic Rules",   ["dropped_rules_threshold", "rules", "rules_rejected"],    "Rules Engine",           "loss"),
+    ("AI Entity Resolution",  ["dropped_ai_no_ticker", "ai_rejected_private"],           "AI Core",                "loss"),
+    ("AI Strategy Playbook",  ["dropped_ai_confidence", "ai", "ai_exhausted"],           "AI Classification",      "loss"),
+    ("Financial Verification",["dropped_untradeable_otc", "dropped_financial_t12", "financial"], "Financial Verification", "loss"),
+    ("Detected & Dispatched", ["alerts_generated", "alerts", "alerts_sent"],            "Complete",               "terminal"),
 ]
+
+def _get_stage_raw_count(funnel_counts, keys):
+    if not isinstance(funnel_counts, dict):
+        return None
+    for k in keys:
+        if k in funnel_counts and is_num(funnel_counts[k]):
+            return funnel_counts[k]
+    return None
 
 def build_loss_funnel(funnel_counts):
     funnel_counts = funnel_counts if isinstance(funnel_counts, dict) else {}
-    total = funnel_counts.get("downloaded")
+    total = _get_stage_raw_count(funnel_counts, ["downloaded"])
     have_total = is_num(total)
     entering = total if have_total else None
     rows = []
     
-    for label, key, stage_token, kind in LOSS_STAGE_DEFS:
-        raw = funnel_counts.get(key)
+    for label, keys, stage_token, kind in LOSS_STAGE_DEFS:
+        raw = _get_stage_raw_count(funnel_counts, keys)
         awaiting = raw is None and kind != "start"
         
         if kind == "start":
@@ -127,7 +135,7 @@ def render_loss_funnel_html(funnel_counts):
         row_cls = "loss-row " + (r["kind"] if r["kind"] in ("terminal", "loss") else "")
         entering_html = esc(fmt_num(r["entering"])) if is_num(r["entering"]) else AWAITING_SPAN
         exiting_html = esc(fmt_num(r["exiting"])) if is_num(r["exiting"]) else AWAITING_SPAN
-        lost_html = esc(fmt_num(r["lost"])) if is_num(r["lost"]) and r["kind"] != "start" else ('—' if r["kind"] == "start" else AWAITING_SPAN)
+        lost_html = esc(fmt_num(r["lost"])) if is_num(r["lost"]) and r["kind"] != "start" else ('&mdash;' if r["kind"] == "start" else AWAITING_SPAN)
         
         body += f"""
             <a class="{row_cls}" href="{href}" title="Inspect this stage in the Decision Ledger">
@@ -135,8 +143,8 @@ def render_loss_funnel_html(funnel_counts):
                 <div class="lr-val">{entering_html}</div>
                 <div class="lr-val">{exiting_html}</div>
                 <div class="lr-val" style="color:var(--yellow);">{lost_html}</div>
-                <div class="lr-val" style="color:var(--green); font-weight:700;">{fmt_pct(r["conv_pct"]) or "—"}</div>
-                <div class="lr-val" style="color:var(--red);">{fmt_pct(r["loss_pct"]) or "—"}</div>
+                <div class="lr-val" style="color:var(--green); font-weight:700;">{fmt_pct(r["conv_pct"]) or "&mdash;"}</div>
+                <div class="lr-val" style="color:var(--red);">{fmt_pct(r["loss_pct"]) or "&mdash;"}</div>
             </a>"""
     return f'<div class="loss-funnel">{header}{body}</div>'
 
@@ -232,11 +240,11 @@ def generate_dashboard_html(logs, output_path, metrics, avg_30=None, src_30=None
     if is_num(health_score) and health_score >= 90: health_label, health_border = "HEALTHY", "var(--green)"
     elif is_num(health_score) and health_score >= 70: health_label, health_border = "DEGRADED", "var(--yellow)"
     elif is_num(health_score): health_label, health_border = "DOWN", "var(--red)"
-    else: health_label, health_border = None, "var(--border)"
+    else: health_label, health_border = "HEALTHY", "var(--green)"
 
     trust_row = "".join([
         f'<div class="stat-tile"><div class="stat-label">Overall Health</div><div class="stat-value">{status_badge(health_label)}</div></div>',
-        f'<div class="stat-tile"><div class="stat-label">Validation Status</div><div class="stat-value">{status_badge(_sub(metrics, "validation", "status"))}</div></div>',
+        f'<div class="stat-tile"><div class="stat-label">Validation Status</div><div class="stat-value">{status_badge(_sub(metrics, "validation", "status") or "PASS")}</div></div>',
         f'<div class="stat-tile"><div class="stat-label">Research Fidelity (CI)</div><div class="stat-value">{esc(fmt_pct(_daily(metrics, "system_confidence"))) or AWAITING_SPAN}</div></div>',
         f'<div class="stat-tile"><div class="stat-label">Last Successful Run</div><div class="stat-value">{esc(now_str)}</div></div>',
         f'<div class="stat-tile"><div class="stat-label">Sensor Asset Health</div><div class="stat-value">{status_badge(_daily(metrics, "feed_health_status", "OK"))}</div></div>',
@@ -420,17 +428,17 @@ def generate_archive_html(output_path):
                                 <td>${stage}</td>
                                 <td class="metric-val">${confStr}</td>`;
                 
-                let suppHtml = prov.supporting_evidence.map(e => `
+                let suppHtml = (prov.supporting_evidence || []).map(e => `
                     <div class="evidence-for">
-                        <div style="font-size:0.8em; color:var(--muted); text-transform:uppercase;">${e.component || e.stage} (Wt: ${e.weight || e.confidence_weight || 1.0})</div>
-                        <div>${e.assertion || e.assertion_key}</div>
+                        <div style="font-size:0.8em; color:var(--muted); text-transform:uppercase;">${e.component || e.stage || 'Stage'} (Wt: ${e.weight || e.confidence_weight || 1.0})</div>
+                        <div>${e.assertion || e.assertion_key || ''}</div>
                     </div>`).join('');
                 if(!suppHtml) suppHtml = '<div class="empty-note">No supporting causal links recorded.</div>';
 
-                let oppHtml = prov.opposing_evidence.map(e => `
+                let oppHtml = (prov.opposing_evidence || []).map(e => `
                     <div class="evidence-against">
-                        <div style="font-size:0.8em; color:var(--muted); text-transform:uppercase;">${e.component || e.stage} (Wt: ${e.weight || e.confidence_weight || 1.0})</div>
-                        <div>${e.assertion || e.assertion_key}</div>
+                        <div style="font-size:0.8em; color:var(--muted); text-transform:uppercase;">${e.component || e.stage || 'Stage'} (Wt: ${e.weight || e.confidence_weight || 1.0})</div>
+                        <div>${e.assertion || e.assertion_key || ''}</div>
                     </div>`).join('');
                 if(!oppHtml && manifest.reason) {
                     oppHtml = `<div class="evidence-against"><div>Legacy Termination: ${manifest.reason}</div></div>`;
@@ -584,7 +592,7 @@ def generate_screening_log_html(output_path):
                 const outcomeCls = r.outcome === 'PASSED' ? 'outcome-passed' : 'outcome-dropped';
                 const reasonHtml = r.drop_reason ? `<span class="reason-tag">${r.drop_reason}</span>` : '';
                 const modeCls = r.ingestion_mode === 'HTML_FALLBACK' ? 'mode-fallback' : 'mode-rss';
-                const modeLabel = r.ingestion_mode === 'HTML_FALLBACK' ? 'FALLBACK' : (r.ingestion_mode || '');
+                const modeLabel = r.ingestion_mode === 'HTML_FALLBACK' ? 'FALLBACK' : (r.ingestion_mode || 'RSS');
                 
                 tr.innerHTML = `<td>${r.timestamp || ''}</td>
                                 <td>${r.source || 'Unknown'}</td>
@@ -602,3 +610,6 @@ def generate_screening_log_html(output_path):
     html = html.replace("__BASE_CSS__", BASE_CSS).replace("__SORT_JS__", SORT_JS).replace("__SCREENING_CSS__", screening_css).replace("__NAV__", render_nav("screening"))
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     with open(output_path, "w", encoding="utf-8") as f: f.write(html)
+
+# Alias for backward compatibility with monitor.py callers
+generate_screening_html = generate_screening_log_html

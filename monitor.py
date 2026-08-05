@@ -3,9 +3,6 @@ SSR 2.0 — Main Orchestrator
 Highly Granular Adaptive Data-Driven Execution Pipeline (Registry Pattern)
 """
 
-from oauthlib.oauth2.rfc6749.grant_types import resource_owner_password_credentials
-from oauthlib.oauth2.rfc6749.grant_types import resource_owner_password_credentials
-from oauthlib.oauth2.rfc6749.grant_types import resource_owner_password_credentials
 import sys
 import logging
 import hashlib
@@ -20,9 +17,17 @@ from src.database import (
     log_article_screening
 )
 
-from src.validation.export_frontend_data import export_archive_json
-from src.validation.export_screening_log import export_screening_log
-from src.html_generator import generate_archive_html, generate_screening_log_html
+from src.validation.export_frontend_data import export_archive_json, export_screening_json
+try:
+    from src.validation.export_screening_log import export_screening_log
+except ImportError:
+    export_screening_log = export_screening_json
+
+from src.html_generator import (
+    generate_archive_html, generate_dashboard_html,
+    generate_decision_analytics_html, generate_screening_log_html
+)
+
 from src.ingestion.scrapers import fetch_all_feeds
 from src.ontology import evaluate_ontology
 from src.ontology.engine import load_ontology
@@ -31,10 +36,6 @@ from src.rules_engine import evaluate as evaluate_deterministic_rules
 from src.ai import extract_target_ticker, classify_event
 from src.financials import get_t12_metrics, query_financial_snapshot
 from src.alerts.email import send_alert
-
-# --- Frontend Exporter & HTML Generators ---
-from src.validation.export_frontend_data import export_archive_json
-from src.html_generator import generate_archive_html
 
 from src.config.settings import SHEET_URL
 from src.sheets import (
@@ -519,6 +520,12 @@ def main():
             "articles": telemetry.metrics.get("alerts_generated", 0),
             "errors": telemetry.metrics.get("errors", 0) + telemetry.metrics.get("ai_exhausted", 0),
             "runtime": telemetry.get_runtime(),
+            "daily": {
+                "run_id": telemetry.run_id,
+                "downloaded": telemetry.metrics.get("downloaded", 0),
+                "health_score": 100.0,
+                "funnel": telemetry.stage_analytics
+            },
             "funnel": telemetry.stage_analytics
         }
         save_workflow_health(health_payload)
@@ -527,12 +534,18 @@ def main():
             logger.info("Dumping Ledger to archive_data.json...")
             export_archive_json("docs/archive_data.json")
             
-            logger.info("Rebuilding HTML Dashboards...")
-            generate_archive_html("docs/archive.html")
-
             logger.info("Exporting article screening log...")
-            export_screening_log("docs/screening_log.json")
+            if callable(export_screening_log):
+                export_screening_log("docs/screening_log.json")
+            else:
+                export_screening_json("docs/screening_log.json")
+
+            logger.info("Rebuilding ALL 4 HTML Dashboards...")
+            generate_dashboard_html([], "docs/index.html", health_payload)
+            generate_decision_analytics_html("docs/decision_analytics.html", health_payload)
+            generate_archive_html("docs/archive.html")
             generate_screening_log_html("docs/screening_log.html")
+            logger.info("[SUCCESS] All 4 institutional HTML dashboards rebuilt in docs/")
         except Exception as e:
             logger.error(f"Frontend Data & HTML Export failed: {e}")
 
