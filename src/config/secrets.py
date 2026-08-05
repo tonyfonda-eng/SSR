@@ -2,33 +2,24 @@ import os
 import json
 import ast
 import re
+import warnings
 
 # Gmail API & SMTP Credentials
 GMAIL_USER = os.environ.get("GMAIL_USER", "your-email@gmail.com")
 GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "your-app-password")
 
-
 def _sanitize_private_key(raw_pk: str) -> str:
-    """Normalize and repair a possibly-escaped or corrupted PEM private key.
-
-    This routine:
-    - Converts common escaped newline sequences to real newlines.
-    - Unwraps JSON/Python quoting layers if present.
-    - Extracts the base64 body and removes any non-base64 characters (including stray backslashes).
-    - Re-wraps the base64 into 64-character lines and reconstructs a canonical PEM.
-    - Validates the result by attempting to parse it with cryptography.
-    """
+    """Normalize and repair a possibly-escaped or corrupted PEM private key."""
     if isinstance(raw_pk, bytes):
         pk = raw_pk.decode("utf-8", "strict")
     else:
         pk = str(raw_pk)
 
-    # Trim and remove accidental surrounding quotes
     pk = pk.strip()
     if (pk.startswith('"') and pk.endswith('"')) or (pk.startswith("'") and pk.endswith("'")):
         pk = pk[1:-1]
 
-    # Unwrap common escape sequences and repeated encoding layers
+    # Unwrap possible JSON/python quoting and collapse escaped newlines
     for _ in range(3):
         prev = pk
         try:
@@ -38,7 +29,10 @@ def _sanitize_private_key(raw_pk: str) -> str:
         except Exception:
             pass
         try:
-            decoded = ast.literal_eval(pk)
+            # FIX: Silence the SyntaxWarning caused by unescaped characters in the PEM key
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", SyntaxWarning)
+                decoded = ast.literal_eval(pk)
             if isinstance(decoded, str):
                 pk = decoded
         except Exception:
@@ -56,7 +50,7 @@ def _sanitize_private_key(raw_pk: str) -> str:
 
     pk = pk.strip()
 
-    # Find header/footer
+    # Extract header/footer and the body between them
     header_match = re.search(r"(-----BEGIN [^\n]+-----)", pk)
     footer_match = re.search(r"(-----END [^\n]+-----)", pk)
     if not header_match or not footer_match:
@@ -65,7 +59,6 @@ def _sanitize_private_key(raw_pk: str) -> str:
     header = header_match.group(1)
     footer = footer_match.group(1)
 
-    # Extract base64 body between header and footer
     body_match = re.search(r"-----BEGIN [^\n]+-----\s*(.*?)\s*-----END [^\n]+-----", pk, re.S)
     if not body_match:
         raise ValueError("private_key PEM body not found")
@@ -74,16 +67,14 @@ def _sanitize_private_key(raw_pk: str) -> str:
 
     # Remove any characters that are not valid in base64
     body_clean = re.sub(r"[^A-Za-z0-9+/=]", "", body)
-
     if not body_clean:
         raise ValueError("private_key PEM body empty after cleaning")
 
-    # Re-wrap into 64-character lines
+    # Re-wrap into 64-character lines (standard PEM formatting)
     wrapped = "\n".join([body_clean[i:i+64] for i in range(0, len(body_clean), 64)])
-
     pk_clean = f"{header}\n{wrapped}\n{footer}\n"
 
-    # Validate by attempting to parse (fails fast with clear error)
+    # Validate by attempting to parse it
     try:
         from cryptography.hazmat.primitives.serialization import load_pem_private_key
         from cryptography.hazmat.backends import default_backend
@@ -93,39 +84,25 @@ def _sanitize_private_key(raw_pk: str) -> str:
 
     return pk_clean
 
-
 def get_google_service_account():
-    """Return a credentials dict for a Google service account.
-
-    Sources checked (in order):
-    - Environment variable GOOGLE_SERVICE_ACCOUNT_JSON (raw or double-encoded JSON)
-    - Local files: google_credentials.json, secure_google_credentials.json two levels up
-
-    The returned dict will have a sanitized "private_key" suitable for google-auth.
-    """
     creds_dict = None
-
-    env_raw = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON", "").strip()
-    if env_raw:
-        try:
-            parsed = json.loads(env_raw)
-            if isinstance(parsed, str):
-                try:
-                    creds_dict = json.loads(parsed)
-                except json.JSONDecodeError:
-                    try:
-                        creds_dict = ast.literal_eval(parsed)
-                    except Exception:
-                        creds_dict = parsed
-            else:
-                creds_dict = parsed
-        except json.JSONDecodeError:
+    
+    # Production / GitHub Actions: Load from Environment with robust fallback parsing
+    env_json = os.environ.get("GOOGLE_SERVICE_ACCOUNT_JSON", "").strip()
+    if env_json:
+        if env_json.startswith("{") and env_json.endswith("}"):
             try:
-                creds_dict = ast.literal_eval(env_raw)
-            except Exception:
-                creds_dict = env_raw
-
-    # Local file fallback
+                creds_dict = json.loads(env_json)
+            except json.JSONDecodeError:
+                try:
+                    # FIX: Silence the SyntaxWarning for bad decimal literals in the JSON string
+                    with warnings.catch_warnings():
+                        warnings.simplefilter("ignore", SyntaxWarning)
+                        creds_dict = ast.literal_eval(env_json)
+                except Exception:
+                    pass
+    
+    # Local / Agent Fallback: Load from ignored JSON file
     if not creds_dict:
         for filename in ["google_credentials.json", "secure_google_credentials.json", "credentials.json"]:
             local_key_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), filename)
@@ -139,19 +116,6 @@ def get_google_service_account():
                 
     if not creds_dict:
         raise ValueError("Google Service Account credentials not found in environment or local credential files.")
-
-    # Coerce to dict if it's still a string
-    if isinstance(creds_dict, str):
-        try:
-            creds_dict = json.loads(creds_dict)
-        except Exception:
-            try:
-                creds_dict = ast.literal_eval(creds_dict)
-            except Exception:
-                pass
-
-    if not isinstance(creds_dict, dict):
-        raise ValueError("Failed to parse Google service account credentials into a dict")
 
     if "private_key" in creds_dict:
         creds_dict["private_key"] = _sanitize_private_key(creds_dict["private_key"])
