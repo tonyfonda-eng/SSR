@@ -20,9 +20,9 @@ class SedarScraper:
     """Dedicated scraper for SEDAR+ Canadian regulatory filings and prospectuses."""
     
     @staticmethod
-    def get_latest_articles(rss_url=None):
+    def get_latest_articles(**kwargs):
         print("[SEDAR+ SCRAPER] Polling Canadian regulatory filings...")
-        target_url = rss_url or "https://www.sedarplus.ca/csa-party/rss/latest_filings.rss"
+        target_url = kwargs.get('url') or kwargs.get('rss_url') or "https://www.sedarplus.ca/csa-party/rss/latest_filings.rss"
         articles = []
         try:
             headers = {"User-Agent": "Mozilla/5.0"}
