@@ -19,7 +19,8 @@ class EdgarScraper(SourceScraper):
         articles = []
         checkpoint = kwargs.get("checkpoint")
         
-        for page in range(200):
+        page = 0
+        while True:
             start = page * 100
             url = f"https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&type={self.FILING_TYPE}&company=&dateb=&owner=include&start={start}&count=100&output=atom"
             
@@ -45,17 +46,12 @@ class EdgarScraper(SourceScraper):
                         "published": getattr(entry, "published", getattr(entry, "updated", ""))
                     })
                     
-                    if len(articles) >= 20000:
-                        print(f"[CRITICAL] Edgar {self.FILING_TYPE} hit emergency 20,000 article limit!")
-                        return articles
-                        
                 time.sleep(1)
+                page += 1
             except Exception as e:
                 print(f"[ERROR] Edgar fetch failed on page {page+1} for {self.FILING_TYPE}: {e}")
                 break
                 
-        if page == 199:
-            print(f"[CRITICAL] Edgar {self.FILING_TYPE} hit emergency 200 page limit without finding checkpoint.")
         return articles
 
     def get_article_body(self, url):
