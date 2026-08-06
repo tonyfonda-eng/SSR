@@ -10,7 +10,7 @@ def _dict_factory(cursor, row):
         d[col[0]] = row[idx]
     return d
 
-def export_screening_log(filepath="docs/screening_log.json", limit=10000):
+def export_screening_log(filepath="docs/screening_log.json", limit=1000):
     """
     Exports the most recent N screened articles (passed AND dropped) so the
     dashboard can show exactly what the pipeline looked at and what happened to it.
@@ -27,6 +27,7 @@ def export_screening_log(filepath="docs/screening_log.json", limit=10000):
             LIMIT ?
         """, (limit,))
         rows = cursor.fetchall()
+        rows = rows[:1000]
         conn.close()
 
         os.makedirs(os.path.dirname(os.path.abspath(filepath)), exist_ok=True)
