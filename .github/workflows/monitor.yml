@@ -28,8 +28,9 @@ jobs:
           path: |
             ssr_cache.sqlite
             ssr_observability.db
-          key: ssr-database-${{ github.sha }}
+          key: ssr-database-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
           restore-keys: |
+            ssr-database-${{ github.sha }}-
             ssr-database-
 
       - name: Set up Python
@@ -84,7 +85,7 @@ jobs:
           path: |
             ssr_cache.sqlite
             ssr_observability.db
-          key: ssr-database-${{ github.sha }}
+          key: ssr-database-${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
 
       - name: Generate HTML Dashboard
         if: always()
