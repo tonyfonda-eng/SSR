@@ -41,20 +41,25 @@ def build_dataset():
         
         # Grab 25 True Positives (Alerts)
         cur.execute("""
-            SELECT el.decision_id, er.article_hash, er.raw_payload_blob, el.detection_outcome, ai.semantic_interpretation
+            SELECT el.decision_id, er.article_hash, er.raw_payload_blob, el.detection_outcome, el.ontology_metadata
             FROM evaluation_ledger el
             JOIN event_registry er ON el.event_id = er.event_id
-            LEFT JOIN ai_core_inference ai ON el.decision_id = ai.decision_id
             WHERE el.detection_outcome IN ('DETECTED', 'DISPATCHED')
             ORDER BY el.runtime_timestamp DESC LIMIT 25
         """)
         for row in cur.fetchall():
+            try:
+                meta = json.loads(row["ontology_metadata"] or "{}")
+                strategy = meta.get("classification", "Unknown")
+            except:
+                strategy = "Unknown"
+                
             cases.append({
                 "case_id": row["decision_id"],
                 "article_hash": row["article_hash"],
                 "raw_text": row["raw_payload_blob"].decode('utf-8', errors='ignore') if row["raw_payload_blob"] else "",
                 "expected_outcome": "DETECTED",
-                "expected_strategy": row["semantic_interpretation"] or "Unknown",
+                "expected_strategy": strategy,
                 "human_rationale": "Historical True Positive extracted from ledger."
             })
             
