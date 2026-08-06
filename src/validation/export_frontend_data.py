@@ -43,9 +43,10 @@ def export_archive_json(filepath="docs/archive_data.json"):
                 FROM evaluation_ledger e
                 LEFT JOIN factual_metadata f ON e.decision_id = f.decision_id
                 ORDER BY e.runtime_timestamp DESC
-                LIMIT 50000
+                LIMIT 1000
             """)
             rows = cursor.fetchall()
+            rows = rows[:1000]
             for r in rows:
                 try:
                     ontology_meta = json.loads(r.get("ontology_metadata") or "{}")
@@ -100,7 +101,7 @@ def export_archive_json(filepath="docs/archive_data.json"):
         return False
 
 
-def export_screening_log(filepath="docs/screening_log.json", limit=20000):
+def export_screening_log(filepath="docs/screening_log.json", limit=1000):
     """
     Exports the most recent N screened articles (passed AND dropped) so the
     dashboard can show exactly what the pipeline looked at and what happened to it.
@@ -118,6 +119,7 @@ def export_screening_log(filepath="docs/screening_log.json", limit=20000):
                 LIMIT ?
             """, (limit,))
             rows = cursor.fetchall()
+            rows = rows[:1000]
         except sqlite3.OperationalError as e:
             print(f"[EXPORT WARN] Could not query article_screening_log: {e}")
             
