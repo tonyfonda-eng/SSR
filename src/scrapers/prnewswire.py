@@ -64,9 +64,7 @@ class PRNewsWireScraper(SourceScraper):
         
         self.scrape_metadata = {
             "pages_visited": 0,
-            "page_limit": 200,
             "checkpoint_found": False,
-            "emergency_stop": False,
             "duplicate_page_detected": False,
             "http_failures": 0,
             "reason": ""
@@ -79,7 +77,6 @@ class PRNewsWireScraper(SourceScraper):
             ("Industrial", "heavy-industry-manufacturing-latest-news/heavy-industry-manufacturing-latest-news-list")
         ]
         
-        pages_per_category = max(1, self.scrape_metadata["page_limit"] // len(CATEGORIES))
         seen_ids = set()
         
         for cat_name, cat_path in CATEGORIES:
@@ -88,7 +85,8 @@ class PRNewsWireScraper(SourceScraper):
             cat_checkpoint_found = False
             first_url = None
             
-            for page in range(1, pages_per_category + 1):
+            page = 1
+            while True:
                 self.scrape_metadata["pages_visited"] += 1
                 url = f"https://www.prnewswire.com/news-releases/{cat_path}/?page={page}&pagesize=100"
                 
@@ -172,6 +170,7 @@ class PRNewsWireScraper(SourceScraper):
                         break
                         
                     time.sleep(1)
+                    page += 1
                 except Exception as e:
                     self.scrape_metadata["http_failures"] += 1
                     print(f"[WARNING] PR Newswire {cat_name} page {page} failed: {e}")
