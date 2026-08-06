@@ -32,7 +32,8 @@ class EntityRole:
     ticker: str
     is_public: bool
     role: str
-    confidence: float
+    extraction_confidence: float
+    role_confidence: float
 
 @dataclass
 class ParsedEntities:
@@ -140,21 +141,22 @@ def interpret_strategy(parsed_data: ParsedAIPayload) -> SemanticInterpretation:
 
 def extract_entities_and_roles(body_text: str, router=None) -> ParsedEntities:
     """
-    Extracts all mentioned organisations and explicitly assigns them roles 
-    (acquirer, target, seller, etc.) with a confidence score.
+    Extracts the Transaction Graph: all mentioned organisations, explicitly assigns them roles 
+    (acquirer, target, seller, etc.) with dual confidence scores.
     """
-    prompt = f"""Analyze this corporate text and identify ALL organisations mentioned.
-    Assign each a role (e.g., 'acquirer', 'target', 'seller', 'adviser', 'lender', 'issuer').
+    prompt = f"""Analyze this corporate text and build a Transaction Graph of ALL organisations mentioned.
+    Assign each a role (e.g., 'acquirer', 'target', 'seller', 'adviser', 'financing', 'competitor', 'supplier', 'shareholder', 'holding company', 'issuer').
     Indicate whether each entity is public or private. Extract their ticker symbols if public.
-    Include a confidence score (0.0 to 1.0) for each entity extraction.
+    Include an 'extraction_confidence' (0.0 to 1.0) on whether the entity exists in the text.
+    Include a 'role_confidence' (0.0 to 1.0) on whether you correctly assigned the role.
     
     Text: {body_text[:4000]}
     
     Respond STRICTLY in this JSON format:
     {{
         "entities": [
-            {{"name": "Company A", "ticker": "XYZ", "is_public": true, "role": "acquirer", "confidence": 0.99}},
-            {{"name": "Company B", "ticker": null, "is_public": false, "role": "target", "confidence": 0.95}}
+            {{"name": "Company A", "ticker": "XYZ", "is_public": true, "role": "acquirer", "extraction_confidence": 0.99, "role_confidence": 0.93}},
+            {{"name": "Company B", "ticker": null, "is_public": false, "role": "target", "extraction_confidence": 0.99, "role_confidence": 0.95}}
         ]
     }}"""
     
@@ -173,7 +175,8 @@ def extract_entities_and_roles(body_text: str, router=None) -> ParsedEntities:
                 ticker=str(ticker_val).upper().replace('$', '') if ticker_val else None,
                 is_public=bool(e.get("is_public", False)),
                 role=e.get("role", "unknown"),
-                confidence=float(e.get("confidence", 0.0))
+                extraction_confidence=float(e.get("extraction_confidence", 0.0)),
+                role_confidence=float(e.get("role_confidence", 0.0))
             ))
             
         return ParsedEntities(
@@ -226,9 +229,18 @@ def classify_event(body_text: str, matches: list, ticker: str = None, market_cap
 
     prompt = f"""Analyze this corporate text and the associated rule triggers.
     Categorize the event into EXACTLY ONE of these families:
-    - Cash Merger
+    - Merger
+    - Acquisition
+    - Spin-off
+    - Tender
+    - Joint Venture
+    - Restructuring
+    - Distressed Sale
+    - Asset Purchase
+    - Take-private
+    - Minority Investment
+    - Strategic Partnership
     - Resumption of Trading
-    - M&A Naked Call Strategy
     - Unknown
     - False Positive
     
