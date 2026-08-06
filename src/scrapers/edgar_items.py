@@ -141,17 +141,12 @@ class EdgarItemScraper(SourceScraper):
                         "published": getattr(entry, "published", getattr(entry, "updated", ""))
                     })
                     
-                    if len(articles) >= 20000:
-                        print(f"[CRITICAL] Edgar Items hit emergency 20,000 article limit!")
-                        return articles
-                        
                 time.sleep(1)
+                page += 1
             except Exception as e:
                 print(f"[ERROR] EDGAR 8-K Items Atom fetch failed on page {page+1}: {e}")
                 break
                 
-        if page == 199:
-            print(f"[CRITICAL] Edgar Items hit emergency 200 page limit without finding checkpoint.")
         return articles
 
     def get_article_body(self, url):
