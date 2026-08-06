@@ -131,6 +131,23 @@ def init_db():
 
     r_conn.execute("CREATE INDEX IF NOT EXISTS idx_screening_timestamp ON article_screening_log(timestamp DESC);")
     
+    # --- V4 Event Ledger ---
+    r_conn.execute("""
+        CREATE TABLE IF NOT EXISTS event_ledger (
+            event_id TEXT PRIMARY KEY,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            status TEXT NOT NULL,
+            event_type TEXT NOT NULL,
+            opportunity_score TEXT,
+            confidence_history TEXT,
+            trade_graph TEXT,
+            evidence TEXT,
+            entities TEXT,
+            routing_destination TEXT
+        );
+    """)
+    
     r_conn.commit()
     r_conn.close()
 
@@ -316,6 +333,32 @@ def commit_decision_capsule(capsule_data: dict, manifest_json: dict = None):
         conn.close()
     except Exception as e:
         logger.error(f"[DB FAULT] Capsule commit failed: {e}")
+
+def log_event(event_data: dict):
+    import json
+    conn = sqlite3.connect(RESEARCH_DB_PATH)
+    try:
+        conn.execute("""
+            INSERT OR REPLACE INTO event_ledger (
+                event_id, created_at, updated_at, status, event_type,
+                opportunity_score, confidence_history, trade_graph, evidence, entities, routing_destination
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            event_data["event_id"],
+            event_data["created_at"],
+            event_data["updated_at"],
+            event_data["status"],
+            event_data["event_type"],
+            json.dumps(event_data.get("opportunity_score", {})),
+            json.dumps(event_data.get("confidence_history", [])),
+            json.dumps(event_data.get("trade_graph", [])),
+            json.dumps(event_data.get("evidence", [])),
+            json.dumps(event_data.get("entities", [])),
+            event_data.get("routing_destination", "DROPPED")
+        ))
+        conn.commit()
+    finally:
+        conn.close()
 
 def save_workflow_health(health_data=None):
     try:

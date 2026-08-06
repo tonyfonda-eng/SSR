@@ -16,20 +16,18 @@ from monitor import STAGE_REGISTRY, PipelineTelemetry
 monitor.log_article_screening = lambda *args, **kwargs: None
 monitor.commit_decision_capsule = lambda *args, **kwargs: None
 
-# Disable shadow mode for replay
-os.environ["ENTITY_ENGINE_VERSION"] = "2.1"
+os.environ["ENTITY_ENGINE_VERSION"] = "v4"
 
-# The V2 DAG order
+# The V4 DAG order
 execution_order = [
-    "dedupe_hash", "dedupe_issuer_memory", "exclude_global_keywords", 
-    "exclude_issuer_feed", "exclude_source_specific", "ontology_concepts", 
-    "ontology_status", "document_scoring", "regex_rules", 
-    "python_issuer_extraction", "candidate_generator", "ambiguity_gate", 
-    "ai_entity_resolution", "graph_validation", "ai_event_classification", "ai_confidence_gate", 
-    "investment_universe_mapping", "strategy_selection", "investment_candidate_selection",
-    "entity_confidence_gate", "financial_market_cap", "tradeability_check", 
-    "financial_t12_floor", "options_chain_check", "liquidity_check", 
-    "playbook_eligibility_check"
+    "v4_ingestion",
+    "v4_dedupe",
+    "v4_entity_resolution",
+    "v4_event_classification",
+    "v4_trade_generation",
+    "v4_strategy_validation",
+    "v4_opportunity_score",
+    "v4_routing"
 ]
 
 def load_config_manifest():
@@ -94,18 +92,15 @@ def run_replay():
     def mock_ai_event_classification(article, ctx):
         hl = article.get("headline", "")
         if "Acquires" in hl or "Acquisition" in hl or "Buyout" in hl:
-            article["_ai_classification"] = "merger" 
+            article["_v4_classification"] = "merger" 
         elif "Spin" in hl:
-            article["_ai_classification"] = "spin-off"
+            article["_v4_classification"] = "spin-off"
         elif "Bankrupt" in hl:
-            article["_ai_classification"] = "bankruptcy"
+            article["_v4_classification"] = "bankruptcy"
         else:
-            article["_ai_classification"] = "UNKNOWN"
+            article["_v4_classification"] = "UNKNOWN"
             
-        if "Emerson" in hl:
-            print(f"DEBUG Emerson hl: {hl}, class: {article['_ai_classification']}")
-        
-        article["_ai_confidence"] = 1.0
+        article["_v4_confidence"] = 1.0
         results["ai_calls_simulated"] += 1
         return True, "passed"
         
@@ -129,17 +124,11 @@ def run_replay():
             entities.append({"ticker": article.get("_target_ticker", "UNKNOWN"), "role": "target", "is_public": True, "options_available": True, "extraction_confidence": 0.99, "role_confidence": 0.99})
             
         article["_entities"] = entities
+        article["_ai_invoked"] = True
         return True, "passed"
         
-    def mock_ontology_concepts(article, ctx):
-        hl = article.get("headline", "")
-        if any(kw in hl for kw in ["Emerson", "NetApp", "Veralto", "Newmark"]):
-            return True, "passed"
-        return monitor.stage_ontology_concepts(article, ctx)
-        
-    STAGE_REGISTRY["ontology_concepts"] = mock_ontology_concepts
-    STAGE_REGISTRY["ai_event_classification"] = mock_ai_event_classification
-    STAGE_REGISTRY["ai_entity_resolution"] = mock_ai_entity_resolution
+    STAGE_REGISTRY["v4_event_classification"] = mock_ai_event_classification
+    STAGE_REGISTRY["v4_entity_resolution"] = mock_ai_entity_resolution
 
     for idx, row in enumerate(rows):
         if idx > 0 and idx % 200 == 0:

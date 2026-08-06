@@ -43,6 +43,13 @@ from src.financials import get_t12_metrics, query_financial_snapshot
 from src.alerts.email import send_alert
 import os
 
+from src.v4_pipeline import (
+    stage_v4_ingestion, stage_v4_dedupe, stage_v4_entity_resolution,
+    stage_v4_event_classification, stage_v4_trade_generation,
+    stage_v4_strategy_validation, stage_v4_opportunity_score,
+    stage_v4_routing
+)
+
 from src.config.settings import SHEET_URL
 from src.sheets import (
     load_rules, load_global_exclusions, load_document_type_scores,
@@ -483,6 +490,16 @@ STAGE_REGISTRY = {
     "ai_confidence_gate": stage_ai_confidence_gate,
     "entity_confidence": stage_entity_confidence_gate,
     "playbook_gate": stage_playbook_eligibility_check,
+    
+    # V4 Stages
+    "v4_ingestion": stage_v4_ingestion,
+    "v4_dedupe": stage_v4_dedupe,
+    "v4_entity_resolution": stage_v4_entity_resolution,
+    "v4_event_classification": stage_v4_event_classification,
+    "v4_trade_generation": stage_v4_trade_generation,
+    "v4_strategy_validation": stage_v4_strategy_validation,
+    "v4_opportunity_score": stage_v4_opportunity_score,
+    "v4_routing": stage_v4_routing
 }
 
 def _record_screening(article: dict, telemetry: PipelineTelemetry, outcome: str, final_stage: str, drop_reason: str = None):
@@ -524,36 +541,50 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
         "ai_router": ai_router
     }
     
-    raw_pipeline_sheet = config_manifest.get("pipeline", [])
-    if raw_pipeline_sheet:
-        sorted_stages = sorted([s for s in raw_pipeline_sheet if str(s.get("Active", "TRUE")).upper() == "TRUE"], key=lambda x: int(x.get("Order", 99)))
-        execution_order = [s.get("Stage_ID") for s in sorted_stages]
-        validate_pipeline_dag(execution_order)
+    version = os.environ.get("ENTITY_ENGINE_VERSION", "1")
+    
+    if version == "v4":
+        execution_order = [
+            "v4_ingestion",
+            "v4_dedupe",
+            "v4_entity_resolution",
+            "v4_event_classification",
+            "v4_trade_generation",
+            "v4_strategy_validation",
+            "v4_opportunity_score",
+            "v4_routing"
+        ]
     else:
-        version = os.environ.get("ENTITY_ENGINE_VERSION", "1")
-        if version == "1" or version == "shadow":
-            execution_order = [
-                "dedupe_hash", "dedupe_issuer_memory", "exclude_global_keywords", 
-                "exclude_issuer_feed", "exclude_source_specific", "ontology_concepts", 
-                "ontology_status", "document_scoring", "regex_rules", 
-                "python_issuer_extraction", "python_ticker_lookup", "ai_ticker_resolution",
-                "entity_confidence_gate", "financial_market_cap", "tradeability_check", 
-                "ai_event_classification", "ai_confidence_gate",
-                "financial_t12_floor", "options_chain_check", "liquidity_check", 
-                "playbook_eligibility_check"
-            ]
+        raw_pipeline_sheet = config_manifest.get("pipeline", [])
+        if raw_pipeline_sheet:
+            sorted_stages = sorted([s for s in raw_pipeline_sheet if str(s.get("Active", "TRUE")).upper() == "TRUE"], key=lambda x: int(x.get("Order", 99)))
+            execution_order = [s.get("Stage_ID") for s in sorted_stages]
+            validate_pipeline_dag(execution_order)
         else:
-            execution_order = [
-                "dedupe_hash", "dedupe_issuer_memory", "exclude_global_keywords", 
-                "exclude_issuer_feed", "exclude_source_specific", "ontology_concepts", 
-                "ontology_status", "document_scoring", "regex_rules", 
-                "python_issuer_extraction", "candidate_generator", "ambiguity_gate", 
-                "ai_entity_resolution", "graph_validation", "ai_event_classification", "ai_confidence_gate", 
-                "investment_universe_mapping", "strategy_selection", "investment_candidate_selection",
-                "entity_confidence_gate", "financial_market_cap", "tradeability_check", 
-                "financial_t12_floor", "options_chain_check", "liquidity_check", 
-                "playbook_eligibility_check"
-            ]
+            version = os.environ.get("ENTITY_ENGINE_VERSION", "1")
+            if version == "1" or version == "shadow":
+                execution_order = [
+                    "dedupe_hash", "dedupe_issuer_memory", "exclude_global_keywords", 
+                    "exclude_issuer_feed", "exclude_source_specific", "ontology_concepts", 
+                    "ontology_status", "document_scoring", "regex_rules", 
+                    "python_issuer_extraction", "python_ticker_lookup", "ai_ticker_resolution",
+                    "entity_confidence_gate", "financial_market_cap", "tradeability_check", 
+                    "ai_event_classification", "ai_confidence_gate",
+                    "financial_t12_floor", "options_chain_check", "liquidity_check", 
+                    "playbook_eligibility_check"
+                ]
+            else:
+                execution_order = [
+                    "dedupe_hash", "dedupe_issuer_memory", "exclude_global_keywords", 
+                    "exclude_issuer_feed", "exclude_source_specific", "ontology_concepts", 
+                    "ontology_status", "document_scoring", "regex_rules", 
+                    "python_issuer_extraction", "candidate_generator", "ambiguity_gate", 
+                    "ai_entity_resolution", "graph_validation", "ai_event_classification", "ai_confidence_gate", 
+                    "investment_universe_mapping", "strategy_selection", "investment_candidate_selection",
+                    "entity_confidence_gate", "financial_market_cap", "tradeability_check", 
+                    "financial_t12_floor", "options_chain_check", "liquidity_check", 
+                    "playbook_eligibility_check"
+                ]
 
     # Validate DAG instead of silently overriding
     validate_pipeline_dag(execution_order)
