@@ -100,7 +100,8 @@ class EdgarItemScraper(SourceScraper):
         articles = []
         seen_ids = set()
         
-        for page in range(200):
+        page = 0
+        while True:
             start = page * 100
             url = (
                 f"https://www.sec.gov/cgi-bin/browse-edgar"
