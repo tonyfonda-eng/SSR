@@ -115,3 +115,72 @@ def send_alert(decision_manifest: dict, recipient: str = None):
     except Exception as e:
         print(f" [EMAIL ERROR] SMTP dispatch failed: {e}")
         raise e
+
+def send_v4_event_report(event_data: dict, recipient: str = None):
+    if not GMAIL_USER or not GMAIL_APP_PASSWORD or GMAIL_USER == "your-email@gmail.com":
+        print(" [WARNING] Email credentials not configured. Skipping event report.")
+        return
+
+    import os
+    if not recipient:
+        env_recipient = os.environ.get("ALERT_EMAIL_RECIPIENT")
+        recipient = env_recipient if env_recipient else GMAIL_USER
+        
+    event_id = event_data.get("event_id", "UNKNOWN")
+    event_type = str(event_data.get("event_type", "Corporate Announcement")).upper()
+    trade_graph = event_data.get("trade_graph", [])
+    
+    subject = f"SSR EVENT: {event_type} - {len(trade_graph)} Strategies Generated"
+    
+    trades_html = ""
+    for t in trade_graph:
+        trades_html += f"<li><strong>{t['strategy']}</strong> on {t['ticker']} (Priority {t['priority']}) - {t['reason']}</li>"
+        
+    html_body = f"""
+    <html>
+    <head>
+        <style>
+            body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; color: #333; line-height: 1.5; }}
+            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 5px; }}
+            h2 {{ color: #2ea043; border-bottom: 2px solid #eaeaea; padding-bottom: 10px; }}
+            .meta-data {{ background: #f6f8fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; font-size: 0.9em; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h2>Institutional Event Report: {event_type}</h2>
+            
+            <div class="meta-data">
+                <div><strong>Event ID:</strong> {event_id}</div>
+                <div><strong>Evidence:</strong> {event_data.get('evidence', [''])[0]}</div>
+                <div><strong>Status:</strong> {event_data.get('status', 'ACTIONABLE')}</div>
+            </div>
+
+            <h3>Generated Trade Graph</h3>
+            <ul>
+                {trades_html}
+            </ul>
+            
+            <div class="footer">
+                Special Situations Radar | V4 Execution Engine
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = subject
+    msg["From"] = f"SSR Operations <{GMAIL_USER}>"
+    msg["To"] = recipient
+
+    msg.attach(MIMEText(html_body, "html"))
+
+    try:
+        server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
+        server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
+        server.send_message(msg)
+        server.quit()
+        print(f" [EMAIL DISPATCH] Event Report sent to {recipient}")
+    except Exception as e:
+        print(f" [EMAIL ERROR] SMTP dispatch failed: {e}")
