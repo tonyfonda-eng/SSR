@@ -784,7 +784,7 @@ def generate_screening_log_html(output_path):
                 return true;
             });
 
-            document.getElementById('resultCount').textContent = `Showing ${filteredData.length} of ${screeningData.length} articles for today (${todayGMT})`;
+            document.getElementById('resultCount').textContent = `Showing ${filteredData.length} of ${screeningData.length} articles for today (${selectedDate || 'All Dates'})`;
 
             tbody.innerHTML = '';
             if (filteredData.length === 0) {
