@@ -65,14 +65,19 @@ def run_pipeline(articles, version):
             return {"valid": True, "cash": 1000}
         return {"valid": False, "reason": "Mock negative cash"}
         
+    def mock_query_financial_snapshot(ticker):
+        if ticker in ["EMR", "NTAP", "VLTO", "NMRK"]:
+            return {"valid": True, "market_cap": 1000000000}
+        return {"valid": False, "reason": "Mock low market cap"}
+        
     src.v4_pipeline.get_t12_metrics = mock_get_t12_metrics
     src.rules_engine.get_t12_metrics = mock_get_t12_metrics
+    src.rules_engine.query_financial_snapshot = mock_query_financial_snapshot
     
     if version == "v2":
         execution_order = [
             "dedupe_hash", "dedupe_issuer_memory", "exclude_global_keywords", 
-            "exclude_issuer_feed", "exclude_source_specific", "ontology_concepts", 
-            "ontology_status", "document_scoring", "regex_rules", 
+            "exclude_issuer_feed", "exclude_source_specific", "document_scoring", "regex_rules", 
             "python_issuer_extraction", "candidate_generator", "ambiguity_gate", 
             "ai_entity_resolution", "graph_validation", "ai_event_classification", "ai_confidence_gate", 
             "investment_universe_mapping", "strategy_selection", "investment_candidate_selection",
