@@ -7,7 +7,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from src.config.secrets import GMAIL_USER, GMAIL_APP_PASSWORD
 
-def send_alert(decision_manifest: dict, recipient: str = "tony.fonda@gmail.com"):
+def send_alert(decision_manifest: dict, recipient: str = None):
     """
     Parses the Canonical Decision Manifest to construct and dispatch an alert email.
     """
@@ -15,6 +15,11 @@ def send_alert(decision_manifest: dict, recipient: str = "tony.fonda@gmail.com")
     if not GMAIL_USER or not GMAIL_APP_PASSWORD or GMAIL_USER == "your-email@gmail.com":
         print(" [WARNING] Email credentials not configured. Skipping alert dispatch.")
         return
+
+    import os
+    if not recipient:
+        env_recipient = os.environ.get("ALERT_EMAIL_RECIPIENT")
+        recipient = env_recipient if env_recipient else GMAIL_USER
 
     # Extract required fields from the Manifest Structure
     reg = decision_manifest.get("manifest_registry", {})

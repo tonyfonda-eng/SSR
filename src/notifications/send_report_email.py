@@ -13,8 +13,7 @@ def send_audit_email(report_filepath: str, recipient: str = "tony.fonda@gmail.co
         return
 
     env_recipient = os.environ.get("ALERT_EMAIL_RECIPIENT")
-    if env_recipient:
-        recipient = env_recipient
+    recipient = env_recipient if env_recipient else GMAIL_USER
 
     date_str = os.path.basename(report_filepath).replace('.md', '')
     subject = f"SSR Daily Audit — {date_str}"
