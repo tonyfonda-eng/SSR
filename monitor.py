@@ -147,7 +147,9 @@ def stage_ontology_concepts(article: dict, ctx: dict) -> tuple:
     score = rich_result.get("score", 0.0)
     article["_ontology_metadata"] = rich_result
     
-    if score < min_score: return False, f"dropped_ontology_score: {score:.2f} < {min_score}"
+    if score < min_score:
+        logger.debug(f"[ONTOLOGY DROP] Score {score:.2f} < {min_score}. Snippet: {article.get('body', '')[:150]}")
+        return False, f"dropped_ontology_score: {score:.2f} < {min_score}"
     return True, "passed"
 
 def stage_ontology_status(article: dict, ctx: dict) -> tuple:
@@ -199,15 +201,10 @@ def stage_python_ticker_lookup(article: dict, ctx: dict) -> tuple:
 
 def stage_entity_confidence_gate(article: dict, ctx: dict) -> tuple:
     """Blocks execution if deterministic/AI extraction yields garbage."""
-    issuer = article.get("_deterministic_issuer", "UNKNOWN")
     ticker = article.get("_ai_ticker", "UNKNOWN")
     
-    if ticker == "UNKNOWN" and issuer == "UNKNOWN":
-        return False, "dropped_entity_missing_both"
-    elif ticker == "UNKNOWN":
+    if ticker == "UNKNOWN":
         return False, "dropped_entity_missing_ticker"
-    elif issuer == "UNKNOWN":
-        return False, "dropped_entity_unknown_issuer"
         
     return True, "passed"
 
@@ -274,7 +271,11 @@ def stage_liquidity_check(article: dict, ctx: dict) -> tuple:
 def stage_playbook_eligibility_check(article: dict, ctx: dict) -> tuple:
     """Drops the article if no active playbook exists for the detected event family."""
     active_playbooks = [str(p.get("Playbook", "")).lower() for p in ctx.get("playbooks", []) if str(p.get("Active", "TRUE")).upper() == "TRUE"]
-    detected_families = [str(f).lower() for f in article.get("_deterministic_families", [])]
+    detected_families = [str(f.get("Rule", "")).lower() for f in article.get("_deterministic_families", []) if isinstance(f, dict)]
+    
+    ai_class = article.get("_ai_classification", "UNKNOWN")
+    if ai_class and ai_class not in ["UNKNOWN", "ERROR", "EXHAUSTED"]:
+        detected_families.append(str(ai_class).lower())
     
     if detected_families:
         has_playbook = any(family in active_playbooks for family in detected_families)
@@ -388,8 +389,22 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
             "python_issuer_extraction", "python_ticker_lookup", "ai_ticker_resolution",
             "entity_confidence_gate", "financial_market_cap", "tradeability_check", 
             "financial_t12_floor", "options_chain_check", "liquidity_check", 
-            "playbook_eligibility_check", "ai_event_classification", "ai_confidence_gate"
+            "ai_event_classification", "ai_confidence_gate", "playbook_eligibility_check"
         ]
+
+    # Enforce correct topological ordering for AI Classification vs Playbook Gate
+    pb_gates = [g for g in ["playbook_gate", "playbook_eligibility_check"] if g in execution_order]
+    if "ai_event_classification" in execution_order and pb_gates:
+        ai_idx = execution_order.index("ai_event_classification")
+        for pg in pb_gates:
+            pg_idx = execution_order.index(pg)
+            if pg_idx < ai_idx:
+                execution_order.remove(pg)
+                ai_idx = execution_order.index("ai_event_classification") # recount after remove
+                insert_idx = ai_idx + 1
+                if "ai_confidence_gate" in execution_order:
+                    insert_idx = max(insert_idx, execution_order.index("ai_confidence_gate") + 1)
+                execution_order.insert(insert_idx, pg)
 
     stage_timings = {}
 
