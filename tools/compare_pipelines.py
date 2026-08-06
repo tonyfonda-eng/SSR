@@ -53,8 +53,22 @@ def mock_ai_entity_resolution(article, ctx):
 def run_pipeline(articles, version):
     STAGE_REGISTRY["ai_event_classification"] = mock_ai_event_classification
     STAGE_REGISTRY["python_issuer_extraction"] = mock_ai_entity_resolution
+    STAGE_REGISTRY["ai_entity_resolution"] = mock_ai_entity_resolution
     STAGE_REGISTRY["v4_event_classification"] = mock_ai_event_classification
     STAGE_REGISTRY["v4_entity_resolution"] = mock_ai_entity_resolution
+    
+    import src.ai
+    def mock_extract_entities(*args, **kwargs):
+        return {"status": "SUCCESS", "entities": [{"ticker": "MOCK", "role": "target", "is_public": True, "options_available": True}]}
+    src.ai.extract_entities_and_roles = mock_extract_entities
+    
+    STAGE_REGISTRY["regex_rules"] = lambda a, c: (True, "passed")
+    STAGE_REGISTRY["document_scoring"] = lambda a, c: (True, "passed")
+    STAGE_REGISTRY["exclude_global_keywords"] = lambda a, c: (True, "passed")
+    STAGE_REGISTRY["exclude_issuer_feed"] = lambda a, c: (True, "passed")
+    STAGE_REGISTRY["exclude_source_specific"] = lambda a, c: (True, "passed")
+    STAGE_REGISTRY["ambiguity_gate"] = lambda a, c: (True, "passed")
+    STAGE_REGISTRY["candidate_generator"] = lambda a, c: (True, "passed")
     
     # Mock get_t12_metrics
     import src.v4_pipeline
