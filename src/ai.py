@@ -32,12 +32,11 @@ class EntityRole:
     ticker: str
     is_public: bool
     role: str
+    confidence: float
 
 @dataclass
 class ParsedEntities:
     entities: list[EntityRole]
-    investment_candidate_ticker: str
-    investment_candidate_is_public: bool
     error: str = None
 
 @dataclass
@@ -142,29 +141,27 @@ def interpret_strategy(parsed_data: ParsedAIPayload) -> SemanticInterpretation:
 def extract_entities_and_roles(body_text: str, router=None) -> ParsedEntities:
     """
     Extracts all mentioned organisations and explicitly assigns them roles 
-    (acquirer, target, seller, etc.), then determines the true investment candidate.
+    (acquirer, target, seller, etc.) with a confidence score.
     """
     prompt = f"""Analyze this corporate text and identify ALL organisations mentioned.
     Assign each a role (e.g., 'acquirer', 'target', 'seller', 'adviser', 'lender', 'issuer').
     Indicate whether each entity is public or private. Extract their ticker symbols if public.
-    Finally, identify which entity should be the subject of our investment thesis (the 'target' in an M&A, or the 'issuer' otherwise).
+    Include a confidence score (0.0 to 1.0) for each entity extraction.
     
     Text: {body_text[:4000]}
     
     Respond STRICTLY in this JSON format:
     {{
         "entities": [
-            {{"name": "Company A", "ticker": "XYZ", "is_public": true, "role": "acquirer"}},
-            {{"name": "Company B", "ticker": null, "is_public": false, "role": "target"}}
-        ],
-        "investment_candidate_ticker": null,
-        "investment_candidate_is_public": false
+            {{"name": "Company A", "ticker": "XYZ", "is_public": true, "role": "acquirer", "confidence": 0.99}},
+            {{"name": "Company B", "ticker": null, "is_public": false, "role": "target", "confidence": 0.95}}
+        ]
     }}"""
     
     raw_output = invoke_llm(prompt, json_mode=True, router=router, prompt_type="Entity Extraction")
     
     if raw_output == "EXHAUSTED":
-        return ParsedEntities(entities=[], investment_candidate_ticker="EXHAUSTED", investment_candidate_is_public=False, error="EXHAUSTED")
+        return ParsedEntities(entities=[], error="EXHAUSTED")
         
     try:
         data = json.loads(raw_output)
@@ -175,22 +172,20 @@ def extract_entities_and_roles(body_text: str, router=None) -> ParsedEntities:
                 name=e.get("name", "Unknown"),
                 ticker=str(ticker_val).upper().replace('$', '') if ticker_val else None,
                 is_public=bool(e.get("is_public", False)),
-                role=e.get("role", "unknown")
+                role=e.get("role", "unknown"),
+                confidence=float(e.get("confidence", 0.0))
             ))
             
-        candidate_ticker = data.get("investment_candidate_ticker")
         return ParsedEntities(
             entities=entities_list,
-            investment_candidate_ticker=str(candidate_ticker).upper().replace('$', '') if candidate_ticker else None,
-            investment_candidate_is_public=bool(data.get("investment_candidate_is_public", False)),
             error=None
         )
     except json.JSONDecodeError:
         logger.warning("[AI CORE] Failed to parse entity extraction output as JSON.")
-        return ParsedEntities(entities=[], investment_candidate_ticker="ERROR", investment_candidate_is_public=False, error="Parse Failure")
+        return ParsedEntities(entities=[], error="Parse Failure")
     except Exception as e:
         logger.error(f"[AI CORE] Entity parsing exception: {e}")
-        return ParsedEntities(entities=[], investment_candidate_ticker="ERROR", investment_candidate_is_public=False, error="Parse Exception")
+        return ParsedEntities(entities=[], error="Parse Exception")
 
 
 def extract_target_ticker(body_text: str, router=None) -> str:

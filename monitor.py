@@ -191,17 +191,21 @@ def stage_python_issuer_extraction(article: dict, ctx: dict) -> tuple:
     return True, "passed"
 
 def stage_python_ticker_lookup(article: dict, ctx: dict) -> tuple:
-    """Legacy deterministic ticker resolution. Disabled in favor of AI entity extraction."""
-    article["_deterministic_ticker"] = "UNKNOWN"
+    """Candidate Generator: Extracts all deterministic tickers from text."""
+    text = article.get("body", "") + " " + article.get("headline", "")
+    tickers = []
+    matches_1 = re.findall(r'\b(?:NYSE|NASDAQ|AMEX|OTC|TSX|LSE|NYSE MKT|NYSE ARCA)\s*[:]\s*([A-Z]{1,5})\b', text, re.IGNORECASE)
+    matches_2 = re.findall(r'\((?:NYSE|NASDAQ|AMEX|OTC|TSX|LSE)\s*:\s*([A-Z]{1,5})\)', text, re.IGNORECASE)
+    
+    for t in matches_1 + matches_2:
+        if t.upper() not in tickers:
+            tickers.append(t.upper())
+            
+    article["_deterministic_tickers"] = tickers
     return True, "passed"
 
 def stage_entity_confidence_gate(article: dict, ctx: dict) -> tuple:
-    """Blocks execution if deterministic/AI extraction yields garbage."""
-    ticker = article.get("_ai_ticker", "UNKNOWN")
-    
-    if ticker == "UNKNOWN":
-        return False, "dropped_entity_missing_ticker"
-        
+    # No longer blocking on deterministic_ticker missing
     return True, "passed"
 
 # --- FINANCIAL CONSTRAINTS (PHASE 4) ---
@@ -211,7 +215,7 @@ def stage_financial_market_cap(article: dict, ctx: dict) -> tuple:
 
 def stage_tradeability_check(article: dict, ctx: dict) -> tuple:
     """Reject untradeable securities, pink sheets, and OTC bulletin boards."""
-    ticker = article.get("_deterministic_ticker", "UNKNOWN")
+    ticker = article.get("_target_ticker", "UNKNOWN")
     if ticker == "UNKNOWN":
         return True, "passed"
         
@@ -221,7 +225,7 @@ def stage_tradeability_check(article: dict, ctx: dict) -> tuple:
     return True, "passed"
 
 def stage_financial_t12_floor(article: dict, ctx: dict) -> tuple:
-    ticker = article.get("_deterministic_ticker", "UNKNOWN")
+    ticker = article.get("_target_ticker", "UNKNOWN")
     if ticker != "UNKNOWN":
         metrics = get_t12_metrics(ticker)
         if not metrics.get("valid"): 
@@ -231,7 +235,7 @@ def stage_financial_t12_floor(article: dict, ctx: dict) -> tuple:
 
 def stage_options_chain_check(article: dict, ctx: dict) -> tuple:
     """Reject target securities requiring options where none exist."""
-    ticker = article.get("_deterministic_ticker", "UNKNOWN")
+    ticker = article.get("_target_ticker", "UNKNOWN")
     if ticker == "UNKNOWN":
         return True, "passed"
         
@@ -247,7 +251,7 @@ def stage_options_chain_check(article: dict, ctx: dict) -> tuple:
 
 def stage_liquidity_check(article: dict, ctx: dict) -> tuple:
     """Enforce minimum liquidity and average volume thresholds."""
-    ticker = article.get("_deterministic_ticker", "UNKNOWN")
+    ticker = article.get("_target_ticker", "UNKNOWN")
     if ticker == "UNKNOWN":
         return True, "passed"
         
@@ -279,18 +283,56 @@ def stage_playbook_eligibility_check(article: dict, ctx: dict) -> tuple:
             return False, "dropped_no_playbook"
             
 def stage_ai_ticker_resolution(article: dict, ctx: dict) -> tuple:
-    """Extract entities and determine the true investment candidate."""
-    parsed_entities = extract_entities_and_roles(article.get("body", ""), router=ctx.get("ai_router"))
+    """Legacy alias for entity_resolution."""
+    return stage_entity_resolution(article, ctx)
+
+def stage_entity_resolution(article: dict, ctx: dict) -> tuple:
+    tickers = article.get("_deterministic_tickers", [])
+    ontology_matches = article.get("_ontology_concepts", [])
     
+    has_ma_keywords = any(kw.lower() in ["merger", "acquires", "acquisition", "buyout", "takeover"] for kw in ontology_matches)
+    
+    ambiguity = len(tickers) != 1 or has_ma_keywords
+    
+    if not ambiguity:
+        # No ambiguity, single ticker -> Issuer
+        article["_entities"] = [{"name": "Issuer", "ticker": tickers[0], "role": "issuer", "is_public": True, "confidence": 1.0}]
+        return True, "passed"
+        
+    # Ambiguity exists, invoke AI
+    parsed_entities = extract_entities_and_roles(article.get("body", ""), router=ctx.get("ai_router"))
     if parsed_entities.error:
-        return False, f"dropped_ai_entity_error: {parsed_entities.error}"
+        return False, f"dropped_entity_error: {parsed_entities.error}"
         
-    if not parsed_entities.investment_candidate_ticker or not parsed_entities.investment_candidate_is_public:
-        return False, "dropped_private_target"
-        
-    article["_ai_ticker"] = parsed_entities.investment_candidate_ticker
     article["_entities"] = [e.__dict__ for e in parsed_entities.entities]
     return True, "passed"
+    
+def stage_investment_candidate_selection(article: dict, ctx: dict) -> tuple:
+    """Selects the investment candidate ticker from the entity graph based on strategy."""
+    entities = article.get("_entities", [])
+    strategy = str(article.get("_ai_classification", "")).lower()
+    
+    if "merger" in strategy or "acquisition" in strategy or "takeover" in strategy:
+        target_entity = next((e for e in entities if e.get("role") == "target"), None)
+        acquirer_entity = next((e for e in entities if e.get("role") == "acquirer"), None)
+        
+        if target_entity and target_entity.get("is_public") and target_entity.get("ticker"):
+            article["_target_ticker"] = target_entity["ticker"]
+            return True, "passed"
+            
+        # If target is private or null, fall back to acquirer
+        if acquirer_entity and acquirer_entity.get("is_public") and acquirer_entity.get("ticker"):
+            article["_target_ticker"] = acquirer_entity["ticker"]
+            return True, "passed"
+            
+    # Default fallback: grab the highest confidence public entity
+    public_entities = [e for e in entities if e.get("is_public") and e.get("ticker")]
+    if public_entities:
+        public_entities.sort(key=lambda x: x.get("confidence", 0.0), reverse=True)
+        article["_target_ticker"] = public_entities[0]["ticker"]
+        return True, "passed"
+        
+    return False, "dropped_no_public_entities"
 
 def stage_ai_event_classification(article: dict, ctx: dict) -> tuple:
     ticker = article.get("_ai_ticker", "UNKNOWN")
@@ -334,6 +376,8 @@ STAGE_REGISTRY = {
     "liquidity_check": stage_liquidity_check,
     "playbook_eligibility_check": stage_playbook_eligibility_check,
     "ai_ticker_resolution": stage_ai_ticker_resolution,
+    "entity_resolution": stage_entity_resolution,
+    "investment_candidate_selection": stage_investment_candidate_selection,
     "ai_event_classification": stage_ai_event_classification,
     "ai_confidence_gate": stage_ai_confidence_gate,
     "entity_confidence": stage_entity_confidence_gate,
@@ -389,13 +433,32 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
             "dedupe_hash", "dedupe_issuer_memory", "exclude_global_keywords", 
             "exclude_issuer_feed", "exclude_source_specific", "ontology_concepts", 
             "ontology_status", "document_scoring", "regex_rules", 
-            "python_issuer_extraction", "python_ticker_lookup", "ai_ticker_resolution",
+            "python_issuer_extraction", "python_ticker_lookup", "entity_resolution",
+            "ai_event_classification", "ai_confidence_gate", "investment_candidate_selection",
             "entity_confidence_gate", "financial_market_cap", "tradeability_check", 
             "financial_t12_floor", "options_chain_check", "liquidity_check", 
-            "ai_event_classification", "ai_confidence_gate", "playbook_eligibility_check"
+            "playbook_eligibility_check"
         ]
 
-    # Enforce correct topological ordering for AI Classification vs Playbook Gate
+    # Enforce correct topological ordering for V2 Redesign:
+    if "ai_ticker_resolution" in execution_order:
+        idx = execution_order.index("ai_ticker_resolution")
+        execution_order[idx] = "entity_resolution"
+        
+    if "investment_candidate_selection" not in execution_order:
+        execution_order.append("investment_candidate_selection")
+        
+    desired_order = ["entity_resolution", "ai_event_classification", "ai_confidence_gate", "investment_candidate_selection", "tradeability_check", "financial_t12_floor", "options_chain_check", "liquidity_check"]
+    
+    for s in desired_order:
+        if s in execution_order:
+            execution_order.remove(s)
+            
+    base_idx = execution_order.index("ontology_status") + 1 if "ontology_status" in execution_order else len(execution_order)
+    for s in reversed(desired_order):
+        execution_order.insert(base_idx, s)
+
+    # Enforce correct topological ordering for Playbook Gate
     pb_gates = [g for g in ["playbook_gate", "playbook_eligibility_check"] if g in execution_order]
     if "ai_event_classification" in execution_order and pb_gates:
         ai_idx = execution_order.index("ai_event_classification")
