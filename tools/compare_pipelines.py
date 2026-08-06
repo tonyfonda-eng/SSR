@@ -56,6 +56,18 @@ def run_pipeline(articles, version):
     STAGE_REGISTRY["v4_event_classification"] = mock_ai_event_classification
     STAGE_REGISTRY["v4_entity_resolution"] = mock_ai_entity_resolution
     
+    # Mock get_t12_metrics
+    import src.v4_pipeline
+    import src.rules_engine
+    
+    def mock_get_t12_metrics(ticker):
+        if ticker in ["EMR", "NTAP", "VLTO", "NMRK"]:
+            return {"valid": True, "cash": 1000}
+        return {"valid": False, "reason": "Mock negative cash"}
+        
+    src.v4_pipeline.get_t12_metrics = mock_get_t12_metrics
+    src.rules_engine.get_t12_metrics = mock_get_t12_metrics
+    
     if version == "v2":
         execution_order = [
             "dedupe_hash", "dedupe_issuer_memory", "exclude_global_keywords", 
