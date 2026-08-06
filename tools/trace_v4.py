@@ -76,8 +76,18 @@ def trace_article(row):
     STAGE_REGISTRY["v4_event_classification"] = mock_ai_event_classification
     STAGE_REGISTRY["v4_entity_resolution"] = mock_ai_entity_resolution
     
-    for stage in monitor.execution_order:
-        if "dedupe" in stage or "ingestion" in stage: continue
+    execution_order = [
+        "v4_ingestion",
+        "v4_dedupe",
+        "v4_entity_resolution",
+        "v4_event_classification",
+        "v4_trade_hypothesis_generation",
+        "v4_strategy_validation",
+        "v4_opportunity_score",
+        "v4_routing"
+    ]
+    for stage in execution_order:
+        if "dedupe" in stage: continue
         func = STAGE_REGISTRY.get(stage)
         if not func: continue
         
