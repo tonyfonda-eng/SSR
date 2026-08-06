@@ -37,7 +37,7 @@ from src.ontology import evaluate_ontology, evaluate_ontology_rich
 from src.ontology.engine import load_ontology
 from src.rules import matches_global_exclusion, matches_issuer_exclusion
 from src.rules_engine import evaluate as evaluate_deterministic_rules
-from src.ai import extract_target_ticker, classify_event
+from src.ai import extract_entities_and_roles, classify_event
 from src.providers.router import ProviderRouter
 from src.financials import get_t12_metrics, query_financial_snapshot
 from src.alerts.email import send_alert
@@ -191,16 +191,8 @@ def stage_python_issuer_extraction(article: dict, ctx: dict) -> tuple:
     return True, "passed"
 
 def stage_python_ticker_lookup(article: dict, ctx: dict) -> tuple:
-    """Resolve ticker symbol deterministically from text structure."""
-    text = article.get("body", "") + " " + article.get("headline", "")
-    match = re.search(r'\b(?:NYSE|NASDAQ|AMEX|OTC|TSX|LSE|NYSE MKT|NYSE ARCA)\s*[:]\s*([A-Z]{1,5})\b', text, re.IGNORECASE)
-    if not match:
-        match = re.search(r'\((?:NYSE|NASDAQ|AMEX|OTC|TSX|LSE)\s*:\s*([A-Z]{1,5})\)', text, re.IGNORECASE)
-    
-    if match:
-        article["_deterministic_ticker"] = match.group(1).upper()
-    else:
-        article["_deterministic_ticker"] = "UNKNOWN"
+    """Legacy deterministic ticker resolution. Disabled in favor of AI entity extraction."""
+    article["_deterministic_ticker"] = "UNKNOWN"
     return True, "passed"
 
 def stage_entity_confidence_gate(article: dict, ctx: dict) -> tuple:
@@ -287,14 +279,17 @@ def stage_playbook_eligibility_check(article: dict, ctx: dict) -> tuple:
             return False, "dropped_no_playbook"
             
 def stage_ai_ticker_resolution(article: dict, ctx: dict) -> tuple:
-    if article.get("_deterministic_ticker", "UNKNOWN") != "UNKNOWN":
-        article["_ai_ticker"] = article.get("_deterministic_ticker")
-        return True, "passed"
+    """Extract entities and determine the true investment candidate."""
+    parsed_entities = extract_entities_and_roles(article.get("body", ""), router=ctx.get("ai_router"))
+    
+    if parsed_entities.error:
+        return False, f"dropped_ai_entity_error: {parsed_entities.error}"
         
-    ticker = extract_target_ticker(article.get("body", ""), router=ctx.get("ai_router"))
-    if ticker in ["EXHAUSTED", "ERROR", "UNKNOWN"]: 
-        return False, "dropped_ai_no_ticker"
-    article["_ai_ticker"] = ticker
+    if not parsed_entities.investment_candidate_ticker or not parsed_entities.investment_candidate_is_public:
+        return False, "dropped_private_target"
+        
+    article["_ai_ticker"] = parsed_entities.investment_candidate_ticker
+    article["_entities"] = [e.__dict__ for e in parsed_entities.entities]
     return True, "passed"
 
 def stage_ai_event_classification(article: dict, ctx: dict) -> tuple:

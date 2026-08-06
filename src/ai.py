@@ -27,6 +27,20 @@ class ParsedAIPayload:
     raw_evidence: list
 
 @dataclass
+class EntityRole:
+    name: str
+    ticker: str
+    is_public: bool
+    role: str
+
+@dataclass
+class ParsedEntities:
+    entities: list[EntityRole]
+    investment_candidate_ticker: str
+    investment_candidate_is_public: bool
+    error: str = None
+
+@dataclass
 class SemanticInterpretation:
     """Layer 3: Internal domain interpretation."""
     outcome: str  # "DETECTED", "DROPPED", "ARCHIVED"
@@ -124,6 +138,60 @@ def interpret_strategy(parsed_data: ParsedAIPayload) -> SemanticInterpretation:
 # ---------------------------------------------------------------------------
 # Legacy Wrapper Functions (Backward Compatibility for `monitor.py`)
 # ---------------------------------------------------------------------------
+
+def extract_entities_and_roles(body_text: str, router=None) -> ParsedEntities:
+    """
+    Extracts all mentioned organisations and explicitly assigns them roles 
+    (acquirer, target, seller, etc.), then determines the true investment candidate.
+    """
+    prompt = f"""Analyze this corporate text and identify ALL organisations mentioned.
+    Assign each a role (e.g., 'acquirer', 'target', 'seller', 'adviser', 'lender', 'issuer').
+    Indicate whether each entity is public or private. Extract their ticker symbols if public.
+    Finally, identify which entity should be the subject of our investment thesis (the 'target' in an M&A, or the 'issuer' otherwise).
+    
+    Text: {body_text[:4000]}
+    
+    Respond STRICTLY in this JSON format:
+    {{
+        "entities": [
+            {{"name": "Company A", "ticker": "XYZ", "is_public": true, "role": "acquirer"}},
+            {{"name": "Company B", "ticker": null, "is_public": false, "role": "target"}}
+        ],
+        "investment_candidate_ticker": null,
+        "investment_candidate_is_public": false
+    }}"""
+    
+    raw_output = invoke_llm(prompt, json_mode=True, router=router, prompt_type="Entity Extraction")
+    
+    if raw_output == "EXHAUSTED":
+        return ParsedEntities(entities=[], investment_candidate_ticker="EXHAUSTED", investment_candidate_is_public=False, error="EXHAUSTED")
+        
+    try:
+        data = json.loads(raw_output)
+        entities_list = []
+        for e in data.get("entities", []):
+            ticker_val = e.get("ticker")
+            entities_list.append(EntityRole(
+                name=e.get("name", "Unknown"),
+                ticker=str(ticker_val).upper().replace('$', '') if ticker_val else None,
+                is_public=bool(e.get("is_public", False)),
+                role=e.get("role", "unknown")
+            ))
+            
+        candidate_ticker = data.get("investment_candidate_ticker")
+        return ParsedEntities(
+            entities=entities_list,
+            investment_candidate_ticker=str(candidate_ticker).upper().replace('$', '') if candidate_ticker else None,
+            investment_candidate_is_public=bool(data.get("investment_candidate_is_public", False)),
+            error=None
+        )
+    except json.JSONDecodeError:
+        logger.warning("[AI CORE] Failed to parse entity extraction output as JSON.")
+        return ParsedEntities(entities=[], investment_candidate_ticker="ERROR", investment_candidate_is_public=False, error="Parse Failure")
+    except Exception as e:
+        logger.error(f"[AI CORE] Entity parsing exception: {e}")
+        return ParsedEntities(entities=[], investment_candidate_ticker="ERROR", investment_candidate_is_public=False, error="Parse Exception")
+
 
 def extract_target_ticker(body_text: str, router=None) -> str:
     """Legacy wrapper for ticker extraction."""
