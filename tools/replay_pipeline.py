@@ -19,14 +19,17 @@ monitor.commit_decision_capsule = lambda *args, **kwargs: None
 # Disable shadow mode for replay
 os.environ["ENTITY_ENGINE_VERSION"] = "2.1"
 
-# The new DAG order
+# The V2 DAG order
 execution_order = [
     "dedupe_hash", "dedupe_issuer_memory", "exclude_global_keywords", 
     "exclude_issuer_feed", "exclude_source_specific", "ontology_concepts", 
-    "candidate_generator", "ambiguity_gate", "entity_resolution",
-    "event_suspicion", "source_quota_gate", "ai_event_classification", 
-    "ai_confidence_gate", "trade_generation",
-    "strategy_financial_gate", "opportunity_scoring"
+    "ontology_status", "document_scoring", "regex_rules", 
+    "python_issuer_extraction", "candidate_generator", "ambiguity_gate", 
+    "ai_entity_resolution", "graph_validation", "ai_event_classification", "ai_confidence_gate", 
+    "investment_universe_mapping", "strategy_selection", "investment_candidate_selection",
+    "entity_confidence_gate", "financial_market_cap", "tradeability_check", 
+    "financial_t12_floor", "options_chain_check", "liquidity_check", 
+    "playbook_eligibility_check"
 ]
 
 def load_config_manifest():
@@ -60,8 +63,8 @@ def run_replay():
     conn = sqlite3.connect(RESEARCH_DB_PATH)
     cursor = conn.cursor()
     
-    # Fetch payload from article_screening_log
-    cursor.execute("SELECT headline, url, source, ticker, event_family FROM article_screening_log ORDER BY timestamp DESC LIMIT 2000")
+    # Fetch payload from article_screening_log (past 30 days)
+    cursor.execute("SELECT headline, url, source, ticker, event_family FROM article_screening_log WHERE timestamp >= date('now', '-30 days') ORDER BY timestamp DESC")
     rows = cursor.fetchall()
     
     print(f"[*] Fetched {len(rows)} raw articles for replay.")
@@ -84,21 +87,23 @@ def run_replay():
     
     results = {
         "survived": 0,
-        "dropped_deterministic_gate": 0,
-        "dropped_financial_gate": 0,
-        "ai_calls_simulated": 0,
-        "recovered_ma": 0,
-        "recovered_activism": 0,
-        "recovered_spinoffs": 0,
-        "recovered_bankruptcies": 0
+        "ai_calls_simulated": 0
     }
     
+    # Mock AI calls to skip API
     def mock_ai_event_classification(article, ctx):
-        article["_ai_classification"] = "merger" # Fake classification to test financial gates
+        article["_ai_classification"] = "merger" 
         results["ai_calls_simulated"] += 1
         return True, "passed"
         
+    def mock_ai_entity_resolution(article, ctx):
+        article["_entities"] = [
+            {"ticker": article.get("_target_ticker", "UNKNOWN"), "role": "target", "is_public": True, "options_available": True}
+        ]
+        return True, "passed"
+        
     STAGE_REGISTRY["ai_event_classification"] = mock_ai_event_classification
+    STAGE_REGISTRY["ai_entity_resolution"] = mock_ai_entity_resolution
 
     for idx, row in enumerate(rows):
         if idx > 0 and idx % 200 == 0:
@@ -124,20 +129,15 @@ def run_replay():
             if not p:
                 passed = False
                 drop_stage = stage
+                
+                # Check for false negatives
+                if any(kw in article["headline"] for kw in ["Emerson", "NetApp", "Veralto", "Newmark"]):
+                    print(f"[FALSE NEGATIVE] {article['headline'][:80]} dropped at {drop_stage}: {r}")
+                
                 break
                 
         if passed:
             results["survived"] += 1
-            if article.get("_opportunity_score", 0.0) >= 80:
-                cls = str(article.get("_ai_classification", "")).lower()
-                if "merger" in cls or "acquisition" in cls or "takeover" in cls:
-                    results["recovered_ma"] += 1
-                elif "activis" in cls:
-                    results["recovered_activism"] += 1
-                elif "spin-off" in cls or "spinoff" in cls:
-                    results["recovered_spinoffs"] += 1
-                elif "bankrupt" in cls or "chapter 11" in cls:
-                    results["recovered_bankruptcies"] += 1
         else:
             if drop_stage not in results:
                 results[drop_stage] = 0
@@ -148,12 +148,8 @@ def run_replay():
     print("="*50)
     print(f"Total articles processed: {len(rows)}")
     print(f"Survived (Alert Generated): {results['survived']}")
-    print(f"Recovered M&A: {results['recovered_ma']}")
-    print(f"Recovered Activism: {results['recovered_activism']}")
-    print(f"Recovered Spin-offs: {results['recovered_spinoffs']}")
-    print(f"Recovered Bankruptcies: {results['recovered_bankruptcies']}")
     for k, v in results.items():
-        if k not in ["survived", "ai_calls_simulated", "recovered_ma", "recovered_activism", "recovered_spinoffs", "recovered_bankruptcies"]:
+        if k not in ["survived", "ai_calls_simulated"]:
             print(f"Dropped at {k}: {v}")
     print(f"Simulated AI Calls: {results['ai_calls_simulated']}")
     print("="*50)
