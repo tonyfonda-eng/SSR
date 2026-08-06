@@ -5,8 +5,8 @@ import re
 import warnings
 
 # Gmail API & SMTP Credentials
-GMAIL_USER = os.environ.get("GMAIL_USER", "your-email@gmail.com")
-GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "your-app-password")
+GMAIL_USER = os.environ.get("GMAIL_USER", os.environ.get("SMTP_USER", "your-email@gmail.com"))
+GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", os.environ.get("SMTP_PASS", "your-app-password"))
 
 def _sanitize_private_key(raw_pk: str) -> str:
     """Normalize and repair a possibly-escaped or corrupted PEM private key."""
