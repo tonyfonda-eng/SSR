@@ -351,6 +351,8 @@ def stage_playbook_eligibility_check(article: dict, ctx: dict) -> tuple:
         if not has_playbook:
             return False, "dropped_no_playbook"
             
+    return True, "passed"
+            
 def stage_ai_ticker_resolution(article: dict, ctx: dict) -> tuple:
     version = os.environ.get("ENTITY_ENGINE_VERSION", "1")
     if version == "1":
@@ -556,8 +558,8 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
     # Validate DAG instead of silently overriding
     validate_pipeline_dag(execution_order)
 
-    # Enforce correct topological ordering for Playbook Gate (Legacy only if V1)
-    pb_gates = [g for g in ["playbook_gate", "playbook_eligibility_check"] if g in execution_order]
+    # Enforce correct topological ordering for Playbook Gate and Financial Gates
+    pb_gates = [g for g in ["playbook_gate", "playbook_eligibility_check", "financial_t12_floor", "options_chain_check"] if g in execution_order]
     if "ai_event_classification" in execution_order and pb_gates:
         ai_idx = execution_order.index("ai_event_classification")
         for pg in pb_gates:

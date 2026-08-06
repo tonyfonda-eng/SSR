@@ -102,6 +102,10 @@ def run_replay():
         else:
             article["_ai_classification"] = "UNKNOWN"
             
+        if "Emerson" in hl:
+            print(f"DEBUG Emerson hl: {hl}, class: {article['_ai_classification']}")
+        
+        article["_ai_confidence"] = 1.0
         results["ai_calls_simulated"] += 1
         return True, "passed"
         
@@ -166,10 +170,11 @@ def run_replay():
                 # Check for false negatives
                 if any(kw in article["headline"] for kw in ["Emerson", "NetApp", "Veralto", "Newmark"]):
                     print(f"[FALSE NEGATIVE] {article['headline'][:80]} dropped at {drop_stage}: {r}")
-                
                 break
                 
         if passed:
+            if any(kw in article["headline"] for kw in ["Emerson", "NetApp", "Veralto", "Newmark"]):
+                print(f"[SURVIVED] {article['headline']}")
             results["survived"] += 1
         else:
             if drop_stage not in results:
