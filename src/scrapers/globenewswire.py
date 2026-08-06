@@ -16,17 +16,22 @@ class GlobeNewswireScraper(SourceScraper):
         articles = []
         seen_ids = set()
         checkpoint = kwargs.get("checkpoint")
+        
+        # Extended metadata as requested
         self.scrape_metadata = {
             "pages_visited": 0,
-            "page_limit": 5,
+            "page_limit": 20, # Increased from 5 to allow more graceful fallback
             "checkpoint_found": False,
             "emergency_stop": False,
-            "reason": ""
+            "duplicate_page_detected": False,
+            "http_failures": 0,
+            "reason": "",
+            "last_checkpoint_url": checkpoint
         }
         
         last_page_urls = set()
         
-        for page in range(1, 6):
+        for page in range(1, self.scrape_metadata["page_limit"] + 1):
             self.scrape_metadata["pages_visited"] = page
             url = f"https://www.globenewswire.com/NewsRoom?page={page}"
             try:
@@ -36,6 +41,7 @@ class GlobeNewswireScraper(SourceScraper):
                 
                 article_links = [a for a in soup.select("a") if 'href' in a.attrs and '/news-release/' in a['href']]
                 if not article_links:
+                    self.scrape_metadata["reason"] = "No article links on page"
                     break
                     
                 current_page_urls = set()
@@ -65,7 +71,6 @@ class GlobeNewswireScraper(SourceScraper):
                         time_elem = parent.find('time') or parent.find(class_=lambda c: c and 'date' in c.lower())
                     
                     if not time_elem:
-                        # Fallback to nearest elements if no clear parent container
                         time_elem = a_tag.find_previous('time') or a_tag.find_next('time')
                         
                     published = ""
@@ -80,34 +85,38 @@ class GlobeNewswireScraper(SourceScraper):
                     })
                     new_articles_on_page += 1
                     
-                    if len(articles) >= 20000:
-                        self.scrape_metadata["emergency_stop"] = True
-                        self.scrape_metadata["reason"] = "Hit 20000 article limit"
-                        print(f"[CRITICAL] GlobeNewswire hit emergency 20,000 article limit!")
-                        return articles
-                    
+                # Stop Condition 1: Duplicate Page Fingerprint
                 if current_page_urls and current_page_urls == last_page_urls:
+                    self.scrape_metadata["duplicate_page_detected"] = True
+                    self.scrape_metadata["reason"] = f"Duplicate page content detected on page {page}"
                     print(f"[INFO] GlobeNewswire detected duplicate page content on page {page}. Breaking.")
                     break
                 last_page_urls = current_page_urls
 
+                # Stop Condition 2: No New URLs on Page
                 if new_articles_on_page == 0:
+                    self.scrape_metadata["reason"] = f"No new URLs found on page {page}"
                     break
                     
                 if not checkpoint:
+                    self.scrape_metadata["reason"] = "First run complete (no checkpoint)"
                     print("[INFO] GlobeNewswire first-run (no checkpoint). Stopping after page 1.")
                     break
                     
                 time.sleep(1)
             except Exception as e:
-                self.scrape_metadata["reason"] = f"HTTP/Parsing Error on page {page}"
+                self.scrape_metadata["http_failures"] += 1
+                self.scrape_metadata["reason"] = f"HTTP/Parsing Error on page {page}: {e}"
                 print(f"[WARNING] GlobeNewswire pagination failed on page {page}: {e}")
                 break
                 
-        if page == 5 and not self.scrape_metadata.get("checkpoint_found") and checkpoint:
+        # Stop Condition 3: Emergency Cap Hit (Graceful Degradation)
+        if page == self.scrape_metadata["page_limit"] and not self.scrape_metadata.get("checkpoint_found") and checkpoint:
             self.scrape_metadata["emergency_stop"] = True
-            self.scrape_metadata["reason"] = "Hit 5 page limit"
-            print("[CRITICAL] GlobeNewswire hit emergency 5 page limit without finding checkpoint.")
+            if not self.scrape_metadata["reason"]:
+                self.scrape_metadata["reason"] = f"Hit {self.scrape_metadata['page_limit']} page limit without checkpoint"
+            print(f"[WARN] GlobeNewswire hit emergency {self.scrape_metadata['page_limit']} page limit without finding checkpoint. Returning what was collected.")
+            
         return articles
 
     def get_article_body(self, url):
