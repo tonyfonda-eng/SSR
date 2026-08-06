@@ -600,11 +600,36 @@ def generate_screening_log_html(output_path):
     <div class="container">__NAV__<header><h1>Daily Master Log</h1></header>
 
     <div class="filter-bar">
+        <div><label>Date</label><br><select id="dateFilter"></select></div>
         <div><label>News Source</label><br><select id="sourceFilter"><option value="">All Sources</option></select></div>
         <div><label>Drop Reason</label><br><select id="reasonFilter"><option value="">All Reasons</option></select></div>
         <div><label>Outcome</label><br><select id="outcomeFilter"><option value="">All</option><option value="PASSED">Passed</option><option value="DROPPED">Dropped</option></select></div>
         <div style="flex:1;"><label>Search (headline, source)</label><br><input type="text" id="searchBox" placeholder="Type to filter..."></div>
     </div>
+    <div class="card" style="margin-bottom: 20px;">
+        <h2>Real-Time Source Audit Metrics</h2>
+        <div class="table-wrapper">
+            <table id="auditTable">
+                <thead>
+                    <tr>
+                        <th>Source</th>
+                        <th>Mode</th>
+                        <th>Grade</th>
+                        <th>Status</th>
+                        <th>Raw Found</th>
+                        <th>30d Avg</th>
+                        <th>Deviation %</th>
+                        <th>Lifetime Rel %</th>
+                        <th>Emergency Stop</th>
+                    </tr>
+                </thead>
+                <tbody id="auditTableBody">
+                    <tr><td colspan="9" style="text-align: center; color: var(--muted); padding: 20px;">Loading Source Audit...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <div class="result-count" id="resultCount"></div>
 
     <div class="table-wrapper"><table id="screeningTable">
@@ -613,41 +638,111 @@ def generate_screening_log_html(output_path):
     </table></div></div>
 
     <script>
+        fetch('realtime_audit.json')
+            .then(res => res.json())
+            .then(data => {
+                const tbody = document.getElementById('auditTableBody');
+                const metrics = data.source_metrics || [];
+                if (metrics.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:20px;">No audit metrics available for today.</td></tr>';
+                    return;
+                }
+                tbody.innerHTML = '';
+                metrics.forEach(m => {
+                    const tr = document.createElement('tr');
+                    const emHtml = m.emergency_stop ? `<span class="badge danger">YES (${m.reason})</span>` : '<span class="badge success">NO</span>';
+                    let gradeColor = 'inherit';
+                    if (m.grade.startsWith('A')) gradeColor = 'var(--green)';
+                    else if (m.grade === 'F') gradeColor = 'var(--red)';
+                    else if (m.grade === 'D') gradeColor = 'var(--yellow)';
+                    
+                    tr.innerHTML = `
+                        <td style="font-weight:bold;">${m.source}</td>
+                        <td>${m.mode}</td>
+                        <td style="color:${gradeColor}; font-weight:bold;">${m.grade}</td>
+                        <td>${m.status_light}</td>
+                        <td class="metric-val">${m.raw}</td>
+                        <td class="metric-val">${m.avg_30d}</td>
+                        <td class="metric-val" style="color:${m.dev_pct < -30 ? 'var(--red)' : (m.dev_pct > 30 ? 'var(--green)' : 'inherit')}">${m.dev_pct > 0 ? '+' : ''}${m.dev_pct}%</td>
+                        <td class="metric-val">${m.lifetime_rel}%</td>
+                        <td>${emHtml}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            })
+            .catch(err => {
+                console.error("Failed to load audit metrics:", err);
+                document.getElementById('auditTableBody').innerHTML = '<tr><td colspan="9" style="text-align:center; color:var(--red);">Error loading audit metrics.</td></tr>';
+            });
+            
         let screeningData = [];
         let filteredData = [];
-        const todayGMT = new Date().toISOString().split('T')[0];
+        let selectedDate = new Date().toISOString().split('T')[0];
 
         fetch('screening_log.json')
             .then(res => res.json())
             .then(data => {
                 const allData = Array.isArray(data) ? data : (data.screening_log || []);
-                // Filter to only show today's news
-                screeningData = allData.filter(r => r.timestamp && r.timestamp.startsWith(todayGMT));
-                populateFilters();
-                renderTable();
+                window.allData = allData;
+                
+                // Populate Dates
+                const dates = [...new Set(allData.map(r => r.timestamp ? r.timestamp.substring(0, 10) : null).filter(Boolean))].sort().reverse();
+                const dateSel = document.getElementById('dateFilter');
+                dates.forEach(d => {
+                    const opt = document.createElement('option');
+                    opt.value = d; opt.textContent = d;
+                    dateSel.appendChild(opt);
+                });
+                
+                if (dates.length > 0 && !dates.includes(selectedDate)) {
+                    selectedDate = dates[0];
+                } else if (dates.length === 0) {
+                    selectedDate = '';
+                }
+                
+                if (selectedDate) {
+                    dateSel.value = selectedDate;
+                }
+
+                filterByDate();
             })
             .catch(err => {
                 screeningData = [];
                 renderTable();
             });
 
+        function filterByDate() {
+            selectedDate = document.getElementById('dateFilter').value;
+            if (selectedDate) {
+                screeningData = window.allData.filter(r => r.timestamp && r.timestamp.startsWith(selectedDate));
+            } else {
+                screeningData = window.allData;
+            }
+            populateFilters();
+            renderTable();
+        }
+
         function populateFilters() {
-            const sources = [...new Set(screeningData.map(r => r.source).filter(Boolean))].sort();
             const sourceSel = document.getElementById('sourceFilter');
+            sourceSel.innerHTML = '<option value="">All Sources</option>';
+            const sources = [...new Set(screeningData.map(r => r.source).filter(Boolean))].sort();
             sources.forEach(s => {
                 const opt = document.createElement('option');
                 opt.value = s; opt.textContent = s;
                 sourceSel.appendChild(opt);
             });
             
-            const reasons = [...new Set(screeningData.map(r => r.drop_reason).filter(Boolean))].sort();
             const reasonSel = document.getElementById('reasonFilter');
+            reasonSel.innerHTML = '<option value="">All Reasons</option>';
+            const reasons = [...new Set(screeningData.map(r => r.drop_reason).filter(Boolean))].sort();
             reasons.forEach(r => {
                 const opt = document.createElement('option');
                 opt.value = r; opt.textContent = r;
                 reasonSel.appendChild(opt);
             });
         }
+
+        document.getElementById('dateFilter').addEventListener('change', filterByDate);
 
         document.getElementById('sourceFilter').addEventListener('change', renderTable);
         document.getElementById('reasonFilter').addEventListener('change', renderTable);

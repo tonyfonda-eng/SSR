@@ -1,0 +1,17 @@
+{
+  "timestamp": "2026-08-06T06:28:25.113232+00:00",
+  "source_metrics": [
+    {
+      "source": "PR Newswire",
+      "mode": "HTML",
+      "grade": "F",
+      "status_light": "\ud83d\udd34",
+      "raw": 1,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 0,
+      "emergency_stop": true,
+      "reason": "Hit 20,000 limit"
+    }
+  ]
+}

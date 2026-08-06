@@ -24,6 +24,8 @@ try:
 except ImportError:
     export_screening_log = export_screening_json
 
+from src.audit.realtime_audit import export_realtime_audit
+
 from src.html_generator import (
     generate_dashboard_html,
     generate_decision_analytics_html, generate_screening_log_html,
@@ -712,6 +714,9 @@ def main():
                 export_screening_log("docs/screening_log.json")
             else:
                 export_screening_json("docs/screening_log.json")
+                
+            logger.info("Exporting real-time source audit...")
+            export_realtime_audit("docs/realtime_audit.json")
 
             logger.info("Rebuilding ALL HTML Dashboards...")
             generate_dashboard_html([], "docs/index.html", health_payload)
