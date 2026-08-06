@@ -106,7 +106,7 @@ def run_pipeline(articles, version):
         passed = True
         
         for stage in execution_order:
-            if "dedupe" in stage or "ingestion" in stage: continue
+            if "dedupe" in stage: continue
             func = STAGE_REGISTRY.get(stage)
             if not func: continue
             
