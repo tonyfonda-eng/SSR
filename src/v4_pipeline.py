@@ -172,9 +172,11 @@ def stage_v4_routing(article: dict, ctx: dict) -> tuple:
     }
     
     try:
+        from src.alerts.email import send_v4_event_report
         log_event(event_data)
+        send_v4_event_report(event_data)
     except Exception as e:
-        pass
+        print(f"Routing failed: {e}")
         
     article["_v4_routed"] = True
     return True, "passed"
