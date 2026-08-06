@@ -74,9 +74,32 @@ def stage_v4_event_classification(article: dict, ctx: dict) -> tuple:
         if ai_result.get("status") in ["EXHAUSTED", "ERROR"]: return False, "ai_exhausted"
         article["_v4_classification"] = ai_result.get("classification", "UNKNOWN")
         article["_v4_confidence"] = 100
+        
+    # Match Persistent Event ID
+    try:
+        from src.config.settings import RESEARCH_DB_PATH
+        conn = sqlite3.connect(RESEARCH_DB_PATH)
+        c = conn.cursor()
+        primary_ticker = article.get("_entities", [{}])[0].get("ticker", "UNKNOWN")
+        if primary_ticker != "UNKNOWN":
+            c.execute("""
+                SELECT event_id FROM event_ledger 
+                WHERE event_type = ? AND entities LIKE ?
+                ORDER BY created_at DESC LIMIT 1
+            """, (article["_v4_classification"], f"%{primary_ticker}%"))
+            row = c.fetchone()
+            if row:
+                article["_v4_event_id"] = row[0]
+                article["_v4_is_update"] = True
+    except Exception:
+        pass
+    finally:
+        try: conn.close()
+        except: pass
+
     return True, "passed"
 
-def stage_v4_trade_generation(article: dict, ctx: dict) -> tuple:
+def stage_v4_trade_hypothesis_generation(article: dict, ctx: dict) -> tuple:
     entities = article.get("_entities", [])
     event_type = str(article.get("_v4_classification", "")).lower()
     
@@ -119,18 +142,16 @@ def stage_v4_strategy_validation(article: dict, ctx: dict) -> tuple:
     for t in trades:
         metrics = get_t12_metrics(t["ticker"])
         if t["strategy"] == "Merger Arb":
-            # Target negative net cash is allowed
             t["status"] = "Valid"
-            valid_trades.append(t)
         elif t["strategy"] == "Acquirer Overwrite":
-            # Bypass T12 check for M&A Acquirer
             t["status"] = "Valid"
-            valid_trades.append(t)
         else:
-            t["status"] = "Valid"
-            valid_trades.append(t)
+            if not metrics.get("valid"):
+                t["status"] = f"Invalid: {metrics.get('reason')}"
+            else:
+                t["status"] = "Valid"
             
-    article["_v4_trade_graph"] = valid_trades
+    article["_v4_trade_graph"] = trades
     return True, "passed"
 
 def stage_v4_opportunity_score(article: dict, ctx: dict) -> tuple:
@@ -157,18 +178,48 @@ def stage_v4_opportunity_score(article: dict, ctx: dict) -> tuple:
 def stage_v4_routing(article: dict, ctx: dict) -> tuple:
     from monitor import _record_screening
     
+    event_id = article["_v4_event_id"]
+    timestamp = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
+    
+    confidence_history = []
+    evidence = []
+    lifecycle = []
+    created_at = timestamp
+    
+    try:
+        from src.config.settings import RESEARCH_DB_PATH
+        conn = sqlite3.connect(RESEARCH_DB_PATH)
+        c = conn.cursor()
+        c.execute("SELECT confidence_history, evidence, lifecycle, created_at FROM event_ledger WHERE event_id = ?", (event_id,))
+        row = c.fetchone()
+        if row:
+            if row[0]: confidence_history = json.loads(row[0])
+            if row[1]: evidence = json.loads(row[1])
+            if row[2]: lifecycle = json.loads(row[2])
+            if row[3]: created_at = row[3]
+    except Exception:
+        pass
+    finally:
+        try: conn.close()
+        except: pass
+        
+    confidence_history.append({"timestamp": timestamp, "source": article.get("source", "Unknown"), "score": article.get("_v4_opportunity_score", {}).get("total", 0)})
+    evidence.append(article.get("headline"))
+    lifecycle.append({"timestamp": timestamp, "stage": "Actionable Alert"})
+    
     event_data = {
-        "event_id": article["_v4_event_id"],
-        "created_at": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT"),
-        "updated_at": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT"),
+        "event_id": event_id,
+        "created_at": created_at,
+        "updated_at": timestamp,
         "status": "ACTIONABLE",
         "event_type": article.get("_v4_classification", "UNKNOWN"),
         "opportunity_score": article.get("_v4_opportunity_score", {}),
-        "confidence_history": [{"timestamp": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT"), "score": article.get("_v4_opportunity_score", {}).get("total", 0)}],
+        "confidence_history": confidence_history,
         "trade_graph": article.get("_v4_trade_graph", []),
-        "evidence": [article.get("headline")],
+        "evidence": evidence,
         "entities": article.get("_entities", []),
-        "routing_destination": "EMAIL_DISPATCH"
+        "routing_destination": "EMAIL_DISPATCH",
+        "lifecycle": lifecycle
     }
     
     try:

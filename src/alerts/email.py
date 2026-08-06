@@ -134,7 +134,18 @@ def send_v4_event_report(event_data: dict, recipient: str = None):
     
     trades_html = ""
     for t in trade_graph:
-        trades_html += f"<li><strong>{t['strategy']}</strong> on {t['ticker']} (Priority {t['priority']}) - {t['reason']}</li>"
+        trades_html += f"<li><strong>{t['strategy']}</strong> ({t['ticker']}) - Status: {t['status']}<br>Reason: {t['reason']}</li>"
+        
+    timeline_html = ""
+    for c in event_data.get("confidence_history", []):
+        timeline_html += f"<li>{c.get('timestamp', 'Unknown')} - {c.get('source', 'Unknown')} (Confidence: {c.get('score', 0)})</li>"
+        
+    evidence_html = ""
+    for e in event_data.get("evidence", []):
+        evidence_html += f"<li>{e}</li>"
+        
+    opportunity_score = event_data.get("opportunity_score", {})
+    confidence_html = f"Total: {opportunity_score.get('total', 0)} (Entity: {opportunity_score.get('entity_confidence', 0)}, Event: {opportunity_score.get('event_confidence', 0)}, Trade: {opportunity_score.get('trade_confidence', 0)}, Financial: {opportunity_score.get('financial_quality', 0)})"
         
     html_body = f"""
     <html>
@@ -152,14 +163,21 @@ def send_v4_event_report(event_data: dict, recipient: str = None):
             
             <div class="meta-data">
                 <div><strong>Event ID:</strong> {event_id}</div>
-                <div><strong>Evidence:</strong> {event_data.get('evidence', [''])[0]}</div>
-                <div><strong>Status:</strong> {event_data.get('status', 'ACTIONABLE')}</div>
+                <div><strong>Event Summary:</strong> {event_type} involving {len(event_data.get('entities', []))} entities.</div>
+                <div><strong>Confidence:</strong> {confidence_html}</div>
             </div>
 
-            <h3>Generated Trade Graph</h3>
-            <ul>
-                {trades_html}
-            </ul>
+            <h3>Timeline</h3>
+            <ul>{timeline_html}</ul>
+            
+            <h3>Supporting Evidence</h3>
+            <ul>{evidence_html}</ul>
+
+            <h3>Tradable Hypotheses</h3>
+            <ul>{trades_html}</ul>
+            
+            <h3>Key Risks</h3>
+            <ul><li>Subject to regulatory approval and financing conditions.</li></ul>
             
             <div class="footer">
                 Special Situations Radar | V4 Execution Engine

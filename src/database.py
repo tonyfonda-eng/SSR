@@ -131,6 +131,15 @@ def init_db():
 
     r_conn.execute("CREATE INDEX IF NOT EXISTS idx_screening_timestamp ON article_screening_log(timestamp DESC);")
     
+    try:
+        r_conn.execute("ALTER TABLE event_ledger ADD COLUMN entity_confidence INTEGER;")
+        r_conn.execute("ALTER TABLE event_ledger ADD COLUMN event_confidence INTEGER;")
+        r_conn.execute("ALTER TABLE event_ledger ADD COLUMN trade_confidence INTEGER;")
+        r_conn.execute("ALTER TABLE event_ledger ADD COLUMN financial_quality INTEGER;")
+        r_conn.execute("ALTER TABLE event_ledger ADD COLUMN lifecycle TEXT;")
+    except sqlite3.OperationalError:
+        pass
+    
     # --- V4 Event Ledger ---
     r_conn.execute("""
         CREATE TABLE IF NOT EXISTS event_ledger (
@@ -140,11 +149,16 @@ def init_db():
             status TEXT NOT NULL,
             event_type TEXT NOT NULL,
             opportunity_score TEXT,
+            entity_confidence INTEGER,
+            event_confidence INTEGER,
+            trade_confidence INTEGER,
+            financial_quality INTEGER,
             confidence_history TEXT,
             trade_graph TEXT,
             evidence TEXT,
             entities TEXT,
-            routing_destination TEXT
+            routing_destination TEXT,
+            lifecycle TEXT
         );
     """)
     
@@ -338,23 +352,30 @@ def log_event(event_data: dict):
     import json
     conn = sqlite3.connect(RESEARCH_DB_PATH)
     try:
+        opportunity_score_dict = event_data.get("opportunity_score", {})
         conn.execute("""
             INSERT OR REPLACE INTO event_ledger (
                 event_id, created_at, updated_at, status, event_type,
-                opportunity_score, confidence_history, trade_graph, evidence, entities, routing_destination
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                opportunity_score, entity_confidence, event_confidence, trade_confidence, financial_quality,
+                confidence_history, trade_graph, evidence, entities, routing_destination, lifecycle
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             event_data["event_id"],
             event_data["created_at"],
             event_data["updated_at"],
             event_data["status"],
             event_data["event_type"],
-            json.dumps(event_data.get("opportunity_score", {})),
+            json.dumps(opportunity_score_dict),
+            opportunity_score_dict.get("entity_confidence"),
+            opportunity_score_dict.get("event_confidence"),
+            opportunity_score_dict.get("trade_confidence"),
+            opportunity_score_dict.get("financial_quality"),
             json.dumps(event_data.get("confidence_history", [])),
             json.dumps(event_data.get("trade_graph", [])),
             json.dumps(event_data.get("evidence", [])),
             json.dumps(event_data.get("entities", [])),
-            event_data.get("routing_destination", "DROPPED")
+            event_data.get("routing_destination", "DROPPED"),
+            json.dumps(event_data.get("lifecycle", []))
         ))
         conn.commit()
     finally:

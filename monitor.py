@@ -45,7 +45,7 @@ import os
 
 from src.v4_pipeline import (
     stage_v4_ingestion, stage_v4_dedupe, stage_v4_entity_resolution,
-    stage_v4_event_classification, stage_v4_trade_generation,
+    stage_v4_event_classification, stage_v4_trade_hypothesis_generation,
     stage_v4_strategy_validation, stage_v4_opportunity_score,
     stage_v4_routing
 )
@@ -496,7 +496,7 @@ STAGE_REGISTRY = {
     "v4_dedupe": stage_v4_dedupe,
     "v4_entity_resolution": stage_v4_entity_resolution,
     "v4_event_classification": stage_v4_event_classification,
-    "v4_trade_generation": stage_v4_trade_generation,
+    "v4_trade_hypothesis_generation": stage_v4_trade_hypothesis_generation,
     "v4_strategy_validation": stage_v4_strategy_validation,
     "v4_opportunity_score": stage_v4_opportunity_score,
     "v4_routing": stage_v4_routing
@@ -549,7 +549,7 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
             "v4_dedupe",
             "v4_entity_resolution",
             "v4_event_classification",
-            "v4_trade_generation",
+            "v4_trade_hypothesis_generation",
             "v4_strategy_validation",
             "v4_opportunity_score",
             "v4_routing"
