@@ -98,9 +98,9 @@ class GlobeNewswireScraper(SourceScraper):
                     self.scrape_metadata["reason"] = f"No new URLs found on page {page}"
                     break
                     
-                if not checkpoint:
-                    self.scrape_metadata["reason"] = "First run complete (no checkpoint)"
-                    print("[INFO] GlobeNewswire first-run (no checkpoint). Stopping after page 1.")
+                if not checkpoint and page >= 3:
+                    self.scrape_metadata["reason"] = "Initial scan complete (3 pages backfilled)"
+                    print("[INFO] GlobeNewswire initial scan complete (3 pages backfilled). Stopping.")
                     break
                     
                 time.sleep(1)

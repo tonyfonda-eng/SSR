@@ -69,12 +69,32 @@ def test_dag_validation_invalid():
     with pytest.raises(ValueError):
         validate_pipeline_dag(invalid_dag)
 
+def test_ma_proposal_bypasses_financial_t12_and_options_filters():
+    from monitor import stage_financial_t12_floor, stage_options_chain_check
+    article = {
+        "_target_ticker": "DBGI",
+        "_ai_classification": "Cash Merger / Acquisition Proposal",
+        "headline": "Digital Brands Group Announces Receipt of $77.58 Per Share All Cash Proposal - DBGI"
+    }
+    ctx = {"sys_settings": {"Options Tradable Only": "TRUE"}}
+    
+    # Financial T12 floor test
+    t12_passed, t12_reason = stage_financial_t12_floor(article, ctx)
+    assert t12_passed
+    assert t12_reason == "passed"
+    
+    # Options chain check test
+    opt_passed, opt_reason = stage_options_chain_check(article, ctx)
+    assert opt_passed
+    assert opt_reason == "passed"
+
 if __name__ == "__main__":
     test_transaction_graph_dataclass()
     test_stage_candidate_generator_offsets()
     test_stage_graph_validation_self_targeting()
     test_stage_graph_validation_low_confidence()
     test_dag_validation_valid()
+    test_ma_proposal_bypasses_financial_t12_and_options_filters()
     try:
         test_dag_validation_invalid()
         print("DAG Validation Exception caught correctly.")

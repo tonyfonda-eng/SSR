@@ -298,6 +298,11 @@ def stage_tradeability_check(article: dict, ctx: dict) -> tuple:
     return True, "passed"
 
 def stage_financial_t12_floor(article: dict, ctx: dict) -> tuple:
+    event_type = str(article.get("_ai_classification", "")).lower()
+    # Bypass T12 negative net cash floor for acquisition/takeover proposals — buyout targets often have negative net cash
+    if any(ma_kw in event_type for ma_kw in ["merger", "acquisition", "takeover", "buyout", "proposal", "tender"]):
+        return True, "passed"
+        
     ticker = article.get("_target_ticker", article.get("_deterministic_ticker", "UNKNOWN"))
     if ticker != "UNKNOWN":
         metrics = get_t12_metrics(ticker)
@@ -307,6 +312,11 @@ def stage_financial_t12_floor(article: dict, ctx: dict) -> tuple:
     return True, "passed"
 
 def stage_options_chain_check(article: dict, ctx: dict) -> tuple:
+    event_type = str(article.get("_ai_classification", "")).lower()
+    # M&A buyout announcements are tracked regardless of whether options chains exist
+    if any(ma_kw in event_type for ma_kw in ["merger", "acquisition", "takeover", "buyout", "proposal", "tender"]):
+        return True, "passed"
+
     ticker = article.get("_target_ticker", article.get("_deterministic_ticker", "UNKNOWN"))
     if ticker == "UNKNOWN":
         return True, "passed"

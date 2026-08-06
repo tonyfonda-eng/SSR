@@ -3,7 +3,7 @@ name: Special Situations Radar
 on:
   workflow_dispatch:
   schedule:
-    - cron: '*/15 * * * *'  # Adjusted to every 15 mins to prevent overlapping runs and race conditions
+    - cron: '*/5 * * * *'  # Run every 5 minutes for rapid breaking news acquisition
 
 concurrency:
   group: "monitor-pipeline-${{ github.ref }}"
@@ -46,6 +46,7 @@ jobs:
       - name: Run monitor
         continue-on-error: false
         env:
+          ENTITY_ENGINE_VERSION: "shadow"
           GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GEMINI_API_KEY_1: ${{ secrets.GEMINI_API_KEY_1 }}
