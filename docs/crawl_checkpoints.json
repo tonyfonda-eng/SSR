@@ -21,5 +21,9 @@
   "Business Wire::RSS-Healthcare": "20260806709065",
   "Business Wire::RSS-Financial Services": "20260805272248",
   "Business Wire::RSS-Venture Capital": "20260806904499",
-  "GlobeNewswire::HTML": "https://www.globenewswire.com/news-release/2026/08/06/3339934/0/en/instaleap-expands-european-footprint-through-strategic-partnership-with-spar-slovenia.html"
+  "GlobeNewswire::HTML": "https://www.globenewswire.com/news-release/2026/08/06/3339934/0/en/instaleap-expands-european-footprint-through-strategic-partnership-with-spar-slovenia.html",
+  "PR Newswire::HTML-Financial": "https://www.prnewswire.com/news-releases/agribank-reports-second-quarter-2026-financial-results-302845295.html",
+  "PR Newswire::HTML-Tech": "https://www.prnewswire.com/news-releases/ae-studio-research-cited-by-anthropic-ceo-dario-amodei-as-a-promising-method-for-making-open-weights-ai-models-safer-302845303.html",
+  "PR Newswire::HTML-Health": "https://www.prnewswire.com/news-releases/in-hellonation-cosmetic-dentistry-expert-dr-irays-santamaria-dmd-explains-what-to-expect-from-crown-and-bridge-restoration-302845297.html",
+  "PR Newswire::HTML-Industrial": "https://www.prnewswire.com/news-releases/agribank-reports-second-quarter-2026-financial-results-302845295.html"
 }

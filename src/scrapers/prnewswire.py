@@ -55,14 +55,13 @@ def download_article(url):
 class PRNewsWireScraper(SourceScraper):
     def get_latest_articles(self, **kwargs):
         import time
+        from src.ingestion.checkpoints import get_checkpoint, set_checkpoint
         headers = {
             "User-Agent": USER_AGENT
         }
         
         articles = []
-        checkpoint = kwargs.get("checkpoint")
         
-        # Extended metadata as requested
         self.scrape_metadata = {
             "pages_visited": 0,
             "page_limit": 200,
@@ -70,115 +69,117 @@ class PRNewsWireScraper(SourceScraper):
             "emergency_stop": False,
             "duplicate_page_detected": False,
             "http_failures": 0,
-            "reason": "",
-            "last_checkpoint_url": checkpoint
+            "reason": ""
         }
         
-        last_page_urls = set()
+        CATEGORIES = [
+            ("Financial", "financial-services-latest-news/financial-services-latest-news-list"),
+            ("Tech", "business-technology-latest-news/business-technology-latest-news-list"),
+            ("Health", "health-latest-news/health-latest-news-list"),
+            ("Industrial", "heavy-industry-manufacturing-latest-news/heavy-industry-manufacturing-latest-news-list")
+        ]
         
-        for page in range(1, self.scrape_metadata["page_limit"] + 1):
-            self.scrape_metadata["pages_visited"] = page
-            # Switched from global 'news-releases-list' to 'financial-services-latest-news-list' to dramatically reduce non-deal noise
-            url = f"https://www.prnewswire.com/news-releases/financial-services-latest-news/financial-services-latest-news-list/?page={page}&pagesize=100"
+        pages_per_category = max(1, self.scrape_metadata["page_limit"] // len(CATEGORIES))
+        seen_ids = set()
+        
+        for cat_name, cat_path in CATEGORIES:
+            checkpoint = get_checkpoint("PR Newswire", f"HTML-{cat_name}")
+            last_page_urls = set()
+            cat_checkpoint_found = False
+            first_url = None
             
-            try:
-                response = get_session().get(url, headers=headers, timeout=30)
-                response.raise_for_status()
+            for page in range(1, pages_per_category + 1):
+                self.scrape_metadata["pages_visited"] += 1
+                url = f"https://www.prnewswire.com/news-releases/{cat_path}/?page={page}&pagesize=100"
                 
-                soup = BeautifulSoup(response.text, "html.parser")
-                
-                # PR Newswire news release cards
-                article_links = soup.select('.news-release') or soup.select('.card h3 a') or soup.select('.row.newsCards a')
-                
-                if not article_links:
-                    self.scrape_metadata["reason"] = "No article links on page"
-                    break # No more articles found, stop pagination
+                try:
+                    response = get_session().get(url, headers=headers, timeout=30)
+                    response.raise_for_status()
                     
-                current_page_urls = set()
-                new_articles_on_page = 0
-                for a_tag in article_links:
-                    href = a_tag.get('href')
-                    if not href:
-                        continue
+                    soup = BeautifulSoup(response.text, "html.parser")
+                    article_links = soup.select('.news-release') or soup.select('.card h3 a') or soup.select('.row.newsCards a')
                     
-                    full_url = href if href.startswith("http") else "https://www.prnewswire.com" + href
-                    current_page_urls.add(full_url)
-                    
-                    if checkpoint and (full_url == checkpoint or href == checkpoint):
-                        self.scrape_metadata["checkpoint_found"] = True
-                        return articles
+                    if not article_links:
+                        break
                         
-                    article_id = full_url.rstrip("/").split("-")[-1].replace(".html", "")
+                    current_page_urls = set()
+                    new_articles_on_page = 0
                     
-                    title_elem = a_tag.find('h3')
-                    title = ""
-                    published = ""
-                    if title_elem:
-                        small = title_elem.find('small')
-                        if small:
-                            published = small.get_text(strip=True)
-                            small.extract()
-                        if not published:
-                            from bs4 import NavigableString
-                            for content in title_elem.contents:
-                                if isinstance(content, NavigableString):
-                                    text = str(content)
-                                    # Split on timezone boundaries to handle prefixes like "LONDON, Aug 6"
-                                    # without breaking if layout shifts
-                                    for tz in [' ET', ' PT', ' CT', ' MT', ' EST', ' PST', ' CST', ' MST']:
-                                        if tz in text[:100]:
-                                            parts = text.split(tz, 1)
-                                            published = parts[0].strip() + tz
-                                            content.replace_with(parts[1].lstrip())
-                                            break
-                                    if published:
-                                        break
-                                        
-                        title = title_elem.get_text(strip=True)
-                    else:
-                        title = a_tag.get_text(strip=True)
+                    for a_tag in article_links:
+                        href = a_tag.get('href')
+                        if not href: continue
                         
-                    articles.append({
-                        "id": article_id,
-                        "title": title,
-                        "url": full_url,
-                        "published": published
-                    })
-                    new_articles_on_page += 1
+                        full_url = href if href.startswith("http") else "https://www.prnewswire.com" + href
+                        current_page_urls.add(full_url)
+                        
+                        if not first_url:
+                            first_url = full_url
+                            
+                        if checkpoint and (full_url == checkpoint or href == checkpoint):
+                            cat_checkpoint_found = True
+                            self.scrape_metadata["checkpoint_found"] = True
+                            break
+                            
+                        article_id = full_url.rstrip("/").split("-")[-1].replace(".html", "")
+                        
+                        if article_id not in seen_ids:
+                            seen_ids.add(article_id)
+                            
+                            title_elem = a_tag.find('h3')
+                            title = ""
+                            published = ""
+                            if title_elem:
+                                small = title_elem.find('small')
+                                if small:
+                                    published = small.get_text(strip=True)
+                                    small.extract()
+                                if not published:
+                                    from bs4 import NavigableString
+                                    for content in title_elem.contents:
+                                        if isinstance(content, NavigableString):
+                                            text = str(content)
+                                            for tz in [' ET', ' PT', ' CT', ' MT', ' EST', ' PST', ' CST', ' MST']:
+                                                if tz in text[:100]:
+                                                    parts = text.split(tz, 1)
+                                                    published = parts[0].strip() + tz
+                                                    content.replace_with(parts[1].lstrip())
+                                                    break
+                                            if published: break
+                                title = title_elem.get_text(strip=True)
+                            else:
+                                title = a_tag.get_text(strip=True)
+                                
+                            articles.append({
+                                "id": article_id,
+                                "title": title,
+                                "url": full_url,
+                                "published": published
+                            })
+                            new_articles_on_page += 1
+                            
+                    if cat_checkpoint_found:
+                        break
+                        
+                    if current_page_urls and current_page_urls == last_page_urls:
+                        self.scrape_metadata["duplicate_page_detected"] = True
+                        break
+                    last_page_urls = current_page_urls
                     
-                # Stop Condition 1: Duplicate Page Fingerprint
-                if current_page_urls and current_page_urls == last_page_urls:
-                    self.scrape_metadata["duplicate_page_detected"] = True
-                    self.scrape_metadata["reason"] = f"Duplicate page content detected on page {page}"
-                    print(f"[INFO] PR Newswire detected duplicate page content on page {page}. Breaking.")
-                    break
-                last_page_urls = current_page_urls
-                
-                # Stop Condition 2: No New URLs on Page
-                if new_articles_on_page == 0:
-                    self.scrape_metadata["reason"] = f"No new URLs found on page {page}"
-                    break
-                    
-                if not checkpoint and page >= 3:
-                    self.scrape_metadata["reason"] = "Initial scan complete (3 pages backfilled)"
-                    print("[INFO] PR Newswire initial scan complete (3 pages backfilled). Stopping.")
+                    if new_articles_on_page == 0:
+                        break
+                        
+                    if not checkpoint and page >= 3:
+                        break
+                        
+                    time.sleep(1)
+                except Exception as e:
+                    self.scrape_metadata["http_failures"] += 1
+                    print(f"[WARNING] PR Newswire {cat_name} page {page} failed: {e}")
                     break
                     
-                time.sleep(1) # Be polite to their server between pagination requests
+            if first_url:
+                set_checkpoint("PR Newswire", f"HTML-{cat_name}", first_url)
                 
-            except Exception as e:
-                self.scrape_metadata["http_failures"] += 1
-                self.scrape_metadata["reason"] = f"HTTP/Parsing Error on page {page}: {e}"
-                print(f"[WARNING] PR Newswire pagination failed on page {page}: {e}")
-                break
-                
-        # Stop Condition 3: Emergency Cap Hit (Graceful Degradation)
-        if page == self.scrape_metadata["page_limit"] and not self.scrape_metadata.get("checkpoint_found") and checkpoint:
-            self.scrape_metadata["emergency_stop"] = True
-            if not self.scrape_metadata["reason"]:
-                self.scrape_metadata["reason"] = f"Hit {self.scrape_metadata['page_limit']} page limit without checkpoint"
-            print(f"[WARN] PR Newswire hit emergency {self.scrape_metadata['page_limit']} page limit without finding checkpoint. Returning what was collected.")
-            
         return articles
         
     def get_article_body(self, url):
