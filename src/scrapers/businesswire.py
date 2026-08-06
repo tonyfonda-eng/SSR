@@ -1,18 +1,5 @@
 import requests
-# --- WAF BYPASS WRAPPER ---
-try:
-    import requests
-    _orig_get = requests.get
-    def _spoofed_get(*args, **kwargs):
-        headers = kwargs.get('headers', {})
-        if isinstance(headers, dict) and 'User-Agent' not in headers:
-            headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        kwargs['headers'] = headers
-        return _orig_get(*args, **kwargs)
-    requests.get = _spoofed_get
-except ImportError:
-    pass
-# --------------------------
+from src.scrapers.client import get_session
 
 from bs4 import BeautifulSoup
 import feedparser
@@ -64,7 +51,7 @@ class BusinessWireScraper(SourceScraper):
             try:
                 # Fetch with requests to enforce timeout and avoid feedparser hangs
                 headers = {"User-Agent": USER_AGENT}
-                response = requests.get(feed_url, headers=headers, timeout=15)
+                response = get_session().get(feed_url, headers=headers, timeout=15)
                 response.raise_for_status()
                 feed = feedparser.parse(response.content)
                 new_in_feed = 0
@@ -108,7 +95,7 @@ class BusinessWireScraper(SourceScraper):
     def get_article_body(self, url):
         headers = {"User-Agent": USER_AGENT}
         try:
-            response = requests.get(url, headers=headers, timeout=30)
+            response = get_session().get(url, headers=headers, timeout=30)
             if response.status_code != 200:
                 return None
 

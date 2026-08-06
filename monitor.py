@@ -35,6 +35,7 @@ from src.ontology.engine import load_ontology
 from src.rules import matches_global_exclusion, matches_issuer_exclusion
 from src.rules_engine import evaluate as evaluate_deterministic_rules
 from src.ai import extract_target_ticker, classify_event
+from src.providers.router import ProviderRouter
 from src.financials import get_t12_metrics, query_financial_snapshot
 from src.alerts.email import send_alert
 
@@ -282,16 +283,12 @@ def stage_playbook_eligibility_check(article: dict, ctx: dict) -> tuple:
         if not has_playbook:
             return False, "dropped_no_playbook"
             
-    return True, "passed"
-
-# --- THE AI SPECIALIST (PHASE 6 - AMBIGUITY, CLASSIFICATION, SUMMARIZATION ONLY) ---
-
 def stage_ai_ticker_resolution(article: dict, ctx: dict) -> tuple:
     if article.get("_deterministic_ticker", "UNKNOWN") != "UNKNOWN":
         article["_ai_ticker"] = article.get("_deterministic_ticker")
         return True, "passed"
         
-    ticker = extract_target_ticker(article.get("body", ""))
+    ticker = extract_target_ticker(article.get("body", ""), router=ctx.get("ai_router"))
     if ticker in ["EXHAUSTED", "ERROR", "UNKNOWN"]: 
         return False, "dropped_ai_no_ticker"
     article["_ai_ticker"] = ticker
@@ -299,7 +296,7 @@ def stage_ai_ticker_resolution(article: dict, ctx: dict) -> tuple:
 
 def stage_ai_event_classification(article: dict, ctx: dict) -> tuple:
     ticker = article.get("_ai_ticker", "UNKNOWN")
-    ai_result = classify_event(article.get("body", ""), ticker)
+    ai_result = classify_event(article.get("body", ""), [], ticker, router=ctx.get("ai_router"))
     
     if isinstance(ai_result, str):
         if ai_result in ["EXHAUSTED", "ERROR"]: return False, "ai_exhausted"
@@ -371,10 +368,18 @@ def _record_screening(article: dict, telemetry: PipelineTelemetry, outcome: str,
     except Exception as e:
         logger.error(f"[SCREENING LOG FAULT] {e}")
 
-def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest: dict, manifest_hash: str):
-    settings = config_manifest.get("settings", [])
-    ctx = config_manifest.copy()
-    ctx["sys_settings"] = settings[0] if settings else {}
+def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest: dict, manifest_hash: str, ai_router=None):
+    ctx = {
+        "sys_settings": config_manifest.get("settings", [])[0] if config_manifest.get("settings") else {},
+        "semantic_concepts": config_manifest.get("semantic_concepts", []),
+        "event_statuses": config_manifest.get("event_statuses", []),
+        "rules": config_manifest.get("rules", []),
+        "global_exclusions": config_manifest.get("global_exclusions", []),
+        "document_type_scores": config_manifest.get("document_type_scores", []),
+        "playbooks": config_manifest.get("playbooks", []),
+        "financial_rules": config_manifest.get("financial_rules", []),
+        "ai_router": ai_router
+    }
     
     raw_pipeline_sheet = config_manifest.get("pipeline", [])
     if raw_pipeline_sheet:
@@ -539,6 +544,9 @@ def main():
         manifest_hash = f"CFG-{hashlib.sha256(config_json.encode('utf-8')).hexdigest()[:12].upper()}"
         save_config_snapshot(manifest_hash, telemetry.run_id, config_json)
         logger.info(f"Locked Immutable Configuration Manifest: {manifest_hash}")
+        
+        ai_router = ProviderRouter()
+        ai_router.update_config(config_manifest.get("settings", {}))
     except Exception as e:
         logger.critical(f"Failed to fetch Configuration Manifest: {e}")
         sys.exit(1)
@@ -587,7 +595,7 @@ def main():
 
         for article in unique_articles:
             try:
-                process_article(article, telemetry, config_manifest, manifest_hash)
+                process_article(article, telemetry, config_manifest, manifest_hash, ai_router)
             except Exception as e:
                 logger.error(f"Error processing article: {e}")
                 telemetry.track("errors")

@@ -21,7 +21,7 @@ def export_screening_log(filepath="docs/screening_log.json", limit=1000):
         conn.row_factory = _dict_factory
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT id, run_id, timestamp, headline, url, source, outcome, final_stage, drop_reason, ticker, event_family, ingestion_mode
+            SELECT id, run_id, timestamp, headline, url, source, outcome, final_stage, drop_reason, ticker, company_name, event_family, ingestion_mode
             FROM article_screening_log
             ORDER BY timestamp DESC, id DESC
             LIMIT ?

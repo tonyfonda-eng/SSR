@@ -28,7 +28,7 @@ jobs:
           path: |
             ssr_cache.sqlite
             ssr_observability.db
-          key: ssr-database-
+          key: ssr-database-${{ github.sha }}
           restore-keys: |
             ssr-database-
 
@@ -84,7 +84,7 @@ jobs:
           path: |
             ssr_cache.sqlite
             ssr_observability.db
-          key: ssr-database-${{ github.run_id }}
+          key: ssr-database-${{ github.sha }}
 
       - name: Generate HTML Dashboard
         if: always()

@@ -2,20 +2,7 @@ import feedparser
 import urllib.parse
 import time
 import requests
-# --- WAF BYPASS WRAPPER ---
-try:
-    import requests
-    _orig_get = requests.get
-    def _spoofed_get(*args, **kwargs):
-        headers = kwargs.get('headers', {})
-        if isinstance(headers, dict) and 'User-Agent' not in headers:
-            headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        kwargs['headers'] = headers
-        return _orig_get(*args, **kwargs)
-    requests.get = _spoofed_get
-except ImportError:
-    pass
-# --------------------------
+from src.scrapers.client import get_session
 
 from bs4 import BeautifulSoup
 from src.scrapers.base import SourceScraper
@@ -32,7 +19,7 @@ class GoogleNewsScraper(SourceScraper):
         try:
             # Wrap in requests.get with timeout for safety
             headers = {"User-Agent": USER_AGENT}
-            response = requests.get(url, headers=headers, timeout=30)
+            response = get_session().get(url, headers=headers, timeout=30)
             response.raise_for_status()
             
             feed = feedparser.parse(response.content)

@@ -113,12 +113,18 @@ def init_db():
             final_stage TEXT NOT NULL,
             drop_reason TEXT,
             ticker TEXT,
+            company_name TEXT,
             event_family TEXT
         );
     """)
     
     try:
         r_conn.execute("ALTER TABLE article_screening_log ADD COLUMN ingestion_mode TEXT;")
+    except sqlite3.OperationalError:
+        pass
+        
+    try:
+        r_conn.execute("ALTER TABLE article_screening_log ADD COLUMN company_name TEXT;")
     except sqlite3.OperationalError:
         pass
 
@@ -206,8 +212,8 @@ def log_article_screening(entry: dict) -> None:
         conn = sqlite3.connect(RESEARCH_DB_PATH)
         conn.execute("""
             INSERT INTO article_screening_log
-            (run_id, timestamp, headline, url, source, outcome, final_stage, drop_reason, ticker, event_family, ingestion_mode)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            (run_id, timestamp, headline, url, source, outcome, final_stage, drop_reason, ticker, company_name, event_family, ingestion_mode)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         """, (
             entry.get("run_id", "UNKNOWN"),
             gmt_now,
@@ -218,6 +224,7 @@ def log_article_screening(entry: dict) -> None:
             entry.get("final_stage", "UNKNOWN"),
             entry.get("drop_reason"),
             entry.get("ticker"),
+            entry.get("company_name"),
             entry.get("event_family"),
             entry.get("ingestion_mode", "UNKNOWN")
         ))

@@ -4,20 +4,7 @@ Downloads and extracts PR Newswire articles.
 """
 
 import requests
-# --- WAF BYPASS WRAPPER ---
-try:
-    import requests
-    _orig_get = requests.get
-    def _spoofed_get(*args, **kwargs):
-        headers = kwargs.get('headers', {})
-        if isinstance(headers, dict) and 'User-Agent' not in headers:
-            headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        kwargs['headers'] = headers
-        return _orig_get(*args, **kwargs)
-    requests.get = _spoofed_get
-except ImportError:
-    pass
-# --------------------------
+from src.scrapers.client import get_session
 
 from bs4 import BeautifulSoup
 
@@ -31,7 +18,7 @@ def download_article(url):
         "User-Agent": USER_AGENT
     }
 
-    response = requests.get(
+    response = get_session().get(
         url,
         headers=headers,
         timeout=30,
@@ -79,7 +66,7 @@ class PRNewsWireScraper(SourceScraper):
             url = f"https://www.prnewswire.com/news-releases/news-releases-list/?page={page}&pagesize=100"
             
             try:
-                response = requests.get(url, headers=headers, timeout=30)
+                response = get_session().get(url, headers=headers, timeout=30)
                 response.raise_for_status()
                 
                 soup = BeautifulSoup(response.text, "html.parser")
@@ -110,12 +97,23 @@ class PRNewsWireScraper(SourceScraper):
                         if small:
                             published = small.get_text(strip=True)
                             small.extract()
-                        raw_text = title_elem.get_text(strip=True)
-                        match = re.match(r'^\d{1,2}:\d{2}\s*ET|^[A-Z][a-z]{2}\s+\d{1,2},\s*\d{4},?\s*\d{1,2}:\d{2}\s*ET', raw_text)
-                        if match and not published:
-                            published = match.group(0)
-                            raw_text = raw_text[match.end():].strip()
-                        title = raw_text
+                        if not published:
+                            from bs4 import NavigableString
+                            for content in title_elem.contents:
+                                if isinstance(content, NavigableString):
+                                    text = str(content)
+                                    # Split on timezone boundaries to handle prefixes like "LONDON, Aug 6"
+                                    # without breaking if layout shifts
+                                    for tz in [' ET', ' PT', ' CT', ' MT', ' EST', ' PST', ' CST', ' MST']:
+                                        if tz in text[:100]:
+                                            parts = text.split(tz, 1)
+                                            published = parts[0].strip() + tz
+                                            content.replace_with(parts[1].lstrip())
+                                            break
+                                    if published:
+                                        break
+                                        
+                        title = title_elem.get_text(strip=True)
                     else:
                         title = a_tag.get_text(strip=True)
                         

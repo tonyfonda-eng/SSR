@@ -1,18 +1,5 @@
 import requests
-# --- WAF BYPASS WRAPPER ---
-try:
-    import requests
-    _orig_get = requests.get
-    def _spoofed_get(*args, **kwargs):
-        headers = kwargs.get('headers', {})
-        if isinstance(headers, dict) and 'User-Agent' not in headers:
-            headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
-        kwargs['headers'] = headers
-        return _orig_get(*args, **kwargs)
-    requests.get = _spoofed_get
-except ImportError:
-    pass
-# --------------------------
+from src.scrapers.client import get_session
 
 from bs4 import BeautifulSoup
 import feedparser
@@ -33,7 +20,7 @@ class GlobeNewswireScraper(SourceScraper):
         for page in range(1, 201):
             url = f"https://www.globenewswire.com/NewsRoom?page={page}"
             try:
-                response = requests.get(url, headers=headers, timeout=15)
+                response = get_session().get(url, headers=headers, timeout=15)
                 response.raise_for_status()
                 soup = BeautifulSoup(response.text, "html.parser")
                 
@@ -58,11 +45,25 @@ class GlobeNewswireScraper(SourceScraper):
                         continue
                     seen_ids.add(article_id)
                     
+                    # Attempt to find the publish date near the link
+                    time_elem = None
+                    parent = a_tag.find_parent(class_=lambda c: c and ('item' in c.lower() or 'article' in c.lower() or 'row' in c.lower()))
+                    if parent:
+                        time_elem = parent.find('time') or parent.find(class_=lambda c: c and 'date' in c.lower())
+                    
+                    if not time_elem:
+                        # Fallback to nearest elements if no clear parent container
+                        time_elem = a_tag.find_previous('time') or a_tag.find_next('time')
+                        
+                    published = ""
+                    if time_elem:
+                        published = time_elem.get('datetime') or time_elem.get_text(strip=True)
+                    
                     articles.append({
                         "id": article_id,
                         "title": a_tag.get_text(strip=True),
                         "url": full_url,
-                        "published": ""
+                        "published": published
                     })
                     new_articles_on_page += 1
                     
@@ -83,7 +84,7 @@ class GlobeNewswireScraper(SourceScraper):
 
     def get_article_body(self, url):
         headers = {"User-Agent": USER_AGENT}
-        response = requests.get(url, headers=headers, timeout=15)
+        response = get_session().get(url, headers=headers, timeout=15)
         if response.status_code != 200:
             return None
 
