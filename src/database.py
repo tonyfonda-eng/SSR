@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 # Strict physical isolation of storage domains
 RESEARCH_DB_PATH = "ssr_observability.db"
 DEVOPS_DB_PATH = "ssr_devops.db"
+AUDIT_DB_PATH = "ssr_audit.db"
 
 # Alias for legacy modules expecting DB_PATH
 DB_PATH = RESEARCH_DB_PATH
@@ -154,6 +155,51 @@ def init_db():
         
     d_conn.commit()
     d_conn.close()
+
+    # --- V4 Audit Database ---
+    os.makedirs(os.path.dirname(os.path.abspath(AUDIT_DB_PATH)), exist_ok=True)
+    a_conn = sqlite3.connect(AUDIT_DB_PATH)
+    a_conn.execute("""
+        CREATE TABLE IF NOT EXISTS daily_source_metrics (
+            run_id TEXT NOT NULL,
+            timestamp TEXT NOT NULL,
+            source TEXT NOT NULL,
+            channel TEXT NOT NULL,
+            raw_found INTEGER NOT NULL,
+            unique_found INTEGER NOT NULL,
+            pages_visited INTEGER,
+            page_limit INTEGER,
+            checkpoint_found BOOLEAN,
+            emergency_stop BOOLEAN,
+            reason TEXT
+        );
+    """)
+    a_conn.execute("""
+        CREATE TABLE IF NOT EXISTS daily_ai_metrics (
+            run_id TEXT NOT NULL,
+            timestamp TEXT NOT NULL,
+            provider TEXT NOT NULL,
+            prompt_type TEXT NOT NULL,
+            input_tokens INTEGER,
+            output_tokens INTEGER,
+            latency_ms INTEGER,
+            cost REAL,
+            success BOOLEAN
+        );
+    """)
+    a_conn.execute("""
+        CREATE TABLE IF NOT EXISTS audit_events (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            timestamp TEXT NOT NULL,
+            run_id TEXT NOT NULL,
+            source_or_provider TEXT NOT NULL,
+            event_type TEXT NOT NULL,
+            severity TEXT NOT NULL,
+            details TEXT
+        );
+    """)
+    a_conn.commit()
+    a_conn.close()
 
 # MODULE-LEVEL EXPORTS REQUIRED BY MONITOR.PY
 def initialise_database():
@@ -298,3 +344,60 @@ def save_workflow_health(health_data=None):
 
 def save_exception_log(*args, **kwargs): pass
 def save_source_stats(*args, **kwargs): pass
+
+def log_audit_source_metrics(run_id: str, ledger: list):
+    try:
+        gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
+        conn = sqlite3.connect(AUDIT_DB_PATH)
+        for entry in ledger:
+            meta = entry.get("metadata", {})
+            conn.execute("""
+                INSERT INTO daily_source_metrics 
+                (run_id, timestamp, source, channel, raw_found, unique_found, pages_visited, page_limit, checkpoint_found, emergency_stop, reason)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            """, (
+                run_id, gmt_now, entry.get("source"), entry.get("channel"),
+                entry.get("raw_found", 0), entry.get("unique_found", 0),
+                meta.get("pages_visited", 0), meta.get("page_limit", 0),
+                meta.get("checkpoint_found", False), meta.get("emergency_stop", False), meta.get("reason", "")
+            ))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        logger.error(f"[DB FAULT] Failed to write daily_source_metrics: {e}")
+
+def log_audit_ai_metrics(run_id: str, telemetry: list):
+    try:
+        gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
+        conn = sqlite3.connect(AUDIT_DB_PATH)
+        for t in telemetry:
+            conn.execute("""
+                INSERT INTO daily_ai_metrics 
+                (run_id, timestamp, provider, prompt_type, input_tokens, output_tokens, latency_ms, cost, success)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+            """, (
+                run_id, gmt_now, t.get("provider"), t.get("prompt_type"),
+                t.get("input_tokens", 0), t.get("output_tokens", 0),
+                t.get("latency_ms", 0), t.get("cost", 0.0), t.get("success", False)
+            ))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        logger.error(f"[DB FAULT] Failed to write daily_ai_metrics: {e}")
+
+def log_audit_event(run_id: str, source_or_provider: str, event_type: str, severity: str, details: str):
+    """Writes a black-box event log directly to the audit database."""
+    try:
+        gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
+        conn = sqlite3.connect(AUDIT_DB_PATH)
+        conn.execute("""
+            INSERT INTO audit_events 
+            (timestamp, run_id, source_or_provider, event_type, severity, details)
+            VALUES (?, ?, ?, ?, ?, ?);
+        """, (
+            gmt_now, run_id, source_or_provider, event_type, severity, details
+        ))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        logger.error(f"[DB FAULT] Failed to write audit event: {e}")

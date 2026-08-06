@@ -61,8 +61,16 @@ class PRNewsWireScraper(SourceScraper):
         
         articles = []
         checkpoint = kwargs.get("checkpoint")
+        self.scrape_metadata = {
+            "pages_visited": 0,
+            "page_limit": 200,
+            "checkpoint_found": False,
+            "emergency_stop": False,
+            "reason": ""
+        }
         
         for page in range(1, 201):
+            self.scrape_metadata["pages_visited"] = page
             url = f"https://www.prnewswire.com/news-releases/news-releases-list/?page={page}&pagesize=100"
             
             try:
@@ -85,6 +93,7 @@ class PRNewsWireScraper(SourceScraper):
                     
                     full_url = href if href.startswith("http") else "https://www.prnewswire.com" + href
                     if checkpoint and (full_url == checkpoint or href == checkpoint):
+                        self.scrape_metadata["checkpoint_found"] = True
                         return articles
                         
                     article_id = full_url.rstrip("/").split("-")[-1].replace(".html", "")
@@ -126,6 +135,8 @@ class PRNewsWireScraper(SourceScraper):
                     new_articles_on_page += 1
                     
                     if len(articles) >= 20000:
+                        self.scrape_metadata["emergency_stop"] = True
+                        self.scrape_metadata["reason"] = "Hit 20000 article limit"
                         print(f"[CRITICAL] PR Newswire hit emergency 20,000 article limit!")
                         return articles
                     
@@ -134,10 +145,13 @@ class PRNewsWireScraper(SourceScraper):
                 time.sleep(1) # Be polite to their server between pagination requests
                 
             except Exception as e:
+                self.scrape_metadata["reason"] = f"HTTP/Parsing Error on page {page}"
                 print(f"[WARNING] PR Newswire pagination failed on page {page}: {e}")
                 break
                 
-        if page == 200:
+        if page == 200 and not self.scrape_metadata.get("checkpoint_found"):
+            self.scrape_metadata["emergency_stop"] = True
+            self.scrape_metadata["reason"] = "Hit 200 page limit"
             print("[CRITICAL] PR Newswire hit emergency 200 page limit without finding checkpoint.")
         return articles
         

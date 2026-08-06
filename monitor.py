@@ -9,12 +9,13 @@ import hashlib
 import time
 import json
 import re
+import subprocess
 from datetime import datetime, timezone
 
 from src.database import (
     initialise_database, get_or_create_event, commit_decision_capsule,
     save_workflow_health, save_exception_log, save_config_snapshot,
-    log_article_screening
+    log_article_screening, log_audit_source_metrics, log_audit_ai_metrics, log_audit_event
 )
 
 from src.validation.export_frontend_data import export_archive_json, export_screening_json
@@ -612,12 +613,21 @@ def main():
                 logger.info(f"    Drop Reasons: {data['drop_reasons']}")
         logger.info("===============================================\n")
         
+        try:
+            git_commit = subprocess.check_output(['git', 'rev-parse', 'HEAD']).decode('ascii').strip()
+            git_branch = subprocess.check_output(['git', 'rev-parse', '--abbrev-ref', 'HEAD']).decode('ascii').strip()
+        except:
+            git_commit = "unknown"
+            git_branch = "unknown"
+            
         health_payload = {
             "run_id": telemetry.run_id,
             "total_scanned": telemetry.metrics.get("downloaded", 0),
             "articles": telemetry.metrics.get("alerts_generated", 0),
             "errors": telemetry.metrics.get("errors", 0) + telemetry.metrics.get("ai_exhausted", 0),
             "runtime": telemetry.get_runtime(),
+            "git_commit": git_commit,
+            "branch": git_branch,
             "daily": {
                 "run_id": telemetry.run_id,
                 "downloaded": telemetry.metrics.get("downloaded", 0),
@@ -636,6 +646,46 @@ def main():
         }
         save_workflow_health(health_payload)
         
+        # --- V4 Audit Logging & Events ---
+        try:
+            log_audit_source_metrics(telemetry.run_id, health_payload.get("ingestion_ledger", []))
+            
+            # Log scraper events
+            has_emergency_stop = False
+            for entry in health_payload.get("ingestion_ledger", []):
+                meta = entry.get("metadata", {})
+                if meta.get("emergency_stop"):
+                    has_emergency_stop = True
+                    log_audit_event(telemetry.run_id, entry.get("source"), "EMERGENCY_LIMIT_REACHED", "CRITICAL", f"Reason: {meta.get('reason')}")
+                elif entry.get("status") in ["TIMEOUT", "ERROR"]:
+                    log_audit_event(telemetry.run_id, entry.get("source"), entry.get("status"), "WARN", entry.get("error_message"))
+
+            if 'ai_router' in locals() and hasattr(ai_router, 'get_telemetry'):
+                log_audit_ai_metrics(telemetry.run_id, ai_router.get_telemetry())
+                # Log AI router events
+                for evt in ai_router.get_events():
+                    log_audit_event(telemetry.run_id, evt.get("source_or_provider"), evt.get("event_type"), evt.get("severity"), evt.get("details"))
+                    
+            # Check for catastrophic failures
+            from src.audit.queries import get_daily_run_summary
+            summary, _ = get_daily_run_summary(datetime.now(timezone.utc).strftime("%Y-%m-%d"), 30)
+            if summary:
+                cov_score = summary.get("coverage_score", 100)
+                if cov_score < 60 or has_emergency_stop:
+                    from src.alerts.email import send_alert
+                    send_alert({
+                        "headline": "CRITICAL HEALTH ALERT",
+                        "url": "https://github.com/tonyfonda-eng/SSR",
+                        "research_summary": f"Coverage dropped to {cov_score}% or emergency stop was reached. Immediate investigation required.",
+                        "is_update": False,
+                        "manifest_registry": {"decision_id": telemetry.run_id},
+                        "detection_vector": {"detected_event_type": "SYSTEM FAILURE", "target_ticker": "SSR_OPS"},
+                        "syndication_lineage": {"canonical_sensor_id": "Flight Recorder"}
+                    })
+                    
+        except Exception as e:
+            logger.error(f"[AUDIT] Failed to save V4 audit metrics/events: {e}")
+            
         try:
             import os
             ledger_path = "docs/ingestion_ledger.json"

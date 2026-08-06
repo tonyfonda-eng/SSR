@@ -94,7 +94,8 @@ def _fetch_html_channel(source: dict) -> tuple:
         "raw_found": 0,
         "parsed_found": 0,
         "duration_sec": 0.0,
-        "unique_found": 0
+        "unique_found": 0,
+        "metadata": {}
     }
     
     if not url:
@@ -110,6 +111,9 @@ def _fetch_html_channel(source: dict) -> tuple:
             checkpoint = get_checkpoint(source_name, "HTML")
             raw_articles = scraper.get_latest_articles(url=url, checkpoint=checkpoint)
             ledger["raw_found"] = len(raw_articles)
+            
+            if hasattr(scraper, "scrape_metadata"):
+                ledger["metadata"] = scraper.scrape_metadata
             
             if raw_articles:
                 set_checkpoint(source_name, "HTML", raw_articles[0].get("url") or raw_articles[0].get("id"))

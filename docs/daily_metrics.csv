@@ -1,0 +1,3 @@
+Date,Total_Runs,Raw_Scanned,Unique_Articles,Alerts_Dispatched,Confidence_Score,Acquisition_Health,Pipeline_Health,AI_Health,DB_Integrity_Health,AI_Total_Calls,AI_Failures,AI_Avg_Latency_ms,AI_Total_Cost,Average_Ontology_Score,Ontology_Delta,Emergency_Stops,Total_Errors,Avg_Runtime_s,Business_Wire,PR_Newswire,GlobeNewswire,SEC_EDGAR
+2026-08-06,1,0,1,0,38.2,85,100,0,60,450,150,2125.0,0.045,0.0,0.0,1,0,0.0,0,1,0,0
+2026-08-06,1,0,1,0,38.2,85,100,0,60,450,150,2125.0,0.045,0.0,0.0,1,0,0.0,0,1,0,0

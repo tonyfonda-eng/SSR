@@ -1,6 +1,12 @@
 class SourceScraper:
     def __init__(self):
-        pass
+        self.scrape_metadata = {
+            "pages_visited": 0,
+            "page_limit": 0,
+            "checkpoint_found": False,
+            "emergency_stop": False,
+            "reason": ""
+        }
 
     def get_latest_articles(self, **kwargs):
         """

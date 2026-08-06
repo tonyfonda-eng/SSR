@@ -23,6 +23,8 @@ class ProviderRouter:
             "openrouter": self._parse_keys("OPENROUTER_API_KEY")
         }
         self.settings = {}
+        self.telemetry = []
+        self.events = []
         
         total_keys = sum(len(v) for v in self.keys.values())
         logger.info(f"[AI ROUTER] Initialized with {total_keys} total keys across providers.")
@@ -43,8 +45,16 @@ class ProviderRouter:
     def update_config(self, settings: dict):
         """Injects dynamic settings from The Brain (Google Sheets)."""
         self.settings = settings
+        
+    def get_telemetry(self) -> List[Dict]:
+        """Returns the accumulated telemetry for this run."""
+        return self.telemetry
 
-    def generate(self, prompt: str, require_json: bool = False) -> str:
+    def get_events(self) -> List[Dict]:
+        """Returns the accumulated black-box events for this run."""
+        return self.events
+
+    def generate(self, prompt: str, require_json: bool = False, prompt_type: str = "Unknown") -> str:
         """
         Executes the prompt against available providers. 
         Implements intelligent fallback and token rotation logic.
@@ -60,17 +70,46 @@ class ProviderRouter:
                     current_key = keys[0]
                 
                 try:
+                    start_time = time.time()
+                    latency_ms = 0
+                    tokens_in = 0
+                    tokens_out = 0
+                    success = False
+                    output = ""
+                    
                     if provider == "gemini":
-                        return self._call_gemini(prompt, current_key, require_json)
+                        output, tokens_in, tokens_out = self._call_gemini(prompt, current_key, require_json)
                     elif provider == "openrouter":
-                        return self._call_openrouter(prompt, current_key, require_json)
+                        output, tokens_in, tokens_out = self._call_openrouter(prompt, current_key, require_json)
+                        
+                    latency_ms = int((time.time() - start_time) * 1000)
+                    success = True
+                    
+                    self.telemetry.append({
+                        "provider": provider,
+                        "prompt_type": prompt_type,
+                        "input_tokens": tokens_in,
+                        "output_tokens": tokens_out,
+                        "latency_ms": latency_ms,
+                        "cost": (tokens_in * 0.075 / 1000000) + (tokens_out * 0.30 / 1000000) if provider == "gemini" else 0.0,
+                        "success": True
+                    })
+                    
+                    return output
                         
                 except requests.exceptions.HTTPError as e:
+                    latency_ms = int((time.time() - start_time) * 1000)
+                    self.telemetry.append({
+                        "provider": provider,
+                        "prompt_type": prompt_type,
+                        "input_tokens": 0, "output_tokens": 0, "latency_ms": latency_ms, "cost": 0, "success": False
+                    })
                     status_code = getattr(e.response, 'status_code', 500)
                     
                     if status_code == 401 or status_code == 403:
                         # FAIL-FAST: Unauthorized key. It's dead. Drop it permanently.
                         logger.warning(f"[AI ROUTER] {status_code} on {provider}. Purging dead key from rotation.")
+                        self.events.append({"source_or_provider": provider, "event_type": "401_UNAUTHORIZED", "severity": "CRITICAL", "details": "Key purged from rotation"})
                         with self._lock:
                             keys_ref = self.keys.get(provider, [])
                             if keys_ref and keys_ref[0] == current_key:
@@ -79,6 +118,7 @@ class ProviderRouter:
                     elif status_code == 429:
                         # RATE LIMIT: Move the exhausted key to the back of the queue and pause briefly.
                         logger.warning(f"[AI ROUTER] 429 Rate Limit on {provider}. Rotating to next key.")
+                        self.events.append({"source_or_provider": provider, "event_type": "429_RATE_LIMIT", "severity": "WARN", "details": f"Latency: {latency_ms}ms. Prompt: {prompt_type}"})
                         with self._lock:
                             keys_ref = self.keys.get(provider, [])
                             if keys_ref and keys_ref[0] == current_key:
@@ -88,17 +128,21 @@ class ProviderRouter:
                     elif status_code >= 500:
                         # VENDOR OUTAGE: The provider is down. Skip to the next provider immediately.
                         logger.error(f"[AI ROUTER] 5xx Vendor Outage on {provider}. Switching providers.")
+                        self.events.append({"source_or_provider": provider, "event_type": f"{status_code}_VENDOR_OUTAGE", "severity": "CRITICAL", "details": "Switching providers"})
                         break 
                         
                     else:
                         logger.error(f"[AI ROUTER] Unexpected HTTP {status_code} from {provider}: {e}")
+                        self.events.append({"source_or_provider": provider, "event_type": f"HTTP_{status_code}", "severity": "CRITICAL", "details": str(e)})
                         break
                         
                 except Exception as e:
                     logger.error(f"[AI ROUTER] Unknown exception connecting to {provider}: {e}")
+                    self.events.append({"source_or_provider": provider, "event_type": "TIMEOUT_OR_NETWORK", "severity": "WARN", "details": str(e)})
                     break # Abort this provider, try the next
                     
         # If the loop exhausts without returning, we are completely out of AI credits/keys.
+        self.events.append({"source_or_provider": "SYSTEM", "event_type": "AI_EXHAUSTED", "severity": "CRITICAL", "details": "All providers failed or exhausted."})
         return "EXHAUSTED"
 
     def _call_gemini(self, prompt: str, api_key: str, require_json: bool) -> str:
@@ -130,7 +174,11 @@ class ProviderRouter:
         
         data = response.json()
         try:
-            return data["candidates"][0]["content"]["parts"][0]["text"]
+            content = data["candidates"][0]["content"]["parts"][0]["text"]
+            usage = data.get("usageMetadata", {})
+            tokens_in = usage.get("promptTokenCount", 0)
+            tokens_out = usage.get("candidatesTokenCount", 0)
+            return content, tokens_in, tokens_out
         except (KeyError, IndexError):
             logger.error(f"[AI ROUTER] Unexpected Gemini response format: {data}")
             raise requests.exceptions.HTTPError(response=response)
@@ -165,4 +213,8 @@ class ProviderRouter:
         response.raise_for_status()
         
         data = response.json()
-        return data["choices"][0]["message"]["content"]
+        usage = data.get("usage", {})
+        tokens_in = usage.get("prompt_tokens", 0)
+        tokens_out = usage.get("completion_tokens", 0)
+        
+        return data["choices"][0]["message"]["content"], tokens_in, tokens_out

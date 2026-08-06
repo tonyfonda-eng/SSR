@@ -44,14 +44,14 @@ def get_router():
     return router
 
 
-def invoke_llm(prompt: str, json_mode: bool = False, router=None) -> str:
+def invoke_llm(prompt: str, json_mode: bool = False, router=None, prompt_type: str = "Unknown") -> str:
     """
     Retrieves the raw, unmodified string response from the AI provider.
     """
     if router is None:
         router = get_router()
     try:
-        response = router.generate(prompt, require_json=json_mode)
+        response = router.generate(prompt, require_json=json_mode, prompt_type=prompt_type)
         if response == "EXHAUSTED":
             logger.critical("[AI CORE] Provider router exhausted all available keys.")
         return response
@@ -133,7 +133,7 @@ def extract_target_ticker(body_text: str, router=None) -> str:
     
     Text: {body_text[:4000]}"""
     
-    raw_output = invoke_llm(prompt, json_mode=False, router=router)
+    raw_output = invoke_llm(prompt, json_mode=False, router=router, prompt_type="Ticker Extraction")
     return parse_ticker_output(raw_output)
 
 
@@ -145,7 +145,7 @@ def extract_halt_date(body_text: str, router=None) -> str:
     
     Text: {body_text[:4000]}"""
     
-    raw_output = invoke_llm(prompt, json_mode=False, router=router)
+    raw_output = invoke_llm(prompt, json_mode=False, router=router, prompt_type="Halt Date Extraction")
     return parse_halt_date_output(raw_output)
 
 
@@ -182,7 +182,7 @@ def classify_event(body_text: str, matches: list, ticker: str = None, market_cap
         "Evidence": ["List of key phrases supporting conclusion"]
     }}"""
 
-    raw_output = invoke_llm(prompt, json_mode=True, router=router)
+    raw_output = invoke_llm(prompt, json_mode=True, router=router, prompt_type="Event Classification")
     parsed_payload = parse_classification_output(raw_output)
     
     # We return just the strategy string here to satisfy the legacy signature in monitor.py
@@ -211,7 +211,7 @@ def execute_playbook(body_text: str, playbook_steps: str, event_family: str, gol
     
     Provide your output as a professional investment memo."""
 
-    raw_output = invoke_llm(prompt, json_mode=False, router=router)
+    raw_output = invoke_llm(prompt, json_mode=False, router=router, prompt_type="Playbook Execution")
     
     if raw_output == "EXHAUSTED":
          return "FAILED: AI Providers Exhausted."

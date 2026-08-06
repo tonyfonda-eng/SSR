@@ -45,6 +45,13 @@ class BusinessWireScraper(SourceScraper):
         
         articles = []
         seen_ids = set()
+        self.scrape_metadata = {
+            "pages_visited": 1,
+            "page_limit": 1,
+            "checkpoint_found": False,
+            "emergency_stop": False,
+            "reason": ""
+        }
 
         for category_name, feed_url in self.RSS_FEEDS:
             checkpoint = get_checkpoint("Business Wire", f"RSS-{category_name}")
@@ -64,6 +71,7 @@ class BusinessWireScraper(SourceScraper):
                         first_id = article_id
                         
                     if checkpoint and (article_id == checkpoint or entry.link == checkpoint):
+                        self.scrape_metadata["checkpoint_found"] = True
                         break
 
                     if article_id not in seen_ids:
@@ -85,6 +93,7 @@ class BusinessWireScraper(SourceScraper):
                 if first_id:
                     set_checkpoint("Business Wire", f"RSS-{category_name}", first_id)
             except Exception as e:
+                self.scrape_metadata["reason"] += f"[{category_name} failed] "
                 print(f"[WARNING] BusinessWire RSS feed '{category_name}' failed: {e}")
 
             time.sleep(0.5)  # Be polite between feed requests
