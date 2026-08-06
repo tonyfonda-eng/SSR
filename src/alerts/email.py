@@ -103,6 +103,7 @@ def send_alert(decision_manifest: dict, recipient: str = "tony.fonda@gmail.com")
 
     try:
         server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
+        server.set_debuglevel(1)
         server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
         server.send_message(msg)
         server.quit()
