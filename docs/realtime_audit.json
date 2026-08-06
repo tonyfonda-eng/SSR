@@ -1,17 +1,149 @@
 {
-  "timestamp": "2026-08-06T06:28:25.113232+00:00",
+  "timestamp": "2026-08-06T13:33:12.295241+00:00",
   "source_metrics": [
     {
       "source": "PR Newswire",
       "mode": "HTML",
       "grade": "F",
       "status_light": "\ud83d\udd34",
+      "raw": 370,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 66.7,
+      "emergency_stop": true,
+      "reason": "Hit 20,000 limit,"
+    },
+    {
+      "source": "EQS News (Germany)",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 98,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 100.0,
+      "emergency_stop": false,
+      "reason": ""
+    },
+    {
+      "source": "SEC Edgar",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 95,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 100.0,
+      "emergency_stop": false,
+      "reason": ""
+    },
+    {
+      "source": "Business Wire",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 54,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 100.0,
+      "emergency_stop": false,
+      "reason": ""
+    },
+    {
+      "source": "eMarket SDIR (Italy)",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 23,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 100.0,
+      "emergency_stop": false,
+      "reason": ""
+    },
+    {
+      "source": "PR Newswire",
+      "mode": "RSS",
+      "grade": "F",
+      "status_light": "\ud83d\udd34",
+      "raw": 20,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 66.7,
+      "emergency_stop": true,
+      "reason": "Hit 20,000 limit,"
+    },
+    {
+      "source": "Finansinspektionen (Sweden)",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 9,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 100.0,
+      "emergency_stop": false,
+      "reason": ""
+    },
+    {
+      "source": "AMF (France)",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 5,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 100.0,
+      "emergency_stop": false,
+      "reason": ""
+    },
+    {
+      "source": "Canadian Newswire SEDAR Feeds",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
       "raw": 1,
       "avg_30d": 0,
       "dev_pct": 0,
-      "lifetime_rel": 0,
-      "emergency_stop": true,
-      "reason": "Hit 20,000 limit"
+      "lifetime_rel": 100.0,
+      "emergency_stop": false,
+      "reason": ""
+    },
+    {
+      "source": "GlobeNewswire_EU",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 1,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 100.0,
+      "emergency_stop": false,
+      "reason": ""
+    },
+    {
+      "source": "NewsWeb (Norway)",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 1,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 100.0,
+      "emergency_stop": false,
+      "reason": ""
+    },
+    {
+      "source": "Special Situations Digest",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 1,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 100.0,
+      "emergency_stop": false,
+      "reason": ""
     }
   ]
 }

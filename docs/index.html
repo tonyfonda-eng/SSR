@@ -69,7 +69,7 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 <a href="archive.html" class="">Daily Master Log</a>
             </div>
     <header style="border-left-color: var(--green);"><div><h1>Operations Centre</h1>
-    <div class="subline">Manifest Configuration Hash: CFG-LATEST &bull; Re-Evaluated 2026-08-05 19:32:27 UTC</div></div></header>
+    <div class="subline">Manifest Configuration Hash: CFG-LATEST &bull; Re-Evaluated 2026-08-06 13:33:12 UTC</div></div></header>
     
     <div class="card" style="margin-bottom: 12px;"><h2>1. Engineering Metrics</h2><div class="tile-grid" style="grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));"><div class="stat-tile"><div class="stat-label">Articles Downloaded</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Duplicates Removed</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Articles Processed</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Ontology Rejected</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Regex Rejected</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Financial Rejected</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Entity / AI Rejections</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Alerts Generated</div><div class="stat-value" style="color:var(--green)">0</div></div></div></div>
     
@@ -78,8 +78,8 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
             <h2>Acquisition Channels (RSS vs HTML)</h2>
             <div class="tile-grid" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
                 <div class="stat-tile" style="border:none; background:transparent;"><div class="stat-label">&nbsp;</div><div class="stat-value" style="font-size: 0.9em; color:var(--muted);">RSS</div><div class="stat-value" style="font-size: 0.9em; margin-top: 8px; color:var(--muted);">HTML</div></div>
-                <div class="stat-tile"><div class="stat-label">Raw Downloaded</div><div class="stat-value" style="font-size: 0.9em;">222</div><div class="stat-value" style="font-size: 0.9em; margin-top: 8px;">11478</div></div>
-                <div class="stat-tile"><div class="stat-label">Unique Yield</div><div class="stat-value" style="font-size: 0.9em;">218</div><div class="stat-value" style="font-size: 0.9em; margin-top: 8px;">11062</div></div>
+                <div class="stat-tile"><div class="stat-label">Raw Downloaded</div><div class="stat-value" style="font-size: 0.9em;">20</div><div class="stat-value" style="font-size: 0.9em; margin-top: 8px;">776</div></div>
+                <div class="stat-tile"><div class="stat-label">Unique Yield</div><div class="stat-value" style="font-size: 0.9em;">20</div><div class="stat-value" style="font-size: 0.9em; margin-top: 8px;">710</div></div>
                 <div class="stat-tile"><div class="stat-label">Alerts Contributed</div><div class="stat-value" style="font-size: 0.9em; color:var(--green)">0</div><div class="stat-value" style="font-size: 0.9em; margin-top: 8px; color:var(--green)">0</div></div>
             </div>
             <div style="margin-top: 10px; font-size: 0.85em; color: var(--yellow);">Global deduplication dropped <strong>0</strong> overlapping cross-channel articles before processing.</div>
@@ -103,21 +103,21 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
     
     <div class="card" style="margin-bottom: 12px; overflow-x: auto;"><h2>3. Source Acquisition Health & Ledger</h2>
     <div style="margin-bottom: 8px; font-size: 0.85em; color: var(--muted);">Real-time log of the most recent fetch cycle per channel. A <span style="color:var(--yellow)">ZERO YIELD</span> status indicates the channel successfully responded but provided no usable articles (often caused by navigation loops or static landing pages).</div>
-    <table><thead><tr><th>Source</th><th>Channel</th><th>URL</th><th style="text-align:right;">Duration</th><th>Status</th><th style="text-align:right;">Raw Discovered</th><th style="text-align:right;">Parsed Successfully</th><th style="text-align:right;">Unique Yield</th><th>Error Context</th></tr></thead><tbody><tr style="">
+    <table><thead><tr><th>Source</th><th>Channel</th><th>URL</th><th style="text-align:right;">Duration</th><th>Status</th><th style="text-align:right;">Raw Discovered</th><th style="text-align:right;">Parsed Successfully</th><th style="text-align:right;">Unique Yield</th><th>Error Context</th></tr></thead><tbody><tr style="color: var(--yellow);">
                 <td><strong>AFM (Netherlands)</strong></td>
                 <td>HTML</td>
                 <td><a href="https://www.afm.nl/en/nieuws" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.67s</td>
-                <td><span class="badge success">OK</span></td>
-                <td class="metric-val">100</td>
-                <td class="metric-val">100</td>
-                <td class="metric-val" style="font-weight:bold;">86</td>
+                <td class="metric-val">0.23s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">0</td>
                 <td></td>
             </tr><tr style="color: var(--yellow);">
                 <td><strong>AFM (Netherlands)</strong></td>
                 <td>RSS</td>
                 <td><a href="https://www.afm.nl/en/nieuws/rss" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.38s</td>
+                <td class="metric-val">0.36s</td>
                 <td><span class="badge warn">ZERO YIELD</span></td>
                 <td class="metric-val">0</td>
                 <td class="metric-val">0</td>
@@ -127,37 +127,37 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 <td><strong>AMF (France)</strong></td>
                 <td>HTML</td>
                 <td><a href="https://www.amf-france.org/en/news-publications/news-releases" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.21s</td>
+                <td class="metric-val">0.23s</td>
                 <td><span class="badge success">OK</span></td>
-                <td class="metric-val">6</td>
-                <td class="metric-val">6</td>
-                <td class="metric-val" style="font-weight:bold;">6</td>
+                <td class="metric-val">5</td>
+                <td class="metric-val">5</td>
+                <td class="metric-val" style="font-weight:bold;">5</td>
                 <td></td>
-            </tr><tr style="">
+            </tr><tr style="color: var(--yellow);">
                 <td><strong>AMF (France)</strong></td>
                 <td>RSS</td>
                 <td><a href="https://www.amf-france.org/fr/flux-rss/display/23" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.25s</td>
-                <td><span class="badge success">OK</span></td>
+                <td class="metric-val">0.29s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
                 <td class="metric-val">200</td>
-                <td class="metric-val">200</td>
-                <td class="metric-val" style="font-weight:bold;">196</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">0</td>
                 <td></td>
-            </tr><tr style="color: var(--red);">
+            </tr><tr style="color: var(--yellow);">
                 <td><strong>ASX</strong></td>
                 <td>HTML</td>
                 <td><a href="https://www.asx.com.au/asx/statistics/todayAnns.do" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.0s</td>
-                <td><span class="badge danger">ERROR</span></td>
+                <td class="metric-val">0.93s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
                 <td class="metric-val">0</td>
                 <td class="metric-val">0</td>
                 <td class="metric-val" style="font-weight:bold;">0</td>
-                <td><span style="font-size:0.85em; opacity:0.8;">ASXScraper.get_latest_articles() got an unexpected</span></td>
+                <td></td>
             </tr><tr style="color: var(--red);">
                 <td><strong>Belgium_FSMA</strong></td>
                 <td>HTML</td>
                 <td><a href="https://stori.fsma.be/rss" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.2s</td>
+                <td class="metric-val">0.18s</td>
                 <td><span class="badge danger">ERROR</span></td>
                 <td class="metric-val">0</td>
                 <td class="metric-val">0</td>
@@ -167,7 +167,7 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 <td><strong>Belgium_FSMA</strong></td>
                 <td>RSS</td>
                 <td><a href="RSS" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.0s</td>
+                <td class="metric-val">0.01s</td>
                 <td><span class="badge warn">ZERO YIELD</span></td>
                 <td class="metric-val">0</td>
                 <td class="metric-val">0</td>
@@ -177,37 +177,37 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 <td><strong>Business Wire</strong></td>
                 <td>HTML</td>
                 <td><a href="https://www.businesswire.com/portal/site/home/news/" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">15.25s</td>
+                <td class="metric-val">10.79s</td>
                 <td><span class="badge success">OK</span></td>
-                <td class="metric-val">143</td>
-                <td class="metric-val">143</td>
-                <td class="metric-val" style="font-weight:bold;">143</td>
+                <td class="metric-val">55</td>
+                <td class="metric-val">55</td>
+                <td class="metric-val" style="font-weight:bold;">55</td>
                 <td></td>
-            </tr><tr style="">
+            </tr><tr style="color: var(--yellow);">
                 <td><strong>Business Wire</strong></td>
                 <td>RSS</td>
                 <td><a href="https://feed.businesswire.com/rss/home/?rss=G1QFDERJXkJeGVtYXw==" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.23s</td>
-                <td><span class="badge success">OK</span></td>
-                <td class="metric-val">2</td>
-                <td class="metric-val">2</td>
-                <td class="metric-val" style="font-weight:bold;">2</td>
+                <td class="metric-val">0.17s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">3</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">0</td>
                 <td></td>
-            </tr><tr style="">
+            </tr><tr style="color: var(--yellow);">
                 <td><strong>CNMV (Spain)</strong></td>
                 <td>HTML</td>
                 <td><a href="https://www.cnmv.es/Portal/HR/ResultadoBusquedaHR.aspx" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.39s</td>
-                <td><span class="badge success">OK</span></td>
-                <td class="metric-val">88</td>
-                <td class="metric-val">88</td>
-                <td class="metric-val" style="font-weight:bold;">85</td>
+                <td class="metric-val">0.33s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">0</td>
                 <td></td>
             </tr><tr style="color: var(--yellow);">
                 <td><strong>CNMV (Spain)</strong></td>
                 <td>RSS</td>
                 <td><a href="https://www.cnmv.es/Portal/RSS/Rss.aspx?tipo=HR" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.87s</td>
+                <td class="metric-val">0.82s</td>
                 <td><span class="badge warn">ZERO YIELD</span></td>
                 <td class="metric-val">0</td>
                 <td class="metric-val">0</td>
@@ -217,7 +217,7 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 <td><strong>Canadian Newswire SEDAR Feeds</strong></td>
                 <td>HTML</td>
                 <td><a href="https://www.newswire.ca/news-releases/" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">1.3s</td>
+                <td class="metric-val">1.51s</td>
                 <td><span class="badge success">OK</span></td>
                 <td class="metric-val">1</td>
                 <td class="metric-val">1</td>
@@ -227,7 +227,7 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 <td><strong>Canadian Newswire SEDAR Feeds</strong></td>
                 <td>RSS</td>
                 <td><a href="https://www.newswire.ca/rss/SEDAR-filings.xml" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.4s</td>
+                <td class="metric-val">0.36s</td>
                 <td><span class="badge warn">ZERO YIELD</span></td>
                 <td class="metric-val">0</td>
                 <td class="metric-val">0</td>
@@ -237,7 +237,7 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 <td><strong>EQS News (Germany)</strong></td>
                 <td>HTML</td>
                 <td><a href="https://www.eqs-news.com/news" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.5s</td>
+                <td class="metric-val">0.61s</td>
                 <td><span class="badge success">OK</span></td>
                 <td class="metric-val">100</td>
                 <td class="metric-val">100</td>
@@ -247,7 +247,7 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 <td><strong>EQS News (Germany)</strong></td>
                 <td>RSS</td>
                 <td><a href="https://www.eqs-news.com/rss/" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.29s</td>
+                <td class="metric-val">0.43s</td>
                 <td><span class="badge warn">ZERO YIELD</span></td>
                 <td class="metric-val">0</td>
                 <td class="metric-val">0</td>
@@ -257,17 +257,17 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 <td><strong>Finansinspektionen (Sweden)</strong></td>
                 <td>HTML</td>
                 <td><a href="https://www.fi.se/en/published/press-releases/" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.24s</td>
+                <td class="metric-val">0.21s</td>
                 <td><span class="badge success">OK</span></td>
-                <td class="metric-val">8</td>
-                <td class="metric-val">8</td>
-                <td class="metric-val" style="font-weight:bold;">8</td>
+                <td class="metric-val">9</td>
+                <td class="metric-val">9</td>
+                <td class="metric-val" style="font-weight:bold;">9</td>
                 <td></td>
             </tr><tr style="color: var(--yellow);">
                 <td><strong>Finansinspektionen (Sweden)</strong></td>
                 <td>RSS</td>
                 <td><a href="https://www.fi.se/sv/publicerat/pressmeddelanden/rss/" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.69s</td>
+                <td class="metric-val">0.49s</td>
                 <td><span class="badge warn">ZERO YIELD</span></td>
                 <td class="metric-val">0</td>
                 <td class="metric-val">0</td>
@@ -277,7 +277,7 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 <td><strong>GlobeNewswire</strong></td>
                 <td>HTML</td>
                 <td><a href="https://www.globenewswire.com/NewsRoom" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">15.09s</td>
+                <td class="metric-val">0.34s</td>
                 <td><span class="badge warn">ZERO YIELD</span></td>
                 <td class="metric-val">0</td>
                 <td class="metric-val">0</td>
@@ -287,7 +287,7 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 <td><strong>GlobeNewswire</strong></td>
                 <td>RSS</td>
                 <td><a href="https://www.globenewswire.com/RssFeed/industry/9000-Finance/feed/iso" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">31.01s</td>
+                <td class="metric-val">0.18s</td>
                 <td><span class="badge warn">ZERO YIELD</span></td>
                 <td class="metric-val">0</td>
                 <td class="metric-val">0</td>
@@ -297,7 +297,7 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 <td><strong>GlobeNewswire_EU</strong></td>
                 <td>HTML</td>
                 <td><a href="https://www.globenewswire.com/NewsRoom" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.14s</td>
+                <td class="metric-val">0.22s</td>
                 <td><span class="badge success">OK</span></td>
                 <td class="metric-val">1</td>
                 <td class="metric-val">1</td>
@@ -307,7 +307,7 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 <td><strong>GlobeNewswire_EU</strong></td>
                 <td>RSS</td>
                 <td><a href="https://www.globenewswire.com/RssFeed/subjectcode/31-Regulatory%20Filings/feed/iso" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.22s</td>
+                <td class="metric-val">0.21s</td>
                 <td><span class="badge warn">ZERO YIELD</span></td>
                 <td class="metric-val">0</td>
                 <td class="metric-val">0</td>
@@ -327,17 +327,17 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 <td><strong>NewsWeb (Norway)</strong></td>
                 <td>HTML</td>
                 <td><a href="https://newsweb.oslobors.no/search" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.32s</td>
+                <td class="metric-val">0.3s</td>
                 <td><span class="badge success">OK</span></td>
-                <td class="metric-val">22</td>
-                <td class="metric-val">22</td>
+                <td class="metric-val">21</td>
+                <td class="metric-val">21</td>
                 <td class="metric-val" style="font-weight:bold;">1</td>
                 <td></td>
             </tr><tr style="color: var(--yellow);">
                 <td><strong>NewsWeb (Norway)</strong></td>
                 <td>RSS</td>
                 <td><a href="https://newsweb.oslobors.no/rss" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.43s</td>
+                <td class="metric-val">0.39s</td>
                 <td><span class="badge warn">ZERO YIELD</span></td>
                 <td class="metric-val">0</td>
                 <td class="metric-val">0</td>
@@ -347,17 +347,17 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 <td><strong>PR Newswire</strong></td>
                 <td>HTML</td>
                 <td><a href="https://www.prnewswire.com/news-releases/" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">3066.3s</td>
+                <td class="metric-val">118.11s</td>
                 <td><span class="badge success">OK</span></td>
-                <td class="metric-val">10000</td>
-                <td class="metric-val">10000</td>
-                <td class="metric-val" style="font-weight:bold;">9704</td>
+                <td class="metric-val">460</td>
+                <td class="metric-val">460</td>
+                <td class="metric-val" style="font-weight:bold;">416</td>
                 <td></td>
             </tr><tr style="">
                 <td><strong>PR Newswire</strong></td>
                 <td>RSS</td>
                 <td><a href="https://www.prnewswire.com/rss/news-releases-list.rss" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.39s</td>
+                <td class="metric-val">0.31s</td>
                 <td><span class="badge success">OK</span></td>
                 <td class="metric-val">20</td>
                 <td class="metric-val">20</td>
@@ -383,21 +383,21 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 <td class="metric-val">0</td>
                 <td class="metric-val" style="font-weight:bold;">0</td>
                 <td></td>
-            </tr><tr style="">
+            </tr><tr style="color: var(--yellow);">
                 <td><strong>SEC EDGAR - Form 10 (Spin-Offs)</strong></td>
                 <td>HTML</td>
                 <td><a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&amp;type=10-12B" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">11.58s</td>
-                <td><span class="badge success">OK</span></td>
-                <td class="metric-val">1</td>
-                <td class="metric-val">1</td>
-                <td class="metric-val" style="font-weight:bold;">1</td>
+                <td class="metric-val">0.3s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">0</td>
                 <td></td>
             </tr><tr style="color: var(--yellow);">
                 <td><strong>SEC EDGAR - Form 10 (Spin-Offs)</strong></td>
                 <td>RSS</td>
                 <td><a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&amp;type=10-12B&amp;output=atom" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.26s</td>
+                <td class="metric-val">0.19s</td>
                 <td><span class="badge warn">ZERO YIELD</span></td>
                 <td class="metric-val">0</td>
                 <td class="metric-val">0</td>
@@ -407,7 +407,7 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 <td><strong>SEC EDGAR - Merger Proxy (PREM14A)</strong></td>
                 <td>RSS</td>
                 <td><a href="HTML" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.0s</td>
+                <td class="metric-val">0.01s</td>
                 <td><span class="badge warn">ZERO YIELD</span></td>
                 <td class="metric-val">0</td>
                 <td class="metric-val">0</td>
@@ -427,7 +427,7 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 <td><strong>SEC EDGAR - Schedule 13D (Activism)</strong></td>
                 <td>HTML</td>
                 <td><a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&amp;type=13D" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.26s</td>
+                <td class="metric-val">0.22s</td>
                 <td><span class="badge warn">ZERO YIELD</span></td>
                 <td class="metric-val">0</td>
                 <td class="metric-val">0</td>
@@ -437,7 +437,7 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 <td><strong>SEC EDGAR - Schedule 13D (Activism)</strong></td>
                 <td>RSS</td>
                 <td><a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&amp;type=13D&amp;output=atom" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.24s</td>
+                <td class="metric-val">0.18s</td>
                 <td><span class="badge warn">ZERO YIELD</span></td>
                 <td class="metric-val">0</td>
                 <td class="metric-val">0</td>
@@ -457,47 +457,47 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 <td><strong>SEC Edgar</strong></td>
                 <td>HTML</td>
                 <td><a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">165.85s</td>
+                <td class="metric-val">43.79s</td>
                 <td><span class="badge success">OK</span></td>
-                <td class="metric-val">978</td>
-                <td class="metric-val">978</td>
-                <td class="metric-val" style="font-weight:bold;">898</td>
+                <td class="metric-val">100</td>
+                <td class="metric-val">100</td>
+                <td class="metric-val" style="font-weight:bold;">100</td>
                 <td></td>
             </tr><tr style="color: var(--yellow);">
                 <td><strong>SEC Edgar</strong></td>
                 <td>RSS</td>
                 <td><a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcurrent&amp;output=atom" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.14s</td>
+                <td class="metric-val">0.12s</td>
                 <td><span class="badge warn">ZERO YIELD</span></td>
                 <td class="metric-val">0</td>
                 <td class="metric-val">0</td>
                 <td class="metric-val" style="font-weight:bold;">0</td>
                 <td></td>
-            </tr><tr style="color: var(--red);">
+            </tr><tr style="color: var(--yellow);">
                 <td><strong>SEDAR+</strong></td>
                 <td>HTML</td>
                 <td><a href="https://www.sedarplus.ca/csa-party/records/document.html" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.0s</td>
-                <td><span class="badge danger">ERROR</span></td>
+                <td class="metric-val">0.52s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
                 <td class="metric-val">0</td>
                 <td class="metric-val">0</td>
                 <td class="metric-val" style="font-weight:bold;">0</td>
-                <td><span style="font-size:0.85em; opacity:0.8;">SedarScraper.get_latest_articles() got an unexpect</span></td>
-            </tr><tr style="">
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
                 <td><strong>SIX Exchange (Switzerland)</strong></td>
                 <td>HTML</td>
                 <td><a href="https://www.six-group.com/en/market-data/news-tools/market-news.html" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.49s</td>
-                <td><span class="badge success">OK</span></td>
-                <td class="metric-val">4</td>
-                <td class="metric-val">4</td>
-                <td class="metric-val" style="font-weight:bold;">4</td>
+                <td class="metric-val">0.19s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">0</td>
                 <td></td>
             </tr><tr style="color: var(--yellow);">
                 <td><strong>SIX Exchange (Switzerland)</strong></td>
                 <td>RSS</td>
                 <td><a href="https://www.six-group.com/exchanges/rss/market_news_en.xml" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.53s</td>
+                <td class="metric-val">0.54s</td>
                 <td><span class="badge warn">ZERO YIELD</span></td>
                 <td class="metric-val">0</td>
                 <td class="metric-val">0</td>
@@ -507,7 +507,7 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 <td><strong>Special Situations Digest</strong></td>
                 <td>HTML</td>
                 <td><a href="https://specialsitsdigest.com/feed/" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.13s</td>
+                <td class="metric-val">0.14s</td>
                 <td><span class="badge success">OK</span></td>
                 <td class="metric-val">1</td>
                 <td class="metric-val">1</td>
@@ -523,25 +523,25 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 <td class="metric-val">0</td>
                 <td class="metric-val" style="font-weight:bold;">0</td>
                 <td></td>
-            </tr><tr style="color: var(--red);">
+            </tr><tr style="color: var(--yellow);">
                 <td><strong>TSX News</strong></td>
                 <td>HTML</td>
                 <td><a href="https://money.tmx.com/en/news" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.0s</td>
-                <td><span class="badge danger">ERROR</span></td>
+                <td class="metric-val">0.5s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
                 <td class="metric-val">0</td>
                 <td class="metric-val">0</td>
                 <td class="metric-val" style="font-weight:bold;">0</td>
-                <td><span style="font-size:0.85em; opacity:0.8;">TSXScraper.get_latest_articles() got an unexpected</span></td>
+                <td></td>
             </tr><tr style="">
                 <td><strong>eMarket SDIR (Italy)</strong></td>
                 <td>HTML</td>
                 <td><a href="https://www.emarketstorage.it/en/news" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
-                <td class="metric-val">0.34s</td>
+                <td class="metric-val">0.48s</td>
                 <td><span class="badge success">OK</span></td>
-                <td class="metric-val">25</td>
-                <td class="metric-val">25</td>
-                <td class="metric-val" style="font-weight:bold;">25</td>
+                <td class="metric-val">23</td>
+                <td class="metric-val">23</td>
+                <td class="metric-val" style="font-weight:bold;">23</td>
                 <td></td>
             </tr></tbody></table></div>
     </div></body></html>
