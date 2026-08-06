@@ -1,0 +1,384 @@
+audit	Set up job	﻿2026-08-06T12:53:14.3807550Z Current runner version: '2.336.0'
+audit	Set up job	2026-08-06T12:53:14.3831856Z ##[group]Runner Image Provisioner
+audit	Set up job	2026-08-06T12:53:14.3832765Z Hosted Compute Agent
+audit	Set up job	2026-08-06T12:53:14.3833494Z Version: 20260707.563
+audit	Set up job	2026-08-06T12:53:14.3834204Z Commit: 02667638d2b423fbc733a8e32a88b44996a3ba6e
+audit	Set up job	2026-08-06T12:53:14.3835053Z Build Date: 2026-07-07T19:33:50Z
+audit	Set up job	2026-08-06T12:53:14.3836021Z Worker ID: {4a93ecb2-9ca4-470d-957e-7482f339d5ac}
+audit	Set up job	2026-08-06T12:53:14.3836784Z Azure Region: centralus
+audit	Set up job	2026-08-06T12:53:14.3837517Z ##[endgroup]
+audit	Set up job	2026-08-06T12:53:14.3839033Z ##[group]Operating System
+audit	Set up job	2026-08-06T12:53:14.3839829Z Ubuntu
+audit	Set up job	2026-08-06T12:53:14.3840432Z 24.04.4
+audit	Set up job	2026-08-06T12:53:14.3841077Z LTS
+audit	Set up job	2026-08-06T12:53:14.3841649Z ##[endgroup]
+audit	Set up job	2026-08-06T12:53:14.3842251Z ##[group]Runner Image
+audit	Set up job	2026-08-06T12:53:14.3843134Z Image: ubuntu-24.04
+audit	Set up job	2026-08-06T12:53:14.3844669Z Version: 20260720.247.2
+audit	Set up job	2026-08-06T12:53:14.3847061Z Included Software: https://github.com/actions/runner-images/blob/ubuntu24/20260720.247/images/ubuntu/Ubuntu2404-Readme.md
+audit	Set up job	2026-08-06T12:53:14.3850436Z Image Release: https://github.com/actions/runner-images/releases/tag/ubuntu24%2F20260720.247
+audit	Set up job	2026-08-06T12:53:14.3852553Z ##[endgroup]
+audit	Set up job	2026-08-06T12:53:14.3855295Z ##[group]GITHUB_TOKEN Permissions
+audit	Set up job	2026-08-06T12:53:14.3858150Z Contents: read
+audit	Set up job	2026-08-06T12:53:14.3858808Z Metadata: read
+audit	Set up job	2026-08-06T12:53:14.3859568Z Packages: read
+audit	Set up job	2026-08-06T12:53:14.3860578Z ##[endgroup]
+audit	Set up job	2026-08-06T12:53:14.3863872Z Secret source: Actions
+audit	Set up job	2026-08-06T12:53:14.3865264Z Prepare workflow directory
+audit	Set up job	2026-08-06T12:53:14.4203814Z Prepare all required actions
+audit	Set up job	2026-08-06T12:53:14.4251854Z Getting action download info
+audit	Set up job	2026-08-06T12:53:14.7097684Z Download action repository 'actions/checkout@v4' (SHA:11d5960a326750d5838078e36cf38b85af677262)
+audit	Set up job	2026-08-06T12:53:15.2468456Z Download action repository 'actions/setup-python@v5' (SHA:a26af69be951a213d495a4c3e4e4022e16d87065)
+audit	Set up job	2026-08-06T12:53:15.4257172Z Complete job name: audit
+audit	Run actions/checkout@v4	﻿2026-08-06T12:53:15.5012971Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.5021546Z ##[group]Run actions/checkout@v4
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.5022351Z with:
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.5022852Z   repository: tonyfonda-eng/SSR
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.5026874Z   token: ***
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.5027353Z   ssh-strict: true
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.5027817Z   ssh-user: git
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.5028315Z   persist-credentials: true
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.5028834Z   clean: true
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.5029334Z   sparse-checkout-cone-mode: true
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.5029895Z   fetch-depth: 1
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.5030351Z   fetch-tags: false
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.5030822Z   show-progress: true
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.5031289Z   lfs: false
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.5031729Z   submodules: false
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.5032237Z   set-safe-directory: true
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.5032773Z   allow-unsafe-pr-checkout: false
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.5033576Z ##[endgroup]
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6043738Z Syncing repository: tonyfonda-eng/SSR
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6046743Z ##[group]Getting Git version info
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6047887Z Working directory is '/home/runner/work/SSR/SSR'
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6049517Z [command]/usr/bin/git version
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6118753Z git version 2.54.0
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6149620Z ##[endgroup]
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6156268Z Temporarily overriding HOME='/home/runner/work/_temp/ed262beb-6df3-4c50-9707-604300d0466a' before making global git config changes
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6158813Z Adding repository directory to the temporary git global config as a safe directory
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6161820Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/SSR/SSR
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6215798Z Deleting the contents of '/home/runner/work/SSR/SSR'
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6233176Z ##[group]Initializing the repository
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6234618Z [command]/usr/bin/git init /home/runner/work/SSR/SSR
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6352551Z hint: Using 'master' as the name for the initial branch. This default branch name
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6354088Z hint: will change to "main" in Git 3.0. To configure the initial branch name
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6355632Z hint: to use in all of your new repositories, which will suppress this warning,
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6356934Z hint: call:
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6357387Z hint:
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6358076Z hint: 	git config --global init.defaultBranch <name>
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6359150Z hint:
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6360113Z hint: Names commonly chosen instead of 'master' are 'main', 'trunk' and
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6361622Z hint: 'development'. The just-created branch can be renamed via this command:
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6363025Z hint:
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6363812Z hint: 	git branch -m <name>
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6364761Z hint:
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6366164Z hint: Disable this message with "git config set advice.defaultBranchName false"
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6376268Z Initialized empty Git repository in /home/runner/work/SSR/SSR/.git/
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6380063Z [command]/usr/bin/git remote add origin https://github.com/tonyfonda-eng/SSR
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6427725Z ##[endgroup]
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6428930Z ##[group]Disabling automatic garbage collection
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6431124Z [command]/usr/bin/git config --local gc.auto 0
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6461711Z ##[endgroup]
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6462547Z ##[group]Setting up auth
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6470839Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6510324Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6918203Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.6955743Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.7183386Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.7220975Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.7444291Z [command]/usr/bin/git config --local http.https://github.com/.extraheader AUTHORIZATION: basic ***
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.7483950Z ##[endgroup]
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.7484883Z ##[group]Fetching the repository
+audit	Run actions/checkout@v4	2026-08-06T12:53:15.7494017Z [command]/usr/bin/git -c protocol.version=2 fetch --no-tags --prune --no-recurse-submodules --depth=1 origin +7c3a60a0ebd41e5d08fb62b8da87b1623be2a3c1:refs/remotes/origin/main
+audit	Run actions/checkout@v4	2026-08-06T12:53:16.6761500Z From https://github.com/tonyfonda-eng/SSR
+audit	Run actions/checkout@v4	2026-08-06T12:53:16.6763320Z  * [new ref]         7c3a60a0ebd41e5d08fb62b8da87b1623be2a3c1 -> origin/main
+audit	Run actions/checkout@v4	2026-08-06T12:53:16.6799830Z ##[endgroup]
+audit	Run actions/checkout@v4	2026-08-06T12:53:16.6801503Z ##[group]Determining the checkout info
+audit	Run actions/checkout@v4	2026-08-06T12:53:16.6803389Z ##[endgroup]
+audit	Run actions/checkout@v4	2026-08-06T12:53:16.6807884Z [command]/usr/bin/git sparse-checkout disable
+audit	Run actions/checkout@v4	2026-08-06T12:53:16.6857334Z [command]/usr/bin/git config --local --unset-all extensions.worktreeConfig
+audit	Run actions/checkout@v4	2026-08-06T12:53:16.6889183Z ##[group]Checking out the ref
+audit	Run actions/checkout@v4	2026-08-06T12:53:16.6892938Z [command]/usr/bin/git checkout --progress --force -B main refs/remotes/origin/main
+audit	Run actions/checkout@v4	2026-08-06T12:53:16.7442445Z Switched to a new branch 'main'
+audit	Run actions/checkout@v4	2026-08-06T12:53:16.7444864Z branch 'main' set up to track 'origin/main'.
+audit	Run actions/checkout@v4	2026-08-06T12:53:16.7452598Z ##[endgroup]
+audit	Run actions/checkout@v4	2026-08-06T12:53:16.7510765Z [command]/usr/bin/git log -1 --format=%H
+audit	Run actions/checkout@v4	2026-08-06T12:53:16.7527532Z 7c3a60a0ebd41e5d08fb62b8da87b1623be2a3c1
+audit	Set up Python	﻿2026-08-06T12:53:16.7898838Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+audit	Set up Python	2026-08-06T12:53:16.7905013Z ##[group]Run actions/setup-python@v5
+audit	Set up Python	2026-08-06T12:53:16.7906316Z with:
+audit	Set up Python	2026-08-06T12:53:16.7907127Z   python-version: 3.11
+audit	Set up Python	2026-08-06T12:53:16.7908056Z   cache: pip
+audit	Set up Python	2026-08-06T12:53:16.7908900Z   check-latest: false
+audit	Set up Python	2026-08-06T12:53:16.7919234Z   token: ***
+audit	Set up Python	2026-08-06T12:53:16.7920113Z   update-environment: true
+audit	Set up Python	2026-08-06T12:53:16.7921149Z   allow-prereleases: false
+audit	Set up Python	2026-08-06T12:53:16.7922148Z   freethreaded: false
+audit	Set up Python	2026-08-06T12:53:16.7923050Z ##[endgroup]
+audit	Set up Python	2026-08-06T12:53:16.9226168Z ##[group]Installed versions
+audit	Set up Python	2026-08-06T12:53:16.9336447Z (node:2236) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+audit	Set up Python	2026-08-06T12:53:16.9339543Z (Use `node --trace-deprecation ...` to show where the warning was created)
+audit	Set up Python	2026-08-06T12:53:16.9341268Z Successfully set up CPython (3.11.15)
+audit	Set up Python	2026-08-06T12:53:16.9343774Z ##[endgroup]
+audit	Set up Python	2026-08-06T12:53:17.0506778Z [command]/opt/hostedtoolcache/Python/3.11.15/x64/bin/pip cache dir
+audit	Set up Python	2026-08-06T12:53:18.9973918Z /home/runner/.cache/pip
+audit	Set up Python	2026-08-06T12:53:19.1830925Z pip cache is not found
+audit	Install dependencies	﻿2026-08-06T12:53:19.1973663Z ##[group]Run pip install -r requirements.txt
+audit	Install dependencies	2026-08-06T12:53:19.1974180Z [36;1mpip install -r requirements.txt[0m
+audit	Install dependencies	2026-08-06T12:53:19.2025993Z shell: /usr/bin/bash -e {0}
+audit	Install dependencies	2026-08-06T12:53:19.2026337Z env:
+audit	Install dependencies	2026-08-06T12:53:19.2026681Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.15/x64
+audit	Install dependencies	2026-08-06T12:53:19.2027199Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib/pkgconfig
+audit	Install dependencies	2026-08-06T12:53:19.2027706Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+audit	Install dependencies	2026-08-06T12:53:19.2028171Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+audit	Install dependencies	2026-08-06T12:53:19.2028632Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+audit	Install dependencies	2026-08-06T12:53:19.2029096Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib
+audit	Install dependencies	2026-08-06T12:53:19.2029506Z ##[endgroup]
+audit	Install dependencies	2026-08-06T12:53:20.4714273Z Collecting requests (from -r requirements.txt (line 2))
+audit	Install dependencies	2026-08-06T12:53:20.5417401Z   Downloading requests-2.34.2-py3-none-any.whl.metadata (4.8 kB)
+audit	Install dependencies	2026-08-06T12:53:20.5740673Z Collecting beautifulsoup4 (from -r requirements.txt (line 3))
+audit	Install dependencies	2026-08-06T12:53:20.5853915Z   Downloading beautifulsoup4-4.15.0-py3-none-any.whl.metadata (3.8 kB)
+audit	Install dependencies	2026-08-06T12:53:20.7002100Z Collecting feedparser (from -r requirements.txt (line 4))
+audit	Install dependencies	2026-08-06T12:53:20.7111697Z   Downloading feedparser-6.0.14-py3-none-any.whl.metadata (2.7 kB)
+audit	Install dependencies	2026-08-06T12:53:20.7508836Z Collecting yfinance (from -r requirements.txt (line 7))
+audit	Install dependencies	2026-08-06T12:53:20.7618898Z   Downloading yfinance-1.5.2-py2.py3-none-any.whl.metadata (6.2 kB)
+audit	Install dependencies	2026-08-06T12:53:20.9099534Z Collecting pandas (from -r requirements.txt (line 8))
+audit	Install dependencies	2026-08-06T12:53:20.9208178Z   Downloading pandas-3.0.5-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (79 kB)
+audit	Install dependencies	2026-08-06T12:53:21.1459424Z Collecting cryptography (from -r requirements.txt (line 11))
+audit	Install dependencies	2026-08-06T12:53:21.1566577Z   Downloading cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl.metadata (4.3 kB)
+audit	Install dependencies	2026-08-06T12:53:21.2090645Z Collecting google-api-python-client (from -r requirements.txt (line 14))
+audit	Install dependencies	2026-08-06T12:53:21.2199415Z   Downloading google_api_python_client-2.198.0-py3-none-any.whl.metadata (7.0 kB)
+audit	Install dependencies	2026-08-06T12:53:21.2635782Z Collecting google-auth (from -r requirements.txt (line 15))
+audit	Install dependencies	2026-08-06T12:53:21.2744149Z   Downloading google_auth-2.56.3-py3-none-any.whl.metadata (6.0 kB)
+audit	Install dependencies	2026-08-06T12:53:21.3025209Z Collecting google-auth-httplib2 (from -r requirements.txt (line 16))
+audit	Install dependencies	2026-08-06T12:53:21.3131010Z   Downloading google_auth_httplib2-0.4.1-py3-none-any.whl.metadata (3.0 kB)
+audit	Install dependencies	2026-08-06T12:53:21.3380517Z Collecting google-auth-oauthlib (from -r requirements.txt (line 17))
+audit	Install dependencies	2026-08-06T12:53:21.3487549Z   Downloading google_auth_oauthlib-1.4.0-py3-none-any.whl.metadata (2.6 kB)
+audit	Install dependencies	2026-08-06T12:53:21.3777122Z Collecting gspread (from -r requirements.txt (line 18))
+audit	Install dependencies	2026-08-06T12:53:21.3883688Z   Downloading gspread-6.2.1-py3-none-any.whl.metadata (11 kB)
+audit	Install dependencies	2026-08-06T12:53:21.4172412Z Collecting PyPDF2 (from -r requirements.txt (line 19))
+audit	Install dependencies	2026-08-06T12:53:21.4286183Z   Downloading pypdf2-3.0.1-py3-none-any.whl.metadata (6.8 kB)
+audit	Install dependencies	2026-08-06T12:53:21.5415198Z Collecting charset_normalizer<4,>=2 (from requests->-r requirements.txt (line 2))
+audit	Install dependencies	2026-08-06T12:53:21.5529380Z   Downloading charset_normalizer-3.4.9-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl.metadata (41 kB)
+audit	Install dependencies	2026-08-06T12:53:21.5807405Z Collecting idna<4,>=2.5 (from requests->-r requirements.txt (line 2))
+audit	Install dependencies	2026-08-06T12:53:21.5913935Z   Downloading idna-3.18-py3-none-any.whl.metadata (6.1 kB)
+audit	Install dependencies	2026-08-06T12:53:21.6235204Z Collecting urllib3<3,>=1.26 (from requests->-r requirements.txt (line 2))
+audit	Install dependencies	2026-08-06T12:53:21.6341192Z   Downloading urllib3-2.7.0-py3-none-any.whl.metadata (6.9 kB)
+audit	Install dependencies	2026-08-06T12:53:21.6623621Z Collecting certifi>=2023.5.7 (from requests->-r requirements.txt (line 2))
+audit	Install dependencies	2026-08-06T12:53:21.6731223Z   Downloading certifi-2026.7.22-py3-none-any.whl.metadata (2.5 kB)
+audit	Install dependencies	2026-08-06T12:53:21.7019328Z Collecting soupsieve>=1.6.1 (from beautifulsoup4->-r requirements.txt (line 3))
+audit	Install dependencies	2026-08-06T12:53:21.7126033Z   Downloading soupsieve-2.9.1-py3-none-any.whl.metadata (4.6 kB)
+audit	Install dependencies	2026-08-06T12:53:21.7399387Z Collecting typing-extensions>=4.0.0 (from beautifulsoup4->-r requirements.txt (line 3))
+audit	Install dependencies	2026-08-06T12:53:21.7509646Z   Downloading typing_extensions-4.16.0-py3-none-any.whl.metadata (3.3 kB)
+audit	Install dependencies	2026-08-06T12:53:21.7729655Z Collecting feedparser-sgmllib<3,>=2 (from feedparser->-r requirements.txt (line 4))
+audit	Install dependencies	2026-08-06T12:53:21.7836896Z   Downloading feedparser_sgmllib-2.1.0-py3-none-any.whl.metadata (926 bytes)
+audit	Install dependencies	2026-08-06T12:53:21.9688927Z Collecting numpy>=1.16.5 (from yfinance->-r requirements.txt (line 7))
+audit	Install dependencies	2026-08-06T12:53:21.9799891Z   Downloading numpy-2.4.6-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (6.6 kB)
+audit	Install dependencies	2026-08-06T12:53:22.0039390Z Collecting multitasking>=0.0.7 (from yfinance->-r requirements.txt (line 7))
+audit	Install dependencies	2026-08-06T12:53:22.0145559Z   Downloading multitasking-0.0.13-py3-none-any.whl.metadata (16 kB)
+audit	Install dependencies	2026-08-06T12:53:22.0444665Z Collecting platformdirs>=2.0.0 (from yfinance->-r requirements.txt (line 7))
+audit	Install dependencies	2026-08-06T12:53:22.0554145Z   Downloading platformdirs-4.11.0-py3-none-any.whl.metadata (5.5 kB)
+audit	Install dependencies	2026-08-06T12:53:22.0970807Z Collecting pytz>=2022.5 (from yfinance->-r requirements.txt (line 7))
+audit	Install dependencies	2026-08-06T12:53:22.1077177Z   Downloading pytz-2026.3.post1-py2.py3-none-any.whl.metadata (22 kB)
+audit	Install dependencies	2026-08-06T12:53:22.1385227Z Collecting peewee>=3.16.2 (from yfinance->-r requirements.txt (line 7))
+audit	Install dependencies	2026-08-06T12:53:22.1492875Z   Downloading peewee-4.3.0-py3-none-any.whl.metadata (10 kB)
+audit	Install dependencies	2026-08-06T12:53:22.2115315Z Collecting curl_cffi>=0.15 (from yfinance->-r requirements.txt (line 7))
+audit	Install dependencies	2026-08-06T12:53:22.2226864Z   Downloading curl_cffi-0.16.0-cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (17 kB)
+audit	Install dependencies	2026-08-06T12:53:22.3811465Z Collecting protobuf>=3.19.0 (from yfinance->-r requirements.txt (line 7))
+audit	Install dependencies	2026-08-06T12:53:22.3924550Z   Downloading protobuf-7.35.1-cp310-abi3-manylinux2014_x86_64.whl.metadata (595 bytes)
+audit	Install dependencies	2026-08-06T12:53:22.4898292Z Collecting websockets>=13.0 (from yfinance->-r requirements.txt (line 7))
+audit	Install dependencies	2026-08-06T12:53:22.5011686Z   Downloading websockets-17.0.1-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl.metadata (6.3 kB)
+audit	Install dependencies	2026-08-06T12:53:22.5278197Z Collecting python-dateutil>=2.8.2 (from pandas->-r requirements.txt (line 8))
+audit	Install dependencies	2026-08-06T12:53:22.5386183Z   Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl.metadata (8.4 kB)
+audit	Install dependencies	2026-08-06T12:53:22.6384053Z Collecting cffi>=2.0.0 (from cryptography->-r requirements.txt (line 11))
+audit	Install dependencies	2026-08-06T12:53:22.6494349Z   Downloading cffi-2.1.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl.metadata (2.5 kB)
+audit	Install dependencies	2026-08-06T12:53:22.6750723Z Collecting httplib2<1.0.0,>=0.19.0 (from google-api-python-client->-r requirements.txt (line 14))
+audit	Install dependencies	2026-08-06T12:53:22.6857957Z   Downloading httplib2-0.32.0-py3-none-any.whl.metadata (2.2 kB)
+audit	Install dependencies	2026-08-06T12:53:22.7313328Z Collecting google-api-core!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.0,<3.0.0,>=1.31.5 (from google-api-python-client->-r requirements.txt (line 14))
+audit	Install dependencies	2026-08-06T12:53:22.7422201Z   Downloading google_api_core-2.34.0-py3-none-any.whl.metadata (2.9 kB)
+audit	Install dependencies	2026-08-06T12:53:22.7651512Z Collecting uritemplate<5,>=3.0.1 (from google-api-python-client->-r requirements.txt (line 14))
+audit	Install dependencies	2026-08-06T12:53:22.7759123Z   Downloading uritemplate-4.2.0-py3-none-any.whl.metadata (2.6 kB)
+audit	Install dependencies	2026-08-06T12:53:22.8047154Z Collecting pyasn1-modules>=0.2.1 (from google-auth->-r requirements.txt (line 15))
+audit	Install dependencies	2026-08-06T12:53:22.8155556Z   Downloading pyasn1_modules-0.4.2-py3-none-any.whl.metadata (3.5 kB)
+audit	Install dependencies	2026-08-06T12:53:22.8564666Z Collecting googleapis-common-protos<2.0.0,>=1.69.2 (from google-api-core!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.0,<3.0.0,>=1.31.5->google-api-python-client->-r requirements.txt (line 14))
+audit	Install dependencies	2026-08-06T12:53:22.8671293Z   Downloading googleapis_common_protos-1.75.1-py3-none-any.whl.metadata (8.5 kB)
+audit	Install dependencies	2026-08-06T12:53:22.8972181Z Collecting proto-plus<2.0.0,>=1.26.1 (from google-api-core!=2.0.*,!=2.1.*,!=2.2.*,!=2.3.0,<3.0.0,>=1.31.5->google-api-python-client->-r requirements.txt (line 14))
+audit	Install dependencies	2026-08-06T12:53:22.9120102Z   Downloading proto_plus-1.28.3-py3-none-any.whl.metadata (2.2 kB)
+audit	Install dependencies	2026-08-06T12:53:22.9470248Z Collecting pyparsing<4,>=3.1 (from httplib2<1.0.0,>=0.19.0->google-api-python-client->-r requirements.txt (line 14))
+audit	Install dependencies	2026-08-06T12:53:22.9577706Z   Downloading pyparsing-3.3.2-py3-none-any.whl.metadata (5.8 kB)
+audit	Install dependencies	2026-08-06T12:53:22.9880158Z Collecting requests-oauthlib>=0.7.0 (from google-auth-oauthlib->-r requirements.txt (line 17))
+audit	Install dependencies	2026-08-06T12:53:22.9988166Z   Downloading requests_oauthlib-2.0.0-py2.py3-none-any.whl.metadata (11 kB)
+audit	Install dependencies	2026-08-06T12:53:23.0319648Z Collecting pycparser (from cffi>=2.0.0->cryptography->-r requirements.txt (line 11))
+audit	Install dependencies	2026-08-06T12:53:23.0427261Z   Downloading pycparser-3.0-py3-none-any.whl.metadata (8.2 kB)
+audit	Install dependencies	2026-08-06T12:53:23.0776488Z Collecting pyasn1<0.7.0,>=0.6.1 (from pyasn1-modules>=0.2.1->google-auth->-r requirements.txt (line 15))
+audit	Install dependencies	2026-08-06T12:53:23.0885665Z   Downloading pyasn1-0.6.4-py3-none-any.whl.metadata (8.4 kB)
+audit	Install dependencies	2026-08-06T12:53:23.1137260Z Collecting six>=1.5 (from python-dateutil>=2.8.2->pandas->-r requirements.txt (line 8))
+audit	Install dependencies	2026-08-06T12:53:23.1243962Z   Downloading six-1.17.0-py2.py3-none-any.whl.metadata (1.7 kB)
+audit	Install dependencies	2026-08-06T12:53:23.1489467Z Collecting oauthlib>=3.0.0 (from requests-oauthlib>=0.7.0->google-auth-oauthlib->-r requirements.txt (line 17))
+audit	Install dependencies	2026-08-06T12:53:23.1597361Z   Downloading oauthlib-3.3.1-py3-none-any.whl.metadata (7.9 kB)
+audit	Install dependencies	2026-08-06T12:53:23.1789107Z Downloading requests-2.34.2-py3-none-any.whl (73 kB)
+audit	Install dependencies	2026-08-06T12:53:23.1936310Z Downloading charset_normalizer-3.4.9-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.manylinux_2_28_x86_64.whl (221 kB)
+audit	Install dependencies	2026-08-06T12:53:23.2175562Z Downloading idna-3.18-py3-none-any.whl (65 kB)
+audit	Install dependencies	2026-08-06T12:53:23.2310946Z Downloading urllib3-2.7.0-py3-none-any.whl (131 kB)
+audit	Install dependencies	2026-08-06T12:53:23.2457044Z Downloading beautifulsoup4-4.15.0-py3-none-any.whl (109 kB)
+audit	Install dependencies	2026-08-06T12:53:23.2592611Z Downloading feedparser-6.0.14-py3-none-any.whl (80 kB)
+audit	Install dependencies	2026-08-06T12:53:23.2727270Z Downloading feedparser_sgmllib-2.1.0-py3-none-any.whl (11 kB)
+audit	Install dependencies	2026-08-06T12:53:23.2855307Z Downloading yfinance-1.5.2-py2.py3-none-any.whl (144 kB)
+audit	Install dependencies	2026-08-06T12:53:23.2999620Z Downloading pandas-3.0.5-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (11.3 MB)
+audit	Install dependencies	2026-08-06T12:53:23.3956166Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 11.3/11.3 MB 121.4 MB/s  0:00:00
+audit	Install dependencies	2026-08-06T12:53:23.4067497Z Downloading cryptography-50.0.0-cp311-abi3-manylinux_2_34_x86_64.whl (4.7 MB)
+audit	Install dependencies	2026-08-06T12:53:23.4225079Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 4.7/4.7 MB 333.9 MB/s  0:00:00
+audit	Install dependencies	2026-08-06T12:53:23.4333425Z Downloading google_api_python_client-2.198.0-py3-none-any.whl (15.6 MB)
+audit	Install dependencies	2026-08-06T12:53:23.4768994Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 15.6/15.6 MB 375.0 MB/s  0:00:00
+audit	Install dependencies	2026-08-06T12:53:23.4877717Z Downloading google_auth-2.56.3-py3-none-any.whl (259 kB)
+audit	Install dependencies	2026-08-06T12:53:23.5012497Z Downloading google_auth_httplib2-0.4.1-py3-none-any.whl (9.5 kB)
+audit	Install dependencies	2026-08-06T12:53:23.5142226Z Downloading google_api_core-2.34.0-py3-none-any.whl (180 kB)
+audit	Install dependencies	2026-08-06T12:53:23.5277061Z Downloading googleapis_common_protos-1.75.1-py3-none-any.whl (300 kB)
+audit	Install dependencies	2026-08-06T12:53:23.5411693Z Downloading httplib2-0.32.0-py3-none-any.whl (93 kB)
+audit	Install dependencies	2026-08-06T12:53:23.5544279Z Downloading proto_plus-1.28.3-py3-none-any.whl (50 kB)
+audit	Install dependencies	2026-08-06T12:53:23.5672953Z Downloading protobuf-7.35.1-cp310-abi3-manylinux2014_x86_64.whl (327 kB)
+audit	Install dependencies	2026-08-06T12:53:23.5807308Z Downloading pyparsing-3.3.2-py3-none-any.whl (122 kB)
+audit	Install dependencies	2026-08-06T12:53:23.5937802Z Downloading uritemplate-4.2.0-py3-none-any.whl (11 kB)
+audit	Install dependencies	2026-08-06T12:53:23.6064855Z Downloading google_auth_oauthlib-1.4.0-py3-none-any.whl (19 kB)
+audit	Install dependencies	2026-08-06T12:53:23.6190881Z Downloading gspread-6.2.1-py3-none-any.whl (59 kB)
+audit	Install dependencies	2026-08-06T12:53:23.6322595Z Downloading pypdf2-3.0.1-py3-none-any.whl (232 kB)
+audit	Install dependencies	2026-08-06T12:53:23.6457328Z Downloading certifi-2026.7.22-py3-none-any.whl (136 kB)
+audit	Install dependencies	2026-08-06T12:53:23.6589159Z Downloading cffi-2.1.1-cp311-cp311-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (217 kB)
+audit	Install dependencies	2026-08-06T12:53:23.6726106Z Downloading curl_cffi-0.16.0-cp310-abi3-manylinux2014_x86_64.manylinux_2_17_x86_64.whl (13.5 MB)
+audit	Install dependencies	2026-08-06T12:53:23.7097517Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 13.5/13.5 MB 378.2 MB/s  0:00:00
+audit	Install dependencies	2026-08-06T12:53:23.7205703Z Downloading multitasking-0.0.13-py3-none-any.whl (16 kB)
+audit	Install dependencies	2026-08-06T12:53:23.7334517Z Downloading numpy-2.4.6-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.9 MB)
+audit	Install dependencies	2026-08-06T12:53:23.7795702Z    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 16.9/16.9 MB 380.3 MB/s  0:00:00
+audit	Install dependencies	2026-08-06T12:53:23.7905047Z Downloading peewee-4.3.0-py3-none-any.whl (179 kB)
+audit	Install dependencies	2026-08-06T12:53:23.8039411Z Downloading platformdirs-4.11.0-py3-none-any.whl (23 kB)
+audit	Install dependencies	2026-08-06T12:53:23.8167308Z Downloading pyasn1_modules-0.4.2-py3-none-any.whl (181 kB)
+audit	Install dependencies	2026-08-06T12:53:23.8298436Z Downloading pyasn1-0.6.4-py3-none-any.whl (84 kB)
+audit	Install dependencies	2026-08-06T12:53:23.8428100Z Downloading python_dateutil-2.9.0.post0-py2.py3-none-any.whl (229 kB)
+audit	Install dependencies	2026-08-06T12:53:23.8566961Z Downloading pytz-2026.3.post1-py2.py3-none-any.whl (508 kB)
+audit	Install dependencies	2026-08-06T12:53:23.8709695Z Downloading requests_oauthlib-2.0.0-py2.py3-none-any.whl (24 kB)
+audit	Install dependencies	2026-08-06T12:53:23.8849466Z Downloading oauthlib-3.3.1-py3-none-any.whl (160 kB)
+audit	Install dependencies	2026-08-06T12:53:23.8982608Z Downloading six-1.17.0-py2.py3-none-any.whl (11 kB)
+audit	Install dependencies	2026-08-06T12:53:23.9110873Z Downloading soupsieve-2.9.1-py3-none-any.whl (37 kB)
+audit	Install dependencies	2026-08-06T12:53:23.9243133Z Downloading typing_extensions-4.16.0-py3-none-any.whl (45 kB)
+audit	Install dependencies	2026-08-06T12:53:23.9374022Z Downloading websockets-17.0.1-cp311-cp311-manylinux1_x86_64.manylinux_2_28_x86_64.manylinux_2_5_x86_64.whl (219 kB)
+audit	Install dependencies	2026-08-06T12:53:23.9511713Z Downloading pycparser-3.0-py3-none-any.whl (48 kB)
+audit	Install dependencies	2026-08-06T12:53:24.1793862Z Installing collected packages: pytz, multitasking, websockets, urllib3, uritemplate, typing-extensions, soupsieve, six, PyPDF2, pyparsing, pycparser, pyasn1, protobuf, platformdirs, peewee, oauthlib, numpy, idna, feedparser-sgmllib, charset_normalizer, certifi, requests, python-dateutil, pyasn1-modules, proto-plus, httplib2, googleapis-common-protos, feedparser, cffi, beautifulsoup4, requests-oauthlib, pandas, curl_cffi, cryptography, yfinance, google-auth, google-auth-oauthlib, google-auth-httplib2, google-api-core, gspread, google-api-python-client
+audit	Install dependencies	2026-08-06T12:53:33.2959372Z 
+audit	Install dependencies	2026-08-06T12:53:33.2983307Z Successfully installed PyPDF2-3.0.1 beautifulsoup4-4.15.0 certifi-2026.7.22 cffi-2.1.1 charset_normalizer-3.4.9 cryptography-50.0.0 curl_cffi-0.16.0 feedparser-6.0.14 feedparser-sgmllib-2.1.0 google-api-core-2.34.0 google-api-python-client-2.198.0 google-auth-2.56.3 google-auth-httplib2-0.4.1 google-auth-oauthlib-1.4.0 googleapis-common-protos-1.75.1 gspread-6.2.1 httplib2-0.32.0 idna-3.18 multitasking-0.0.13 numpy-2.4.6 oauthlib-3.3.1 pandas-3.0.5 peewee-4.3.0 platformdirs-4.11.0 proto-plus-1.28.3 protobuf-7.35.1 pyasn1-0.6.4 pyasn1-modules-0.4.2 pycparser-3.0 pyparsing-3.3.2 python-dateutil-2.9.0.post0 pytz-2026.3.post1 requests-2.34.2 requests-oauthlib-2.0.0 six-1.17.0 soupsieve-2.9.1 typing-extensions-4.16.0 uritemplate-4.2.0 urllib3-2.7.0 websockets-17.0.1 yfinance-1.5.2
+audit	Install dependencies	2026-08-06T12:53:33.2990098Z 
+audit	Install dependencies	2026-08-06T12:53:33.2990421Z [notice] A new release of pip is available: 26.1.2 -> 26.2.1
+audit	Install dependencies	2026-08-06T12:53:33.2991090Z [notice] To update, run: pip install --upgrade pip
+audit	Run Environment Check	﻿2026-08-06T12:53:33.4008515Z ##[group]Run python tools/test_env.py
+audit	Run Environment Check	2026-08-06T12:53:33.4008887Z [36;1mpython tools/test_env.py[0m
+audit	Run Environment Check	2026-08-06T12:53:33.4055094Z shell: /usr/bin/bash -e {0}
+audit	Run Environment Check	2026-08-06T12:53:33.4055625Z env:
+audit	Run Environment Check	2026-08-06T12:53:33.4055913Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.15/x64
+audit	Run Environment Check	2026-08-06T12:53:33.4056366Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib/pkgconfig
+audit	Run Environment Check	2026-08-06T12:53:33.4056816Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+audit	Run Environment Check	2026-08-06T12:53:33.4057212Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+audit	Run Environment Check	2026-08-06T12:53:33.4057602Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+audit	Run Environment Check	2026-08-06T12:53:33.4057997Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib
+audit	Run Environment Check	2026-08-06T12:53:33.4058496Z   SMTP_SERVER: ***
+audit	Run Environment Check	2026-08-06T12:53:33.4058721Z   SMTP_PORT: ***
+audit	Run Environment Check	2026-08-06T12:53:33.4058976Z   SMTP_USER: ***
+audit	Run Environment Check	2026-08-06T12:53:33.4059200Z   SMTP_PASS: ***
+audit	Run Environment Check	2026-08-06T12:53:33.4059444Z   ALERT_EMAIL_RECIPIENT: ***
+audit	Run Environment Check	2026-08-06T12:53:33.4059693Z ##[endgroup]
+audit	Run Environment Check	2026-08-06T12:53:33.4218594Z --- RUNTIME ENVIRONMENT VARIABLES ---
+audit	Run Environment Check	2026-08-06T12:53:33.4219172Z SMTP_SERVER = smt***********
+audit	Run Environment Check	2026-08-06T12:53:33.4219728Z exists = YES
+audit	Run Environment Check	2026-08-06T12:53:33.4220075Z length = 14
+audit	Run Environment Check	2026-08-06T12:53:33.4220283Z 
+audit	Run Environment Check	2026-08-06T12:53:33.4220456Z SMTP_PASS = htx****************
+audit	Run Environment Check	2026-08-06T12:53:33.4220903Z exists = YES
+audit	Run Environment Check	2026-08-06T12:53:33.4221255Z length = 19
+audit	Run Environment Check	2026-08-06T12:53:33.4221475Z 
+audit	Run Environment Check	2026-08-06T12:53:33.4221628Z SMTP_PORT = ***
+audit	Run Environment Check	2026-08-06T12:53:33.4221961Z exists = YES
+audit	Run Environment Check	2026-08-06T12:53:33.4222314Z length = 3
+audit	Run Environment Check	2026-08-06T12:53:33.4222497Z 
+audit	Run Environment Check	2026-08-06T12:53:33.4222718Z ALERT_EMAIL_RECIPIENT = kar********************
+audit	Run Environment Check	2026-08-06T12:53:33.4223249Z exists = YES
+audit	Run Environment Check	2026-08-06T12:53:33.4223614Z length = 23
+audit	Run Environment Check	2026-08-06T12:53:33.4223812Z 
+audit	Run Environment Check	2026-08-06T12:53:33.4224016Z SMTP_USER = kar********************
+audit	Run Environment Check	2026-08-06T12:53:33.4224461Z exists = YES
+audit	Run Environment Check	2026-08-06T12:53:33.4224803Z length = 23
+audit	Run Environment Check	2026-08-06T12:53:33.4225001Z 
+audit	Run Environment Check	2026-08-06T12:53:33.4225175Z --- RECIPIENT TRACE ---
+audit	Run Environment Check	2026-08-06T12:53:33.4225949Z ALERT_EMAIL_RECIPIENT = ***
+audit	Run Email Dispatch Test	﻿2026-08-06T12:53:33.4269520Z ##[group]Run python tools/test_email.py
+audit	Run Email Dispatch Test	2026-08-06T12:53:33.4269935Z [36;1mpython tools/test_email.py[0m
+audit	Run Email Dispatch Test	2026-08-06T12:53:33.4311288Z shell: /usr/bin/bash -e {0}
+audit	Run Email Dispatch Test	2026-08-06T12:53:33.4311540Z env:
+audit	Run Email Dispatch Test	2026-08-06T12:53:33.4311817Z   pythonLocation: /opt/hostedtoolcache/Python/3.11.15/x64
+audit	Run Email Dispatch Test	2026-08-06T12:53:33.4312262Z   PKG_CONFIG_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib/pkgconfig
+audit	Run Email Dispatch Test	2026-08-06T12:53:33.4312716Z   Python_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+audit	Run Email Dispatch Test	2026-08-06T12:53:33.4313105Z   Python2_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+audit	Run Email Dispatch Test	2026-08-06T12:53:33.4313492Z   Python3_ROOT_DIR: /opt/hostedtoolcache/Python/3.11.15/x64
+audit	Run Email Dispatch Test	2026-08-06T12:53:33.4313891Z   LD_LIBRARY_PATH: /opt/hostedtoolcache/Python/3.11.15/x64/lib
+audit	Run Email Dispatch Test	2026-08-06T12:53:33.4314302Z   SMTP_SERVER: ***
+audit	Run Email Dispatch Test	2026-08-06T12:53:33.4314522Z   SMTP_PORT: ***
+audit	Run Email Dispatch Test	2026-08-06T12:53:33.4314754Z   SMTP_USER: ***
+audit	Run Email Dispatch Test	2026-08-06T12:53:33.4314977Z   SMTP_PASS: ***
+audit	Run Email Dispatch Test	2026-08-06T12:53:33.4315223Z   ALERT_EMAIL_RECIPIENT: ***
+audit	Run Email Dispatch Test	2026-08-06T12:53:33.4315692Z ##[endgroup]
+audit	Run Email Dispatch Test	2026-08-06T12:53:33.7900569Z send: 'ehlo runnervmvrwv9.5svf0n5jzeeuzemd0l3pozd44h.gx.internal.cloudapp.net\r\n'
+audit	Run Email Dispatch Test	2026-08-06T12:53:33.8225154Z reply: b'250-*** at your service, [52.242.243.4]\r\n'
+audit	Run Email Dispatch Test	2026-08-06T12:53:33.8226219Z reply: b'250-SIZE 35882577\r\n'
+audit	Run Email Dispatch Test	2026-08-06T12:53:33.8226738Z reply: b'250-8BITMIME\r\n'
+audit	Run Email Dispatch Test	2026-08-06T12:53:33.8227780Z reply: b'250-AUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH\r\n'
+audit	Run Email Dispatch Test	2026-08-06T12:53:33.8228721Z reply: b'250-ENHANCEDSTATUSCODES\r\n'
+audit	Run Email Dispatch Test	2026-08-06T12:53:33.8229339Z reply: b'250-PIPELINING\r\n'
+audit	Run Email Dispatch Test	2026-08-06T12:53:33.8229888Z reply: b'250-CHUNKING\r\n'
+audit	Run Email Dispatch Test	2026-08-06T12:53:33.8230396Z reply: b'250 SMTPUTF8\r\n'
+audit	Run Email Dispatch Test	2026-08-06T12:53:33.8232301Z reply: retcode (250); Msg: b'*** at your service, [52.242.243.4]\nSIZE 35882577\n8BITMIME\nAUTH LOGIN PLAIN XOAUTH2 PLAIN-CLIENTTOKEN OAUTHBEARER XOAUTH\nENHANCEDSTATUSCODES\nPIPELINING\nCHUNKING\nSMTPUTF8'
+audit	Run Email Dispatch Test	2026-08-06T12:53:33.8234170Z send: 'AUTH PLAIN AGth***AGh0***\r\n'
+audit	Run Email Dispatch Test	2026-08-06T12:53:34.0895226Z reply: b'235 2.7.0 Accepted\r\n'
+audit	Run Email Dispatch Test	2026-08-06T12:53:34.0896188Z reply: retcode (235); Msg: b'2.7.0 Accepted'
+audit	Run Email Dispatch Test	2026-08-06T12:53:34.0905088Z send: 'mail FROM:<***> size=2639\r\n'
+audit	Run Email Dispatch Test	2026-08-06T12:53:34.1226774Z reply: b'250 2.1.0 OK 46e09a7af769-7f1df345ed1sm4350203a34.8 - gsmtp\r\n'
+audit	Run Email Dispatch Test	2026-08-06T12:53:34.1227922Z reply: retcode (250); Msg: b'2.1.0 OK 46e09a7af769-7f1df345ed1sm4350203a34.8 - gsmtp'
+audit	Run Email Dispatch Test	2026-08-06T12:53:34.1229176Z send: 'rcpt TO:<***>\r\n'
+audit	Run Email Dispatch Test	2026-08-06T12:53:34.1528397Z reply: b'250 2.1.5 OK 46e09a7af769-7f1df345ed1sm4350203a34.8 - gsmtp\r\n'
+audit	Run Email Dispatch Test	2026-08-06T12:53:34.1529616Z reply: retcode (250); Msg: b'2.1.5 OK 46e09a7af769-7f1df345ed1sm4350203a34.8 - gsmtp'
+audit	Run Email Dispatch Test	2026-08-06T12:53:34.1530193Z send: 'data\r\n'
+audit	Run Email Dispatch Test	2026-08-06T12:53:34.3929367Z reply: b'354 Go ahead 46e09a7af769-7f1df345ed1sm4350203a34.8 - gsmtp\r\n'
+audit	Run Email Dispatch Test	2026-08-06T12:53:34.3930529Z reply: retcode (354); Msg: b'Go ahead 46e09a7af769-7f1df345ed1sm4350203a34.8 - gsmtp'
+audit	Run Email Dispatch Test	2026-08-06T12:53:34.3931625Z data: (354, b'Go ahead 46e09a7af769-7f1df345ed1sm4350203a34.8 - gsmtp')
+audit	Run Email Dispatch Test	2026-08-06T12:53:34.3942231Z send: b'Content-Type: multipart/alternative;\r\n boundary="===============1073505638817672879=="\r\nMIME-Version: 1.0\r\nSubject: SSR [ALERT] TEST - Merger\r\nFrom: SSR Operations <***>\r\nTo: ***\r\n\r\n--===============1073505638817672879==\r\nContent-Type: text/html; charset="us-ascii"\r\nMIME-Version: 1.0\r\nContent-Transfer-Encoding: 7bit\r\n\r\n\r\n    <html>\r\n    <head>\r\n        <style>\r\n            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; color: #333; line-height: 1.5; }\r\n            .container { max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eaeaea; border-radius: 5px; }\r\n            h2 { color: #2ea043; border-bottom: 2px solid #eaeaea; padding-bottom: 10px; }\r\n            .meta-data { background: #f6f8fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; font-size: 0.9em; }\r\n            .meta-data strong { color: #24292e; display: inline-block; width: 120px; }\r\n            .research-memo { white-space: pre-wrap; background: #fff; padding: 15px; border-left: 4px solid #4088db; font-family: monospace; font-size: 13px; }\r\n            .evidence { margin-top: 20px; font-size: 0.85em; color: #586069; }\r\n            .footer { margin-top: 30px; font-size: 0.8em; color: #6a737d; text-align: center; border-top: 1px solid #eaeaea; padding-top: 10px; }\r\n        </style>\r\n    </head>\r\n    <body>\r\n        <div class="container">\r\n            <h2>SSR Strategy Alert: Merger</h2>\r\n            \r\n            <div class="meta-data">\r\n                <div><strong>Target Ticker:</strong> TEST</div>\r\n                <div><strong>Confidence:</strong> 95.0%</div>\r\n                <div><strong>Sensor Source:</strong> TestSensor</div>\r\n                <div><strong>Timestamp:</strong> 2026-08-06 12:00:00 GMT</div>\r\n                <div style="margin-top: 10px;"><strong>Source Headline:</strong> <a href="http://localhost/test">TEST INC ANNOUNCES MERGER WITH DUMMY CORP</a></div>\r\n            </div>\r\n\r\n            <h3>Investment Memo (AI Synthesis)</h3>\r\n            <div class="research-memo">This is a decoupled email test verifying SMTP functionality.</div>\r\n            \r\n            <h3>Supporting Causal Evidence</h3>\r\n            <ul class="evidence">\r\n    <li>[Rule engine] Matched merger terminology (Wt: 5.0)</li>\r\n            </ul>\r\n            \r\n            <div class="footer">\r\n                Special Situations Radar (SSR 2.0) | Decision ID: DEC-TEST001<br>\r\n                Manifest Configuration: CFG-MOCKHASH\r\n            </div>\r\n        </div>\r\n    </body>\r\n    </html>\r\n    \r\n--===============1073505638817672879==--\r\n.\r\n'
+audit	Run Email Dispatch Test	2026-08-06T12:53:34.9698924Z reply: b'250 2.0.0 OK  1786020814 46e09a7af769-7f1df345ed1sm4350203a34.8 - gsmtp\r\n'
+audit	Run Email Dispatch Test	2026-08-06T12:53:34.9699887Z reply: retcode (250); Msg: b'2.0.0 OK  1786020814 46e09a7af769-7f1df345ed1sm4350203a34.8 - gsmtp'
+audit	Run Email Dispatch Test	2026-08-06T12:53:34.9700602Z data: (250, b'2.0.0 OK  1786020814 46e09a7af769-7f1df345ed1sm4350203a34.8 - gsmtp')
+audit	Run Email Dispatch Test	2026-08-06T12:53:34.9701124Z send: 'quit\r\n'
+audit	Run Email Dispatch Test	2026-08-06T12:53:34.9999221Z reply: b'221 2.0.0 closing connection 46e09a7af769-7f1df345ed1sm4350203a34.8 - gsmtp\r\n'
+audit	Run Email Dispatch Test	2026-08-06T12:53:35.0000558Z reply: retcode (221); Msg: b'2.0.0 closing connection 46e09a7af769-7f1df345ed1sm4350203a34.8 - gsmtp'
+audit	Run Email Dispatch Test	2026-08-06T12:53:35.0001466Z Testing email dispatch using ***...
+audit	Run Email Dispatch Test	2026-08-06T12:53:35.0002056Z  [EMAIL DISPATCH] Alert successfully sent to *** for TEST
+audit	Run Email Dispatch Test	2026-08-06T12:53:35.0002547Z [SUCCESS] Test email dispatched without errors.
+audit	Post Set up Python	﻿2026-08-06T12:53:35.0186573Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+audit	Post Set up Python	2026-08-06T12:53:35.0187851Z Post job cleanup.
+audit	Post Set up Python	2026-08-06T12:53:35.1346267Z (node:2306) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+audit	Post Set up Python	2026-08-06T12:53:35.1347136Z (Use `node --trace-deprecation ...` to show where the warning was created)
+audit	Post Set up Python	2026-08-06T12:53:35.1596783Z [command]/usr/bin/tar --posix -cf cache.tzst --exclude cache.tzst -P -C /home/runner/work/SSR/SSR --files-from manifest.txt --use-compress-program zstdmt
+audit	Post Set up Python	2026-08-06T12:53:35.5238245Z (node:2306) [DEP0169] DeprecationWarning: `url.parse()` behavior is not standardized and prone to errors that have security implications. Use the WHATWG URL API instead. CVEs are not issued for `url.parse()` vulnerabilities.
+audit	Post Set up Python	2026-08-06T12:53:36.5157341Z Sent 50397184 of 69007441 (73.0%), 48.0 MBs/sec
+audit	Post Set up Python	2026-08-06T12:53:37.2503916Z Sent 69007441 of 69007441 (100.0%), 37.9 MBs/sec
+audit	Post Set up Python	2026-08-06T12:53:37.4226465Z Cache saved with the key: setup-python-Linux-x64-24.04-Ubuntu-python-3.11.15-pip-dc8efa6cb695d9af976cb0647084d27b1cbe4e7cdc390fef184444717a53572f
+audit	Post Run actions/checkout@v4	﻿2026-08-06T12:53:37.4406084Z Node 20 is being deprecated. This workflow is running with Node 24 by default. If you need to temporarily use Node 20, you can set the ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION=true environment variable. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
+audit	Post Run actions/checkout@v4	2026-08-06T12:53:37.4407378Z Post job cleanup.
+audit	Post Run actions/checkout@v4	2026-08-06T12:53:37.5246962Z [command]/usr/bin/git version
+audit	Post Run actions/checkout@v4	2026-08-06T12:53:37.5322853Z git version 2.54.0
+audit	Post Run actions/checkout@v4	2026-08-06T12:53:37.5365645Z Temporarily overriding HOME='/home/runner/work/_temp/042041fe-6a2a-45fa-b51c-48a37bdbc641' before making global git config changes
+audit	Post Run actions/checkout@v4	2026-08-06T12:53:37.5367175Z Adding repository directory to the temporary git global config as a safe directory
+audit	Post Run actions/checkout@v4	2026-08-06T12:53:37.5372953Z [command]/usr/bin/git config --global --add safe.directory /home/runner/work/SSR/SSR
+audit	Post Run actions/checkout@v4	2026-08-06T12:53:37.5413281Z [command]/usr/bin/git config --local --name-only --get-regexp core\.sshCommand
+audit	Post Run actions/checkout@v4	2026-08-06T12:53:37.5458576Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'core\.sshCommand' && git config --local --unset-all 'core.sshCommand' || :"
+audit	Post Run actions/checkout@v4	2026-08-06T12:53:37.5702661Z [command]/usr/bin/git config --local --name-only --get-regexp http\.https\:\/\/github\.com\/\.extraheader
+audit	Post Run actions/checkout@v4	2026-08-06T12:53:37.5730359Z http.https://github.com/.extraheader
+audit	Post Run actions/checkout@v4	2026-08-06T12:53:37.5742382Z [command]/usr/bin/git config --local --unset-all http.https://github.com/.extraheader
+audit	Post Run actions/checkout@v4	2026-08-06T12:53:37.5776042Z [command]/usr/bin/git submodule foreach --recursive sh -c "git config --local --name-only --get-regexp 'http\.https\:\/\/github\.com\/\.extraheader' && git config --local --unset-all 'http.https://github.com/.extraheader' || :"
+audit	Post Run actions/checkout@v4	2026-08-06T12:53:37.6039040Z [command]/usr/bin/git config --local --name-only --get-regexp ^includeIf\.gitdir:
+audit	Post Run actions/checkout@v4	2026-08-06T12:53:37.6078532Z [command]/usr/bin/git submodule foreach --recursive git config --local --show-origin --name-only --get-regexp remote.origin.url
+audit	Complete job	﻿2026-08-06T12:53:37.6485263Z Cleaning up orphan processes
+audit	Complete job	2026-08-06T12:53:37.6762238Z ##[warning]Node.js 20 is deprecated. The following actions target Node.js 20 but are being forced to run on Node.js 24: actions/checkout@v4, actions/setup-python@v5. For more information see: https://github.blog/changelog/2025-09-19-deprecation-of-node-20-on-github-actions-runners/
