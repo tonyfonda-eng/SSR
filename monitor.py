@@ -667,21 +667,17 @@ def main():
                     log_audit_event(telemetry.run_id, evt.get("source_or_provider"), evt.get("event_type"), evt.get("severity"), evt.get("details"))
                     
             # Check for catastrophic failures
-            from src.audit.queries import get_daily_run_summary
-            summary, _ = get_daily_run_summary(datetime.now(timezone.utc).strftime("%Y-%m-%d"), 30)
-            if summary:
-                cov_score = summary.get("coverage_score", 100)
-                if cov_score < 60 or has_emergency_stop:
-                    from src.alerts.email import send_alert
-                    send_alert({
-                        "headline": "CRITICAL HEALTH ALERT",
-                        "url": "https://github.com/tonyfonda-eng/SSR",
-                        "research_summary": f"Coverage dropped to {cov_score}% or emergency stop was reached. Immediate investigation required.",
-                        "is_update": False,
-                        "manifest_registry": {"decision_id": telemetry.run_id},
-                        "detection_vector": {"detected_event_type": "SYSTEM FAILURE", "target_ticker": "SSR_OPS"},
-                        "syndication_lineage": {"canonical_sensor_id": "Flight Recorder"}
-                    })
+            if has_emergency_stop:
+                from src.alerts.email import send_alert
+                send_alert({
+                    "headline": "CRITICAL HEALTH ALERT",
+                    "url": "https://github.com/tonyfonda-eng/SSR",
+                    "research_summary": "Emergency stop was reached. Immediate investigation required.",
+                    "is_update": False,
+                    "manifest_registry": {"decision_id": telemetry.run_id},
+                    "detection_vector": {"detected_event_type": "SYSTEM FAILURE", "target_ticker": "SSR_OPS"},
+                    "syndication_lineage": {"canonical_sensor_id": "Flight Recorder"}
+                })
                     
         except Exception as e:
             logger.error(f"[AUDIT] Failed to save V4 audit metrics/events: {e}")
