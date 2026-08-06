@@ -78,7 +78,8 @@ class PRNewsWireScraper(SourceScraper):
         
         for page in range(1, self.scrape_metadata["page_limit"] + 1):
             self.scrape_metadata["pages_visited"] = page
-            url = f"https://www.prnewswire.com/news-releases/news-releases-list/?page={page}&pagesize=100"
+            # Switched from global 'news-releases-list' to 'financial-services-latest-news-list' to dramatically reduce non-deal noise
+            url = f"https://www.prnewswire.com/news-releases/financial-services-latest-news/financial-services-latest-news-list/?page={page}&pagesize=100"
             
             try:
                 response = get_session().get(url, headers=headers, timeout=30)
