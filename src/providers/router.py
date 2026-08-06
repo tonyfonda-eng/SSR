@@ -9,12 +9,14 @@ import time
 import json
 import logging
 import requests
+import threading
 from typing import List, Dict
 
 logger = logging.getLogger(__name__)
 
 class ProviderRouter:
     def __init__(self):
+        self._lock = threading.Lock()
         # Dynamically parse comma-separated API keys from the environment
         self.keys = {
             "gemini": self._parse_keys("GEMINI_API_KEY"),
@@ -50,10 +52,13 @@ class ProviderRouter:
         provider_order = ["gemini", "openrouter"]
         
         for provider in provider_order:
-            keys = self.keys.get(provider, [])
-            
-            while keys:
-                current_key = keys[0]
+            while True:
+                with self._lock:
+                    keys = self.keys.get(provider, [])
+                    if not keys:
+                        break
+                    current_key = keys[0]
+                
                 try:
                     if provider == "gemini":
                         return self._call_gemini(prompt, current_key, require_json)
@@ -66,12 +71,18 @@ class ProviderRouter:
                     if status_code == 401 or status_code == 403:
                         # FAIL-FAST: Unauthorized key. It's dead. Drop it permanently.
                         logger.warning(f"[AI ROUTER] {status_code} on {provider}. Purging dead key from rotation.")
-                        keys.pop(0)
+                        with self._lock:
+                            keys_ref = self.keys.get(provider, [])
+                            if keys_ref and keys_ref[0] == current_key:
+                                keys_ref.pop(0)
                         
                     elif status_code == 429:
                         # RATE LIMIT: Move the exhausted key to the back of the queue and pause briefly.
                         logger.warning(f"[AI ROUTER] 429 Rate Limit on {provider}. Rotating to next key.")
-                        keys.append(keys.pop(0))
+                        with self._lock:
+                            keys_ref = self.keys.get(provider, [])
+                            if keys_ref and keys_ref[0] == current_key:
+                                keys_ref.append(keys_ref.pop(0))
                         time.sleep(1.5) # Graceful backoff
                         
                     elif status_code >= 500:

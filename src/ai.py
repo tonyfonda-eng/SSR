@@ -44,11 +44,12 @@ def get_router():
     return router
 
 
-def invoke_llm(prompt: str, json_mode: bool = False) -> str:
+def invoke_llm(prompt: str, json_mode: bool = False, router=None) -> str:
     """
     Retrieves the raw, unmodified string response from the AI provider.
     """
-    router = get_router()
+    if router is None:
+        router = get_router()
     try:
         response = router.generate(prompt, require_json=json_mode)
         if response == "EXHAUSTED":
@@ -124,7 +125,7 @@ def interpret_strategy(parsed_data: ParsedAIPayload) -> SemanticInterpretation:
 # Legacy Wrapper Functions (Backward Compatibility for `monitor.py`)
 # ---------------------------------------------------------------------------
 
-def extract_target_ticker(body_text: str) -> str:
+def extract_target_ticker(body_text: str, router=None) -> str:
     """Legacy wrapper for ticker extraction."""
     prompt = f"""Identify the primary ticker symbol for the company involved in this text. 
     Return ONLY the ticker symbol (e.g., AAPL). If multiple exist, return the primary subject. 
@@ -132,11 +133,11 @@ def extract_target_ticker(body_text: str) -> str:
     
     Text: {body_text[:4000]}"""
     
-    raw_output = invoke_llm(prompt, json_mode=False)
+    raw_output = invoke_llm(prompt, json_mode=False, router=router)
     return parse_ticker_output(raw_output)
 
 
-def extract_halt_date(body_text: str) -> str:
+def extract_halt_date(body_text: str, router=None) -> str:
     """Legacy wrapper for trading halt date extraction."""
     prompt = f"""Analyze the following press release regarding a resumption of trading.
     Identify the date when the original trading halt was enacted.
@@ -144,11 +145,11 @@ def extract_halt_date(body_text: str) -> str:
     
     Text: {body_text[:4000]}"""
     
-    raw_output = invoke_llm(prompt, json_mode=False)
+    raw_output = invoke_llm(prompt, json_mode=False, router=router)
     return parse_halt_date_output(raw_output)
 
 
-def classify_event(body_text: str, matches: list, ticker: str = None, market_cap: float = None) -> str:
+def classify_event(body_text: str, matches: list, ticker: str = None, market_cap: float = None, router=None) -> str:
     """
     Legacy wrapper for event classification.
     Note: Returns the strategy string directly to support legacy caller signatures.
@@ -181,7 +182,7 @@ def classify_event(body_text: str, matches: list, ticker: str = None, market_cap
         "Evidence": ["List of key phrases supporting conclusion"]
     }}"""
 
-    raw_output = invoke_llm(prompt, json_mode=True)
+    raw_output = invoke_llm(prompt, json_mode=True, router=router)
     parsed_payload = parse_classification_output(raw_output)
     
     # We return just the strategy string here to satisfy the legacy signature in monitor.py
@@ -189,7 +190,7 @@ def classify_event(body_text: str, matches: list, ticker: str = None, market_cap
     return parsed_payload.strategy
 
 
-def execute_playbook(body_text: str, playbook_steps: str, event_family: str, gold_standard: str = None, market_data_str: str = "") -> str:
+def execute_playbook(body_text: str, playbook_steps: str, event_family: str, gold_standard: str = None, market_data_str: str = "", router=None) -> str:
     """Executes a specific investment research playbook."""
     if not playbook_steps:
         return "No specific playbook instructions provided for this event family."
@@ -210,7 +211,7 @@ def execute_playbook(body_text: str, playbook_steps: str, event_family: str, gol
     
     Provide your output as a professional investment memo."""
 
-    raw_output = invoke_llm(prompt, json_mode=False)
+    raw_output = invoke_llm(prompt, json_mode=False, router=router)
     
     if raw_output == "EXHAUSTED":
          return "FAILED: AI Providers Exhausted."
