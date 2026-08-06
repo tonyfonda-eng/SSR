@@ -292,7 +292,7 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 return true;
             });
 
-            document.getElementById('resultCount').textContent = `Showing ${filteredData.length} of ${screeningData.length} articles for today (${todayGMT})`;
+            document.getElementById('resultCount').textContent = `Showing ${filteredData.length} of ${screeningData.length} articles for today (${selectedDate || 'All Dates'})`;
 
             tbody.innerHTML = '';
             if (filteredData.length === 0) {
