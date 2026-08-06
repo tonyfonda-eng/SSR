@@ -128,24 +128,31 @@ def send_v4_event_report(event_data: dict, recipient: str = None):
         
     event_id = event_data.get("event_id", "UNKNOWN")
     event_type = str(event_data.get("event_type", "Corporate Announcement")).upper()
-    trade_graph = event_data.get("trade_graph", [])
+    hypotheses = event_data.get("hypotheses", [])
     
-    subject = f"SSR EVENT: {event_type} - {len(trade_graph)} Strategies Generated"
+    subject = f"SSR EVENT: {event_type} - {len(hypotheses)} Strategies Generated"
     
     trades_html = ""
-    for t in trade_graph:
+    for t in hypotheses:
         trades_html += f"<li><strong>{t['strategy']}</strong> ({t['ticker']}) - Status: {t['status']}<br>Reason: {t['reason']}</li>"
         
     timeline_html = ""
-    for c in event_data.get("confidence_history", []):
-        timeline_html += f"<li>{c.get('timestamp', 'Unknown')} - {c.get('source', 'Unknown')} (Confidence: {c.get('score', 0)})</li>"
+    history = event_data.get("confidence_history", [])
+    for c in history:
+        timeline_html += f"<li>Version {c.get('version', '?')} ({c.get('timestamp', 'Unknown')}) - Score: {c.get('score', 0)}<br>Reason: {c.get('reason', 'Unknown')}</li>"
         
     evidence_html = ""
     for e in event_data.get("evidence", []):
         evidence_html += f"<li>{e}</li>"
         
     opportunity_score = event_data.get("opportunity_score", {})
-    confidence_html = f"Total: {opportunity_score.get('total', 0)} (Entity: {opportunity_score.get('entity_confidence', 0)}, Event: {opportunity_score.get('event_confidence', 0)}, Trade: {opportunity_score.get('trade_confidence', 0)}, Financial: {opportunity_score.get('financial_quality', 0)})"
+    trend = ""
+    if len(history) > 1:
+        diff = history[-1].get("score", 0) - history[-2].get("score", 0)
+        trend = f" (↑ +{diff})" if diff > 0 else f" (↓ {diff})" if diff < 0 else " (-)"
+        
+    raw = opportunity_score.get("raw_components", {})
+    confidence_html = f"Total: {opportunity_score.get('total', 0)}{trend} (Entity: {raw.get('entity', 0)}, Event: {raw.get('event', 0)}, Trade: {raw.get('trade', 0)}, Financial: {raw.get('financial', 0)})"
         
     html_body = f"""
     <html>

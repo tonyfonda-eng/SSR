@@ -15,6 +15,65 @@ def _extract_ticker(text: str):
         match = re.search(r'\((?:NYSE|NASDAQ|AMEX|OTC|TSX|LSE)\s*:\s*([A-Z]{1,5})\)', text, re.IGNORECASE)
     return match.group(1).upper() if match else "UNKNOWN"
 
+def _confidence_scored_merge(article: dict, existing_events: list) -> tuple:
+    import difflib
+    
+    best_score = 0
+    best_event = None
+    
+    article_entities = {e.get("ticker") for e in article.get("_entities", []) if e.get("ticker") and e.get("ticker") != "UNKNOWN"}
+    article_headline = article.get("headline", "")
+    
+    for row in existing_events:
+        event_id = row[0]
+        event_type = row[1]
+        try:
+            entities = json.loads(row[2])
+            existing_tickers = {e.get("ticker") for e in entities if e.get("ticker") and e.get("ticker") != "UNKNOWN"}
+        except:
+            existing_tickers = set()
+            
+        try:
+            evidence = json.loads(row[3])
+            last_headline = evidence[-1] if evidence else ""
+        except:
+            last_headline = ""
+            
+        created_at_str = row[4]
+        
+        score = 0
+        
+        # 1. Entity Similarity (max 40)
+        intersection = article_entities.intersection(existing_tickers)
+        if intersection:
+            score += 40
+            
+        # 2. Headline Similarity (max 30)
+        seq_ratio = difflib.SequenceMatcher(None, article_headline.lower(), last_headline.lower()).ratio()
+        score += int(seq_ratio * 30)
+        
+        # 3. Time Proximity (max 20)
+        try:
+            created_at = datetime.datetime.strptime(created_at_str, "%Y-%m-%d %H:%M:%S GMT").replace(tzinfo=datetime.timezone.utc)
+            now = datetime.datetime.now(datetime.timezone.utc)
+            hours_diff = (now - created_at).total_seconds() / 3600
+            if hours_diff < 24:
+                score += 20
+            elif hours_diff < 72:
+                score += 10
+        except:
+            pass
+            
+        # 4. Event Progression (max 10)
+        if article.get("_v4_classification") == event_type:
+            score += 10
+            
+        if score > best_score:
+            best_score = score
+            best_event = event_id
+            
+    return best_score, best_event
+
 def stage_v4_ingestion(article: dict, ctx: dict) -> tuple:
     # Set internal tracking fields
     article["_v4_event_id"] = "EVT-" + hashlib.md5((article.get("headline", "") + article.get("source", "")).encode()).hexdigest()[:12].upper()
@@ -80,17 +139,27 @@ def stage_v4_event_classification(article: dict, ctx: dict) -> tuple:
         from src.config.settings import RESEARCH_DB_PATH
         conn = sqlite3.connect(RESEARCH_DB_PATH)
         c = conn.cursor()
-        primary_ticker = article.get("_entities", [{}])[0].get("ticker", "UNKNOWN")
-        if primary_ticker != "UNKNOWN":
-            c.execute("""
-                SELECT event_id FROM event_ledger 
-                WHERE event_type = ? AND entities LIKE ?
-                ORDER BY created_at DESC LIMIT 1
-            """, (article["_v4_classification"], f"%{primary_ticker}%"))
-            row = c.fetchone()
-            if row:
-                article["_v4_event_id"] = row[0]
-                article["_v4_is_update"] = True
+        
+        # Only query recent events (last 14 days) to keep memory footprint low
+        c.execute("""
+            SELECT event_id, event_type, entities, evidence, created_at 
+            FROM event_ledger 
+            ORDER BY created_at DESC LIMIT 500
+        """)
+        recent_events = c.fetchall()
+        
+        best_score, best_event = _confidence_scored_merge(article, recent_events)
+        
+        if best_score > 90:
+            article["_v4_event_id"] = best_event
+            article["_v4_is_update"] = True
+            article["_v4_human_review"] = 0
+        elif best_score > 60:
+            # We spawn a new event but flag it for human review
+            article["_v4_human_review"] = 1
+        else:
+            article["_v4_human_review"] = 0
+            
     except Exception:
         pass
     finally:
@@ -132,11 +201,11 @@ def stage_v4_trade_hypothesis_generation(article: dict, ctx: dict) -> tuple:
     if not trades:
         return False, "dropped_no_trade_generated"
         
-    article["_v4_trade_graph"] = trades
+    article["_v4_hypotheses"] = trades
     return True, "passed"
 
 def stage_v4_strategy_validation(article: dict, ctx: dict) -> tuple:
-    trades = article.get("_v4_trade_graph", [])
+    trades = article.get("_v4_hypotheses", [])
     valid_trades = []
     
     for t in trades:
@@ -150,24 +219,36 @@ def stage_v4_strategy_validation(article: dict, ctx: dict) -> tuple:
                 t["status"] = f"Invalid: {metrics.get('reason')}"
             else:
                 t["status"] = "Valid"
+        if t["status"] == "Valid":
+            valid_trades.append(t)
             
-    article["_v4_trade_graph"] = trades
+    article["_v4_validated_trades"] = valid_trades
     return True, "passed"
 
 def stage_v4_opportunity_score(article: dict, ctx: dict) -> tuple:
-    trades = article.get("_v4_trade_graph", [])
-    valid_trades = [t for t in trades if t["status"] == "Valid"]
+    valid_trades = article.get("_v4_validated_trades", [])
     
     if not valid_trades:
         return False, "dropped_failed_strategy_validation"
         
+    entity_raw = 25 if valid_trades[0]["ticker"] != "UNKNOWN" else 0
+    event_raw = 35 if article.get("_ai_invoked") else 10
+    trade_raw = 20 if valid_trades[0]["strategy"] != "General Momentum" else 5
+    financial_raw = 20
+        
     score_dict = {
-        "entity_confidence": 25 if valid_trades[0]["ticker"] != "UNKNOWN" else 0,
-        "event_confidence": 35 if article.get("_ai_invoked") else 10,
-        "trade_confidence": 20 if valid_trades[0]["strategy"] != "General Momentum" else 5,
-        "financial_quality": 20
+        "entity_confidence": entity_raw,
+        "event_confidence": event_raw,
+        "trade_confidence": trade_raw,
+        "financial_quality": financial_raw,
+        "raw_components": {
+            "entity": f"{entity_raw}/25",
+            "event": f"{event_raw}/35",
+            "trade": f"{trade_raw}/20",
+            "financial": f"{financial_raw}/20"
+        }
     }
-    score_dict["total"] = sum(score_dict.values())
+    score_dict["total"] = sum([entity_raw, event_raw, trade_raw, financial_raw])
     article["_v4_opportunity_score"] = score_dict
     
     if score_dict["total"] < 50:
@@ -203,7 +284,17 @@ def stage_v4_routing(article: dict, ctx: dict) -> tuple:
         try: conn.close()
         except: pass
         
-    confidence_history.append({"timestamp": timestamp, "source": article.get("source", "Unknown"), "score": article.get("_v4_opportunity_score", {}).get("total", 0)})
+    version = len(confidence_history) + 1
+    reason = "Initial detection" if version == 1 else f"{article.get('source', 'Unknown')} confirmation"
+    
+    confidence_history.append({
+        "version": version,
+        "timestamp": timestamp,
+        "source": article.get("source", "Unknown"),
+        "score": article.get("_v4_opportunity_score", {}).get("total", 0),
+        "reason": reason
+    })
+    
     evidence.append(article.get("headline"))
     lifecycle.append({"timestamp": timestamp, "stage": "Actionable Alert"})
     
@@ -215,11 +306,13 @@ def stage_v4_routing(article: dict, ctx: dict) -> tuple:
         "event_type": article.get("_v4_classification", "UNKNOWN"),
         "opportunity_score": article.get("_v4_opportunity_score", {}),
         "confidence_history": confidence_history,
-        "trade_graph": article.get("_v4_trade_graph", []),
+        "hypotheses": article.get("_v4_hypotheses", []),
+        "validated_trades": article.get("_v4_validated_trades", []),
         "evidence": evidence,
         "entities": article.get("_entities", []),
         "routing_destination": "EMAIL_DISPATCH",
-        "lifecycle": lifecycle
+        "lifecycle": lifecycle,
+        "human_review_flag": article.get("_v4_human_review", 0)
     }
     
     try:

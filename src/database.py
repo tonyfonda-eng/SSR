@@ -139,6 +139,7 @@ def init_db():
         r_conn.execute("ALTER TABLE event_ledger ADD COLUMN lifecycle TEXT;")
         r_conn.execute("ALTER TABLE event_ledger ADD COLUMN hypotheses TEXT;")
         r_conn.execute("ALTER TABLE event_ledger ADD COLUMN validated_trades TEXT;")
+        r_conn.execute("ALTER TABLE event_ledger ADD COLUMN human_review_flag INTEGER DEFAULT 0;")
     except sqlite3.OperationalError:
         pass
     
@@ -161,7 +162,8 @@ def init_db():
             evidence TEXT,
             entities TEXT,
             routing_destination TEXT,
-            lifecycle TEXT
+            lifecycle TEXT,
+            human_review_flag INTEGER DEFAULT 0
         );
     """)
     
@@ -360,8 +362,8 @@ def log_event(event_data: dict):
             INSERT OR REPLACE INTO event_ledger (
                 event_id, created_at, updated_at, status, event_type,
                 opportunity_score, entity_confidence, event_confidence, trade_confidence, financial_quality,
-                confidence_history, trade_graph, evidence, entities, routing_destination, lifecycle
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                confidence_history, hypotheses, validated_trades, evidence, entities, routing_destination, lifecycle, human_review_flag
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             event_data["event_id"],
             event_data["created_at"],
@@ -374,11 +376,13 @@ def log_event(event_data: dict):
             opportunity_score_dict.get("trade_confidence"),
             opportunity_score_dict.get("financial_quality"),
             json.dumps(event_data.get("confidence_history", [])),
-            json.dumps(event_data.get("trade_graph", [])),
+            json.dumps(event_data.get("hypotheses", [])),
+            json.dumps(event_data.get("validated_trades", [])),
             json.dumps(event_data.get("evidence", [])),
             json.dumps(event_data.get("entities", [])),
             event_data.get("routing_destination", "DROPPED"),
-            json.dumps(event_data.get("lifecycle", []))
+            json.dumps(event_data.get("lifecycle", [])),
+            event_data.get("human_review_flag", 0)
         ))
         conn.commit()
     finally:
