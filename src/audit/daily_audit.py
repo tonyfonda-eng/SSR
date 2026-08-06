@@ -384,9 +384,47 @@ def generate_markdown_report(date_str):
     md.append("```")
     md.append("")
     
-    md.append("## 13. Appendix: Raw SQL Dump")
-    md.append("### `workflow_health` (Top 3)")
-    md.append("```json\n" + json.dumps(appendix.get('workflow_health', [])[:3], indent=2) + "\n```")
+    # 14. Transaction Engine V4 Telemetry & Shadow Mode Audit
+    engine_ver = os.environ.get("ENTITY_ENGINE_VERSION", "1")
+    conn = get_db_connection(RESEARCH_DB)
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT decision_json FROM decision_capsule 
+        WHERE date(runtime_timestamp) = ?
+    """, (date_str,))
+    capsule_rows = cursor.fetchall()
+    conn.close()
+
+    shadow_agreements = 0
+    shadow_discrepancies = 0
+    total_nodes_extracted = 0
+    total_edges_extracted = 0
+    
+    for r in capsule_rows:
+        try:
+            cap = json.loads(r['decision_json'])
+            sh = cap.get('shadow_mode_v2', {})
+            if sh:
+                v1_outcome = cap.get('detection_outcome')
+                v2_outcome = "DETECTED" if sh.get('passed') else "DROPPED"
+                if v1_outcome == v2_outcome:
+                    shadow_agreements += 1
+                else:
+                    shadow_discrepancies += 1
+            
+            graph = cap.get('transaction_graph', {})
+            total_nodes_extracted += len(graph.get('nodes', []))
+            total_edges_extracted += len(graph.get('edges', []))
+        except:
+            pass
+
+    md.append("## 14. Transaction Engine V4 Telemetry & Shadow Mode")
+    md.append(f"- **Engine Version**: `{engine_ver}`")
+    md.append(f"- **Transaction Nodes Extracted Today**: {total_nodes_extracted}")
+    md.append(f"- **Transaction Edges Extracted Today**: {total_edges_extracted}")
+    md.append(f"- **Shadow Mode Agreement Count**: {shadow_agreements}")
+    md.append(f"- **Shadow Mode Discrepancies**: {shadow_discrepancies}")
+    md.append("")
 
     return "\n".join(md)
 

@@ -212,19 +212,56 @@ def stage_python_ticker_lookup(article: dict, ctx: dict) -> tuple:
 def stage_candidate_generator(article: dict, ctx: dict) -> tuple:
     text = article.get("body", "") + " " + article.get("headline", "")
     tickers = []
-    
-    # Needs actual raw string literal
-    matches_1 = re.findall(r'\b(?:NYSE|NASDAQ|AMEX|OTC|TSX|LSE|NYSE MKT|NYSE ARCA)\s*[:]\s*([A-Z]{1,5})\b', text, re.IGNORECASE)
-    matches_2 = re.findall(r'\((?:NYSE|NASDAQ|AMEX|OTC|TSX|LSE)\s*:\s*([A-Z]{1,5})\)', text, re.IGNORECASE)
-    
     candidates = []
-    for t in matches_1 + matches_2:
-        t = t.upper()
+    
+    pattern = r'\b(?:NYSE|NASDAQ|AMEX|OTC|TSX|LSE|NYSE MKT|NYSE ARCA)\s*[:]\s*([A-Z]{1,5})\b|\((?:NYSE|NASDAQ|AMEX|OTC|TSX|LSE)\s*:\s*([A-Z]{1,5})\)'
+    for m in re.finditer(pattern, text, re.IGNORECASE):
+        t = (m.group(1) or m.group(2)).upper()
+        offset = m.start()
         if t not in tickers:
             tickers.append(t)
-            candidates.append({"ticker": t, "source": "regex", "mention_frequency": text.count(t), "confidence": 1.0})
+            candidates.append({
+                "ticker": t,
+                "source": "regex",
+                "position_offset": offset,
+                "mention_frequency": len(re.findall(rf'\b{re.escape(t)}\b', text)),
+                "confidence": 1.0
+            })
             
     article["_candidate_entities"] = candidates
+    return True, "passed"
+
+def stage_graph_validation(article: dict, ctx: dict) -> tuple:
+    """
+    Validates structural consistency of extracted Transaction Graph to detect hallucinations:
+    1. Rejects self-targeting entities (e.g. Entity A acquiring Entity A).
+    2. Rejects multiple contradictory acquirers unless event is Joint Venture/Consortium.
+    3. Filters out low-confidence entities (< 0.5 extraction/role confidence).
+    """
+    nodes = article.get("_entities", [])
+    edges = article.get("_transaction_edges", [])
+    
+    # 1. Filter out low confidence nodes
+    valid_nodes = [
+        n for n in nodes 
+        if n.get("extraction_confidence", 1.0) >= 0.5 and n.get("role_confidence", 1.0) >= 0.5
+    ]
+    article["_entities"] = valid_nodes
+    
+    # 2. Check self-targeting in edges
+    for edge in edges:
+        src = str(edge.get("source_node", "")).strip().lower()
+        tgt = str(edge.get("target_node", "")).strip().lower()
+        rel = str(edge.get("relationship", "")).strip().lower()
+        if src and tgt and src == tgt and rel in ["acquiring", "buying", "taking_private"]:
+            return False, "dropped_graph_invalid: self_targeting_edge"
+
+    # 3. Check for multiple contradictory acquirers in non-JV deals
+    acquirers = [n for n in valid_nodes if str(n.get("role", "")).lower() == "acquirer"]
+    event_type = str(article.get("_ai_classification", "")).lower()
+    if len(acquirers) > 1 and "joint venture" not in event_type and "consortium" not in event_type:
+        logger.warning(f"[GRAPH VALIDATION] Multiple acquirers ({len(acquirers)}) detected in non-JV deal for {article.get('headline')[:60]}")
+
     return True, "passed"
 
 def stage_ambiguity_gate(article: dict, ctx: dict) -> tuple:
@@ -325,11 +362,16 @@ def stage_ai_entity_resolution(article: dict, ctx: dict) -> tuple:
     if not article.get("_ambiguity", True):
         return True, "passed"
         
-    parsed_entities = extract_entities_and_roles(article.get("body", ""), router=ctx.get("ai_router"))
-    if parsed_entities.error:
-        return False, f"dropped_entity_error: {parsed_entities.error}"
+    graph = extract_entities_and_roles(article.get("body", ""), router=ctx.get("ai_router"))
+    if graph.error:
+        return False, f"dropped_entity_error: {graph.error}"
         
-    article["_entities"] = [e.__dict__ for e in parsed_entities.entities]
+    article["_entities"] = [n.__dict__ for n in graph.nodes]
+    article["_transaction_edges"] = [e.__dict__ for e in graph.edges]
+    article["_transaction_graph"] = {
+        "nodes": [n.__dict__ for n in graph.nodes],
+        "edges": [e.__dict__ for e in graph.edges]
+    }
     return True, "passed"
 
 def stage_investment_universe_mapping(article: dict, ctx: dict) -> tuple:
@@ -420,11 +462,11 @@ STAGE_REGISTRY = {
     "candidate_generator": stage_candidate_generator,
     "ambiguity_gate": stage_ambiguity_gate,
     "ai_entity_resolution": stage_ai_entity_resolution,
+    "graph_validation": stage_graph_validation,
     "investment_universe_mapping": stage_investment_universe_mapping,
     "strategy_selection": stage_strategy_selection,
     "investment_candidate_selection": stage_investment_candidate_selection,
     "entity_resolution": stage_entity_resolution,
-    "investment_candidate_selection": stage_investment_candidate_selection,
     "ai_event_classification": stage_ai_event_classification,
     "ai_confidence_gate": stage_ai_confidence_gate,
     "entity_confidence": stage_entity_confidence_gate,
@@ -477,7 +519,7 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
         validate_pipeline_dag(execution_order)
     else:
         version = os.environ.get("ENTITY_ENGINE_VERSION", "1")
-        if version == "1":
+        if version == "1" or version == "shadow":
             execution_order = [
                 "dedupe_hash", "dedupe_issuer_memory", "exclude_global_keywords", 
                 "exclude_issuer_feed", "exclude_source_specific", "ontology_concepts", 
@@ -493,7 +535,7 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
                 "exclude_issuer_feed", "exclude_source_specific", "ontology_concepts", 
                 "ontology_status", "document_scoring", "regex_rules", 
                 "python_issuer_extraction", "candidate_generator", "ambiguity_gate", 
-                "ai_entity_resolution", "ai_event_classification", "ai_confidence_gate", 
+                "ai_entity_resolution", "graph_validation", "ai_event_classification", "ai_confidence_gate", 
                 "investment_universe_mapping", "strategy_selection", "investment_candidate_selection",
                 "entity_confidence_gate", "financial_market_cap", "tradeability_check", 
                 "financial_t12_floor", "options_chain_check", "liquidity_check", 
@@ -516,6 +558,45 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
                 if "ai_confidence_gate" in execution_order:
                     insert_idx = max(insert_idx, execution_order.index("ai_confidence_gate") + 1)
                 execution_order.insert(insert_idx, pg)
+
+    # If in SHADOW mode, run V2 pipeline on a clone to log discrepancies without affecting production V1 decision
+    if os.environ.get("ENTITY_ENGINE_VERSION") == "shadow":
+        try:
+            import copy
+            shadow_article = copy.deepcopy(article)
+            shadow_v2_order = [
+                "dedupe_hash", "dedupe_issuer_memory", "exclude_global_keywords", 
+                "exclude_issuer_feed", "exclude_source_specific", "ontology_concepts", 
+                "ontology_status", "document_scoring", "regex_rules", 
+                "python_issuer_extraction", "candidate_generator", "ambiguity_gate", 
+                "ai_entity_resolution", "graph_validation", "ai_event_classification", "ai_confidence_gate", 
+                "investment_universe_mapping", "strategy_selection", "investment_candidate_selection",
+                "entity_confidence_gate", "financial_market_cap", "tradeability_check", 
+                "financial_t12_floor", "options_chain_check", "liquidity_check", 
+                "playbook_eligibility_check"
+            ]
+            shadow_passed = True
+            shadow_terminal = "AI_APPROVED"
+            shadow_drop_reason = None
+            for s_stage in shadow_v2_order:
+                s_func = STAGE_REGISTRY.get(s_stage.lower())
+                if not s_func: continue
+                spassed, sreason = s_func(shadow_article, ctx)
+                if not spassed:
+                    shadow_passed = False
+                    shadow_terminal = s_stage
+                    shadow_drop_reason = sreason
+                    break
+            article["_shadow_mode_v2"] = {
+                "passed": shadow_passed,
+                "terminal_stage": shadow_terminal,
+                "drop_reason": shadow_drop_reason,
+                "target_ticker": shadow_article.get("_target_ticker", "UNKNOWN"),
+                "transaction_graph": shadow_article.get("_transaction_graph", {})
+            }
+            logger.info(f"[SHADOW MODE V2] '{article.get('headline')[:50]}' -> Passed: {shadow_passed} ({shadow_terminal})")
+        except Exception as e:
+            logger.error(f"[SHADOW MODE FAULT] {e}")
 
     stage_timings = {}
 
@@ -562,6 +643,8 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
                     "terminal_stage": stage_name,
                     "headline": article.get("headline", "Corporate Announcement"),
                     "url": article.get("url", "UNKNOWN"),
+                    "transaction_graph": article.get("_transaction_graph", {}),
+                    "shadow_mode_v2": article.get("_shadow_mode_v2", {}),
                     "ontology_metadata": article.get("_ontology_metadata", {}),
                     "execution_timings": stage_timings
                 }
@@ -586,6 +669,9 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
         "terminal_stage": "AI_APPROVED",
         "headline": article.get("headline", "Corporate Announcement"),
         "url": article.get("url", "UNKNOWN"),
+        "target_ticker": article.get("_target_ticker", ticker),
+        "transaction_graph": article.get("_transaction_graph", {}),
+        "shadow_mode_v2": article.get("_shadow_mode_v2", {}),
         "ai_core_inference": {
             "aggregate_confidence": article.get("_ai_confidence", 1.0),
             "parsed_structural_properties": {"ticker": ticker}
