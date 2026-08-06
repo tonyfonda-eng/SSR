@@ -137,6 +137,8 @@ def init_db():
         r_conn.execute("ALTER TABLE event_ledger ADD COLUMN trade_confidence INTEGER;")
         r_conn.execute("ALTER TABLE event_ledger ADD COLUMN financial_quality INTEGER;")
         r_conn.execute("ALTER TABLE event_ledger ADD COLUMN lifecycle TEXT;")
+        r_conn.execute("ALTER TABLE event_ledger ADD COLUMN hypotheses TEXT;")
+        r_conn.execute("ALTER TABLE event_ledger ADD COLUMN validated_trades TEXT;")
     except sqlite3.OperationalError:
         pass
     
@@ -154,7 +156,8 @@ def init_db():
             trade_confidence INTEGER,
             financial_quality INTEGER,
             confidence_history TEXT,
-            trade_graph TEXT,
+            hypotheses TEXT,
+            validated_trades TEXT,
             evidence TEXT,
             entities TEXT,
             routing_destination TEXT,
