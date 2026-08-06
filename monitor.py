@@ -536,8 +536,9 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
                 "ontology_status", "document_scoring", "regex_rules", 
                 "python_issuer_extraction", "python_ticker_lookup", "ai_ticker_resolution",
                 "entity_confidence_gate", "financial_market_cap", "tradeability_check", 
+                "ai_event_classification", "ai_confidence_gate",
                 "financial_t12_floor", "options_chain_check", "liquidity_check", 
-                "ai_event_classification", "ai_confidence_gate", "playbook_eligibility_check"
+                "playbook_eligibility_check"
             ]
         else:
             execution_order = [
