@@ -46,11 +46,16 @@ class BusinessWireScraper(SourceScraper):
         articles = []
         seen_ids = set()
         self.scrape_metadata = {
+            "source": "Business Wire",
+            "mode": "RSS",
+            "checkpoint_found": False,
+            "recovery_attempted": False,
+            "recovery_status": "NOT_REQUIRED",
             "pages_visited": 1,
             "page_limit": 1,
-            "checkpoint_found": False,
             "emergency_stop": False,
-            "reason": ""
+            "reason": "",
+            "checkpoints_to_set": []
         }
 
         for category_name, feed_url in self.RSS_FEEDS:
@@ -63,6 +68,7 @@ class BusinessWireScraper(SourceScraper):
                 feed = feedparser.parse(response.content)
                 new_in_feed = 0
                 first_id = None
+                feed_checkpoint_found = False
                 
                 for entry in feed.entries:
                     article_id = self._extract_article_id(entry.link)
@@ -71,7 +77,7 @@ class BusinessWireScraper(SourceScraper):
                         first_id = article_id
                         
                     if checkpoint and (article_id == checkpoint or entry.link == checkpoint):
-                        self.scrape_metadata["checkpoint_found"] = True
+                        feed_checkpoint_found = True
                         break
 
                     if article_id not in seen_ids:
@@ -91,12 +97,23 @@ class BusinessWireScraper(SourceScraper):
                     print(f"    [BW RSS] {category_name}: {new_in_feed} unique articles")
                     
                 if first_id:
-                    set_checkpoint("Business Wire", f"RSS-{category_name}", first_id)
+                    if not checkpoint or feed_checkpoint_found:
+                        self.scrape_metadata["checkpoints_to_set"].append(("Business Wire", f"RSS-{category_name}", first_id))
+                    else:
+                        print(f"    [BW RSS] {category_name}: CHECKPOINT_NOT_REACHED — BACKFILL REQUIRED (Blocked by 403)")
+                        self.scrape_metadata["checkpoint_found"] = False
+                        self.scrape_metadata["recovery_status"] = "BLOCKED"
+                        self.scrape_metadata["reason"] += f"[{category_name} gap] "
+                        
             except Exception as e:
                 self.scrape_metadata["reason"] += f"[{category_name} failed] "
+                self.scrape_metadata["recovery_status"] = "FAILED"
                 print(f"[WARNING] BusinessWire RSS feed '{category_name}' failed: {e}")
 
             time.sleep(0.5)  # Be polite between feed requests
+
+        if "gap" not in self.scrape_metadata["reason"] and "failed" not in self.scrape_metadata["reason"]:
+            self.scrape_metadata["checkpoint_found"] = True
 
         print(f"    [BW RSS] Total unique articles: {len(articles)}")
         return articles

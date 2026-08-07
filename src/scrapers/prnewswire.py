@@ -16,22 +16,69 @@ class PRNewsWireScraper(SourceScraper):
     def get_latest_articles(self, **kwargs):
         import time
         from bs4 import BeautifulSoup
+        import feedparser
         
         base_url = "https://www.prnewswire.com/news-releases/news-releases-list/"
-        articles = []
         checkpoint = kwargs.get("checkpoint")
+        max_pages = kwargs.get("max_pages", 20)
         
         self.scrape_metadata = {
-            "pages_visited": 0,
-            "page_limit": 20,
+            "source": "PR Newswire",
+            "mode": "RSS",
             "checkpoint_found": False,
+            "recovery_attempted": False,
+            "recovery_status": "NOT_REQUIRED",
+            "pages_scanned": 0,
+            "articles_recovered": 0,
+            "pages_visited": 0,
+            "page_limit": max_pages,
+            "articles_scanned": 0,
+            "oldest_article_seen": None,
             "emergency_stop": False,
             "reason": "",
             "last_checkpoint_url": checkpoint
         }
         
+        # --- RSS FAST PATH ---
+        try:
+            feed = feedparser.parse(self.RSS_URL)
+            if feed.entries:
+                rss_articles = []
+                for entry in feed.entries:
+                    link = entry.get("link", "")
+                    if checkpoint and (link == checkpoint or link.split("?")[0] == checkpoint.split("?")[0]):
+                        self.scrape_metadata["checkpoint_found"] = True
+                        print(f"    [PR Newswire] Fast Path: Checkpoint reached via RSS.")
+                        return rss_articles
+                    
+                    title = entry.get("title", "No title")
+                    rss_articles.append({
+                        "id": link,
+                        "title": title,
+                        "url": link,
+                        "published": entry.get("published", "")
+                    })
+                
+                if not checkpoint:
+                    self.scrape_metadata["checkpoint_found"] = True
+                    print(f"    [PR Newswire] Fast Path: No checkpoint provided, returning {len(rss_articles)} RSS articles.")
+                    return rss_articles
+                else:
+                    self.scrape_metadata["recovery_attempted"] = True
+                    self.scrape_metadata["recovery_status"] = "BACKFILL_REQUIRED"
+                    self.scrape_metadata["mode"] = "HTML"
+                    print(f"    [PR Newswire] Recovery Path: Checkpoint not in RSS, falling back to HTML backfill.")
+        except Exception as e:
+            self.scrape_metadata["recovery_attempted"] = True
+            self.scrape_metadata["recovery_status"] = "BACKFILL_REQUIRED"
+            self.scrape_metadata["mode"] = "HTML"
+            print(f"    [PR Newswire] RSS Fast Path failed: {e}. Falling back to HTML.")
+
+        # --- HTML RECOVERY PATH (BACKFILL) ---
+        articles = []
         for page in range(1, self.scrape_metadata["page_limit"] + 1):
             self.scrape_metadata["pages_visited"] = page
+            self.scrape_metadata["pages_scanned"] = page
             url = f"{base_url}?page={page}&pagesize=100"
             headers = {"User-Agent": USER_AGENT}
             
@@ -55,10 +102,16 @@ class PRNewsWireScraper(SourceScraper):
                     
                     if checkpoint and (full_url == checkpoint or href == checkpoint):
                         self.scrape_metadata["checkpoint_found"] = True
+                        self.scrape_metadata["recovery_status"] = "RECOVERED"
+                        self.scrape_metadata["articles_recovered"] = len(articles)
+                        self.scrape_metadata["articles_scanned"] = len(articles)
+                        self.scrape_metadata["oldest_article_seen"] = full_url
                         return articles
                         
                     title_elem = item.select_one("h3")
                     title = title_elem.text.split("ET", 1)[-1].strip() if title_elem else "No title"
+                    
+                    self.scrape_metadata["oldest_article_seen"] = full_url
                     
                     articles.append({
                         "id": full_url,
@@ -72,11 +125,15 @@ class PRNewsWireScraper(SourceScraper):
             except Exception as e:
                 print(f"[ERROR] PR Newswire Scraper failed on page {page}: {e}")
                 self.scrape_metadata["reason"] = str(e)
+                self.scrape_metadata["recovery_status"] = "FAILED"
                 break
                 
         if self.scrape_metadata["pages_visited"] == self.scrape_metadata["page_limit"] and not self.scrape_metadata.get("checkpoint_found") and checkpoint:
             self.scrape_metadata["emergency_stop"] = True
+            self.scrape_metadata["recovery_status"] = "GAP_DETECTED"
             
+        self.scrape_metadata["articles_recovered"] = len(articles)
+        self.scrape_metadata["articles_scanned"] = len(articles)
         print(f"    [PR Newswire] Total unique articles fetched: {len(articles)}")
         return articles
 
