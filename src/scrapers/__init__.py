@@ -9,7 +9,7 @@ from .nasdaq import NasdaqScraper
 from .lse import LSEScraper
 from .europe import (
     EQSScraper, BorsaItalianaScraper, AMFScraper, CNMVScraper, 
-    FIScraper, NewsWebScraper, AFMScraper, SIXScraper
+    FinansinspektionenScraper, NewsWebScraper, AFMScraper, SIXScraper
 )
 from .tsx import TSXScraper
 from .asx import ASXScraper
@@ -44,7 +44,7 @@ SCRAPER_REGISTRY = {
     "eMarket SDIR (Italy)": BorsaItalianaScraper,
     "AMF (France)": AMFScraper,
     "CNMV (Spain)": CNMVScraper,
-    "Finansinspektionen (Sweden)": FIScraper,
+    "Finansinspektionen (Sweden)": FinansinspektionenScraper,
     "NewsWeb (Norway)": NewsWebScraper,
     "AFM (Netherlands)": AFMScraper,
     "SIX Exchange (Switzerland)": SIXScraper,
