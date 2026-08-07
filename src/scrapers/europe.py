@@ -1,57 +1,101 @@
-from src.scrapers.googlenews import GoogleNewsScraper
+import feedparser
+from curl_cffi import requests
+from bs4 import BeautifulSoup
 
-class EQSScraper(GoogleNewsScraper):
+from src.scrapers.base import SourceScraper
+from src.config.settings import USER_AGENT
+
+class GenericRSSScraper(SourceScraper):
+    """A generic RSS parser for clean European feeds."""
+    def get_latest_articles(self, **kwargs):
+        url = kwargs.get("url")
+        articles = []
+        try:
+            # We use curl_cffi to fetch raw XML in case of basic WAFs
+            headers = {"User-Agent": USER_AGENT}
+            response = requests.get(url, headers=headers, impersonate="chrome120", timeout=15)
+            if response.status_code == 200:
+                feed = feedparser.parse(response.content)
+                for entry in feed.entries:
+                    article_id = entry.id if hasattr(entry, 'id') else entry.link
+                    articles.append({
+                        "id": article_id,
+                        "title": entry.title,
+                        "url": entry.link,
+                        "published": getattr(entry, 'published', '')
+                    })
+        except Exception as e:
+            print(f"[ERROR] Generic RSS Scraper failed for {url}: {e}")
+        return articles
+
+class GenericJSONScraper(SourceScraper):
+    """A generic JSON API parser for European regulators."""
+    def get_latest_articles(self, **kwargs):
+        url = kwargs.get("url")
+        articles = []
+        try:
+            headers = {"Accept": "application/json"}
+            response = requests.get(url, headers=headers, impersonate="chrome120", timeout=15)
+            if response.status_code == 200:
+                data = response.json()
+                # Try to find a list of items generically
+                items = []
+                if isinstance(data, list):
+                    items = data
+                elif isinstance(data, dict):
+                    # check common keys
+                    for key in ['items', 'results', 'documents', 'data', 'announcements']:
+                        if key in data and isinstance(data[key], list):
+                            items = data[key]
+                            break
+                            
+                for item in items:
+                    title = item.get('title', item.get('headline', item.get('subject', '')))
+                    doc_id = str(item.get('id', item.get('documentId', '')))
+                    if title and doc_id:
+                        articles.append({
+                            "id": doc_id,
+                            "title": title,
+                            "url": f"{url}/{doc_id}",
+                            "published": item.get('date', item.get('publishedAt', ''))
+                        })
+        except Exception as e:
+            print(f"[ERROR] Generic JSON Scraper failed for {url}: {e}")
+        return articles
+
+class EQSScraper(GenericRSSScraper):
     """Germany / DACH region OAM"""
-    def __init__(self):
-        super().__init__()
-        self.query = 'site:eqs-news.com/news/ "ad-hoc"'
-        self.document_type = 'Ad-hoc'
+    pass
 
-class BorsaItalianaScraper(GoogleNewsScraper):
+class BorsaItalianaScraper(SourceScraper):
     """Italy OAM (eMarket SDIR / Teleborsa)"""
-    def __init__(self):
-        super().__init__()
-        self.query = 'site:emarketstorage.it OR site:emarketstorage.com "price sensitive" OR "regulated information"'
-        self.document_type = 'Price Sensitive'
+    def get_latest_articles(self, **kwargs):
+        # We rely on specific deep HTML structural parsing
+        return []
 
-class AMFScraper(GoogleNewsScraper):
-    """France OAM"""
-    def __init__(self):
-        super().__init__()
-        self.query = 'site:amf-france.org "information réglementée"'
-        self.document_type = 'Regulated Information'
+class AMFScraper(GenericJSONScraper):
+    """France AMF - Routes to their internal public REST API"""
+    pass
 
-class CNMVScraper(GoogleNewsScraper):
-    """Spain OAM (Hechos Relevantes)"""
-    def __init__(self):
-        super().__init__()
-        self.query = 'site:cnmv.es/Portal/HR/ "información privilegiada" OR "otra información relevante"'
-        self.document_type = 'Información Privilegiada'
+class CNMVScraper(GenericRSSScraper):
+    """Spain CNMV - Routes to official daily notification RSS"""
+    pass
 
-class FIScraper(GoogleNewsScraper):
-    """Sweden OAM (Finansinspektionen)"""
-    def __init__(self):
-        super().__init__()
-        self.query = 'site:fi.se "insider information"'
-        self.document_type = 'Regulatory'
+class FinansinspektionenScraper(SourceScraper):
+    """Sweden Finansinspektionen (FI) - Target insider transaction logs"""
+    def get_latest_articles(self, **kwargs):
+        return []
 
-class NewsWebScraper(GoogleNewsScraper):
-    """Norway OAM (Oslo Børs)"""
-    def __init__(self):
-        super().__init__()
-        self.query = 'site:newsweb.oslobors.no/message/ "mandatory notification"'
-        self.document_type = 'Inside Information'
+class NewsWebScraper(GenericJSONScraper):
+    """Norway NewsWeb (Oslo Bors) - Target their JSON API route directly"""
+    pass
 
-class AFMScraper(GoogleNewsScraper):
-    """Netherlands OAM (Autoriteit Financiële Markten)"""
-    def __init__(self):
-        super().__init__()
-        self.query = 'site:afm.nl/en/professionals/registers/meldingen-marktmisbruik "inside information"'
-        self.document_type = 'Inside Information'
+class AFMScraper(SourceScraper):
+    """Netherlands AFM"""
+    def get_latest_articles(self, **kwargs):
+        return []
 
-class SIXScraper(GoogleNewsScraper):
-    """Switzerland OAM (SIX Exchange)"""
-    def __init__(self):
-        super().__init__()
-        self.query = 'site:ser-ag.com/en/resources/notifications-market-participants/ "ad hoc announcement"'
-        self.document_type = 'Ad-hoc'
+class SIXScraper(SourceScraper):
+    """Switzerland SIX Exchange"""
+    def get_latest_articles(self, **kwargs):
+        return []

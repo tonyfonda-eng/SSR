@@ -1,39 +1,61 @@
+from curl_cffi import requests
+from src.scrapers.base import SourceScraper
 
-def _safe_json(resp):
-    try: return resp.json()
-    except Exception:
-        print("    [ASX WAF] HTML Challenge Blocked JSON payload. Skipping.")
-        return {}
-import requests
-from src.scrapers.client import get_session
-
-
-class ASXScraper:
-    """Dedicated scraper for ASX corporate announcements."""
+class ASXScraper(SourceScraper):
+    """
+    Dedicated scraper for ASX corporate announcements.
+    Uses curl_cffi to bypass the aggressive HTML Challenge WAF.
+    """
     
-    @staticmethod
-    def get_latest_articles(**kwargs):
-        print("[ASX SCRAPER] Polling Australian Stock Exchange announcements...")
-        url = kwargs.get('url') or kwargs.get('rss_url') or "https://www.asx.com.au/asx/v2/statistics/announcements.do?by=latest&timeframe=d&fmt=json"
+    # Modern dynamic JSON API endpoint
+    API_URL = "https://asx.api.markitdigital.com/asx-research/v1/companies/announcements"
+    
+    def get_latest_articles(self, **kwargs):
+        url = kwargs.get("url") or self.API_URL
         articles = []
+        
+        headers = {
+            "Accept": "application/json, text/plain, */*",
+            "Origin": "https://www2.asx.com.au",
+            "Referer": "https://www2.asx.com.au/"
+        }
+        
         try:
-            headers = {"User-Agent": "Mozilla/5.0"}
-            resp = get_session().get(url, headers=headers, timeout=15)
-            if resp.status_code == 200:
-                data = _safe_json(resp)
-                for item in data.get("data", []):
-                    title = item.get("documentHeadline", "ASX Announcement")
-                    ann_id = str(item.get("announcementId", ""))
-                    doc_num = item.get("documentKey", "")
-                    doc_url = f"https://www.asx.com.au/asxpdf/{doc_num}.pdf"
+            # impersonate chrome120 to pass the WAF
+            response = requests.get(url, headers=headers, impersonate="chrome120", timeout=15)
+            
+            if response.status_code == 200:
+                data = response.json()
+                
+                # The announcements are usually embedded in a 'data' array
+                items = data.get("data", {}).get("items", []) if isinstance(data, dict) and "data" in data else []
+                if not items and isinstance(data, list):
+                    items = data
+                    
+                for item in items:
+                    headline = item.get("headline", "")
+                    doc_id = item.get("id", "")
+                    symbol = item.get("symbol", "ASX")
+                    
+                    if not doc_id:
+                        continue
+                        
+                    full_url = f"https://cdn-api.markitdigital.com/apiman-gateway/ASX/asx-research/1.0/file/{doc_id}"
+                    
                     articles.append({
-                        "id": ann_id,
-                        "title": title,
-                        "url": doc_url,
-                        "published": item.get("date", ""),
-                        "body": f"ASX Corporate Announcement for {item.get('issuerCode', 'ASX')}: {title}",
-                        "document_type": "ASX Announcement"
+                        "id": doc_id,
+                        "title": f"[{symbol}] {headline}",
+                        "url": full_url,
+                        "published": item.get("date", "")
                     })
+            else:
+                print(f"[WARNING] ASX Scraper returned HTTP {response.status_code}")
+                
         except Exception as e:
-            print(f"[ERROR] ASX scraper failed: {e}")
+            print(f"[ERROR] ASX Scraper failed: {e}")
+            
+        print(f"    [ASX] Total unique articles fetched: {len(articles)}")
         return articles
+
+    def get_article_body(self, url):
+        return "[ASX PDF] Classify event based on Title."
