@@ -56,9 +56,50 @@ class EdgarScraper(SourceScraper):
 
     def get_article_body(self, url):
         headers = {"User-Agent": self.USER_AGENT}
-        response = get_session().get(url, headers=headers, timeout=30)
-        if response.status_code != 200:
-            return None
+        try:
+            response = get_session().get(url, headers=headers, timeout=30)
+            if response.status_code != 200:
+                return None
+            
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(response.text, "html.parser")
+            
+            # If we landed on an index page, fetch the actual document
+            if "index.htm" in url:
+                table = soup.find("table", class_="tableFile", summary="Document Format Files")
+                if table:
+                    rows = table.find_all("tr")
+                    for row in rows[1:]:
+                        cols = row.find_all("td")
+                        if len(cols) >= 3:
+                            doc_link = cols[2].find("a")
+                            if doc_link:
+                                href = doc_link.get("href")
+                                # Ignore iXBRL viewer wrapper and get raw file
+                                if href.startswith("/ix?doc="):
+                                    href = href.replace("/ix?doc=", "")
+                                    
+                                if href.lower().endswith(".htm") or href.lower().endswith(".txt"):
+                                    real_url = f"https://www.sec.gov{href}" if href.startswith("/") else href
+                                    # Fetch the real document
+                                    doc_resp = get_session().get(real_url, headers=headers, timeout=30)
+                                    if doc_resp.status_code == 200:
+                                        doc_soup = BeautifulSoup(doc_resp.text, "html.parser")
+                                        text = doc_soup.get_text("
+", strip=True)
+                                        if len(text) > 500:
+                                            return text
+                                    break # If we failed to get the primary doc, don't fallback to index text
+            
+            # Fallback if not an index page or extraction failed
+            text = soup.get_text("
+", strip=True)
+            if len(text) > 500:
+                return text
+        except Exception as e:
+            print(f"[ERROR] Failed to fetch EDGAR filing body: {e}")
+            
+        return None
 
         soup = BeautifulSoup(response.text, "html.parser")
         
