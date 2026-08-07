@@ -20,7 +20,7 @@ def _fetch_rss_channel(source: dict) -> tuple:
     start_time = time.time()
     articles = []
     source_name = source.get("Source Name", source.get("Source", "Unknown"))
-    url = source.get("RSS URL", source.get("URL", ""))
+    url = source.get("Target URL", source.get("URL", ""))
     
     ledger = {
         "source": source_name,
@@ -83,7 +83,7 @@ def _fetch_html_channel(source: dict) -> tuple:
     start_time = time.time()
     articles = []
     source_name = source.get("Source Name", source.get("Source", "Unknown"))
-    url = source.get("HTML URL", "")
+    url = source.get("Target URL", source.get("URL", ""))
     
     ledger = {
         "source": source_name,
@@ -203,13 +203,18 @@ def fetch_all_feeds(active_sources: list = None) -> tuple:
     with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
         futures = []
         for source in active_targets:
-            # RSS collector
-            if source.get("RSS URL") or source.get("URL"):
-                futures.append(executor.submit(_fetch_rss_channel, source))
-            
-            # HTML collector
-            if source.get("HTML URL"):
+            url = source.get("Target URL", source.get("URL", ""))
+            if not url:
+                continue
+                
+            # Check if there's a dedicated scraper in the registry
+            from src.scrapers import get_scraper_for_source
+            if get_scraper_for_source(source.get("Source")):
+                # Route through HTML channel which inherently delegates to the dedicated scraper
                 futures.append(executor.submit(_fetch_html_channel, source))
+            else:
+                # Default fallback for generic RSS parsing
+                futures.append(executor.submit(_fetch_rss_channel, source))
                 
         for future in concurrent.futures.as_completed(futures):
             try:
