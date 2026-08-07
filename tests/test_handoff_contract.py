@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 
 import monitor
 import hashlib
-from src.telemetry.telemetry_manager import PipelineTelemetry
+from monitor import PipelineTelemetry
 
 class TestHandoffContract(unittest.TestCase):
     
