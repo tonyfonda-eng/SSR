@@ -20,7 +20,10 @@ from .reuters import ReutersScraper
 
 from .lse_couk import LSECoukScraper
 
+from .otc import OTCScraper
+
 SCRAPER_REGISTRY = {
+    "OTC Markets": OTCScraper,
     "LSE.co.uk": LSECoukScraper,
     "Reuters": ReutersScraper,
     "Business Wire": BusinessWireScraper,
