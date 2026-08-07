@@ -223,7 +223,7 @@ def fetch_all_feeds(active_sources: list = None) -> tuple:
                     articles.extend(arts)
                 if ledger:
                     ingestion_ledger.append(ledger)
-                if source_name and ledger and ledger.get("status") == "OK":
+                if source_name and ledger and ledger.get("status") in ["OK", "EMPTY"]:
                     successful_sources.add(source_name)
             except Exception as e:
                 logger.error(f"[INGESTION] Thread fetch failed: {e}")
