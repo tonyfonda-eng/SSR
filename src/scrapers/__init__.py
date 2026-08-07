@@ -16,7 +16,10 @@ from .asx import ASXScraper
 from .sedar import SedarScraper
 from .hkex import HKEXScraper
 
+from .reuters import ReutersScraper
+
 SCRAPER_REGISTRY = {
+    "Reuters": ReutersScraper,
     "Business Wire": BusinessWireScraper,
     "GlobeNewswire": GlobeNewswireScraper,
     "SEC Edgar": EdgarScraper,
