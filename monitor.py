@@ -1000,44 +1000,62 @@ def main():
     try:
         raw_articles, ingestion_ledger = fetch_all_feeds(config_manifest.get("sources", [])) 
         telemetry.metrics["downloaded"] = len(raw_articles)
-        telemetry.metrics["RSS_downloaded"] = sum(1 for a in raw_articles if a.get("_ingestion_mode") == "RSS")
-        telemetry.metrics["HTML_downloaded"] = sum(1 for a in raw_articles if a.get("_ingestion_mode") == "HTML")
+        telemetry.metrics["RSS_downloaded"] = sum(1 for a in raw_articles if a.get("channel") == "RSS")
+        telemetry.metrics["HTML_downloaded"] = sum(1 for a in raw_articles if a.get("channel") == "HTML")
         
         # Immediate Global Deduplication
         unique_articles = []
         seen_hashes = set()
         
-        ledger_unique = {f"{entry['source']}::{entry['channel']}": 0 for entry in ingestion_ledger}
+        ledger_unique = {f"{entry['source']}::{entry['actual_mode']}": 0 for entry in ingestion_ledger}
+        quarantined = 0
+        
+        def validate_article_contract(art):
+            required = ["source", "channel", "title", "url", "published", "body", "article_hash"]
+            for req in required:
+                if req not in art:
+                    raise KeyError(f"Missing mandatory field: {req}")
+            
+            title_text = art.get("title", "").strip().lower()
+            source_text = art.get("source", "").strip().lower()
+            if not title_text or title_text == "no title" or title_text == "html document":
+                title_text = art.get("body", "")[:200].strip().lower()
+                
+            art["article_hash"] = hashlib.md5(f"{source_text}::{title_text}".encode('utf-8')).hexdigest()
+            return art
         
         for article in raw_articles:
-            title = article.get("headline", "").strip().lower()
-            source = article.get("source", "").strip().lower()
-            if not title or title == "no title" or title == "html document":
-                title = article.get("body", "")[:200].strip().lower()
+            try:
+                validated_article = validate_article_contract(article)
+                dup_hash = validated_article["article_hash"]
                 
-            dup_hash = hashlib.md5(f"{source}::{title}".encode('utf-8')).hexdigest()
-            
-            if dup_hash not in seen_hashes:
-                seen_hashes.add(dup_hash)
-                unique_articles.append(article)
-                
-                k = f"{article.get('source')}::{article.get('_ingestion_mode')}"
-                if k in ledger_unique:
-                    ledger_unique[k] += 1
-            else:
-                logger.debug(f"[DEDUPE] Dropped overlapping article: {article.get('headline')} from {article.get('source')} ({article.get('_ingestion_mode')})")
+                if dup_hash not in seen_hashes:
+                    seen_hashes.add(dup_hash)
+                    unique_articles.append(validated_article)
+                    
+                    k = f"{validated_article['source']}::{validated_article['channel']}"
+                    if k in ledger_unique:
+                        ledger_unique[k] += 1
+                else:
+                    logger.debug(f"[DEDUPE] Dropped overlapping article: {validated_article['title']} from {validated_article['source']} ({validated_article['channel']})")
+            except Exception as handoff_err:
+                quarantined += 1
+                logger.warning(f"[HANDOFF] Quarantined malformed article from {article.get('source', 'Unknown')}. Reason: {handoff_err}")
                 
         for entry in ingestion_ledger:
-            k = f"{entry['source']}::{entry['channel']}"
+            k = f"{entry['source']}::{entry['actual_mode']}"
             entry["unique_found"] = ledger_unique.get(k, 0)
             
         telemetry.ingestion_ledger = ingestion_ledger
         
-        telemetry.metrics["RSS_unique"] = sum(1 for a in unique_articles if a.get("_ingestion_mode") == "RSS")
-        telemetry.metrics["HTML_unique"] = sum(1 for a in unique_articles if a.get("_ingestion_mode") == "HTML")
+        telemetry.metrics["RSS_unique"] = sum(1 for a in unique_articles if a.get("channel") == "RSS")
+        telemetry.metrics["HTML_unique"] = sum(1 for a in unique_articles if a.get("channel") == "HTML")
         telemetry.metrics["unique_articles"] = len(unique_articles)
         
-        logger.info(f"Global deduplication complete: {len(raw_articles)} raw -> {len(unique_articles)} unique.")
+        logger.info(f"INGESTION COMPLETE: {len(raw_articles)}")
+        logger.info(f"HANDOFF ACCEPTED: {len(raw_articles) - quarantined}")
+        logger.info(f"HANDOFF QUARANTINED: {quarantined}")
+        logger.info(f"PIPELINE PROCESSED: {len(unique_articles)}")
 
         for article in unique_articles:
             try:

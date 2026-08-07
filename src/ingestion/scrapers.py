@@ -24,6 +24,7 @@ def _fetch_rss_channel(source: dict) -> tuple:
     url = source.get("Target URL", source.get("URL", ""))
     
     configured_mode = source.get("Type", "Unknown")
+    # For generic RSS, mode is RSS
     config_drift = configured_mode.upper() not in ("RSS", "RSS PARSING")
     
     ledger = {
@@ -48,8 +49,8 @@ def _fetch_rss_channel(source: dict) -> tuple:
         "reason": "",
         "potential_recall_loss": False,
         "checkpoint_frozen": False,
-        "status": "OK", # Internal
-        "duration_sec": 0.0 # Internal
+        "status": "OK", 
+        "duration_sec": 0.0
     }
     
     if config_drift:
@@ -85,11 +86,13 @@ def _fetch_rss_channel(source: dict) -> tuple:
                     
                 articles.append({
                     "source": source_name,
+                    "channel": "RSS",
+                    "title": entry.get("title", "No Title"),
                     "url": link,
-                    "headline": entry.get("title", "No Title"),
+                    "published": getattr(entry, "published", ""),
                     "body": body_text,
-                    "document_type": source.get("Type", "Press Release"),
-                    "_ingestion_mode": "RSS"
+                    "article_hash": "",
+                    "document_type": source.get("Type", "Press Release")
                 })
                 
             ledger["articles_emitted"] = len(articles)
@@ -123,110 +126,6 @@ def _fetch_rss_channel(source: dict) -> tuple:
         ledger["checkpoint_after"] = articles[0]["url"]
     else:
         ledger["checkpoint_after"] = ledger["checkpoint_before"]
-        
-    ledger["duration_sec"] = round(time.time() - start_time, 2)
-    return articles, ledger, source_name
-        
-    try:
-        feed = feedparser.parse(url)
-        checkpoint = get_checkpoint(source_name, "RSS")
-        ledger["checkpoint_before"] = checkpoint
-        checkpoint_found = False
-        
-        if feed.entries:
-            ledger["raw_found"] = len(feed.entries)
-            for entry in feed.entries:
-                link = entry.get("link", url)
-                if checkpoint and link == checkpoint:
-                    checkpoint_found = True
-                    break
-                    
-                body_text = entry.get("summary", entry.get("description", ""))
-                
-                # Clean HTML tags out of RSS summaries if they exist
-                if "<" in body_text and ">" in body_text:
-                    body_text = BeautifulSoup(body_text, "html.parser").get_text(separator=" ")
-                    
-                articles.append({
-                    "source": source_name,
-                    "url": link,
-                    "headline": entry.get("title", "No Title"),
-                    "body": body_text,
-                    "document_type": source.get("Type", "Press Release"),
-                    "_ingestion_mode": "RSS"
-                })
-            ledger["parsed_found"] = len(articles)
-            ledger["checkpoint_found"] = checkpoint_found
-            
-            if articles:
-                if not checkpoint or checkpoint_found:
-                    ledger["recovery_status"] = "NOT_REQUIRED"
-                else:
-                    ledger["status"] = "GAP_DETECTED"
-                    ledger["gap_detected"] = True
-                    ledger["error_message"] = "CHECKPOINT_NOT_REACHED — BACKFILL REQUIRED"
-                    ledger["recovery_status"] = "GAP_DETECTED"
-                    logger.warning(f"[INGESTION] {source_name} (RSS) hit feed limit without finding checkpoint. Backfill required.")
-        
-        if len(articles) == 0:
-            ledger["status"] = "EMPTY"
-            
-    except Exception as e:
-        logger.error(f"[INGESTION] RSS fetch failed for {source_name}: {e}")
-        ledger["status"] = "ERROR"
-        ledger["error_message"] = str(e)
-        ledger["recovery_status"] = "FAILED"
-        
-    # Transactional checkpoint logic
-    if ledger["status"] in ("OK", "EMPTY") and articles and ledger["recovery_status"] in ("NOT_REQUIRED", "RECOVERED"):
-        set_checkpoint(source_name, "RSS", articles[0]["url"])
-        ledger["checkpoint_after"] = articles[0]["url"]
-        
-    ledger["duration_sec"] = round(time.time() - start_time, 2)
-    return articles, ledger, source_name
-        
-    try:
-        feed = feedparser.parse(url)
-        checkpoint = get_checkpoint(source_name, "RSS")
-        checkpoint_found = False
-        if feed.entries:
-            ledger["raw_found"] = len(feed.entries)
-            for entry in feed.entries:
-                link = entry.get("link", url)
-                if checkpoint and link == checkpoint:
-                    checkpoint_found = True
-                    break
-                    
-                body_text = entry.get("summary", entry.get("description", ""))
-                
-                # Clean HTML tags out of RSS summaries if they exist
-                if "<" in body_text and ">" in body_text:
-                    body_text = BeautifulSoup(body_text, "html.parser").get_text(separator=" ")
-                    
-                articles.append({
-                    "source": source_name,
-                    "url": link,
-                    "headline": entry.get("title", "No Title"),
-                    "body": body_text,
-                    "document_type": source.get("Type", "Press Release"),
-                    "_ingestion_mode": "RSS"
-                })
-            ledger["parsed_found"] = len(articles)
-            if articles:
-                if not checkpoint or checkpoint_found:
-                    set_checkpoint(source_name, "RSS", articles[0]["url"])
-                else:
-                    ledger["status"] = "GAP_DETECTED"
-                    ledger["error_message"] = "CHECKPOINT_NOT_REACHED — BACKFILL REQUIRED"
-                    logger.warning(f"[INGESTION] {source_name} (RSS) hit feed limit without finding checkpoint. Backfill required.")
-        
-        if len(articles) == 0:
-            ledger["status"] = "EMPTY"
-            
-    except Exception as e:
-        logger.error(f"[INGESTION] RSS fetch failed for {source_name}: {e}")
-        ledger["status"] = "ERROR"
-        ledger["error_message"] = str(e)
         
     ledger["duration_sec"] = round(time.time() - start_time, 2)
     return articles, ledger, source_name
@@ -264,9 +163,9 @@ def _fetch_html_channel(source: dict) -> tuple:
         "reason": "",
         "potential_recall_loss": False,
         "checkpoint_frozen": False,
-        "status": "OK", # Internal
-        "duration_sec": 0.0, # Internal
-        "metadata": {} # Internal
+        "status": "OK", 
+        "duration_sec": 0.0,
+        "metadata": {} 
     }
     
     if not url:
@@ -302,15 +201,12 @@ def _fetch_html_channel(source: dict) -> tuple:
                 ledger["newest_article_seen"] = raw_articles[0].get("url") or raw_articles[0].get("id")
                 if not ledger["oldest_article_seen"]:
                     ledger["oldest_article_seen"] = raw_articles[-1].get("url") or raw_articles[-1].get("id")
-                    
-            if configured_mode.upper() != ledger["actual_mode"].upper() and configured_mode.upper() not in ("RSS PARSING", "HTML PARSING"):
-                ledger["config_drift"] = True
-                
+            
+            # Drift semantics fix: if a dedicated adapter is used, we trust its mode shifts (like PRN backfill).
+            # We only flag URL drift for dedicated adapters.
             if ledger["actual_url"] != ledger["configured_url"] and not ledger["actual_url"].startswith(ledger["configured_url"]):
                 ledger["config_drift"] = True
-                
-            if ledger["config_drift"]:
-                logger.warning(f"[INGESTION] SOURCE_CONFIG_DRIFT: {source_name} configured mode/url doesn't match actual.")
+                logger.warning(f"[INGESTION] SOURCE_CONFIG_DRIFT: {source_name} requested {ledger['configured_url']} but fetched {ledger['actual_url']}")
             
             if raw_articles:
                 if ledger["recovery_status"] == "GAP_DETECTED":
@@ -345,11 +241,13 @@ def _fetch_html_channel(source: dict) -> tuple:
                         
                 articles.append({
                     "source": source_name,
+                    "channel": ledger["actual_mode"],
+                    "title": ra.get("title", "No Title"),
                     "url": ra.get("url", url),
-                    "headline": ra.get("title", "No Title"),
+                    "published": ra.get("published", ""),
                     "body": body_text,
-                    "document_type": source.get("Type", "Press Release"),
-                    "_ingestion_mode": ledger["actual_mode"]
+                    "article_hash": "",
+                    "document_type": source.get("Type", "Press Release")
                 })
             
             ledger["articles_emitted"] = len(articles)
@@ -382,6 +280,11 @@ def _fetch_html_channel(source: dict) -> tuple:
             
     # Generic HTML Fallback
     try:
+        # Drift detector for generic
+        if configured_mode.upper() != ledger["actual_mode"].upper() and configured_mode.upper() not in ("RSS PARSING", "HTML PARSING"):
+            ledger["config_drift"] = True
+            logger.warning(f"[INGESTION] SOURCE_CONFIG_DRIFT: {source_name} configured {configured_mode} but fell back to HTML.")
+            
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
         resp = requests.get(url, headers=headers, timeout=10)
         ledger["articles_scanned"] = 1 if resp.status_code == 200 else 0
@@ -389,11 +292,13 @@ def _fetch_html_channel(source: dict) -> tuple:
             soup = BeautifulSoup(resp.text, "html.parser")
             articles.append({
                 "source": source_name,
+                "channel": "HTML",
+                "title": soup.title.string if soup.title else "HTML Document",
                 "url": url,
-                "headline": soup.title.string if soup.title else "HTML Document",
+                "published": "",
                 "body": soup.get_text(separator=" ", strip=True)[:8000],
-                "document_type": source.get("Type", "HTML"),
-                "_ingestion_mode": "HTML"
+                "article_hash": "",
+                "document_type": source.get("Type", "HTML")
             })
             ledger["articles_emitted"] = 1
             ledger["newest_article_seen"] = url
@@ -415,211 +320,8 @@ def _fetch_html_channel(source: dict) -> tuple:
     ledger["checkpoint_after"] = ledger["checkpoint_before"]
     ledger["duration_sec"] = round(time.time() - start_time, 2)
     return articles, ledger, source_name
-        
-    if scraper:
-        try:
-            logger.info(f"[INGESTION] Using dedicated scraper for '{source_name}'")
-            checkpoint = get_checkpoint(source_name, "HTML")
-            ledger["checkpoint_before"] = checkpoint
-            
-            # Allow configurable backfill limits
-            max_pages = source.get("max_backfill_pages", 20)
-            raw_articles = scraper.get_latest_articles(url=url, checkpoint=checkpoint, max_pages=max_pages)
-            ledger["raw_found"] = len(raw_articles)
-            
-            if hasattr(scraper, "scrape_metadata"):
-                meta = scraper.scrape_metadata
-                ledger["metadata"] = meta
-                ledger["actual_mode"] = meta.get("mode", "HTML")
-                ledger["recovery_status"] = meta.get("recovery_status", "NOT_REQUIRED")
-                ledger["checkpoint_found"] = meta.get("checkpoint_found", False)
-                if meta.get("actual_url"):
-                    ledger["actual_url"] = meta.get("actual_url")
-                    
-            if configured_mode.upper() != ledger["actual_mode"].upper() and configured_mode.upper() not in ("RSS PARSING", "HTML PARSING"):
-                ledger["config_drift"] = True
-                
-            if ledger["actual_url"] != ledger["configured_url"] and not ledger["actual_url"].startswith(ledger["configured_url"]):
-                ledger["config_drift"] = True
-                
-            if ledger["config_drift"]:
-                logger.warning(f"[INGESTION] SOURCE_CONFIG_DRIFT: {source_name} configured mode/url doesn't match actual.")
-            
-            if raw_articles:
-                if ledger["recovery_status"] == "GAP_DETECTED":
-                    ledger["status"] = "GAP_DETECTED"
-                    ledger["gap_detected"] = True
-                    ledger["error_message"] = "CHECKPOINT_NOT_REACHED — BACKFILL REQUIRED"
-                    logger.warning(f"[INGESTION] {source_name} hit limit without finding checkpoint.")
-                elif ledger["recovery_status"] == "BLOCKED":
-                    ledger["status"] = "GAP_DETECTED"
-                    ledger["gap_detected"] = True
-                    ledger["error_message"] = "CHECKPOINT_NOT_REACHABLE — BLOCKED_BY_403"
-                    logger.warning(f"[INGESTION] SOURCE DEGRADED: {source_name} blocked by 403. Checkpoint frozen. Potential recall loss: YES.")
-            
-            for ra in raw_articles:
-                body_text = ra.get("body", "")
-                if not body_text or len(body_text) < 500:
-                    try:
-                        fetched_body = scraper.get_article_body(ra["url"])
-                        if fetched_body:
-                            body_text = fetched_body
-                    except Exception as body_err:
-                        logger.debug(f"Failed to fetch full HTML body for {ra['url']}: {body_err}")
-                        
-                articles.append({
-                    "source": source_name,
-                    "url": ra.get("url", url),
-                    "headline": ra.get("title", "No Title"),
-                    "body": body_text,
-                    "document_type": source.get("Type", "Press Release"),
-                    "_ingestion_mode": ledger["actual_mode"]
-                })
-            
-            ledger["parsed_found"] = len(articles)
-            if len(articles) == 0:
-                ledger["status"] = "EMPTY"
-                
-            # Transactional checkpoint logic
-            if ledger["status"] in ("OK", "EMPTY") and raw_articles and ledger["recovery_status"] in ("NOT_REQUIRED", "RECOVERED"):
-                if "checkpoints_to_set" in ledger.get("metadata", {}):
-                    for src, chnl, val in ledger["metadata"]["checkpoints_to_set"]:
-                        set_checkpoint(src, chnl, val)
-                    ledger["checkpoint_after"] = "multiple"
-                else:
-                    set_checkpoint(source_name, "HTML", raw_articles[0].get("url") or raw_articles[0].get("id"))
-                    ledger["checkpoint_after"] = raw_articles[0].get("url") or raw_articles[0].get("id")
-                
-            ledger["duration_sec"] = round(time.time() - start_time, 2)
-            return articles, ledger, source_name
-        except Exception as e:
-            logger.error(f"[INGESTION] Scraper for '{source_name}' failed: {e}")
-            ledger["status"] = "TIMEOUT" if "timeout" in str(e).lower() else "ERROR"
-            ledger["error_message"] = str(e)
-            ledger["recovery_status"] = "FAILED"
-            ledger["duration_sec"] = round(time.time() - start_time, 2)
-            return [], ledger, source_name
-            
-    # Generic HTML Fallback
-    try:
-        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
-        resp = requests.get(url, headers=headers, timeout=10)
-        ledger["raw_found"] = 1 if resp.status_code == 200 else 0
-        if resp.status_code == 200:
-            soup = BeautifulSoup(resp.text, "html.parser")
-            articles.append({
-                "source": source_name,
-                "url": url,
-                "headline": soup.title.string if soup.title else "HTML Document",
-                "body": soup.get_text(separator=" ", strip=True)[:8000],
-                "document_type": source.get("Type", "HTML"),
-                "_ingestion_mode": "HTML"
-            })
-            ledger["parsed_found"] = len(articles)
-        else:
-            ledger["status"] = "ERROR"
-            ledger["error_message"] = f"HTTP {resp.status_code}"
-            
-        if len(articles) == 0 and ledger["status"] == "OK":
-            ledger["status"] = "EMPTY"
-            
-    except Exception as e:
-        logger.error(f"[INGESTION] Generic HTML fetch failed for {source_name}: {e}")
-        ledger["status"] = "TIMEOUT" if "timeout" in str(e).lower() else "ERROR"
-        ledger["error_message"] = str(e)
-        
-    ledger["duration_sec"] = round(time.time() - start_time, 2)
-    return articles, ledger, source_name
-        
-    scraper = get_scraper_for_source(source_name)
-    if scraper:
-        try:
-            logger.info(f"[INGESTION] Using dedicated HTML scraper for '{source_name}'")
-            checkpoint = get_checkpoint(source_name, "HTML")
-            raw_articles = scraper.get_latest_articles(url=url, checkpoint=checkpoint)
-            ledger["raw_found"] = len(raw_articles)
-            
-            if hasattr(scraper, "scrape_metadata"):
-                ledger["metadata"] = scraper.scrape_metadata
-            
-            if raw_articles:
-                if not checkpoint or scraper.scrape_metadata.get("checkpoint_found"):
-                    set_checkpoint(source_name, "HTML", raw_articles[0].get("url") or raw_articles[0].get("id"))
-                else:
-                    ledger["status"] = "GAP_DETECTED"
-                    ledger["error_message"] = "CHECKPOINT_NOT_REACHED — BACKFILL REQUIRED"
-                    logger.warning(f"[INGESTION] {source_name} (HTML) hit limit without finding checkpoint. Backfill required.")
-            
-            for ra in raw_articles:
-                body_text = ra.get("body", "")
-                # If body is missing or very short, try to fetch the full text
-                if not body_text or len(body_text) < 500:
-                    try:
-                        fetched_body = scraper.get_article_body(ra["url"])
-                        if fetched_body:
-                            body_text = fetched_body
-                    except Exception as body_err:
-                        logger.debug(f"Failed to fetch full HTML body for {ra['url']}: {body_err}")
-                        
-                articles.append({
-                    "source": source_name,
-                    "url": ra.get("url", url),
-                    "headline": ra.get("title", "No Title"),
-                    "body": body_text,
-                    "document_type": source.get("Type", "Press Release"),
-                    "_ingestion_mode": "HTML"
-                })
-            
-            ledger["parsed_found"] = len(articles)
-            if len(articles) == 0:
-                ledger["status"] = "EMPTY"
-                
-            ledger["duration_sec"] = round(time.time() - start_time, 2)
-            return articles, ledger, source_name
-        except Exception as e:
-            logger.error(f"[INGESTION] HTML scraper for '{source_name}' failed: {e}")
-            ledger["status"] = "TIMEOUT" if "timeout" in str(e).lower() else "ERROR"
-            ledger["error_message"] = str(e)
-            ledger["duration_sec"] = round(time.time() - start_time, 2)
-            return [], ledger, source_name
-            
-    # Generic HTML Fallback
-    try:
-        headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
-        resp = requests.get(url, headers=headers, timeout=10)
-        ledger["raw_found"] = 1 if resp.status_code == 200 else 0
-        if resp.status_code == 200:
-            soup = BeautifulSoup(resp.text, "html.parser")
-            articles.append({
-                "source": source_name,
-                "url": url,
-                "headline": soup.title.string if soup.title else "HTML Document",
-                "body": soup.get_text(separator=" ", strip=True)[:8000],
-                "document_type": source.get("Type", "HTML"),
-                "_ingestion_mode": "HTML"
-            })
-            ledger["parsed_found"] = len(articles)
-        else:
-            ledger["status"] = "ERROR"
-            ledger["error_message"] = f"HTTP {resp.status_code}"
-            
-        if len(articles) == 0 and ledger["status"] == "OK":
-            ledger["status"] = "EMPTY"
-            
-    except Exception as e:
-        logger.error(f"[INGESTION] Generic HTML fetch failed for {source_name}: {e}")
-        ledger["status"] = "TIMEOUT" if "timeout" in str(e).lower() else "ERROR"
-        ledger["error_message"] = str(e)
-        
-    ledger["duration_sec"] = round(time.time() - start_time, 2)
-    return articles, ledger, source_name
-
 
 def fetch_all_feeds(active_sources: list = None) -> tuple:
-    """
-    Scrapes feeds concurrently based on the dynamically injected sources config.
-    Returns (articles, ingestion_ledger)
-    """
     articles = []
     ingestion_ledger = []
     
@@ -639,13 +341,10 @@ def fetch_all_feeds(active_sources: list = None) -> tuple:
             if not url:
                 continue
                 
-            # Check if there's a dedicated scraper in the registry
             from src.scrapers import get_scraper_for_source
             if get_scraper_for_source(source.get("Source")):
-                # Route through HTML channel which inherently delegates to the dedicated scraper
                 futures.append(executor.submit(_fetch_html_channel, source))
             else:
-                # Default fallback for generic RSS parsing
                 futures.append(executor.submit(_fetch_rss_channel, source))
                 
         for future in concurrent.futures.as_completed(futures):
