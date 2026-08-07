@@ -69,7 +69,7 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
                 <a href="archive.html" class="">Daily Master Log</a>
             </div>
     <header style="border-left-color: var(--green);"><div><h1>Operations Centre</h1>
-    <div class="subline">Manifest Configuration Hash: CFG-LATEST &bull; Re-Evaluated 2026-08-07 09:52:24 UTC</div></div></header>
+    <div class="subline">Manifest Configuration Hash: CFG-LATEST &bull; Re-Evaluated 2026-08-07 20:05:59 UTC</div></div></header>
     
     <div class="card" style="margin-bottom: 12px;"><h2>1. Engineering Metrics</h2><div class="tile-grid" style="grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));"><div class="stat-tile"><div class="stat-label">Articles Downloaded</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Duplicates Removed</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Articles Processed</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Ontology Rejected</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Regex Rejected</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Financial Rejected</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Entity / AI Rejections</div><div class="stat-value">0</div></div><div class="stat-tile"><div class="stat-label">Alerts Generated</div><div class="stat-value" style="color:var(--green)">0</div></div></div></div>
     
@@ -78,8 +78,8 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
             <h2>Acquisition Channels (RSS vs HTML)</h2>
             <div class="tile-grid" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
                 <div class="stat-tile" style="border:none; background:transparent;"><div class="stat-label">&nbsp;</div><div class="stat-value" style="font-size: 0.9em; color:var(--muted);">RSS</div><div class="stat-value" style="font-size: 0.9em; margin-top: 8px; color:var(--muted);">HTML</div></div>
-                <div class="stat-tile"><div class="stat-label">Raw Downloaded</div><div class="stat-value" style="font-size: 0.9em;">0</div><div class="stat-value" style="font-size: 0.9em; margin-top: 8px;">0</div></div>
-                <div class="stat-tile"><div class="stat-label">Unique Yield</div><div class="stat-value" style="font-size: 0.9em;">0</div><div class="stat-value" style="font-size: 0.9em; margin-top: 8px;">0</div></div>
+                <div class="stat-tile"><div class="stat-label">Raw Downloaded</div><div class="stat-value" style="font-size: 0.9em;">0</div><div class="stat-value" style="font-size: 0.9em; margin-top: 8px;">288</div></div>
+                <div class="stat-tile"><div class="stat-label">Unique Yield</div><div class="stat-value" style="font-size: 0.9em;">0</div><div class="stat-value" style="font-size: 0.9em; margin-top: 8px;">281</div></div>
                 <div class="stat-tile"><div class="stat-label">Alerts Contributed</div><div class="stat-value" style="font-size: 0.9em; color:var(--green)">0</div><div class="stat-value" style="font-size: 0.9em; margin-top: 8px; color:var(--green)">0</div></div>
             </div>
             <div style="margin-top: 10px; font-size: 0.85em; color: var(--yellow);">Global deduplication dropped <strong>0</strong> overlapping cross-channel articles before processing.</div>
@@ -103,5 +103,285 @@ const comparer = (idx, asc) => (a, b) => ((v1, v2) =>
     
     <div class="card" style="margin-bottom: 12px; overflow-x: auto;"><h2>3. Source Acquisition Health & Ledger</h2>
     <div style="margin-bottom: 8px; font-size: 0.85em; color: var(--muted);">Real-time log of the most recent fetch cycle per channel. A <span style="color:var(--yellow)">ZERO YIELD</span> status indicates the channel successfully responded but provided no usable articles (often caused by navigation loops or static landing pages).</div>
-    <table><thead><tr><th>Source</th><th>Channel</th><th>URL</th><th style="text-align:right;">Duration</th><th>Status</th><th style="text-align:right;">Raw Discovered</th><th style="text-align:right;">Parsed Successfully</th><th style="text-align:right;">Unique Yield</th><th>Error Context</th></tr></thead><tbody><tr><td colspan='9' class='empty-note'>Awaiting next ingestion cycle to populate ledger.</td></tr></tbody></table></div>
+    <table><thead><tr><th>Source</th><th>Channel</th><th>URL</th><th style="text-align:right;">Duration</th><th>Status</th><th style="text-align:right;">Raw Discovered</th><th style="text-align:right;">Parsed Successfully</th><th style="text-align:right;">Unique Yield</th><th>Error Context</th></tr></thead><tbody><tr style="color: var(--yellow);">
+                <td><strong>AFM (Netherlands)</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">0.0s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">0</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>AMF (France)</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">0.35s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">0</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>ASX</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">0.63s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">0</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>Business Wire</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">11.2s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">2</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>CNMV (Spain)</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">0.5s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">0</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>EQS News (Germany)</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">0.33s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">0</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>Finansinspektionen (Sweden)</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">0.0s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">0</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>GlobeNewswire</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">0.74s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">0</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>HKEX</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">4.45s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">0</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>LSE.co.uk</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">5.95s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">27</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>London Stock Exchange</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">9.58s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">0</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>NewsWeb (Norway)</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">0.4s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">0</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>OTC Markets</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">0.22s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">0</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>PR Newswire</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">4.02s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">20</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>Reuters</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">0.18s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">50</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>SEC EDGAR - Board Rec (14D-9)</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">5.07s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">2</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>SEC EDGAR - Definitive Proxy (DEFM14A)</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">1.96s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">2</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>SEC EDGAR - Form 10 (Spin-Offs)</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">0.27s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">0</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>SEC EDGAR - Merger Proxy (PREM14A)</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">0.23s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">0</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>SEC EDGAR - S-4 (Stock Mergers)</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">6.24s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">6</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>SEC EDGAR - Schedule 13D (Activism)</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">0.26s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">0</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>SEC EDGAR - Tender Offers (SC TO)</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">12.42s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">26</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>SEC Edgar</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">22.32s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">146</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>SEC Edgar 8-K Items</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">63.66s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">0</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>SEDAR+</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">0.68s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">0</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>SIX Exchange (Switzerland)</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">0.0s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">0</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>TSX News</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">0.8s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">0</td>
+                <td></td>
+            </tr><tr style="color: var(--yellow);">
+                <td><strong>eMarket SDIR (Italy)</strong></td>
+                <td>HTML</td>
+                <td><a href="" target="_blank" style="color: inherit; text-decoration: underline;">Link</a></td>
+                <td class="metric-val">0.0s</td>
+                <td><span class="badge warn">ZERO YIELD</span></td>
+                <td class="metric-val">0</td>
+                <td class="metric-val">0</td>
+                <td class="metric-val" style="font-weight:bold;">0</td>
+                <td></td>
+            </tr></tbody></table></div>
     </div></body></html>

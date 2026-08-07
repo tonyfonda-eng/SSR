@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-08-07T09:52:24.142801+00:00",
+  "timestamp": "2026-08-07T20:05:59.620778+00:00",
   "source_metrics": [
     {
       "source": "SEC Edgar",
       "mode": "HTML",
       "grade": "A+",
       "status_light": "\ud83d\udfe2",
-      "raw": 404,
+      "raw": 542,
       "avg_30d": 0,
       "dev_pct": 0,
       "lifetime_rel": 100.0,
@@ -30,10 +30,10 @@
       "mode": "HTML",
       "grade": "A+",
       "status_light": "\ud83d\udfe2",
-      "raw": 157,
+      "raw": 176,
       "avg_30d": 0,
       "dev_pct": 0,
-      "lifetime_rel": 85.7,
+      "lifetime_rel": 87.5,
       "emergency_stop": false,
       "reason": ""
     },
@@ -42,7 +42,19 @@
       "mode": "HTML",
       "grade": "A+",
       "status_light": "\ud83d\udfe2",
-      "raw": 78,
+      "raw": 79,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 100.0,
+      "emergency_stop": false,
+      "reason": ""
+    },
+    {
+      "source": "Reuters",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 50,
       "avg_30d": 0,
       "dev_pct": 0,
       "lifetime_rel": 100.0,
@@ -69,7 +81,7 @@
       "raw": 21,
       "avg_30d": 0,
       "dev_pct": 0,
-      "lifetime_rel": 85.7,
+      "lifetime_rel": 87.5,
       "emergency_stop": false,
       "reason": ""
     },
@@ -79,6 +91,18 @@
       "grade": "A+",
       "status_light": "\ud83d\udfe2",
       "raw": 18,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 100.0,
+      "emergency_stop": false,
+      "reason": ""
+    },
+    {
+      "source": "LSE.co.uk",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 17,
       "avg_30d": 0,
       "dev_pct": 0,
       "lifetime_rel": 100.0,
@@ -110,6 +134,18 @@
       "reason": ""
     },
     {
+      "source": "SEC EDGAR - S-4 (Stock Mergers)",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 6,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 100.0,
+      "emergency_stop": false,
+      "reason": ""
+    },
+    {
       "source": "Canadian Newswire SEDAR Feeds",
       "mode": "HTML",
       "grade": "A+",
@@ -123,6 +159,30 @@
     },
     {
       "source": "NewsWeb (Norway)",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 2,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 100.0,
+      "emergency_stop": false,
+      "reason": ""
+    },
+    {
+      "source": "SEC EDGAR - Board Rec (14D-9)",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 2,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 100.0,
+      "emergency_stop": false,
+      "reason": ""
+    },
+    {
+      "source": "SEC EDGAR - Tender Offers (SC TO)",
       "mode": "HTML",
       "grade": "A+",
       "status_light": "\ud83d\udfe2",
