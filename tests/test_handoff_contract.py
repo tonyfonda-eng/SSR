@@ -22,6 +22,7 @@ class TestHandoffContract(unittest.TestCase):
             "url": "https://valid.com",
             "published": "",
             "body": "This is a valid body text.",
+            "article_hash": "",
             "document_type": "Press Release"
         }
         
@@ -32,6 +33,7 @@ class TestHandoffContract(unittest.TestCase):
             "url": "https://bad.com",
             "published": "",
             "body": "Bad",
+            "article_hash": "",
             "document_type": "Press Release"
         }
         
