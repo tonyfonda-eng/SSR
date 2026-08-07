@@ -38,8 +38,6 @@ SCRAPER_REGISTRY = {
     "SEC EDGAR - S-4 (Stock Mergers)": EdgarS4Scraper,
     "SEC Edgar 8-K Items": EdgarItemScraper,
     "PR Newswire": PRNewsWireScraper,
-    "KEDM": KEDMScraper,
-    "Google News": GoogleNewsScraper,
     "Nasdaq": NasdaqScraper,
     "London Stock Exchange": LSEScraper,
     "EQS News (Germany)": EQSScraper,
