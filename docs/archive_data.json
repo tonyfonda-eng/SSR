@@ -2,6 +2,1179 @@
   "ledger": [
     {
       "manifest_registry": {
+        "decision_id": "DEC-7BB30DEEC86D",
+        "event_id": "EVT-DBBFF015DC8D",
+        "configuration_manifest_hash": "CFG-8502A8F660E7",
+        "execution_timestamp_gmt": "2026-08-07 20:07:41 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 8.412,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.34,
+        "exclude_issuer_feed": 0.001,
+        "ontology_concepts": 6.9
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 20:07:41 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Corporate Announcement",
+      "url": "https://www.lse.co.uk/news/london-market-early-call-ftse-100-seen-down-as-brent-rises-rhz7rucxbc3fk1y.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-F84863AB632D",
+        "event_id": "EVT-754BDB8D9725",
+        "configuration_manifest_hash": "CFG-8502A8F660E7",
+        "execution_timestamp_gmt": "2026-08-07 20:07:41 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 8.45,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.051,
+        "exclude_issuer_feed": 0.001,
+        "ontology_concepts": 0.597
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 20:07:41 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Corporate Announcement",
+      "url": "http://www.businesswire.com/news/home/20260807026731/en/EdgeConneX-Supports-Governor-Abbott%E2%80%99s-Leadership-on-Responsible-Data-Center-Development-in-Texas/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-78D3B6C44315",
+        "event_id": "EVT-88A83214106E",
+        "configuration_manifest_hash": "CFG-8502A8F660E7",
+        "execution_timestamp_gmt": "2026-08-07 20:07:41 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 9.232,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.131,
+        "exclude_issuer_feed": 0.001,
+        "ontology_concepts": 2.187
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 20:07:41 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Corporate Announcement",
+      "url": "https://www.sec.gov/Archives/edgar/data/1527469/000119312526340236/0001193125-26-340236-index.htm"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-3F74545178C2",
+        "event_id": "EVT-EDF5EAC962E7",
+        "configuration_manifest_hash": "CFG-8502A8F660E7",
+        "execution_timestamp_gmt": "2026-08-07 20:07:41 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 8.692,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.133,
+        "exclude_issuer_feed": 0.001,
+        "ontology_concepts": 2.619
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 20:07:41 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Corporate Announcement",
+      "url": "https://www.sec.gov/Archives/edgar/data/1877939/000187793926000073/0001877939-26-000073-index.htm"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-E3E544695D54",
+        "event_id": "EVT-1A164CF77CC1",
+        "configuration_manifest_hash": "CFG-8502A8F660E7",
+        "execution_timestamp_gmt": "2026-08-07 20:07:41 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 13.649,
+        "dedupe_issuer_memory": 0.004,
+        "exclude_global_keywords": 0.335,
+        "exclude_issuer_feed": 0.003,
+        "ontology_concepts": 3.902
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 20:07:41 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Corporate Announcement",
+      "url": "https://www.sec.gov/Archives/edgar/data/2053641/000110465926092685/0001104659-26-092685-index.htm"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-43F7F351FEED",
+        "event_id": "EVT-D245F6CD4E8E",
+        "configuration_manifest_hash": "CFG-8502A8F660E7",
+        "execution_timestamp_gmt": "2026-08-07 20:07:41 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 8.527,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.144,
+        "exclude_issuer_feed": 0.002,
+        "ontology_concepts": 1.881
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 20:07:41 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Corporate Announcement",
+      "url": "https://www.sec.gov/Archives/edgar/data/1318220/000110465926092680/0001104659-26-092680-index.htm"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-E9AA35E861E2",
+        "event_id": "EVT-A24825A13F15",
+        "configuration_manifest_hash": "CFG-8502A8F660E7",
+        "execution_timestamp_gmt": "2026-08-07 20:07:41 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 6.941,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.092,
+        "exclude_issuer_feed": 0.001,
+        "ontology_concepts": 1.754
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 20:07:41 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Corporate Announcement",
+      "url": "https://www.sec.gov/Archives/edgar/data/1339970/000133997026000051/0001339970-26-000051-index.htm"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-7BD991C14F9F",
+        "event_id": "EVT-4E627D3B2F8F",
+        "configuration_manifest_hash": "CFG-8502A8F660E7",
+        "execution_timestamp_gmt": "2026-08-07 20:07:40 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 18.054,
+        "dedupe_issuer_memory": 0.003,
+        "exclude_global_keywords": 1.236,
+        "exclude_issuer_feed": 0.006,
+        "ontology_concepts": 10.026
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 20:07:40 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Corporate Announcement",
+      "url": "https://www.lse.co.uk/news/oil-rises-on-concerns-over-strait-of-hormuz-reopening-plans-7r32hfjsl7mb15y.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-554484C7BB09",
+        "event_id": "EVT-A9F9444A88B7",
+        "configuration_manifest_hash": "CFG-8502A8F660E7",
+        "execution_timestamp_gmt": "2026-08-07 20:07:40 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 8.618,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.256,
+        "exclude_issuer_feed": 0.002,
+        "ontology_concepts": 5.467
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 20:07:40 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Corporate Announcement",
+      "url": "https://www.lse.co.uk/news/senate-confirms-trump-pick-to-oversee-tsa-as-administration-pushes-private-airport-security-5ucztmx9i2ifpyx.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-5E0ED2DA9CC0",
+        "event_id": "EVT-0295F0C4D73F",
+        "configuration_manifest_hash": "CFG-8502A8F660E7",
+        "execution_timestamp_gmt": "2026-08-07 20:07:40 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 7.151,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.465,
+        "exclude_issuer_feed": 0.002,
+        "ontology_concepts": 9.506
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 20:07:40 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Corporate Announcement",
+      "url": "https://www.lse.co.uk/news/wrapup-2-us-nonfarm-payrolls-fall-in-july-unemployment-rate-eases-to-41-7es9tpflj4ft6su.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-B48DA08FD715",
+        "event_id": "EVT-896225D58F8C",
+        "configuration_manifest_hash": "CFG-8502A8F660E7",
+        "execution_timestamp_gmt": "2026-08-07 20:07:40 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 9.895,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.319,
+        "exclude_issuer_feed": 0.002,
+        "ontology_concepts": 6.888
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 20:07:40 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Corporate Announcement",
+      "url": "https://www.lse.co.uk/news/trump-to-host-mining-ceos-as-administration-seeks-minerals-for-defense-supply-chains-7f110g3jm5gan12.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-8555C5BF109E",
+        "event_id": "EVT-5E5553FC21E8",
+        "configuration_manifest_hash": "CFG-8502A8F660E7",
+        "execution_timestamp_gmt": "2026-08-07 20:07:40 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 8.533,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.297,
+        "exclude_issuer_feed": 0.001,
+        "ontology_concepts": 6.48
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 20:07:40 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Corporate Announcement",
+      "url": "https://www.lse.co.uk/news/global-markets-us-stocks-bonds-rally-after-soft-jobs-report-yen-bounces-back-1tv1ajtpijus399.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-44DDDC28B430",
+        "event_id": "EVT-87678170D0C6",
+        "configuration_manifest_hash": "CFG-8502A8F660E7",
+        "execution_timestamp_gmt": "2026-08-07 20:07:40 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 8.875,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.236,
+        "exclude_issuer_feed": 0.001,
+        "ontology_concepts": 4.192
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 20:07:40 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Corporate Announcement",
+      "url": "https://www.lse.co.uk/news/uk-watchdog-steps-up-scrutiny-of-unregulated-lenders-mn3eusvskl7r7v3.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-DD0B8F24253F",
+        "event_id": "EVT-FFB68A390D40",
+        "configuration_manifest_hash": "CFG-8502A8F660E7",
+        "execution_timestamp_gmt": "2026-08-07 20:07:40 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 10.754,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.361,
+        "exclude_issuer_feed": 0.002,
+        "ontology_concepts": 5.51
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 20:07:40 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Corporate Announcement",
+      "url": "https://www.lse.co.uk/news/starlink-rival-eutelsat-sees-revenue-growth-in-2027-on-oneweb-momentum-frm77cpuxjunizz.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-9128F69E241B",
+        "event_id": "EVT-D60F6300367A",
+        "configuration_manifest_hash": "CFG-8502A8F660E7",
+        "execution_timestamp_gmt": "2026-08-07 20:07:40 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 9.975,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.519,
+        "exclude_issuer_feed": 0.003,
+        "ontology_concepts": 8.195
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 20:07:40 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Corporate Announcement",
+      "url": "https://www.lse.co.uk/news/kingspan-raises-profit-forecast-on-booming-data-centre-demand-ulsw5t35qnakxyo.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-AC107469989B",
+        "event_id": "EVT-708EABACF3CE",
+        "configuration_manifest_hash": "CFG-8502A8F660E7",
+        "execution_timestamp_gmt": "2026-08-07 20:07:40 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 15.132,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.377,
+        "exclude_issuer_feed": 0.002,
+        "ontology_concepts": 8.064
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 20:07:40 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Corporate Announcement",
+      "url": "https://www.lse.co.uk/news/wrapup-1-us-job-growth-likely-picked-up-in-july-unemployment-rate-forecast-unchanged-at-42-6mhvwielcna1hbp.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-8E93E361DF59",
+        "event_id": "EVT-2024AA51D058",
+        "configuration_manifest_hash": "CFG-8502A8F660E7",
+        "execution_timestamp_gmt": "2026-08-07 20:07:40 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 10.853,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.527,
+        "exclude_issuer_feed": 0.002,
+        "ontology_concepts": 8.734
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 20:07:40 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Corporate Announcement",
+      "url": "https://www.lse.co.uk/news/graphic-europes-getting-hotter-markets-are-taking-note-kea025bdimbr2qd.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-AE2ADDD4291A",
+        "event_id": "EVT-4A8962C74F3E",
+        "configuration_manifest_hash": "CFG-8502A8F660E7",
+        "execution_timestamp_gmt": "2026-08-07 20:07:40 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 9.602,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.329,
+        "exclude_issuer_feed": 0.001,
+        "ontology_concepts": 7.431
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 20:07:40 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Corporate Announcement",
+      "url": "https://www.lse.co.uk/news/oil-gains-as-investors-cautious-over-iran-oman-talk-progress-9r54zjsqu8hxo9j.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-BA5FA62F0A54",
+        "event_id": "EVT-C5C4EC2BE871",
+        "configuration_manifest_hash": "CFG-8502A8F660E7",
+        "execution_timestamp_gmt": "2026-08-07 20:07:40 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 8.869,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.343,
+        "exclude_issuer_feed": 0.002,
+        "ontology_concepts": 5.221
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 20:07:40 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Corporate Announcement",
+      "url": "https://www.lse.co.uk/news/rbc-capital-starts-coverage-of-pan-african-resources-at-outperform-aboi71wb3148a8w.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-8A55D9D7FA64",
+        "event_id": "EVT-808FF69C1299",
+        "configuration_manifest_hash": "CFG-8502A8F660E7",
+        "execution_timestamp_gmt": "2026-08-07 20:07:40 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 9.246,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.194,
+        "exclude_issuer_feed": 0.006,
+        "ontology_concepts": 4.306
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 20:07:40 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Corporate Announcement",
+      "url": "https://www.lse.co.uk/news/deutsche-bank-lifts-next-price-target-after-results-903byx3cjagkhcw.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-F3B020B8CD3B",
+        "event_id": "EVT-FBF207E8A39C",
+        "configuration_manifest_hash": "CFG-8502A8F660E7",
+        "execution_timestamp_gmt": "2026-08-07 20:07:40 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 15.308,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.746,
+        "exclude_issuer_feed": 0.003,
+        "ontology_concepts": 10.532
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 20:07:40 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Corporate Announcement",
+      "url": "https://www.lse.co.uk/news/london-broker-ratings-rbc-cuts-endeavour-mining-jpm-raises-easyjet-1wqvd19zuxpoi3y.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-73D9B92DB93E",
+        "event_id": "EVT-1E592008BF77",
+        "configuration_manifest_hash": "CFG-8502A8F660E7",
+        "execution_timestamp_gmt": "2026-08-07 20:07:40 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 7.632,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.295,
+        "exclude_issuer_feed": 0.001,
+        "ontology_concepts": 6.087
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 20:07:40 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Corporate Announcement",
+      "url": "https://www.lse.co.uk/news/dana-gas-crescent-petroleum-deny-breaching-contract-over-khor-mor-gas-supplies-t4txurv2qnvmj51.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-21D02964050F",
+        "event_id": "EVT-D298612A5A6C",
+        "configuration_manifest_hash": "CFG-8502A8F660E7",
+        "execution_timestamp_gmt": "2026-08-07 20:07:40 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 9.415,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.38,
+        "exclude_issuer_feed": 0.002,
+        "ontology_concepts": 7.256
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 20:07:40 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Corporate Announcement",
+      "url": "https://www.lse.co.uk/news/global-markets-stocks-dollar-stall-ahead-of-us-jobs-data-oil-gains-as-gulf-tensions-flare-fklp67i1pmpla80.html"
+    },
+    {
+      "manifest_registry": {
         "decision_id": "DEC-9AAE5C6DE92C",
         "event_id": "EVT-3FB4016C7B2B",
         "configuration_manifest_hash": "CFG-EC66C56DFCAC",
@@ -50786,1251 +51959,6 @@
       "pipeline_stage": "financial_t12_floor",
       "headline": "Insmed Reports Second-Quarter 2026 Financial Results and Provides Business Update",
       "url": "https://www.prnewswire.com/news-releases/insmed-reports-second-quarter-2026-financial-results-and-provides-business-update-302844094.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-30856A14B59F",
-        "event_id": "EVT-3B01BE8D48D9",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:45 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 7.04,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 0.377,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 5.911
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:45 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "Medtronic announces expanded CE Mark indication for Affera\u2122 Mapping and Ablation System and Sphere-9\u2122 Catheter for treatment of ventricular arrhythmias",
-      "url": "https://www.prnewswire.com/news-releases/medtronic-announces-expanded-ce-mark-indication-for-affera-mapping-and-ablation-system-and-sphere-9-catheter-for-treatment-of-ventricular-arrhythmias-302844326.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-28EF7BB73768",
-        "event_id": "EVT-FA9D72B2C799",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:43 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "financial_t12_floor",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 40.0,
-        "matched": [
-          "MERGER"
-        ],
-        "missing": [
-          "ACQUISITION",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 6.438,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 0.681,
-        "exclude_issuer_feed": 0.001,
-        "ontology_concepts": 15.983,
-        "ontology_status": 0.001,
-        "document_scoring": 0.001,
-        "regex_rules": 0.04,
-        "python_issuer_extraction": 0.07,
-        "python_ticker_lookup": 0.038,
-        "ai_ticker_resolution": 0.002,
-        "entity_confidence": 0.0,
-        "tradeability_check": 0.006,
-        "liquidity_check": 0.001,
-        "financial_market_cap": 0.0,
-        "financial_t12_floor": 1095.735
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:43 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "financial_t12_floor",
-      "headline": "Axcelis Announces Financial Results for Second Quarter 2026",
-      "url": "https://www.prnewswire.com/news-releases/axcelis-announces-financial-results-for-second-quarter-2026-302844749.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-67AEF8811C44",
-        "event_id": "EVT-598113106EB3",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:43 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 7.031,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 0.308,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 6.498
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:43 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "Lawton Chiles High School student wins Humane Science Award from National Anti-Vivisection Society",
-      "url": "https://www.prnewswire.com/news-releases/lawton-chiles-high-school-student-wins-humane-science-award-from-national-anti-vivisection-society-302844145.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-4091986D00BD",
-        "event_id": "EVT-531F59FFD6A8",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:43 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 8.018,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 0.111,
-        "exclude_issuer_feed": 0.001,
-        "ontology_concepts": 1.921
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:43 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "Warner Bros. Discovery Reports Second Quarter 2026 Results",
-      "url": "https://www.prnewswire.com/news-releases/warner-bros-discovery-reports-second-quarter-2026-results-302844635.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-6F8018FFCA55",
-        "event_id": "EVT-0A6FA2A16B18",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:42 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "financial_t12_floor",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 40.0,
-        "matched": [
-          "ACQUISITION"
-        ],
-        "missing": [
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 6.757,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 1.602,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 37.784,
-        "ontology_status": 0.001,
-        "document_scoring": 0.0,
-        "regex_rules": 0.036,
-        "python_issuer_extraction": 0.062,
-        "python_ticker_lookup": 0.027,
-        "ai_ticker_resolution": 0.003,
-        "entity_confidence": 0.0,
-        "tradeability_check": 0.006,
-        "liquidity_check": 0.001,
-        "financial_market_cap": 0.0,
-        "financial_t12_floor": 404.959
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:42 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "financial_t12_floor",
-      "headline": "Evolent Announces Second Quarter 2026 Results",
-      "url": "https://www.prnewswire.com/news-releases/evolent-announces-second-quarter-2026-results-302844413.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-1EEBD65F51C5",
-        "event_id": "EVT-F97FB0389677",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:41 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "financial_t12_floor",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 40.0,
-        "matched": [
-          "ACQUISITION"
-        ],
-        "missing": [
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 6.752,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 0.915,
-        "exclude_issuer_feed": 0.001,
-        "ontology_concepts": 22.927,
-        "ontology_status": 0.001,
-        "document_scoring": 0.0,
-        "regex_rules": 0.053,
-        "python_issuer_extraction": 0.108,
-        "python_ticker_lookup": 0.06,
-        "ai_ticker_resolution": 0.003,
-        "entity_confidence": 0.0,
-        "tradeability_check": 0.008,
-        "liquidity_check": 0.001,
-        "financial_market_cap": 0.0,
-        "financial_t12_floor": 1819.385
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:41 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "financial_t12_floor",
-      "headline": "Starwood Property Trust Reports Results for Quarter Ended June 30, 2026",
-      "url": "https://www.prnewswire.com/news-releases/starwood-property-trust-reports-results-for-quarter-ended-june-30-2026-302844646.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-BACED6A9A73D",
-        "event_id": "EVT-FA1CD6FEA322",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:41 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 8.062,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 0.183,
-        "exclude_issuer_feed": 0.006,
-        "ontology_concepts": 3.394
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:41 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "WindRose Health Investors Announces Recapitalization of Verified Clinical Trials",
-      "url": "https://www.prnewswire.com/news-releases/windrose-health-investors-announces-recapitalization-of-verified-clinical-trials-302844569.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-B3D1FDF4F468",
-        "event_id": "EVT-F46DFE29AD1B",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:39 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "financial_t12_floor",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 145.0,
-        "matched": [
-          "ACQUISITION",
-          "MERGER",
-          "SPIN_OFF",
-          "LIQUIDATION"
-        ],
-        "missing": [
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 10.632,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 4.836,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 118.764,
-        "ontology_status": 0.001,
-        "document_scoring": 0.001,
-        "regex_rules": 0.098,
-        "python_issuer_extraction": 0.129,
-        "python_ticker_lookup": 0.053,
-        "ai_ticker_resolution": 0.003,
-        "entity_confidence": 0.0,
-        "tradeability_check": 0.007,
-        "liquidity_check": 0.002,
-        "financial_market_cap": 0.0,
-        "financial_t12_floor": 747.211
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:39 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "financial_t12_floor",
-      "headline": "Keurig Dr Pepper Reports Q2 Results and Reaffirms Guidance for 2026",
-      "url": "https://www.prnewswire.com/news-releases/keurig-dr-pepper-reports-q2-results-and-reaffirms-guidance-for-2026-302844357.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-8F5FA93B8487",
-        "event_id": "EVT-63AD7475A05A",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:39 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 7.196,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 0.282,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 6.061
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:39 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "Mediar Therapeutics Enters into a Collaboration and Option Agreement with Ono Pharma to Develop Novel Treatments for Fibro-inflammatory Diseases",
-      "url": "https://www.prnewswire.com/news-releases/mediar-therapeutics-enters-into-a-collaboration-and-option-agreement-with-ono-pharma-to-develop-novel-treatments-for-fibro-inflammatory-diseases-302842396.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-342317B6352B",
-        "event_id": "EVT-394BEDADCD12",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:38 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 6.628,
-        "dedupe_issuer_memory": 0.002,
-        "exclude_global_keywords": 0.71,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 12.235
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:38 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "Kodiak Sciences Completes Enrollment in First Pivotal Cohort in the Phase 3 PEAK Trial of KSI-101 for Macular Edema Secondary to Inflammation and Reaffirms Topline Clinical Data Release Remains on Track for December 2026",
-      "url": "https://www.prnewswire.com/news-releases/kodiak-sciences-completes-enrollment-in-first-pivotal-cohort-in-the-phase-3-peak-trial-of-ksi-101-for-macular-edema-secondary-to-inflammation-and-reaffirms-topline-clinical-data-release-remains-on-track-for-december-2026-302844806.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-DA4EBC1552FC",
-        "event_id": "EVT-BE8DAD8049EE",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:38 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 8.348,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 0.231,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 4.054
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:38 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "My Professional Plumber announces rebranding",
-      "url": "https://www.prnewswire.com/news-releases/my-professional-plumber-announces-rebranding-302844176.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-36EBBFCEB7CA",
-        "event_id": "EVT-8EE376C678BE",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:38 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "financial_t12_floor",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 40.0,
-        "matched": [
-          "ACQUISITION"
-        ],
-        "missing": [
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 7.74,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 1.638,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 39.165,
-        "ontology_status": 0.001,
-        "document_scoring": 0.001,
-        "regex_rules": 0.04,
-        "python_issuer_extraction": 0.08,
-        "python_ticker_lookup": 0.088,
-        "ai_ticker_resolution": 0.003,
-        "entity_confidence": 0.0,
-        "tradeability_check": 0.006,
-        "liquidity_check": 0.001,
-        "financial_market_cap": 0.0,
-        "financial_t12_floor": 637.332
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:38 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "financial_t12_floor",
-      "headline": "Howmet Aerospace Reports Second Quarter 2026 Results",
-      "url": "https://www.prnewswire.com/news-releases/howmet-aerospace-reports-second-quarter-2026-results-302844230.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-B740A3FFCB03",
-        "event_id": "EVT-96F9A647AA9F",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:37 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "financial_t12_floor",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 40.0,
-        "matched": [
-          "ACQUISITION"
-        ],
-        "missing": [
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 7.138,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 1.215,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 27.325,
-        "ontology_status": 0.0,
-        "document_scoring": 0.0,
-        "regex_rules": 0.035,
-        "python_issuer_extraction": 0.051,
-        "python_ticker_lookup": 0.046,
-        "ai_ticker_resolution": 0.002,
-        "entity_confidence": 0.0,
-        "tradeability_check": 0.006,
-        "liquidity_check": 0.001,
-        "financial_market_cap": 0.0,
-        "financial_t12_floor": 388.984
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:37 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "financial_t12_floor",
-      "headline": "Cars.com Reports Second Quarter 2026 Results",
-      "url": "https://www.prnewswire.com/news-releases/carscom-reports-second-quarter-2026-results-302844769.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-C11E25EC480B",
-        "event_id": "EVT-DA966FB61B72",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:37 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 7.693,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 1.023,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 22.989
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:37 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "Charter Announces Results Of Early Tenders In Debt Exchange Offers And Amendment And Upsize of Debt Exchange Offers",
-      "url": "https://www.prnewswire.com/news-releases/charter-announces-results-of-early-tenders-in-debt-exchange-offers-and-amendment-and-upsize-of-debt-exchange-offers-302844918.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-F7698BF06D9E",
-        "event_id": "EVT-DFE31BB7394A",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:37 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 6.746,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 0.458,
-        "exclude_issuer_feed": 0.001,
-        "ontology_concepts": 10.361
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:37 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "Hydreight to Participate in Canaccord Genuity's 46th Annual Growth Conference in Boston",
-      "url": "https://www.prnewswire.com/news-releases/hydreight-to-participate-in-canaccord-genuitys-46th-annual-growth-conference-in-boston-302844055.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-BA398C7C7CEB",
-        "event_id": "EVT-C6CD388E5CB4",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:37 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 8.153,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 0.323,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 6.135
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:37 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "Verified Clinical Trials Partners with WindRose Health Investors to Accelerate Growth and Welcomes Howard Miller as Chief Executive Officer",
-      "url": "https://www.prnewswire.com/news-releases/verified-clinical-trials-partners-with-windrose-health-investors-to-accelerate-growth-and-welcomes-howard-miller-as-chief-executive-officer-302844390.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-744E172C4F1A",
-        "event_id": "EVT-B3956BB13EA7",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:37 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 7.329,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 0.134,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 2.293
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:37 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "Tripadvisor, Inc. Earnings Press Release Available on Company's Investor Relations Site",
-      "url": "https://www.prnewswire.com/news-releases/tripadvisor-inc-earnings-press-release-available-on-companys-investor-relations-site-302844643.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-02E6AC5BBA81",
-        "event_id": "EVT-AA0C2AD65C90",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:37 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 8.128,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 0.758,
-        "exclude_issuer_feed": 0.001,
-        "ontology_concepts": 18.496
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:37 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "REGENXBIO Reports Second Quarter 2026 Financial Results and Operational Highlights",
-      "url": "https://www.prnewswire.com/news-releases/regenxbio-reports-second-quarter-2026-financial-results-and-operational-highlights-302844662.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-206DA8714AF3",
-        "event_id": "EVT-15C2D7F2B0AB",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:37 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 6.668,
-        "dedupe_issuer_memory": 0.002,
-        "exclude_global_keywords": 0.173,
-        "exclude_issuer_feed": 0.001,
-        "ontology_concepts": 2.82
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:37 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "Australia's Department of Foreign Affairs and Trade Extends Partnership with Cambridge Global Advisors to Build Cyber Capacity Among Women in the Pacific",
-      "url": "https://www.prnewswire.com/news-releases/australias-department-of-foreign-affairs-and-trade-extends-partnership-with-cambridge-global-advisors-to-build-cyber-capacity-among-women-in-the-pacific-302844585.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-25D399F6302D",
-        "event_id": "EVT-DE30AE53EEFE",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:37 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 7.244,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 0.425,
-        "exclude_issuer_feed": 0.003,
-        "ontology_concepts": 10.234
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:37 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "Arbe Appoints Assaf Pereg, CPA, as Chief Financial Officer",
-      "url": "https://www.prnewswire.com/news-releases/arbe-appoints-assaf-pereg-cpa-as-chief-financial-officer-302844841.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-03CC06585582",
-        "event_id": "EVT-ED8436045D22",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:37 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 7.763,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 0.28,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 5.895
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:37 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "Bausch Health CEO Thomas J. Appio Joins Bausch + Lomb Board",
-      "url": "https://www.prnewswire.com/news-releases/bausch-health-ceo-thomas-j-appio-joins-bausch--lomb-board-302844911.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-7E10F8CFAFA7",
-        "event_id": "EVT-347207BBF984",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:37 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 6.911,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 0.781,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 17.025
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:37 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "Greenland Energy Company Issues Shareholder Letter Providing Update with Greenlandic Authorities and Regulators and Preparations Occurring at the Jameson Land Basin",
-      "url": "https://www.prnewswire.com/news-releases/greenland-energy-company-issues-shareholder-letter-providing-update-with-greenlandic-authorities-and-regulators-and-preparations-occurring-at-the-jameson-land-basin-302844700.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-33978BEE393D",
-        "event_id": "EVT-5D5A4CFFDF3B",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:37 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 7.492,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 0.311,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 6.628
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:37 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "Hadrian Raises $1.37B Series D to Build Highly Automated Factories to Accelerate America's Industrial Renewal",
-      "url": "https://www.prnewswire.com/news-releases/hadrian-raises-1-37b-series-d-to-build-highly-automated-factories-to-accelerate-americas-industrial-renewal-302844408.html"
     }
   ]
 }

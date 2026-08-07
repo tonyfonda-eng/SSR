@@ -1,12 +1,12 @@
 {
-  "timestamp": "2026-08-07T20:05:59.620778+00:00",
+  "timestamp": "2026-08-07T20:07:43.937592+00:00",
   "source_metrics": [
     {
       "source": "SEC Edgar",
       "mode": "HTML",
       "grade": "A+",
       "status_light": "\ud83d\udfe2",
-      "raw": 542,
+      "raw": 547,
       "avg_30d": 0,
       "dev_pct": 0,
       "lifetime_rel": 100.0,
@@ -33,19 +33,7 @@
       "raw": 176,
       "avg_30d": 0,
       "dev_pct": 0,
-      "lifetime_rel": 87.5,
-      "emergency_stop": false,
-      "reason": ""
-    },
-    {
-      "source": "Business Wire",
-      "mode": "HTML",
-      "grade": "A+",
-      "status_light": "\ud83d\udfe2",
-      "raw": 79,
-      "avg_30d": 0,
-      "dev_pct": 0,
-      "lifetime_rel": 100.0,
+      "lifetime_rel": 88.9,
       "emergency_stop": false,
       "reason": ""
     },
@@ -54,7 +42,19 @@
       "mode": "HTML",
       "grade": "A+",
       "status_light": "\ud83d\udfe2",
-      "raw": 50,
+      "raw": 100,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 100.0,
+      "emergency_stop": false,
+      "reason": ""
+    },
+    {
+      "source": "Business Wire",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 81,
       "avg_30d": 0,
       "dev_pct": 0,
       "lifetime_rel": 100.0,
@@ -74,6 +74,18 @@
       "reason": ""
     },
     {
+      "source": "LSE.co.uk",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 34,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 100.0,
+      "emergency_stop": false,
+      "reason": ""
+    },
+    {
       "source": "PR Newswire",
       "mode": "RSS",
       "grade": "A+",
@@ -81,7 +93,7 @@
       "raw": 21,
       "avg_30d": 0,
       "dev_pct": 0,
-      "lifetime_rel": 87.5,
+      "lifetime_rel": 88.9,
       "emergency_stop": false,
       "reason": ""
     },
@@ -91,18 +103,6 @@
       "grade": "A+",
       "status_light": "\ud83d\udfe2",
       "raw": 18,
-      "avg_30d": 0,
-      "dev_pct": 0,
-      "lifetime_rel": 100.0,
-      "emergency_stop": false,
-      "reason": ""
-    },
-    {
-      "source": "LSE.co.uk",
-      "mode": "HTML",
-      "grade": "A+",
-      "status_light": "\ud83d\udfe2",
-      "raw": 17,
       "avg_30d": 0,
       "dev_pct": 0,
       "lifetime_rel": 100.0,
