@@ -12,7 +12,7 @@ class HKEXScraper(SourceScraper):
     """
     
     # Official daily index log payload link
-    TARGET_URL = "https://www1.hkexnews.hk/search/titles.aspx?lang=en"
+    TARGET_URL = "https://www1.hkexnews.hk/search/titlesearch.xhtml?lang=en"
     
     def get_latest_articles(self, **kwargs):
         url = kwargs.get("url") or self.TARGET_URL

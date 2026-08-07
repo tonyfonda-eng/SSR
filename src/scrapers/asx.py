@@ -8,7 +8,7 @@ class ASXScraper(SourceScraper):
     """
     
     # Modern dynamic JSON API endpoint
-    API_URL = "https://asx.api.markitdigital.com/asx-research/v1/companies/announcements"
+    API_URL = "https://asx.api.markitdigital.com/asx-research/1.0/markets/announcements"
     
     def get_latest_articles(self, **kwargs):
         url = kwargs.get("url") or self.API_URL
