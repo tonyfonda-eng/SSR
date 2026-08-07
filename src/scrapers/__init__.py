@@ -18,7 +18,10 @@ from .hkex import HKEXScraper
 
 from .reuters import ReutersScraper
 
+from .lse_couk import LSECoukScraper
+
 SCRAPER_REGISTRY = {
+    "LSE.co.uk": LSECoukScraper,
     "Reuters": ReutersScraper,
     "Business Wire": BusinessWireScraper,
     "GlobeNewswire": GlobeNewswireScraper,

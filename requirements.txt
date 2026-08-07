@@ -18,3 +18,4 @@ google-auth-oauthlib
 gspread
 PyPDF2
 playwright
+curl-cffi
