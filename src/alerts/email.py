@@ -21,17 +21,12 @@ def send_alert(decision_manifest: dict, recipient: str = None):
         env_recipient = os.environ.get("ALERT_EMAIL_RECIPIENT")
         recipient = env_recipient if env_recipient else GMAIL_USER
 
-    # Extract required fields from the Manifest Structure
-    reg = decision_manifest.get("manifest_registry", {})
-    det = decision_manifest.get("detection_vector", {})
-    prov = decision_manifest.get("evidentiary_provenance_dag", {})
-    lineage = decision_manifest.get("syndication_lineage", {})
-
-    event_family = det.get("detected_event_type", "Unknown Event")
-    ticker = det.get("target_ticker", "UNKNOWN")
-    decision_id = reg.get("decision_id", "Unknown Decision ID")
-    sensor = lineage.get("canonical_sensor_id", "Unknown Source")
-    timestamp = reg.get("execution_timestamp_gmt", "Unknown Time")
+    # Extract required fields from the flat Manifest Structure
+    event_family = decision_manifest.get("event_type", "Unknown Event")
+    ticker = decision_manifest.get("target_ticker", "UNKNOWN")
+    decision_id = decision_manifest.get("decision_id", "Unknown Decision ID")
+    sensor = decision_manifest.get("canonical_sensor_id", decision_manifest.get("source", "Unknown Source"))
+    timestamp = decision_manifest.get("runtime_timestamp", "Unknown Time")
 
     article_title = decision_manifest.get("headline", f"Event Detected for {ticker}")
     article_url = decision_manifest.get("url", "#")
@@ -39,8 +34,8 @@ def send_alert(decision_manifest: dict, recipient: str = None):
     is_update = decision_manifest.get("is_update", False)
 
     # Reconstruct Confidence
-    conf_decomp = det.get("confidence_decomposition", {})
-    agg_conf = conf_decomp.get("aggregate_confidence", 0.0)
+    ai_core = decision_manifest.get("ai_core_inference", {})
+    agg_conf = ai_core.get("aggregate_confidence", 0.0)
     confidence_pct = f"{agg_conf * 100:.1f}%" if agg_conf > 0 else "N/A"
 
     subject_prefix = "[UPDATE]" if is_update else "[ALERT]"
@@ -80,7 +75,7 @@ def send_alert(decision_manifest: dict, recipient: str = None):
             <ul class="evidence">
     """
     
-    supporting_evidence = prov.get("supporting_evidence", [])
+    supporting_evidence = decision_manifest.get("evidence", [])
     if supporting_evidence:
         for ev in supporting_evidence:
             html_body += f"<li>[{ev.get('component', 'System')}] {ev.get('assertion', 'Matched context')} (Wt: {ev.get('weight', 1.0)})</li>"
@@ -107,7 +102,9 @@ def send_alert(decision_manifest: dict, recipient: str = None):
     msg.attach(MIMEText(html_body, "html"))
 
     try:
-        server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
+        smtp_server = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
+        smtp_port = int(os.environ.get("SMTP_PORT", 465))
+        server = smtplib.SMTP_SSL(smtp_server, smtp_port)
         server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
         server.send_message(msg)
         server.quit()
@@ -202,7 +199,9 @@ def send_v4_event_report(event_data: dict, recipient: str = None):
     msg.attach(MIMEText(html_body, "html"))
 
     try:
-        server = smtplib.SMTP_SSL("smtp.gmail.com", 465)
+        smtp_server = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
+        smtp_port = int(os.environ.get("SMTP_PORT", 465))
+        server = smtplib.SMTP_SSL(smtp_server, smtp_port)
         server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
         server.send_message(msg)
         server.quit()

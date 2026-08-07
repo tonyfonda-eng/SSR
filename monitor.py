@@ -692,6 +692,7 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
             "terminal_stage": "AI_APPROVED",
             "headline": article.get("headline", "Corporate Announcement"),
             "url": article.get("url", "UNKNOWN"),
+            "event_type": event_family,
             "target_ticker": article.get("_target_ticker", ticker),
             "transaction_graph": article.get("_transaction_graph", {}),
             "shadow_mode_v2": article.get("_shadow_mode_v2", {}),
