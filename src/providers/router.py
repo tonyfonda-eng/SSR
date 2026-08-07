@@ -66,6 +66,7 @@ class ProviderRouter:
         Implements intelligent fallback and token rotation logic.
         """
         provider_order = ["gemini", "openrouter"]
+        last_fatal_error = "EXHAUSTED"
         
         for provider in provider_order:
             while True:
@@ -115,6 +116,7 @@ class ProviderRouter:
                     status_code = getattr(e.response, 'status_code', 500)
                     
                     if status_code == 401 or status_code == 403:
+                        last_fatal_error = "AUTH_ERROR"
                         # FAIL-FAST: Unauthorized key. It's dead. Drop it permanently.
                         logger.warning(f"[AI ROUTER] {status_code} on {provider}. Purging dead key from rotation.")
                         self.events.append({"source_or_provider": provider, "event_type": "401_UNAUTHORIZED", "severity": "CRITICAL", "details": "Key purged from rotation"})
@@ -124,6 +126,7 @@ class ProviderRouter:
                                 keys_ref.pop(0)
                         
                     elif status_code == 429:
+                        last_fatal_error = "RATE_LIMITED"
                         # RATE LIMIT: Move the exhausted key to the back of the queue and pause briefly.
                         logger.warning(f"[AI ROUTER] 429 Rate Limit on {provider}. Rotating to next key.")
                         self.events.append({"source_or_provider": provider, "event_type": "429_RATE_LIMIT", "severity": "WARN", "details": f"Latency: {latency_ms}ms. Prompt: {prompt_type}"})
@@ -134,24 +137,27 @@ class ProviderRouter:
                         time.sleep(1.5) # Graceful backoff
                         
                     elif status_code >= 500:
+                        last_fatal_error = "PROVIDER_ERROR"
                         # VENDOR OUTAGE: The provider is down. Skip to the next provider immediately.
                         logger.error(f"[AI ROUTER] 5xx Vendor Outage on {provider}. Switching providers.")
                         self.events.append({"source_or_provider": provider, "event_type": f"{status_code}_VENDOR_OUTAGE", "severity": "CRITICAL", "details": "Switching providers"})
                         break 
                         
                     else:
+                        last_fatal_error = "CONFIG_ERROR"
                         logger.error(f"[AI ROUTER] Unexpected HTTP {status_code} from {provider}: {e}. (Model misconfigured?)")
                         self.events.append({"source_or_provider": provider, "event_type": f"HTTP_{status_code}", "severity": "CRITICAL", "details": str(e)})
                         break
                         
                 except Exception as e:
+                    last_fatal_error = "TIMEOUT"
                     logger.error(f"[AI ROUTER] Unknown exception connecting to {provider}: {e}")
                     self.events.append({"source_or_provider": provider, "event_type": "TIMEOUT_OR_NETWORK", "severity": "WARN", "details": str(e)})
                     break # Abort this provider, try the next
                     
         # If the loop exhausts without returning, we are completely out of AI credits/keys.
-        self.events.append({"source_or_provider": "SYSTEM", "event_type": "AI_EXHAUSTED", "severity": "CRITICAL", "details": "All providers failed or exhausted."})
-        return "EXHAUSTED"
+        self.events.append({"source_or_provider": "SYSTEM", "event_type": last_fatal_error, "severity": "CRITICAL", "details": "All providers failed or exhausted."})
+        return last_fatal_error
 
     def _call_gemini(self, prompt: str, api_key: str, require_json: bool, configured_model: str) -> str:
         """Executes API call to Google Gemini REST API."""

@@ -383,6 +383,12 @@ def stage_ai_entity_resolution(article: dict, ctx: dict) -> tuple:
         
     graph = extract_entities_and_roles(article.get("body", ""), router=ctx.get("ai_router"))
     if graph.error:
+        if article.get("_deterministic_ticker", "UNKNOWN") != "UNKNOWN":
+            # Fallback to deterministic ticker if AI resolution failed
+            article["_entities"] = [{"name": "Issuer", "ticker": article["_deterministic_ticker"], "role": "target", "is_public": True, "extraction_confidence": 1.0, "role_confidence": 1.0}]
+            article["_transaction_edges"] = []
+            article["_transaction_graph"] = {"nodes": article["_entities"], "edges": []}
+            return True, "passed_with_fallback"
         return False, f"dropped_entity_error: {graph.error}"
         
     article["_entities"] = [n.__dict__ for n in graph.nodes]
