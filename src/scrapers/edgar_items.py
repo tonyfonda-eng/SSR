@@ -181,15 +181,13 @@ class EdgarItemScraper(SourceScraper):
                                     doc_resp = get_session().get(real_url, headers=headers, timeout=30)
                                     if doc_resp.status_code == 200:
                                         doc_soup = BeautifulSoup(doc_resp.text, "html.parser")
-                                        text = doc_soup.get_text("
-", strip=True)
+                                        text = doc_soup.get_text("\n", strip=True)
                                         if len(text) > 500:
                                             return text
                                     break # If we failed to get the primary doc, don't fallback to index text
             
             # Fallback if not an index page or extraction failed
-            text = soup.get_text("
-", strip=True)
+            text = soup.get_text("\n", strip=True)
             if len(text) > 500:
                 return text
         except Exception as e:
@@ -197,11 +195,4 @@ class EdgarItemScraper(SourceScraper):
             
         return None
                 
-            from bs4 import BeautifulSoup
-            soup = BeautifulSoup(response.text, "html.parser")
-            text = soup.get_text("\n", strip=True)
-            if len(text) > 500:
-                return text
-        except Exception as e:
-            print(f"[ERROR] Failed to fetch EDGAR filing body: {e}")
-        return None
+

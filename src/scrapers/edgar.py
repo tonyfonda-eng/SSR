@@ -85,15 +85,13 @@ class EdgarScraper(SourceScraper):
                                     doc_resp = get_session().get(real_url, headers=headers, timeout=30)
                                     if doc_resp.status_code == 200:
                                         doc_soup = BeautifulSoup(doc_resp.text, "html.parser")
-                                        text = doc_soup.get_text("
-", strip=True)
+                                        text = doc_soup.get_text("\n", strip=True)
                                         if len(text) > 500:
                                             return text
                                     break # If we failed to get the primary doc, don't fallback to index text
             
             # Fallback if not an index page or extraction failed
-            text = soup.get_text("
-", strip=True)
+            text = soup.get_text("\n", strip=True)
             if len(text) > 500:
                 return text
         except Exception as e:
@@ -101,14 +99,6 @@ class EdgarScraper(SourceScraper):
             
         return None
 
-        soup = BeautifulSoup(response.text, "html.parser")
-        
-        # We need to extract the actual text of the filing, which can be tricky in Edgar.
-        # Often the main body is in <document> tags or just the body text.
-        text = soup.get_text("\n", strip=True)
-        if len(text) > 500:
-            return text
-        return None
 
 class Edgar13DScraper(EdgarScraper):
     FILING_TYPE = "13D"
