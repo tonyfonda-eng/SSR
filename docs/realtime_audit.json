@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-08-07T06:10:22.486170+00:00",
+  "timestamp": "2026-08-07T06:37:17.849463+00:00",
   "source_metrics": [
     {
       "source": "SEC Edgar",
@@ -14,6 +14,18 @@
       "reason": ""
     },
     {
+      "source": "EQS News (Germany)",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 198,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 100.0,
+      "emergency_stop": false,
+      "reason": ""
+    },
+    {
       "source": "PR Newswire",
       "mode": "HTML",
       "grade": "A+",
@@ -21,19 +33,7 @@
       "raw": 157,
       "avg_30d": 0,
       "dev_pct": 0,
-      "lifetime_rel": 80.0,
-      "emergency_stop": false,
-      "reason": ""
-    },
-    {
-      "source": "EQS News (Germany)",
-      "mode": "HTML",
-      "grade": "A+",
-      "status_light": "\ud83d\udfe2",
-      "raw": 99,
-      "avg_30d": 0,
-      "dev_pct": 0,
-      "lifetime_rel": 100.0,
+      "lifetime_rel": 85.7,
       "emergency_stop": false,
       "reason": ""
     },
@@ -42,7 +42,7 @@
       "mode": "HTML",
       "grade": "A+",
       "status_light": "\ud83d\udfe2",
-      "raw": 77,
+      "raw": 78,
       "avg_30d": 0,
       "dev_pct": 0,
       "lifetime_rel": 100.0,
@@ -54,7 +54,7 @@
       "mode": "HTML",
       "grade": "A+",
       "status_light": "\ud83d\udfe2",
-      "raw": 23,
+      "raw": 46,
       "avg_30d": 0,
       "dev_pct": 0,
       "lifetime_rel": 100.0,
@@ -66,10 +66,10 @@
       "mode": "RSS",
       "grade": "A+",
       "status_light": "\ud83d\udfe2",
-      "raw": 20,
+      "raw": 21,
       "avg_30d": 0,
       "dev_pct": 0,
-      "lifetime_rel": 80.0,
+      "lifetime_rel": 85.7,
       "emergency_stop": false,
       "reason": ""
     },
@@ -78,7 +78,19 @@
       "mode": "HTML",
       "grade": "A+",
       "status_light": "\ud83d\udfe2",
-      "raw": 9,
+      "raw": 18,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 100.0,
+      "emergency_stop": false,
+      "reason": ""
+    },
+    {
+      "source": "Diagnostic Test",
+      "mode": "UNKNOWN",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 16,
       "avg_30d": 0,
       "dev_pct": 0,
       "lifetime_rel": 100.0,
@@ -90,7 +102,7 @@
       "mode": "HTML",
       "grade": "A+",
       "status_light": "\ud83d\udfe2",
-      "raw": 5,
+      "raw": 10,
       "avg_30d": 0,
       "dev_pct": 0,
       "lifetime_rel": 100.0,
@@ -102,7 +114,19 @@
       "mode": "HTML",
       "grade": "A+",
       "status_light": "\ud83d\udfe2",
-      "raw": 1,
+      "raw": 2,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 100.0,
+      "emergency_stop": false,
+      "reason": ""
+    },
+    {
+      "source": "NewsWeb (Norway)",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 2,
       "avg_30d": 0,
       "dev_pct": 0,
       "lifetime_rel": 100.0,
@@ -122,7 +146,7 @@
       "reason": ""
     },
     {
-      "source": "NewsWeb (Norway)",
+      "source": "Special Situations Digest",
       "mode": "HTML",
       "grade": "A+",
       "status_light": "\ud83d\udfe2",

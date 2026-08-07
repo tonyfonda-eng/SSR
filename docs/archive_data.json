@@ -2,6 +2,659 @@
   "ledger": [
     {
       "manifest_registry": {
+        "decision_id": "DEC-7272304B3641",
+        "event_id": "EVT-E3F8C85436C1",
+        "configuration_manifest_hash": "CFG-4FAC94C093C9",
+        "execution_timestamp_gmt": "2026-08-07 06:37:15 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 11.95,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.064,
+        "exclude_issuer_feed": 0.002,
+        "ontology_concepts": 0.743
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 06:37:15 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Hurricane Electric Expands Network in Manila With New Point of Presence at STT Makati",
+      "url": "http://www.businesswire.com/news/home/20260806644165/en/Hurricane-Electric-Expands-Network-in-Manila-With-New-Point-of-Presence-at-STT-Makati/"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-428646B2DD8F",
+        "event_id": "EVT-5A76A96F169C",
+        "configuration_manifest_hash": "CFG-4FAC94C093C9",
+        "execution_timestamp_gmt": "2026-08-07 06:37:13 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": [
+          "ACQUISITION",
+          "MERGER",
+          "TENDER_OFFER",
+          "TAKE_PRIVATE",
+          "GOING_PRIVATE",
+          "DELISTING",
+          "SPIN_OFF",
+          "LIQUIDATION",
+          "SPECIAL_DIVIDEND",
+          "RETURN_OF_CAPITAL",
+          "ACTIVIST_ACTION",
+          "STRATEGIC_REVIEW"
+        ]
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 25.375,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.208,
+        "exclude_issuer_feed": 0.002,
+        "ontology_concepts": 1.732
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 06:37:13 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Xiong'an: Better city, better life",
+      "url": "https://www.prnewswire.com/news-releases/xiongan-better-city-better-life-302845894.html"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-761673C76ED7",
+        "event_id": "EVT-3A92E7513FCC",
+        "configuration_manifest_hash": "TEST_MANIFEST_HASH",
+        "execution_timestamp_gmt": "2026-08-07 06:28:42 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {},
+      "performance_telemetry_ms": {
+        "dedupe_hash": 0.001,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.046,
+        "exclude_issuer_feed": 0.002,
+        "exclude_source_specific": 0.005,
+        "ontology_concepts": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 06:28:42 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Newmark Acquires L+P Immobilienbewertung 1786084121.8513403",
+      "url": "http://diagnostic.test/shadow1"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-71FEB84470F3",
+        "event_id": "EVT-3A92E7513FCC",
+        "configuration_manifest_hash": "TEST_MANIFEST_HASH",
+        "execution_timestamp_gmt": "2026-08-07 06:28:41 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {},
+      "performance_telemetry_ms": {
+        "dedupe_hash": 27.903,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.191,
+        "exclude_issuer_feed": 0.002,
+        "exclude_source_specific": 0.003,
+        "ontology_concepts": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 06:28:41 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Newmark Acquires L+P Immobilienbewertung 1786084121.8513403",
+      "url": "http://diagnostic.test/shadow1"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-413FC144475F",
+        "event_id": "EVT-2FBEB30F8CCB",
+        "configuration_manifest_hash": "TEST_MANIFEST_HASH",
+        "execution_timestamp_gmt": "2026-08-07 06:28:23 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {},
+      "performance_telemetry_ms": {
+        "dedupe_hash": 18.621,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.246,
+        "exclude_issuer_feed": 0.002,
+        "exclude_source_specific": 0.005,
+        "ontology_concepts": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 06:28:23 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Newmark Acquires L+P Immobilienbewertung 1786084103.677949",
+      "url": "http://diagnostic.test/shadow1"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-30B3171EA3DA",
+        "event_id": "EVT-2FBEB30F8CCB",
+        "configuration_manifest_hash": "TEST_MANIFEST_HASH",
+        "execution_timestamp_gmt": "2026-08-07 06:28:23 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {},
+      "performance_telemetry_ms": {
+        "dedupe_hash": 0.002,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.044,
+        "exclude_issuer_feed": 0.002,
+        "exclude_source_specific": 0.004,
+        "ontology_concepts": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 06:28:23 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Newmark Acquires L+P Immobilienbewertung 1786084103.677949",
+      "url": "http://diagnostic.test/shadow1"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-5EFC54705DA3",
+        "event_id": "EVT-60D39B35B9F5",
+        "configuration_manifest_hash": "TEST_MANIFEST_HASH",
+        "execution_timestamp_gmt": "2026-08-07 06:28:06 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {},
+      "performance_telemetry_ms": {
+        "dedupe_hash": 21.542,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.195,
+        "exclude_issuer_feed": 0.003,
+        "exclude_source_specific": 0.004,
+        "ontology_concepts": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 06:28:06 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Newmark Acquires L+P Immobilienbewertung 1786084086.192345",
+      "url": "http://diagnostic.test/shadow1"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-BE5AD5DD50B4",
+        "event_id": "EVT-60D39B35B9F5",
+        "configuration_manifest_hash": "TEST_MANIFEST_HASH",
+        "execution_timestamp_gmt": "2026-08-07 06:28:06 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {},
+      "performance_telemetry_ms": {
+        "dedupe_hash": 0.003,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.09,
+        "exclude_issuer_feed": 0.005,
+        "exclude_source_specific": 0.009,
+        "ontology_concepts": 0.002
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 06:28:06 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Newmark Acquires L+P Immobilienbewertung 1786084086.192345",
+      "url": "http://diagnostic.test/shadow1"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-61C696FF0148",
+        "event_id": "EVT-0C014E4A727C",
+        "configuration_manifest_hash": "TEST_MANIFEST_HASH",
+        "execution_timestamp_gmt": "2026-08-07 06:27:38 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {},
+      "performance_telemetry_ms": {
+        "dedupe_hash": 25.489,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.287,
+        "exclude_issuer_feed": 0.002,
+        "exclude_source_specific": 0.003,
+        "ontology_concepts": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 06:27:38 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Newmark Acquires L+P Immobilienbewertung 1786084058.0922756",
+      "url": "http://diagnostic.test/shadow1"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-303AC05AD10A",
+        "event_id": "EVT-0C014E4A727C",
+        "configuration_manifest_hash": "TEST_MANIFEST_HASH",
+        "execution_timestamp_gmt": "2026-08-07 06:27:38 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {},
+      "performance_telemetry_ms": {
+        "dedupe_hash": 0.001,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.03,
+        "exclude_issuer_feed": 0.001,
+        "exclude_source_specific": 0.003,
+        "ontology_concepts": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 06:27:38 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Newmark Acquires L+P Immobilienbewertung 1786084058.0922756",
+      "url": "http://diagnostic.test/shadow1"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-5149DA9B9B7A",
+        "event_id": "EVT-7BC11A3DC38C",
+        "configuration_manifest_hash": "TEST_MANIFEST_HASH",
+        "execution_timestamp_gmt": "2026-08-07 06:27:26 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {},
+      "performance_telemetry_ms": {
+        "dedupe_hash": 29.946,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.216,
+        "exclude_issuer_feed": 0.003,
+        "exclude_source_specific": 0.003,
+        "ontology_concepts": 0.001
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 06:27:26 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Newmark Acquires L+P Immobilienbewertung 1786084046.855682",
+      "url": "http://diagnostic.test/shadow1"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-A47FBD9D455A",
+        "event_id": "EVT-1DFC739ED2FA",
+        "configuration_manifest_hash": "TEST_MANIFEST_HASH",
+        "execution_timestamp_gmt": "2026-08-07 06:26:18 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {},
+      "performance_telemetry_ms": {
+        "dedupe_hash": 13.144,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.339,
+        "exclude_issuer_feed": 0.004,
+        "exclude_source_specific": 0.008,
+        "ontology_concepts": 0.002
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 06:26:18 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Newmark Acquires L+P Immobilienbewertung 1786083978.6005797",
+      "url": "http://diagnostic.test/shadow1"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-C6CAA428381B",
+        "event_id": "EVT-ECE5D81367E2",
+        "configuration_manifest_hash": "TEST_MANIFEST_HASH",
+        "execution_timestamp_gmt": "2026-08-07 06:19:14 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "regex_rules",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": []
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 25.521,
+        "dedupe_issuer_memory": 0.003,
+        "exclude_global_keywords": 0.404,
+        "exclude_issuer_feed": 0.014,
+        "exclude_source_specific": 0.008,
+        "ontology_concepts": 0.018,
+        "ontology_status": 0.001,
+        "document_scoring": 0.001,
+        "regex_rules": 0.016
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 06:19:14 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "regex_rules",
+      "headline": "Newmark Acquires L+P Immobilienbewertung 1786083554.7664356",
+      "url": "http://diagnostic.test/shadow1"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-B0C7289D0B48",
+        "event_id": "EVT-A97C6A452D92",
+        "configuration_manifest_hash": "TEST_MANIFEST_HASH",
+        "execution_timestamp_gmt": "2026-08-07 06:18:49 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "regex_rules",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": []
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 8.004,
+        "dedupe_issuer_memory": 0.001,
+        "exclude_global_keywords": 0.172,
+        "exclude_issuer_feed": 0.002,
+        "exclude_source_specific": 0.003,
+        "ontology_concepts": 0.01,
+        "ontology_status": 0.0,
+        "document_scoring": 0.0,
+        "regex_rules": 0.007
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 06:18:49 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "regex_rules",
+      "headline": "Newmark Acquires L+P Immobilienbewertung 1786083529.6807742",
+      "url": "http://diagnostic.test/shadow1"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-506BEEB51A22",
+        "event_id": "EVT-863CBAD13D5E",
+        "configuration_manifest_hash": "TEST_MANIFEST_HASH",
+        "execution_timestamp_gmt": "2026-08-07 06:16:29 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": []
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 47.819,
+        "dedupe_issuer_memory": 0.003,
+        "exclude_global_keywords": 0.316,
+        "exclude_issuer_feed": 0.004,
+        "exclude_source_specific": 0.007,
+        "ontology_concepts": 0.04
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 06:16:29 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Newmark Acquires L+P Immobilienbewertung 1786083389.7088628",
+      "url": "http://diagnostic.test/shadow1"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-27A1F57362F8",
+        "event_id": "EVT-D7CBC9DE1B70",
+        "configuration_manifest_hash": "TEST_MANIFEST_HASH",
+        "execution_timestamp_gmt": "2026-08-07 06:16:19 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": []
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 23.415,
+        "dedupe_issuer_memory": 0.003,
+        "exclude_global_keywords": 0.248,
+        "exclude_issuer_feed": 0.004,
+        "exclude_source_specific": 0.006,
+        "ontology_concepts": 0.037
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 06:16:19 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Newmark Acquires L+P Immobilienbewertung 1786083379.616756",
+      "url": "http://diagnostic.test/shadow1"
+    },
+    {
+      "manifest_registry": {
+        "decision_id": "DEC-E344F7DA821F",
+        "event_id": "EVT-F19DCED80085",
+        "configuration_manifest_hash": "TEST_MANIFEST_HASH",
+        "execution_timestamp_gmt": "2026-08-07 06:16:05 GMT",
+        "evidence_completeness_score": 1.0
+      },
+      "detection_vector": {
+        "outcome": "DROPPED",
+        "terminal_stage": "ontology_concepts",
+        "detected_event_type": "Corporate Announcement",
+        "target_ticker": "UNKNOWN",
+        "confidence_decomposition": {
+          "aggregate_confidence": 1.0
+        }
+      },
+      "ontology_metadata": {
+        "score": 0,
+        "matched": [],
+        "missing": []
+      },
+      "performance_telemetry_ms": {
+        "dedupe_hash": 9.78,
+        "dedupe_issuer_memory": 0.002,
+        "exclude_global_keywords": 0.312,
+        "exclude_issuer_feed": 0.004,
+        "exclude_source_specific": 0.007,
+        "ontology_concepts": 0.087
+      },
+      "syndication_lineage": {
+        "canonical_sensor_id": "System"
+      },
+      "timestamp": "2026-08-07 06:16:05 GMT",
+      "outcome": "DROPPED",
+      "pipeline_stage": "ontology_concepts",
+      "headline": "Newmark Acquires L+P Immobilienbewertung 1786083365.901954",
+      "url": "http://diagnostic.test/shadow1"
+    },
+    {
+      "manifest_registry": {
         "decision_id": "DEC-9C6FC552AD65",
         "event_id": "EVT-2C413F5B0281",
         "configuration_manifest_hash": "CFG-E27A55AAB456",
@@ -51623,873 +52276,6 @@
       "pipeline_stage": "ontology_concepts",
       "headline": "Morphic\u00ae Medical Announces New Board Appointments",
       "url": "https://www.prnewswire.com/news-releases/morphic-medical-announces-new-board-appointments-302844948.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-5EB073B23BB7",
-        "event_id": "EVT-81A58890498E",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:10 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 7.691,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 0.525,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 11.468
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:10 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "Largest, Longest Real-World Study of Migraine in U.S. Veterans Finds that Nerivio\u00ae Helps Patients Successfully Skip Prescribed Migraine Medications in 3-out-of-4 of Their Migraine Attacks",
-      "url": "https://www.prnewswire.com/news-releases/largest-longest-real-world-study-of-migraine-in-us-veterans-finds-that-nerivio-helps-patients-successfully-skip-prescribed-migraine-medications-in-3-out-of-4-of-their-migraine-attacks-302845006.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-4AED7430B0B5",
-        "event_id": "EVT-EA9BA823E0C7",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:10 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 8.025,
-        "dedupe_issuer_memory": 0.002,
-        "exclude_global_keywords": 0.482,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 10.895
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:10 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "JAMBA BRINGS SPA WEEKEND TO LIFE WITH LIMITED-TIME SMOOTHIE AND THE ULTIMATE GETAWAY SWEEPSTAKES",
-      "url": "https://www.prnewswire.com/news-releases/jamba-brings-spa-weekend-to-life-with-limited-time-smoothie-and-the-ultimate-getaway-sweepstakes-302844401.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-988B6215EDD3",
-        "event_id": "EVT-D1C20CEACFB0",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:10 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 30.244,
-        "dedupe_issuer_memory": 0.004,
-        "exclude_global_keywords": 0.615,
-        "exclude_issuer_feed": 0.013,
-        "ontology_concepts": 14.707
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:10 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "Royal Caribbean Group announces proposed offering of senior unsecured notes",
-      "url": "https://www.prnewswire.com/news-releases/royal-caribbean-group-announces-proposed-offering-of-senior-unsecured-notes-302845014.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-C7B5A261EE27",
-        "event_id": "EVT-8ABC00E8B76F",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:10 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 18.538,
-        "dedupe_issuer_memory": 0.002,
-        "exclude_global_keywords": 0.716,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 11.651
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:10 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "SIX FLAGS GREAT AMERICA ANNOUNCES CAMP TIMBER TRAIL, AN ALL-NEW FAMILY ADVENTURE FOR 2027",
-      "url": "https://www.prnewswire.com/news-releases/six-flags-great-america-announces-camp-timber-trail-an-all-new-family-adventure-for-2027-302844445.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-DF22EE7FBA94",
-        "event_id": "EVT-12C8DA8D27C0",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:10 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 11.863,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 0.381,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 7.021
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:10 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "Supermicro's Seventh Annual Open Storage Summit Brings Together 21 Ecosystem Partners to Share Practical Guidance on Deploying Enterprise AI at Scale",
-      "url": "https://www.prnewswire.com/news-releases/supermicros-seventh-annual-open-storage-summit-brings-together-21-ecosystem-partners-to-share-practical-guidance-on-deploying-enterprise-ai-at-scale-302844553.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-F2EFDE87BF61",
-        "event_id": "EVT-D97AD991A9F7",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:10 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 10.567,
-        "dedupe_issuer_memory": 0.002,
-        "exclude_global_keywords": 0.488,
-        "exclude_issuer_feed": 0.003,
-        "ontology_concepts": 6.422
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:10 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "thriveMD Announces Expansion with New Premier Clinic in Denver's Cherry Creek North",
-      "url": "https://www.prnewswire.com/news-releases/thrivemd-announces-expansion-with-new-premier-clinic-in-denvers-cherry-creek-north-302845012.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-50396E4BC7A1",
-        "event_id": "EVT-6C7AB35620EB",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:10 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 11.214,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 0.273,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 6.239
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:10 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "Gregory P. Linehan Earns 2026 Florida Super Lawyers Selection",
-      "url": "https://www.prnewswire.com/news-releases/gregory-p-linehan-earns-2026-florida-super-lawyers-selection-302843032.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-603E8A6A27AD",
-        "event_id": "EVT-A151BB53790A",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:10 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 7.157,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 0.33,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 6.565
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:10 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "Brain Corp Reports 68% Growth in Global Deployments as Enterprise Robots Log More Than 5.3 Million Autonomous Hours in H1 2026",
-      "url": "https://www.prnewswire.com/news-releases/brain-corp-reports-68-growth-in-global-deployments-as-enterprise-robots-log-more-than-5-3-million-autonomous-hours-in-h1-2026--302842609.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-20B448EF4903",
-        "event_id": "EVT-77DF9A3C2926",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:10 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 9.185,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 0.394,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 8.131
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:10 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "GardaWorld Security - U.S. Earns Great Place To Work Certification\u2122 for Fourth Consecutive Year, Underscoring People-First Culture",
-      "url": "https://www.prnewswire.com/news-releases/gardaworld-security--us-earns-great-place-to-work-certification-for-fourth-consecutive-year-underscoring-people-first-culture-302845009.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-B59347708879",
-        "event_id": "EVT-F37C096C0D08",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:10 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 7.929,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 0.551,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 10.67
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:10 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "Knorr and Meg Stalter Serve Up Weeknight-Ready, Slow-Roasted Flavor at the Ultimate Chicken Roast",
-      "url": "https://www.prnewswire.com/news-releases/knorr-and-meg-stalter-serve-up-weeknight-ready-slow-roasted-flavor-at-the-ultimate-chicken-roast-302844292.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-D550C682F32E",
-        "event_id": "EVT-94139C458A46",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:10 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 7.173,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 0.375,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 9.305
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:10 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "MedStar Georgetown Surgeons Make History with Three Single-Port Robotic Surgery Firsts in One Week",
-      "url": "https://www.prnewswire.com/news-releases/medstar-georgetown-surgeons-make-history-with-three-single-port-robotic-surgery-firsts-in-one-week-302844924.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-CEBBF3686FA5",
-        "event_id": "EVT-A45D6255E810",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:10 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 11.641,
-        "dedupe_issuer_memory": 0.002,
-        "exclude_global_keywords": 0.57,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 9.669
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:10 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "Authenticom Group Wins Pinnacle Award for Experiential Marketing Campaign at NADA Show 2026",
-      "url": "https://www.prnewswire.com/news-releases/authenticom-group-wins-pinnacle-award-for-experiential-marketing-campaign-at-nada-show-2026-302844134.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-318E29E740C4",
-        "event_id": "EVT-A938EBC32172",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:10 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 9.212,
-        "dedupe_issuer_memory": 0.002,
-        "exclude_global_keywords": 0.594,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 8.639
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:10 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "CAZ Investments Partners with SoFi to Democratize Access to Private Markets",
-      "url": "https://www.prnewswire.com/news-releases/caz-investments-partners-with-sofi-to-democratize-access-to-private-markets-302844954.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-9C4CCE5E7676",
-        "event_id": "EVT-78E8BE3A3231",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:10 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 9.371,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 0.694,
-        "exclude_issuer_feed": 0.003,
-        "ontology_concepts": 13.699
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:10 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "Vectra AI Achieves FedRAMP High Authorization Through Partnership with Knox Systems, Bringing AI-Native Security to Federal Agencies",
-      "url": "https://www.prnewswire.com/news-releases/vectra-ai-achieves-fedramp-high-authorization-through-partnership-with-knox-systems-bringing-ai-native-security-to-federal-agencies-302844517.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-77DA49C10FC6",
-        "event_id": "EVT-FBBC0EEC4CDA",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:10 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 7.562,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 0.297,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 6.58
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:10 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "DXC and Primary Launch AI-Native Zero Trust Platform for Enterprise AI",
-      "url": "https://www.prnewswire.com/news-releases/dxc-and-primary-launch-ai-native-zero-trust-platform-for-enterprise-ai-302844721.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-D8A960C1CD4C",
-        "event_id": "EVT-ED7C279C29BD",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:10 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 7.236,
-        "dedupe_issuer_memory": 0.001,
-        "exclude_global_keywords": 0.437,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 9.48
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:10 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "U.S. Robocalls Continue Upward Trend as Consumers Received More Than 4.3 Billion in July, According to YouMail Robocall Index",
-      "url": "https://www.prnewswire.com/news-releases/us-robocalls-continue-upward-trend-as-consumers-received-more-than-4-3-billion-in-july-according-to-youmail-robocall-index-302844784.html"
-    },
-    {
-      "manifest_registry": {
-        "decision_id": "DEC-73C5D646CE9D",
-        "event_id": "EVT-022C10C8C6BA",
-        "configuration_manifest_hash": "CFG-3CF2FC2E25A0",
-        "execution_timestamp_gmt": "2026-08-06 13:32:10 GMT",
-        "evidence_completeness_score": 1.0
-      },
-      "detection_vector": {
-        "outcome": "DROPPED",
-        "terminal_stage": "ontology_concepts",
-        "detected_event_type": "Corporate Announcement",
-        "target_ticker": "UNKNOWN",
-        "confidence_decomposition": {
-          "aggregate_confidence": 1.0
-        }
-      },
-      "ontology_metadata": {
-        "score": 0,
-        "matched": [],
-        "missing": [
-          "ACQUISITION",
-          "MERGER",
-          "TENDER_OFFER",
-          "TAKE_PRIVATE",
-          "GOING_PRIVATE",
-          "DELISTING",
-          "SPIN_OFF",
-          "LIQUIDATION",
-          "SPECIAL_DIVIDEND",
-          "RETURN_OF_CAPITAL",
-          "ACTIVIST_ACTION",
-          "STRATEGIC_REVIEW"
-        ]
-      },
-      "performance_telemetry_ms": {
-        "dedupe_hash": 8.748,
-        "dedupe_issuer_memory": 0.002,
-        "exclude_global_keywords": 0.573,
-        "exclude_issuer_feed": 0.002,
-        "ontology_concepts": 8.752
-      },
-      "syndication_lineage": {
-        "canonical_sensor_id": "System"
-      },
-      "timestamp": "2026-08-06 13:32:10 GMT",
-      "outcome": "DROPPED",
-      "pipeline_stage": "ontology_concepts",
-      "headline": "Shift Browser Awards Second Annual $25,000 Impact Grant to PhyCo",
-      "url": "https://www.prnewswire.com/news-releases/shift-browser-awards-second-annual-25-000-impact-grant-to-phyco-302844379.html"
     }
   ]
 }
