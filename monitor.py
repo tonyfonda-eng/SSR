@@ -519,7 +519,7 @@ def _record_screening(article: dict, telemetry: PipelineTelemetry, outcome: str,
         "ticker": company_name,
         "company_name": company_name,
         "event_family": article.get("_ai_classification"),
-        "ingestion_mode": article.get("_ingestion_mode", "UNKNOWN"),
+        "ingestion_mode": article.get("channel", "UNKNOWN"),
         "body_snippet": article.get("body", "")[:3000]
     }
     logger.info(f"[SCREENED] '{entry['headline'][:80]}' -> {outcome} @ {final_stage}" + (f" ({drop_reason})" if drop_reason else ""))
@@ -675,7 +675,7 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
                 v4_shadow_article = copy.deepcopy(article)
                 
         telemetry.track("alerts_generated")
-        mode = article.get("_ingestion_mode")
+        mode = article.get("channel")
         if mode == "RSS": telemetry.track("RSS_alerts")
         elif mode == "HTML": telemetry.track("HTML_alerts")
         
