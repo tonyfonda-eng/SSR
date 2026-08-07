@@ -388,11 +388,15 @@ def generate_markdown_report(date_str):
     engine_ver = os.environ.get("ENTITY_ENGINE_VERSION", "1")
     conn = get_db_connection(RESEARCH_DB)
     cursor = conn.cursor()
-    cursor.execute("""
-        SELECT decision_json FROM decision_capsule 
-        WHERE date(runtime_timestamp) = ?
-    """, (date_str,))
-    capsule_rows = cursor.fetchall()
+    capsule_rows = []
+    try:
+        cursor.execute("""
+            SELECT decision_json FROM decision_capsule 
+            WHERE date(runtime_timestamp) = ?
+        """, (date_str,))
+        capsule_rows = cursor.fetchall()
+    except Exception:
+        pass
     conn.close()
 
     shadow_agreements = 0
@@ -429,6 +433,8 @@ def generate_markdown_report(date_str):
     return "\n".join(md)
 
 def run_daily_audit():
+    from src.database import initialise_database
+    initialise_database()
     today = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
     print(f"Generating Institutional Flight Recorder V4 for {today}...")
     
