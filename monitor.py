@@ -756,9 +756,12 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
         
     finally:
         if v4_shadow_article and v2_outcome:
-            article_body = article.get('body', '')
-            article_hash = hashlib.sha256(article_body.encode('utf-8')).hexdigest()
-            run_v4_shadow_pipeline(v4_shadow_article, ctx, v2_outcome, telemetry, article_hash)
+            try:
+                article_body = article.get('body', '')
+                article_hash = hashlib.sha256(article_body.encode('utf-8')).hexdigest()
+                run_v4_shadow_pipeline(v4_shadow_article, ctx, v2_outcome, telemetry, article_hash)
+            except Exception as e:
+                logger.error(f"[SHADOW V4 CALL SITE FAULT] {e}")
 
 
 def validate_pipeline_dag(execution_order: list):
