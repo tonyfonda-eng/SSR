@@ -14,32 +14,68 @@ class PRNewsWireScraper(SourceScraper):
     RSS_URL = "https://www.prnewswire.com/rss/news-releases-list.rss"
     
     def get_latest_articles(self, **kwargs):
-        url = kwargs.get("url") or self.RSS_URL
+        import time
+        from bs4 import BeautifulSoup
+        
+        base_url = "https://www.prnewswire.com/news-releases/news-releases-list/"
         articles = []
+        checkpoint = kwargs.get("checkpoint")
         
-        headers = {"User-Agent": USER_AGENT}
+        self.scrape_metadata = {
+            "pages_visited": 0,
+            "page_limit": 20,
+            "checkpoint_found": False,
+            "emergency_stop": False,
+            "reason": "",
+            "last_checkpoint_url": checkpoint
+        }
         
-        try:
-            # We use curl_cffi to ensure any basic WAF caching is cleared
-            response = requests.get(url, headers=headers, impersonate="chrome120", timeout=15)
+        for page in range(1, self.scrape_metadata["page_limit"] + 1):
+            self.scrape_metadata["pages_visited"] = page
+            url = f"{base_url}?page={page}&pagesize=100"
+            headers = {"User-Agent": USER_AGENT}
             
-            if response.status_code == 200:
-                feed = feedparser.parse(response.content)
+            try:
+                response = requests.get(url, headers=headers, impersonate="chrome120", timeout=15)
+                if response.status_code != 200:
+                    self.scrape_metadata["reason"] = f"HTTP {response.status_code} on page {page}"
+                    break
+                    
+                soup = BeautifulSoup(response.text, "html.parser")
+                items = soup.select("a.newsreleaseconsolidatelink")
                 
-                for entry in feed.entries:
-                    article_id = entry.id if hasattr(entry, 'id') else entry.link
+                if not items:
+                    self.scrape_metadata["reason"] = f"No items found on page {page}"
+                    break
+                    
+                for item in items:
+                    href = item.get("href")
+                    if not href: continue
+                    full_url = href if href.startswith("http") else f"https://www.prnewswire.com{href}"
+                    
+                    if checkpoint and (full_url == checkpoint or href == checkpoint):
+                        self.scrape_metadata["checkpoint_found"] = True
+                        return articles
+                        
+                    title_elem = item.select_one("h3")
+                    title = title_elem.text.split("ET", 1)[-1].strip() if title_elem else "No title"
                     
                     articles.append({
-                        "id": article_id,
-                        "title": entry.title,
-                        "url": entry.link,
-                        "published": getattr(entry, 'published', '')
+                        "id": full_url,
+                        "title": title,
+                        "url": full_url,
+                        "published": ""
                     })
-            else:
-                print(f"[WARNING] PR Newswire Scraper returned HTTP {response.status_code}")
+                    
+                time.sleep(1)
                 
-        except Exception as e:
-            print(f"[ERROR] PR Newswire Scraper failed: {e}")
+            except Exception as e:
+                print(f"[ERROR] PR Newswire Scraper failed on page {page}: {e}")
+                self.scrape_metadata["reason"] = str(e)
+                break
+                
+        if self.scrape_metadata["pages_visited"] == self.scrape_metadata["page_limit"] and not self.scrape_metadata.get("checkpoint_found") and checkpoint:
+            self.scrape_metadata["emergency_stop"] = True
             
         print(f"    [PR Newswire] Total unique articles fetched: {len(articles)}")
         return articles
