@@ -421,7 +421,83 @@ def batch_append_daily_memory(sheet_url, new_issuers):
     worksheet.append_rows(rows)
 
 # Backward Compatibility Stubs
-def update_pipeline_metrics(sheet_url, *args, **kwargs): pass 
+def batch_update_source_telemetry(sheet_url, ingestion_ledger):
+    """
+    Updates the parsing metrics in the Sources sheet.
+    ingestion_ledger: list of dicts, each with 'source' and 'raw_found' (or 'unique_found')
+    """
+    if not ingestion_ledger:
+        return
+        
+    spreadsheet = get_spreadsheet(sheet_url)
+    try:
+        worksheet = spreadsheet.worksheet('Sources')
+        all_values = worksheet.get_all_values()
+    except Exception as e:
+        print(f"[SHEET ERROR] Could not fetch Sources sheet for telemetry: {e}")
+        return
+        
+    if not all_values or len(all_values) < 2:
+        return
+        
+    headers = all_values[0]
+    
+    # Locate columns
+    source_col_idx = None
+    parsed_col_idx = None
+    cumulative_col_idx = None
+    
+    for i, h in enumerate(headers):
+        h_lower = h.lower()
+        if "source" in h_lower and "name" not in h_lower and "url" not in h_lower:
+            source_col_idx = i
+        elif "parsed (last run)" in h_lower:
+            parsed_col_idx = i
+        elif "cumulative parsed (today)" in h_lower:
+            cumulative_col_idx = i
+            
+    if source_col_idx is None or parsed_col_idx is None or cumulative_col_idx is None:
+        print("[SHEET ERROR] Could not locate telemetry columns in Sources sheet.")
+        return
+        
+    # Map ledger to a dictionary
+    ledger_map = {}
+    for entry in ingestion_ledger:
+        src = entry.get("source")
+        if src:
+            # Aggregate if there are multiple entries for the same source
+            ledger_map[src] = ledger_map.get(src, 0) + entry.get("parsed_found", entry.get("raw_found", 0))
+            
+    cells_to_update = []
+    
+    for row_idx, row in enumerate(all_values):
+        if row_idx == 0:
+            continue
+            
+        if len(row) > source_col_idx:
+            src = row[source_col_idx].strip()
+            if src in ledger_map:
+                new_parsed = ledger_map[src]
+                
+                # Current cumulative
+                current_cum_str = row[cumulative_col_idx].strip() if len(row) > cumulative_col_idx else "0"
+                try:
+                    current_cum = int(current_cum_str) if current_cum_str.isdigit() else 0
+                except:
+                    current_cum = 0
+                    
+                new_cum = current_cum + new_parsed
+                
+                # Append cell updates
+                cells_to_update.append(gspread.Cell(row=row_idx + 1, col=parsed_col_idx + 1, value=new_parsed))
+                cells_to_update.append(gspread.Cell(row=row_idx + 1, col=cumulative_col_idx + 1, value=new_cum))
+                
+    if cells_to_update:
+        try:
+            worksheet.update_cells(cells_to_update)
+            print(f"[TELEMETRY] Successfully pushed parsing metrics for {len(ledger_map)} sources.")
+        except Exception as e:
+            print(f"[SHEET ERROR] Failed to push telemetry updates: {e}")
 def prune_daily_memory(sheet_url, *args, **kwargs): pass
 def log_ontology_review(sheet_url, *args, **kwargs): pass
 def aggregate_and_sync_yesterday(sheet_url, *args, **kwargs): pass

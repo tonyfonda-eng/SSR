@@ -8,7 +8,7 @@ import time
 import feedparser
 import requests
 from bs4 import BeautifulSoup
-from src.sheets import batch_update_last_checked
+from src.sheets import batch_update_last_checked, batch_update_source_telemetry
 from src.config.settings import SHEET_URL
 
 logger = logging.getLogger(__name__)
@@ -233,6 +233,12 @@ def fetch_all_feeds(active_sources: list = None) -> tuple:
             batch_update_last_checked(SHEET_URL, list(successful_sources))
         except Exception as sheet_err:
             logger.debug(f"[INGESTION] Failed to batch update Last Checked: {sheet_err}")
+            
+    if ingestion_ledger:
+        try:
+            batch_update_source_telemetry(SHEET_URL, ingestion_ledger)
+        except Exception as sheet_err:
+            logger.debug(f"[INGESTION] Failed to push source telemetry: {sheet_err}")
             
     logger.info(f"[INGESTION] Download sequence complete. Downloaded {len(articles)} raw articles across all channels.")
     return articles, ingestion_ledger
