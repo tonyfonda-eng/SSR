@@ -20,6 +20,7 @@ def _confidence_scored_merge(article: dict, existing_events: list) -> tuple:
     
     best_score = 0
     best_event = None
+    best_decision = None
     
     article_entities = {e.get("ticker") for e in article.get("_entities", []) if e.get("ticker") and e.get("ticker") != "UNKNOWN"}
     article_headline = article.get("headline", "")
@@ -42,15 +43,34 @@ def _confidence_scored_merge(article: dict, existing_events: list) -> tuple:
         created_at_str = row[4]
         
         score = 0
+        components = {
+            "entity_similarity": 0,
+            "headline_similarity": 0,
+            "time_proximity": 0,
+            "event_progression": 0,
+            "transaction_value_similarity": None
+        }
+        evidence_used = []
+        missing_evidence = ["transaction_value"]
+        reasoning_parts = []
         
         # 1. Entity Similarity (max 40)
         intersection = article_entities.intersection(existing_tickers)
         if intersection:
             score += 40
+            components["entity_similarity"] = 100
+            evidence_used.append("entity")
+            reasoning_parts.append(f"Shared entities ({', '.join(intersection)})")
+        else:
+            components["entity_similarity"] = 0
             
         # 2. Headline Similarity (max 30)
         seq_ratio = difflib.SequenceMatcher(None, article_headline.lower(), last_headline.lower()).ratio()
         score += int(seq_ratio * 30)
+        components["headline_similarity"] = int(seq_ratio * 100)
+        if seq_ratio > 0.5:
+            evidence_used.append("headline")
+            reasoning_parts.append("similar headline")
         
         # 3. Time Proximity (max 20)
         try:
@@ -59,20 +79,61 @@ def _confidence_scored_merge(article: dict, existing_events: list) -> tuple:
             hours_diff = (now - created_at).total_seconds() / 3600
             if hours_diff < 24:
                 score += 20
+                components["time_proximity"] = 100
+                evidence_used.append("time")
+                reasoning_parts.append(f"within {int(hours_diff)} hours")
             elif hours_diff < 72:
                 score += 10
+                components["time_proximity"] = 50
+                evidence_used.append("time")
+                reasoning_parts.append(f"within {int(hours_diff)} hours")
+            else:
+                components["time_proximity"] = 0
         except:
             pass
             
         # 4. Event Progression (max 10)
         if article.get("_v4_classification") == event_type:
             score += 10
+            components["event_progression"] = 100
+            evidence_used.append("progression")
+            reasoning_parts.append("matching event classification")
+        else:
+            components["event_progression"] = 0
+            
+        decision_val = "AUTO_MERGE" if score > 90 else "REVIEW" if score > 60 else "NEW_EVENT"
+            
+        decision_obj = {
+            "score": score,
+            "decision": decision_val,
+            "components": components,
+            "evidence_used": evidence_used,
+            "missing_evidence": missing_evidence,
+            "reasoning": ", ".join(reasoning_parts) if reasoning_parts else "No significant overlap."
+        }
             
         if score > best_score:
             best_score = score
             best_event = event_id
+            best_decision = decision_obj
             
-    return best_score, best_event
+    if best_decision is None:
+        best_decision = {
+            "score": 0,
+            "decision": "NEW_EVENT",
+            "components": {
+                "entity_similarity": 0,
+                "headline_similarity": 0,
+                "time_proximity": 0,
+                "event_progression": 0,
+                "transaction_value_similarity": None
+            },
+            "evidence_used": [],
+            "missing_evidence": ["transaction_value"],
+            "reasoning": "No existing events to merge against."
+        }
+        
+    return best_score, best_event, best_decision
 
 def stage_v4_ingestion(article: dict, ctx: dict) -> tuple:
     # Set internal tracking fields
@@ -148,7 +209,9 @@ def stage_v4_event_classification(article: dict, ctx: dict) -> tuple:
         """)
         recent_events = c.fetchall()
         
-        best_score, best_event = _confidence_scored_merge(article, recent_events)
+        best_score, best_event, merge_decision = _confidence_scored_merge(article, recent_events)
+        
+        article["_v4_merge_decision"] = merge_decision
         
         if best_score > 90:
             article["_v4_event_id"] = best_event
@@ -312,15 +375,22 @@ def stage_v4_routing(article: dict, ctx: dict) -> tuple:
         "entities": article.get("_entities", []),
         "routing_destination": "EMAIL_DISPATCH",
         "lifecycle": lifecycle,
-        "human_review_flag": article.get("_v4_human_review", 0)
+        "human_review_flag": article.get("_v4_human_review", 0),
+        "merge_decision": article.get("_v4_merge_decision", {})
     }
     
     try:
-        from src.alerts.email import send_v4_event_report
         log_event(event_data)
+    except Exception as e:
+        print(f"Routing failed on DB write: {e}")
+        return False, f"dropped_db_error: {e}"
+        
+    try:
+        from src.alerts.email import send_v4_event_report
         send_v4_event_report(event_data)
     except Exception as e:
-        print(f"Routing failed: {e}")
+        print(f"Email dispatch failed: {e}")
+        # Do not drop or fail the pipeline. The event is safely persisted as ACTIONABLE in the ledger.
         
     article["_v4_routed"] = True
     return True, "passed"

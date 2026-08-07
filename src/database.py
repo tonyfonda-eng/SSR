@@ -140,6 +140,7 @@ def init_db():
         r_conn.execute("ALTER TABLE event_ledger ADD COLUMN hypotheses TEXT;")
         r_conn.execute("ALTER TABLE event_ledger ADD COLUMN validated_trades TEXT;")
         r_conn.execute("ALTER TABLE event_ledger ADD COLUMN human_review_flag INTEGER DEFAULT 0;")
+        r_conn.execute("ALTER TABLE event_ledger ADD COLUMN merge_decision TEXT;")
     except sqlite3.OperationalError:
         pass
     
@@ -163,7 +164,8 @@ def init_db():
             entities TEXT,
             routing_destination TEXT,
             lifecycle TEXT,
-            human_review_flag INTEGER DEFAULT 0
+            human_review_flag INTEGER DEFAULT 0,
+            merge_decision TEXT
         );
     """)
     
@@ -362,8 +364,8 @@ def log_event(event_data: dict):
             INSERT OR REPLACE INTO event_ledger (
                 event_id, created_at, updated_at, status, event_type,
                 opportunity_score, entity_confidence, event_confidence, trade_confidence, financial_quality,
-                confidence_history, hypotheses, validated_trades, evidence, entities, routing_destination, lifecycle, human_review_flag
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                confidence_history, hypotheses, validated_trades, evidence, entities, routing_destination, lifecycle, human_review_flag, merge_decision
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             event_data["event_id"],
             event_data["created_at"],
@@ -382,7 +384,8 @@ def log_event(event_data: dict):
             json.dumps(event_data.get("entities", [])),
             event_data.get("routing_destination", "DROPPED"),
             json.dumps(event_data.get("lifecycle", [])),
-            event_data.get("human_review_flag", 0)
+            event_data.get("human_review_flag", 0),
+            json.dumps(event_data.get("merge_decision", {})) if event_data.get("merge_decision") else None
         ))
         conn.commit()
     finally:
