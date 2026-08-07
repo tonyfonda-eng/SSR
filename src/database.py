@@ -168,6 +168,56 @@ def init_db():
             merge_decision TEXT
         );
     """)
+
+    # --- V4 Shadow Ledger ---
+    r_conn.execute("""
+        CREATE TABLE IF NOT EXISTS v4_event_ledger (
+            event_id TEXT PRIMARY KEY,
+            created_at TEXT NOT NULL,
+            updated_at TEXT NOT NULL,
+            status TEXT NOT NULL,
+            event_type TEXT NOT NULL,
+            opportunity_score TEXT,
+            entity_confidence INTEGER,
+            event_confidence INTEGER,
+            trade_confidence INTEGER,
+            financial_quality INTEGER,
+            confidence_history TEXT,
+            hypotheses TEXT,
+            validated_trades TEXT,
+            evidence TEXT,
+            entities TEXT,
+            routing_destination TEXT,
+            lifecycle TEXT,
+            human_review_flag INTEGER DEFAULT 0,
+            merge_decision TEXT,
+            v2_outcome TEXT,
+            event_trace TEXT,
+            article_hash TEXT,
+            v4_run_id TEXT,
+            parent_run_id TEXT,
+            v4_outcome TEXT
+        );
+    """)
+    
+    try:
+        r_conn.execute("ALTER TABLE v4_event_ledger ADD COLUMN v2_outcome TEXT;")
+    except sqlite3.OperationalError: pass
+    try:
+        r_conn.execute("ALTER TABLE v4_event_ledger ADD COLUMN event_trace TEXT;")
+    except sqlite3.OperationalError: pass
+    try:
+        r_conn.execute("ALTER TABLE v4_event_ledger ADD COLUMN article_hash TEXT;")
+    except sqlite3.OperationalError: pass
+    try:
+        r_conn.execute("ALTER TABLE v4_event_ledger ADD COLUMN v4_run_id TEXT;")
+    except sqlite3.OperationalError: pass
+    try:
+        r_conn.execute("ALTER TABLE v4_event_ledger ADD COLUMN parent_run_id TEXT;")
+    except sqlite3.OperationalError: pass
+    try:
+        r_conn.execute("ALTER TABLE v4_event_ledger ADD COLUMN v4_outcome TEXT;")
+    except sqlite3.OperationalError: pass
     
     r_conn.commit()
     r_conn.close()
@@ -182,12 +232,27 @@ def init_db():
             articles INTEGER NOT NULL,
             errors INTEGER NOT NULL,
             drift_score REAL NOT NULL,
-            runtime REAL NOT NULL
+            runtime REAL NOT NULL,
+            engine_version TEXT,
+            execution_mode TEXT,
+            parent_run_id TEXT
         );
     """)
     
     try:
         d_conn.execute("ALTER TABLE workflow_health ADD COLUMN funnel_telemetry TEXT;")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        d_conn.execute("ALTER TABLE workflow_health ADD COLUMN engine_version TEXT;")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        d_conn.execute("ALTER TABLE workflow_health ADD COLUMN execution_mode TEXT;")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        d_conn.execute("ALTER TABLE workflow_health ADD COLUMN parent_run_id TEXT;")
     except sqlite3.OperationalError:
         pass
         
@@ -391,6 +456,99 @@ def log_event(event_data: dict):
     finally:
         conn.close()
 
+def log_v4_shadow_event(event_data: dict):
+    import json
+    conn = sqlite3.connect(RESEARCH_DB_PATH)
+    try:
+        event_id = event_data["event_id"]
+        cursor = conn.cursor()
+        
+        # Read existing record to handle append-aware fields
+        cursor.execute("SELECT confidence_history, evidence, event_trace FROM v4_event_ledger WHERE event_id = ?", (event_id,))
+        row = cursor.fetchone()
+        
+        new_conf = event_data.get("confidence_history", [])
+        new_evidence = event_data.get("evidence", [])
+        new_trace = event_data.get("event_trace", "")
+        
+        if row:
+            # Safely append arrays
+            try:
+                old_conf = json.loads(row[0]) if row[0] else []
+                for item in new_conf:
+                    if item not in old_conf:
+                        old_conf.append(item)
+                new_conf = old_conf
+            except: pass
+            
+            try:
+                old_evidence = json.loads(row[1]) if row[1] else []
+                for item in new_evidence:
+                    if item not in old_evidence:
+                        old_evidence.append(item)
+                new_evidence = old_evidence
+            except: pass
+            
+            try:
+                old_traces = json.loads(row[2]) if row[2] else []
+                if isinstance(old_traces, dict): old_traces = [old_traces]
+                if new_trace:
+                    new_trace_obj = json.loads(new_trace) if isinstance(new_trace, str) else new_trace
+                    # Idempotency check: don't append if a trace for this article_hash already exists
+                    if not any(t.get("article_hash") == new_trace_obj.get("article_hash") for t in old_traces):
+                        old_traces.append(new_trace_obj)
+                new_trace = old_traces
+            except: pass
+            
+        else:
+            if new_trace:
+                try:
+                    new_trace = [json.loads(new_trace) if isinstance(new_trace, str) else new_trace]
+                except:
+                    new_trace = []
+        
+        opportunity_score_dict = event_data.get("opportunity_score", {})
+        
+        # Explicit UPSERT pattern (simulated via REPLACE but preserving appends)
+        cursor.execute("""
+            INSERT OR REPLACE INTO v4_event_ledger (
+                event_id, created_at, updated_at, status, event_type,
+                opportunity_score, entity_confidence, event_confidence, trade_confidence, financial_quality,
+                confidence_history, hypotheses, validated_trades, evidence, entities, routing_destination, 
+                lifecycle, human_review_flag, merge_decision, v2_outcome, event_trace, 
+                article_hash, v4_run_id, parent_run_id, v4_outcome
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            event_id,
+            event_data["created_at"],
+            event_data["updated_at"],
+            event_data["status"],
+            event_data["event_type"],
+            json.dumps(opportunity_score_dict),
+            opportunity_score_dict.get("entity_confidence"),
+            opportunity_score_dict.get("event_confidence"),
+            opportunity_score_dict.get("trade_confidence"),
+            opportunity_score_dict.get("financial_quality"),
+            json.dumps(new_conf),
+            json.dumps(event_data.get("hypotheses", [])),
+            json.dumps(event_data.get("validated_trades", [])),
+            json.dumps(new_evidence),
+            json.dumps(event_data.get("entities", [])),
+            event_data.get("routing_destination", "SHADOW_NO_SEND"),
+            json.dumps(event_data.get("lifecycle", [])),
+            event_data.get("human_review_flag", 0),
+            json.dumps(event_data.get("merge_decision", {})) if event_data.get("merge_decision") else None,
+            json.dumps(event_data.get("v2_outcome", {})),
+            json.dumps(new_trace),
+            event_data.get("article_hash"),
+            event_data.get("v4_run_id"),
+            event_data.get("parent_run_id"),
+            json.dumps(event_data.get("v4_outcome", {}))
+        ))
+        conn.commit()
+    finally:
+        conn.close()
+
 def save_workflow_health(health_data=None):
     try:
         gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
@@ -399,8 +557,11 @@ def save_workflow_health(health_data=None):
         funnel_json = json.dumps(health_data.get('funnel', {})) if health_data else "{}"
         
         conn.execute("""
-            INSERT OR REPLACE INTO workflow_health (timestamp, run_id, total_scanned, articles, errors, drift_score, runtime, funnel_telemetry)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+            INSERT OR REPLACE INTO workflow_health (
+                timestamp, run_id, total_scanned, articles, errors, drift_score, runtime, funnel_telemetry,
+                engine_version, execution_mode, parent_run_id
+            )
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         """, (
             gmt_now,
             health_data.get('run_id', 'UNKNOWN') if health_data else 'UNKNOWN',
@@ -409,7 +570,10 @@ def save_workflow_health(health_data=None):
             health_data.get('errors', 0) if health_data else 0,
             health_data.get('drift_score', 0.0) if health_data else 0.0,
             health_data.get('runtime', 0.0) if health_data else 0.0,
-            funnel_json
+            funnel_json,
+            health_data.get('engine_version', 'V2') if health_data else 'V2',
+            health_data.get('execution_mode', 'LIVE') if health_data else 'LIVE',
+            health_data.get('parent_run_id') if health_data else None
         ))
         conn.commit()
         conn.close()

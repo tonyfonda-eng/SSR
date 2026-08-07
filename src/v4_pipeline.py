@@ -141,6 +141,8 @@ def stage_v4_ingestion(article: dict, ctx: dict) -> tuple:
     return True, "passed"
 
 def stage_v4_dedupe(article: dict, ctx: dict) -> tuple:
+    if ctx.get("is_shadow_mode", False):
+        return True, "passed (shadow bypass)"
     from monitor import stage_dedupe_hash
     return stage_dedupe_hash(article, ctx)
 
@@ -361,6 +363,8 @@ def stage_v4_routing(article: dict, ctx: dict) -> tuple:
     evidence.append(article.get("headline"))
     lifecycle.append({"timestamp": timestamp, "stage": "Actionable Alert"})
     
+    is_shadow = ctx.get("is_shadow_mode", False)
+    
     event_data = {
         "event_id": event_id,
         "created_at": created_at,
@@ -373,12 +377,17 @@ def stage_v4_routing(article: dict, ctx: dict) -> tuple:
         "validated_trades": article.get("_v4_validated_trades", []),
         "evidence": evidence,
         "entities": article.get("_entities", []),
-        "routing_destination": "EMAIL_DISPATCH",
+        "routing_destination": "SHADOW_NO_SEND" if is_shadow else "EMAIL_DISPATCH",
         "lifecycle": lifecycle,
         "human_review_flag": article.get("_v4_human_review", 0),
         "merge_decision": article.get("_v4_merge_decision", {})
     }
     
+    if is_shadow:
+        article["_v4_routed"] = True
+        return True, "passed"
+        
+    # V4 PRODUCTION EXECUTION BELOW THIS LINE
     try:
         log_event(event_data)
     except Exception as e:

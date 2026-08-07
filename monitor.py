@@ -603,174 +603,162 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
                     insert_idx = max(insert_idx, execution_order.index("ai_confidence_gate") + 1)
                 execution_order.insert(insert_idx, pg)
 
-    # If in SHADOW mode, run V2 pipeline on a clone to log discrepancies without affecting production V1 decision
-    if os.environ.get("ENTITY_ENGINE_VERSION") == "shadow":
-        try:
-            import copy
-            shadow_article = copy.deepcopy(article)
-            shadow_v2_order = [
-                "dedupe_hash", "dedupe_issuer_memory", "exclude_global_keywords", 
-                "exclude_issuer_feed", "exclude_source_specific", "ontology_concepts", 
-                "ontology_status", "document_scoring", "regex_rules", 
-                "python_issuer_extraction", "candidate_generator", "ambiguity_gate", 
-                "ai_entity_resolution", "graph_validation", "ai_event_classification", "ai_confidence_gate", 
-                "investment_universe_mapping", "strategy_selection", "investment_candidate_selection",
-                "entity_confidence_gate", "financial_market_cap", "tradeability_check", 
-                "financial_t12_floor", "options_chain_check", "liquidity_check", 
-                "playbook_eligibility_check"
-            ]
-            shadow_passed = True
-            shadow_terminal = "AI_APPROVED"
-            shadow_drop_reason = None
-            for s_stage in shadow_v2_order:
-                s_func = STAGE_REGISTRY.get(s_stage.lower())
-                if not s_func: continue
-                spassed, sreason = s_func(shadow_article, ctx)
-                if not spassed:
-                    shadow_passed = False
-                    shadow_terminal = s_stage
-                    shadow_drop_reason = sreason
-                    break
-            article["_shadow_mode_v2"] = {
-                "passed": shadow_passed,
-                "terminal_stage": shadow_terminal,
-                "drop_reason": shadow_drop_reason,
-                "target_ticker": shadow_article.get("_target_ticker", "UNKNOWN"),
-                "transaction_graph": shadow_article.get("_transaction_graph", {})
-            }
-            logger.info(f"[SHADOW MODE V2] '{article.get('headline')[:50]}' -> Passed: {shadow_passed} ({shadow_terminal})")
-        except Exception as e:
-            logger.error(f"[SHADOW MODE FAULT] {e}")
-
     stage_timings = {}
+    v4_shadow_article = None
+    v2_outcome = None
 
-    for stage_name in execution_order:
-        stage_func = STAGE_REGISTRY.get(stage_name.lower())
-        if not stage_func: 
-            logger.warning(f"Configuration requested unknown pipeline stage: {stage_name}")
-            continue
+    try:
+        for stage_name in execution_order:
+            stage_func = STAGE_REGISTRY.get(stage_name.lower())
+            if not stage_func: 
+                logger.warning(f"Configuration requested unknown pipeline stage: {stage_name}")
+                continue
+                
+            start_cpu = time.perf_counter_ns()
+            start_net = article.get("_net_time_accumulator", 0)
+            start_api = article.get("_api_call_accumulator", 0)
+
+            passed, drop_reason = stage_func(article, ctx)
             
-        start_cpu = time.perf_counter_ns()
-        start_net = article.get("_net_time_accumulator", 0)
-        start_api = article.get("_api_call_accumulator", 0)
-
-        passed, drop_reason = stage_func(article, ctx)
-        
-        delta_cpu = time.perf_counter_ns() - start_cpu
-        delta_net = article.get("_net_time_accumulator", start_net) - start_net
-        delta_api = article.get("_api_call_accumulator", start_api) - start_api
-        
-        stage_timings[stage_name] = round(delta_cpu / 1_000_000, 3)
-
-        telemetry.track_stage_performance(
-            stage=stage_name,
-            outcome="passed" if passed else "rejected",
-            cpu_ns=delta_cpu,
-            network_ns=delta_net,
-            api_calls=delta_api,
-            reason=drop_reason if not passed else "N/A"
-        )
-
-        if not passed:
-            telemetry.track(drop_reason)
-            _record_screening(article, telemetry, outcome="DROPPED", final_stage=stage_name, drop_reason=drop_reason)
+            delta_cpu = time.perf_counter_ns() - start_cpu
+            delta_net = article.get("_net_time_accumulator", start_net) - start_net
+            delta_api = article.get("_api_call_accumulator", start_api) - start_api
             
-            if stage_name != "dedupe_hash":
-                evt_id = article.get("_internal_event_id", "UNKNOWN")
-                dec_hash = hashlib.md5(f"{evt_id}:{time.time()}".encode()).hexdigest()[:12].upper()
-                decision_capsule = {
-                    "decision_id": f"DEC-{dec_hash}",
-                    "event_id": evt_id,
-                    "manifest_hash": manifest_hash,
-                    "runtime_timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT"),
-                    "detection_outcome": "DROPPED",
+            stage_timings[stage_name] = round(delta_cpu / 1_000_000, 3)
+
+            telemetry.track_stage_performance(
+                stage=stage_name,
+                outcome="passed" if passed else "rejected",
+                cpu_ns=delta_cpu,
+                network_ns=delta_net,
+                api_calls=delta_api,
+                reason=drop_reason if not passed else "N/A"
+            )
+
+            if not passed:
+                telemetry.track(drop_reason)
+                _record_screening(article, telemetry, outcome="DROPPED", final_stage=stage_name, drop_reason=drop_reason)
+                
+                if stage_name != "dedupe_hash":
+                    evt_id = article.get("_internal_event_id", "UNKNOWN")
+                    dec_hash = hashlib.md5(f"{evt_id}:{time.time()}".encode()).hexdigest()[:12].upper()
+                    decision_capsule = {
+                        "decision_id": f"DEC-{dec_hash}",
+                        "event_id": evt_id,
+                        "manifest_hash": manifest_hash,
+                        "runtime_timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT"),
+                        "detection_outcome": "DROPPED",
+                        "terminal_stage": stage_name,
+                        "headline": article.get("headline", "Corporate Announcement"),
+                        "url": article.get("url", "UNKNOWN"),
+                        "transaction_graph": article.get("_transaction_graph", {}),
+                        "shadow_mode_v2": article.get("_shadow_mode_v2", {}),
+                        "ontology_metadata": article.get("_ontology_metadata", {}),
+                        "execution_timings": stage_timings
+                    }
+                    commit_decision_capsule(decision_capsule)
+                    
+                v2_outcome = {
+                    "engine": "V2",
+                    "status": "DROP",
                     "terminal_stage": stage_name,
-                    "headline": article.get("headline", "Corporate Announcement"),
-                    "url": article.get("url", "UNKNOWN"),
-                    "transaction_graph": article.get("_transaction_graph", {}),
-                    "shadow_mode_v2": article.get("_shadow_mode_v2", {}),
-                    "ontology_metadata": article.get("_ontology_metadata", {}),
-                    "execution_timings": stage_timings
+                    "reason": drop_reason,
+                    "event_type": article.get("_ai_classification", "UNKNOWN"),
+                    "ticker": article.get("_target_ticker", article.get("_deterministic_ticker", "UNKNOWN")),
+                    "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT"),
+                    "run_id": telemetry.run_id
                 }
-                commit_decision_capsule(decision_capsule)
-            return False
-            
-    telemetry.track("alerts_generated")
-    mode = article.get("_ingestion_mode")
-    if mode == "RSS": telemetry.track("RSS_alerts")
-    elif mode == "HTML": telemetry.track("HTML_alerts")
-    
-    event_id = article.get("_internal_event_id", "UNKNOWN")
-    ticker = article.get("_ai_ticker", "UNKNOWN")
-    event_family = article.get("_ai_classification", "Corporate Announcement")
-    
-    decision_capsule = {
-        "decision_id": f"DEC-{hashlib.md5(f'{event_id}:{ticker}'.encode()).hexdigest()[:12].upper()}",
-        "event_id": event_id,
-        "manifest_hash": manifest_hash,
-        "runtime_timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT"),
-        "detection_outcome": "DETECTED",
-        "terminal_stage": "AI_APPROVED",
-        "headline": article.get("headline", "Corporate Announcement"),
-        "url": article.get("url", "UNKNOWN"),
-        "target_ticker": article.get("_target_ticker", ticker),
-        "transaction_graph": article.get("_transaction_graph", {}),
-        "shadow_mode_v2": article.get("_shadow_mode_v2", {}),
-        "ai_core_inference": {
-            "aggregate_confidence": article.get("_ai_confidence", 1.0),
-            "parsed_structural_properties": {"ticker": ticker}
-        },
-        "ontology_metadata": article.get("_ontology_metadata", {}),
-        "execution_timings": stage_timings
-    }
-    
-    commit_decision_capsule(decision_capsule)
-    logger.info(f"[ALERT GENERATED] {ticker} - {event_family}")
-    _record_screening(article, telemetry, outcome="PASSED", final_stage="AI_APPROVED")
-    
-    try:
-        if ticker != "UNKNOWN":
-            batch_append_daily_memory(SHEET_URL, [ticker])
-            
-        append_to_research_queue(SHEET_URL, {
-            "timestamp": decision_capsule["runtime_timestamp"],
-            "ticker": ticker,
-            "issuer": ticker,
-            "event_family": event_family,
-            "url": decision_capsule["url"],
-            "status": "Alert Dispatched"
-        })
-    except Exception as e:
-        logger.error(f"[SHEETS SYNC FAULT] Failed to update Daily Memory or Research Queue: {e}")
+                return False
 
-    try:
-        send_alert(decision_capsule)
-    except Exception as e:
-        logger.error(f"[EMAIL DISPATCH FAILED] Unable to send alert for {ticker}: {e}")
+            if stage_name == "dedupe_hash" and os.environ.get("ENTITY_ENGINE_VERSION") == "shadow":
+                import copy
+                v4_shadow_article = copy.deepcopy(article)
+                
+        telemetry.track("alerts_generated")
+        mode = article.get("_ingestion_mode")
+        if mode == "RSS": telemetry.track("RSS_alerts")
+        elif mode == "HTML": telemetry.track("HTML_alerts")
         
-    return True
-
-
-def validate_pipeline_dag(execution_order: list):
-    version = os.environ.get("ENTITY_ENGINE_VERSION", "1")
-    if version == "1":
-        return
+        event_id = article.get("_internal_event_id", "UNKNOWN")
+        ticker = article.get("_ai_ticker", "UNKNOWN")
+        event_family = article.get("_ai_classification", "Corporate Announcement")
         
-    required_order = [
-        ("candidate_generator", "ambiguity_gate"),
-        ("ai_event_classification", "strategy_selection")
-    ]
-    
-    for first, second in required_order:
-        if first in execution_order and second in execution_order:
-            if execution_order.index(first) > execution_order.index(second):
-                err = f"CRITICAL: Invalid Pipeline DAG. {first} MUST PRECEDE {second}."
-                try:
-                    from src.alerts.email import send_alert
-                    send_alert({"headline": err, "drop_reason": "DAG Error", "decision_id": "SYS", "final_stage": "DAG_VALIDATION", "pipeline_metrics": {}}, force_email=True)
-                except:
-                    pass
-                raise ValueError(err)
+        decision_capsule = {
+            "decision_id": f"DEC-{hashlib.md5(f'{event_id}:{ticker}'.encode()).hexdigest()[:12].upper()}",
+            "event_id": event_id,
+            "manifest_hash": manifest_hash,
+            "runtime_timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT"),
+            "detection_outcome": "DETECTED",
+            "terminal_stage": "AI_APPROVED",
+            "headline": article.get("headline", "Corporate Announcement"),
+            "url": article.get("url", "UNKNOWN"),
+            "target_ticker": article.get("_target_ticker", ticker),
+            "transaction_graph": article.get("_transaction_graph", {}),
+            "shadow_mode_v2": article.get("_shadow_mode_v2", {}),
+            "ai_core_inference": {
+                "aggregate_confidence": article.get("_ai_confidence", 1.0),
+                "parsed_structural_properties": {"ticker": ticker}
+            },
+            "ontology_metadata": article.get("_ontology_metadata", {}),
+            "execution_timings": stage_timings
+        }
+        
+        commit_decision_capsule(decision_capsule)
+        logger.info(f"[ALERT GENERATED] {ticker} - {event_family}")
+        _record_screening(article, telemetry, outcome="PASSED", final_stage="AI_APPROVED")
+        
+        try:
+            if ticker != "UNKNOWN":
+                batch_append_daily_memory(SHEET_URL, [ticker])
+                
+            append_to_research_queue(SHEET_URL, {
+                "timestamp": decision_capsule["runtime_timestamp"],
+                "ticker": ticker,
+                "issuer": ticker,
+                "event_family": event_family,
+                "url": decision_capsule["url"],
+                "status": "Alert Dispatched"
+            })
+        except Exception as e:
+            logger.error(f"[SHEETS SYNC FAULT] Failed to update Daily Memory or Research Queue: {e}")
+
+        try:
+            send_alert(decision_capsule)
+        except Exception as e:
+            logger.error(f"[EMAIL DISPATCH FAILED] Unable to send alert for {ticker}: {e}")
+            
+        v2_outcome = {
+            "engine": "V2",
+            "status": "ALERT",
+            "terminal_stage": "AI_APPROVED",
+            "reason": None,
+            "event_type": article.get("_ai_classification", "UNKNOWN"),
+            "ticker": article.get("_target_ticker", article.get("_deterministic_ticker", "UNKNOWN")),
+            "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT"),
+            "run_id": telemetry.run_id
+        }
+            
+        return True
+        
+    except Exception as e:
+        v2_outcome = {
+            "engine": "V2",
+            "status": "ERROR",
+            "terminal_stage": locals().get('stage_name', 'UNKNOWN'),
+            "reason": str(e),
+            "event_type": article.get("_ai_classification", "UNKNOWN"),
+            "ticker": article.get("_target_ticker", article.get("_deterministic_ticker", "UNKNOWN")),
+            "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT"),
+            "run_id": telemetry.run_id
+        }
+        raise
+        
+    finally:
+        if v4_shadow_article and v2_outcome:
+            article_body = article.get('body', '')
+            article_hash = hashlib.sha256(article_body.encode('utf-8')).hexdigest()
+            run_v4_shadow_pipeline(v4_shadow_article, ctx, v2_outcome, telemetry, article_hash)
+
 
 def validate_pipeline_dag(execution_order: list):
     version = os.environ.get("ENTITY_ENGINE_VERSION", "1")
@@ -797,6 +785,177 @@ def validate_pipeline_dag(execution_order: list):
                     logger.error(f"Failed to send DAG alert: {e}")
                 raise ValueError(err)
 
+def run_v4_shadow_pipeline(article: dict, parent_ctx: dict, v2_outcome: dict, parent_telemetry: PipelineTelemetry, article_hash: str):
+    try:
+        ctx = parent_ctx.copy()
+        ctx["is_shadow_mode"] = True
+        ctx["v2_outcome"] = v2_outcome
+        
+        # Initialize isolated telemetry for V4
+        v4_telemetry = PipelineTelemetry()
+        v4_telemetry.run_id = f"V4_SHADOW-{parent_telemetry.run_id}"
+        
+        execution_order = [
+            "v4_ingestion",
+            "v4_entity_resolution",
+            "v4_event_classification",
+            "v4_trade_hypothesis_generation",
+            "v4_strategy_validation",
+            "v4_opportunity_score",
+            "v4_routing"
+        ]
+        
+        trace_data = {
+            "stages": [],
+            "article_hash": article_hash,
+            "v4_run_id": v4_telemetry.run_id
+        }
+        final_terminal = "AI_APPROVED"
+        passed_all = True
+        v4_outcome = None
+        
+        for stage_name in execution_order:
+            stage_func = STAGE_REGISTRY.get(stage_name.lower())
+            if not stage_func: continue
+            
+            start_cpu = time.perf_counter_ns()
+            start_net = article.get("_net_time_accumulator", 0)
+            start_api = article.get("_api_call_accumulator", 0)
+            
+            passed, reason = stage_func(article, ctx)
+            
+            delta_cpu = time.perf_counter_ns() - start_cpu
+            delta_net = article.get("_net_time_accumulator", start_net) - start_net
+            delta_api = article.get("_api_call_accumulator", start_api) - start_api
+            
+            v4_telemetry.track_stage_performance(
+                stage=stage_name,
+                outcome="passed" if passed else "rejected",
+                cpu_ns=delta_cpu,
+                network_ns=delta_net,
+                api_calls=delta_api,
+                reason=reason if not passed else "N/A"
+            )
+            
+            duration_ms = round(delta_cpu / 1_000_000, 3)
+            trace_entry = {
+                "stage": stage_name,
+                "status": "PASS" if passed else "FAIL",
+                "duration_ms": duration_ms
+            }
+            if not passed:
+                trace_entry["reason"] = reason
+            elif stage_name == "v4_routing":
+                trace_entry["status"] = "SHADOW_NO_SEND"
+            elif stage_name == "v4_event_classification":
+                trace_entry["event_type"] = article.get('_v4_classification')
+                trace_entry["confidence"] = article.get('_v4_confidence')
+            elif stage_name == "v4_opportunity_score":
+                trace_entry["score"] = article.get("opportunity_score", {}).get("normalized_score")
+                
+            trace_data["stages"].append(trace_entry)
+            
+            if not passed:
+                final_terminal = stage_name
+                passed_all = False
+                break
+                
+        v4_outcome = {
+            "engine": "V4",
+            "execution_mode": "SHADOW",
+            "status": "ALERT" if passed_all else "DROP",
+            "terminal_stage": final_terminal,
+            "reason": reason if not passed_all else None,
+            "parent_run_id": parent_telemetry.run_id,
+            "v4_run_id": v4_telemetry.run_id,
+            "article_hash": article_hash
+        }
+        
+    except Exception as e:
+        logger.error(f"[SHADOW V4 FAULT] {e}")
+        v4_outcome = {
+            "engine": "V4",
+            "execution_mode": "SHADOW",
+            "status": "ERROR",
+            "terminal_stage": locals().get('stage_name', 'UNKNOWN'),
+            "reason": str(e),
+            "parent_run_id": parent_telemetry.run_id,
+            "v4_run_id": v4_telemetry.run_id,
+            "article_hash": article_hash
+        }
+    finally:
+        # Save isolated telemetry
+        try:
+            health_data = {
+                'run_id': v4_telemetry.run_id,
+                'total_scanned': 1,
+                'articles': 1,
+                'errors': 1 if v4_outcome.get("status") == "ERROR" else 0,
+                'drift_score': 0.0,
+                'runtime': v4_telemetry.get_runtime(),
+                'funnel': v4_telemetry.stage_analytics,
+                'engine_version': 'V4',
+                'execution_mode': 'SHADOW',
+                'parent_run_id': parent_telemetry.run_id
+            }
+            save_workflow_health(health_data)
+        except Exception as e:
+            logger.error(f"[SHADOW V4 TELEMETRY FAULT] {e}")
+
+        # Ensure V4 state persistence
+        try:
+            from src.database import log_v4_shadow_event
+            event_id = article.get("_v4_event_id", article.get("_internal_event_id", "UNKNOWN"))
+            event_data = {
+                "event_id": event_id,
+                "created_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "updated_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+                "status": "ACTIONABLE" if v4_outcome.get("status") == "ALERT" else "DROPPED",
+                "event_type": article.get("_v4_classification", "UNKNOWN"),
+                "opportunity_score": article.get("opportunity_score", {}),
+                "confidence_history": article.get("_v4_confidence_history", []),
+                "hypotheses": article.get("_v4_hypotheses", []),
+                "validated_trades": article.get("_v4_validated_trades", []),
+                "evidence": article.get("_v4_evidence", []),
+                "entities": article.get("_entities", []),
+                "routing_destination": "SHADOW_NO_SEND",
+                "lifecycle": article.get("_lifecycle", []),
+                "human_review_flag": article.get("_v4_human_review", 0),
+                "merge_decision": article.get("_v4_merge_decision", {}),
+                "v2_outcome": v2_outcome,
+                "event_trace": trace_data,
+                "article_hash": article_hash,
+                "v4_run_id": v4_telemetry.run_id,
+                "parent_run_id": parent_telemetry.run_id,
+                "v4_outcome": v4_outcome
+            }
+            log_v4_shadow_event(event_data)
+        except Exception as e:
+            logger.error(f"[SHADOW V4 DB FAULT] {e}")
+
+        # Generate pretty string trace for stdout
+        try:
+            trace_str = []
+            trace_str.append("EVENT TRACE")
+            trace_str.append("-----------")
+            trace_str.append(f"Article: {article.get('headline')}")
+            trace_str.append(f"Source: {article.get('source')}")
+            trace_str.append(f"Published: {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M')}")
+            trace_str.append("")
+            for stage in trace_data["stages"]:
+                extra = ""
+                if "reason" in stage: extra = f"  {stage['reason']}"
+                elif "event_type" in stage: extra = f"  {stage['event_type']} confidence={stage.get('confidence')}"
+                elif "score" in stage: extra = f"  score={stage.get('score')}"
+                trace_str.append(f"{stage['stage'].ljust(30)} {stage['status']}{extra}")
+                
+            trace_str.append("")
+            trace_str.append(f"V2 Outcome: {v2_outcome.get('status')} @ {v2_outcome.get('terminal_stage')}")
+            trace_str.append(f"V4 Outcome: {v4_outcome.get('status')} @ {v4_outcome.get('terminal_stage')}")
+            
+            print("\n" + "\n".join(trace_str) + "\n")
+        except Exception as e:
+            pass
 def main():
     logger.info("Initializing SSR 2.0 Highly Granular Pipeline...")
     try:

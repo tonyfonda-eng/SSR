@@ -1,24 +1,12 @@
 {
-  "timestamp": "2026-08-06T13:33:12.295241+00:00",
+  "timestamp": "2026-08-07T06:10:22.486170+00:00",
   "source_metrics": [
     {
-      "source": "PR Newswire",
-      "mode": "HTML",
-      "grade": "F",
-      "status_light": "\ud83d\udd34",
-      "raw": 370,
-      "avg_30d": 0,
-      "dev_pct": 0,
-      "lifetime_rel": 66.7,
-      "emergency_stop": true,
-      "reason": "Hit 20,000 limit,"
-    },
-    {
-      "source": "EQS News (Germany)",
+      "source": "SEC Edgar",
       "mode": "HTML",
       "grade": "A+",
       "status_light": "\ud83d\udfe2",
-      "raw": 98,
+      "raw": 404,
       "avg_30d": 0,
       "dev_pct": 0,
       "lifetime_rel": 100.0,
@@ -26,11 +14,23 @@
       "reason": ""
     },
     {
-      "source": "SEC Edgar",
+      "source": "PR Newswire",
       "mode": "HTML",
       "grade": "A+",
       "status_light": "\ud83d\udfe2",
-      "raw": 95,
+      "raw": 157,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 80.0,
+      "emergency_stop": false,
+      "reason": ""
+    },
+    {
+      "source": "EQS News (Germany)",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 99,
       "avg_30d": 0,
       "dev_pct": 0,
       "lifetime_rel": 100.0,
@@ -42,7 +42,7 @@
       "mode": "HTML",
       "grade": "A+",
       "status_light": "\ud83d\udfe2",
-      "raw": 54,
+      "raw": 77,
       "avg_30d": 0,
       "dev_pct": 0,
       "lifetime_rel": 100.0,
@@ -64,14 +64,14 @@
     {
       "source": "PR Newswire",
       "mode": "RSS",
-      "grade": "F",
-      "status_light": "\ud83d\udd34",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
       "raw": 20,
       "avg_30d": 0,
       "dev_pct": 0,
-      "lifetime_rel": 66.7,
-      "emergency_stop": true,
-      "reason": "Hit 20,000 limit,"
+      "lifetime_rel": 80.0,
+      "emergency_stop": false,
+      "reason": ""
     },
     {
       "source": "Finansinspektionen (Sweden)",
@@ -123,18 +123,6 @@
     },
     {
       "source": "NewsWeb (Norway)",
-      "mode": "HTML",
-      "grade": "A+",
-      "status_light": "\ud83d\udfe2",
-      "raw": 1,
-      "avg_30d": 0,
-      "dev_pct": 0,
-      "lifetime_rel": 100.0,
-      "emergency_stop": false,
-      "reason": ""
-    },
-    {
-      "source": "Special Situations Digest",
       "mode": "HTML",
       "grade": "A+",
       "status_light": "\ud83d\udfe2",
