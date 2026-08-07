@@ -26,7 +26,8 @@ class OTCScraper(SourceScraper):
         
         try:
             # Query the first page with a solid chunk of articles
-            url = f"{self.API_URL}?page=1&pageSize=50"
+            base_url = kwargs.get("url") or self.API_URL
+            url = f"{base_url}?page=1&pageSize=50" if "?" not in base_url else base_url
             
             # Use curl_cffi to bypass Cloudflare/WAF on the backend API
             response = requests.get(url, headers=headers, impersonate="chrome120", timeout=10)
