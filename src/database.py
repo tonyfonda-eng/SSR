@@ -20,6 +20,13 @@ AUDIT_DB_PATH = "ssr_audit.db"
 # Alias for legacy modules expecting DB_PATH
 DB_PATH = RESEARCH_DB_PATH
 
+def _get_connection(db_path: str):
+    conn = sqlite3.connect(db_path, timeout=30.0)
+    # Ensure WAL mode is active for concurrency
+    conn.execute("PRAGMA journal_mode = WAL;")
+    conn.execute("PRAGMA synchronous = NORMAL;")
+    return conn
+
 
 def init_db():
     """
@@ -27,7 +34,7 @@ def init_db():
     and the DevOps Workflow log using strict timezone-aware UTC paradigms.
     """
     os.makedirs(os.path.dirname(os.path.abspath(RESEARCH_DB_PATH)), exist_ok=True)
-    r_conn = sqlite3.connect(RESEARCH_DB_PATH)
+    r_conn = _get_connection(RESEARCH_DB_PATH)
     r_conn.execute("PRAGMA foreign_keys = ON;")
     
     r_conn.execute("""
@@ -223,7 +230,7 @@ def init_db():
     r_conn.close()
 
     os.makedirs(os.path.dirname(os.path.abspath(DEVOPS_DB_PATH)), exist_ok=True)
-    d_conn = sqlite3.connect(DEVOPS_DB_PATH)
+    d_conn = _get_connection(DEVOPS_DB_PATH)
     d_conn.execute("""
         CREATE TABLE IF NOT EXISTS workflow_health (
             timestamp TEXT PRIMARY KEY,
@@ -261,7 +268,7 @@ def init_db():
 
     # --- V4 Audit Database ---
     os.makedirs(os.path.dirname(os.path.abspath(AUDIT_DB_PATH)), exist_ok=True)
-    a_conn = sqlite3.connect(AUDIT_DB_PATH)
+    a_conn = _get_connection(AUDIT_DB_PATH)
     a_conn.execute("""
         CREATE TABLE IF NOT EXISTS daily_source_metrics (
             run_id TEXT NOT NULL,
@@ -310,7 +317,7 @@ def initialise_database():
 
 def get_latest_config_snapshot() -> dict:
     try:
-        conn = sqlite3.connect(RESEARCH_DB_PATH)
+        conn = _get_connection(RESEARCH_DB_PATH)
         cursor = conn.cursor()
         cursor.execute("SELECT hash, captured_at, run_id, config_json FROM config_snapshots ORDER BY captured_at DESC LIMIT 1")
         row = cursor.fetchone()
@@ -324,7 +331,7 @@ def get_latest_config_snapshot() -> dict:
 def save_config_snapshot(config_hash: str, run_id: str, config_json: str):
     try:
         gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
-        conn = sqlite3.connect(RESEARCH_DB_PATH)
+        conn = _get_connection(RESEARCH_DB_PATH)
         conn.execute("INSERT OR IGNORE INTO config_snapshots (hash, captured_at, run_id, config_json) VALUES (?, ?, ?, ?);", 
                      (config_hash, gmt_now, run_id, config_json))
         conn.commit()
@@ -333,7 +340,7 @@ def save_config_snapshot(config_hash: str, run_id: str, config_json: str):
         pass
 
 def get_or_create_event(article_hash: str, raw_payload: bytes, mime_type: str = "text/html") -> tuple:
-    conn = sqlite3.connect(RESEARCH_DB_PATH)
+    conn = _get_connection(RESEARCH_DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT event_id FROM event_registry WHERE article_hash = ? LIMIT 1;", (article_hash,))
     row = cursor.fetchone()
@@ -358,7 +365,7 @@ def get_or_create_event(article_hash: str, raw_payload: bytes, mime_type: str = 
 def log_article_screening(entry: dict) -> None:
     try:
         gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
-        conn = sqlite3.connect(RESEARCH_DB_PATH)
+        conn = _get_connection(RESEARCH_DB_PATH)
         conn.execute("""
             INSERT INTO article_screening_log
             (run_id, timestamp, headline, url, source, outcome, final_stage, drop_reason, ticker, company_name, event_family, ingestion_mode)
@@ -384,7 +391,7 @@ def log_article_screening(entry: dict) -> None:
         
 def commit_decision_capsule(capsule_data: dict, manifest_json: dict = None):
     try:
-        conn = sqlite3.connect(RESEARCH_DB_PATH)
+        conn = _get_connection(RESEARCH_DB_PATH)
         cursor = conn.cursor()
         dec_id = capsule_data["decision_id"]
         
@@ -422,7 +429,7 @@ def commit_decision_capsule(capsule_data: dict, manifest_json: dict = None):
 
 def log_event(event_data: dict):
     import json
-    conn = sqlite3.connect(RESEARCH_DB_PATH)
+    conn = _get_connection(RESEARCH_DB_PATH)
     try:
         opportunity_score_dict = event_data.get("opportunity_score", {})
         conn.execute("""
@@ -458,7 +465,7 @@ def log_event(event_data: dict):
 
 def log_v4_shadow_event(event_data: dict):
     import json
-    conn = sqlite3.connect(RESEARCH_DB_PATH)
+    conn = _get_connection(RESEARCH_DB_PATH)
     try:
         event_id = event_data["event_id"]
         cursor = conn.cursor()
@@ -552,7 +559,7 @@ def log_v4_shadow_event(event_data: dict):
 def save_workflow_health(health_data=None):
     try:
         gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
-        conn = sqlite3.connect(DEVOPS_DB_PATH)
+        conn = _get_connection(DEVOPS_DB_PATH)
         
         funnel_json = json.dumps(health_data.get('funnel', {})) if health_data else "{}"
         
@@ -586,7 +593,7 @@ def save_source_stats(*args, **kwargs): pass
 def log_audit_source_metrics(run_id: str, ledger: list):
     try:
         gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
-        conn = sqlite3.connect(AUDIT_DB_PATH)
+        conn = _get_connection(AUDIT_DB_PATH)
         for entry in ledger:
             meta = entry.get("metadata", {})
             conn.execute("""
@@ -607,7 +614,7 @@ def log_audit_source_metrics(run_id: str, ledger: list):
 def log_audit_ai_metrics(run_id: str, telemetry: list):
     try:
         gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
-        conn = sqlite3.connect(AUDIT_DB_PATH)
+        conn = _get_connection(AUDIT_DB_PATH)
         for t in telemetry:
             conn.execute("""
                 INSERT INTO daily_ai_metrics 
@@ -627,7 +634,7 @@ def log_audit_event(run_id: str, source_or_provider: str, event_type: str, sever
     """Writes a black-box event log directly to the audit database."""
     try:
         gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
-        conn = sqlite3.connect(AUDIT_DB_PATH)
+        conn = _get_connection(AUDIT_DB_PATH)
         conn.execute("""
             INSERT INTO audit_events 
             (timestamp, run_id, source_or_provider, event_type, severity, details)

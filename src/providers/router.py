@@ -42,9 +42,15 @@ class ProviderRouter:
                 
         return keys
 
-    def update_config(self, settings: dict):
+    def update_config(self, settings: list):
         """Injects dynamic settings from The Brain (Google Sheets)."""
-        self.settings = settings
+        self.settings = {}
+        if isinstance(settings, list):
+            for item in settings:
+                if isinstance(item, dict) and "Setting Name" in item:
+                    self.settings[item["Setting Name"]] = item.get("Value")
+        elif isinstance(settings, dict):
+            self.settings = settings
         
     def get_telemetry(self) -> List[Dict]:
         """Returns the accumulated telemetry for this run."""
@@ -77,10 +83,12 @@ class ProviderRouter:
                     success = False
                     output = ""
                     
+                    configured_model = self.settings.get("Default AI Model", "Gemini-1.5-Pro")
+                    
                     if provider == "gemini":
-                        output, tokens_in, tokens_out = self._call_gemini(prompt, current_key, require_json)
+                        output, tokens_in, tokens_out = self._call_gemini(prompt, current_key, require_json, configured_model)
                     elif provider == "openrouter":
-                        output, tokens_in, tokens_out = self._call_openrouter(prompt, current_key, require_json)
+                        output, tokens_in, tokens_out = self._call_openrouter(prompt, current_key, require_json, configured_model)
                         
                     latency_ms = int((time.time() - start_time) * 1000)
                     success = True
@@ -132,7 +140,7 @@ class ProviderRouter:
                         break 
                         
                     else:
-                        logger.error(f"[AI ROUTER] Unexpected HTTP {status_code} from {provider}: {e}")
+                        logger.error(f"[AI ROUTER] Unexpected HTTP {status_code} from {provider}: {e}. (Model misconfigured?)")
                         self.events.append({"source_or_provider": provider, "event_type": f"HTTP_{status_code}", "severity": "CRITICAL", "details": str(e)})
                         break
                         
@@ -145,9 +153,15 @@ class ProviderRouter:
         self.events.append({"source_or_provider": "SYSTEM", "event_type": "AI_EXHAUSTED", "severity": "CRITICAL", "details": "All providers failed or exhausted."})
         return "EXHAUSTED"
 
-    def _call_gemini(self, prompt: str, api_key: str, require_json: bool) -> str:
+    def _call_gemini(self, prompt: str, api_key: str, require_json: bool, configured_model: str) -> str:
         """Executes API call to Google Gemini REST API."""
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
+        model_map = {
+            "gemini-1.5-pro": "gemini-1.5-pro-latest",
+            "gemini-1.5-flash": "gemini-1.5-flash-latest"
+        }
+        api_model = model_map.get(configured_model.lower(), "gemini-1.5-pro-latest")
+        
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{api_model}:generateContent?key={api_key}"
         headers = {"Content-Type": "application/json"}
         
         system_prompt = "You are a specialized corporate events data extractor."
@@ -183,7 +197,7 @@ class ProviderRouter:
             logger.error(f"[AI ROUTER] Unexpected Gemini response format: {data}")
             raise requests.exceptions.HTTPError(response=response)
 
-    def _call_openrouter(self, prompt: str, api_key: str, require_json: bool) -> str:
+    def _call_openrouter(self, prompt: str, api_key: str, require_json: bool, configured_model: str) -> str:
         """Executes API call to OpenRouter."""
         url = "https://openrouter.ai/api/v1/chat/completions"
         headers = {
@@ -193,12 +207,18 @@ class ProviderRouter:
             "X-Title": "Special Situations Radar"
         }
         
+        model_map = {
+            "gemini-1.5-pro": "google/gemini-1.5-pro",
+            "gemini-1.5-flash": "google/gemini-1.5-flash"
+        }
+        api_model = model_map.get(configured_model.lower(), "google/gemini-1.5-pro")
+        
         system_prompt = "You are a specialized corporate events data extractor."
         if require_json:
             system_prompt += " You must respond strictly with valid JSON. Do not include markdown formatting or commentary."
             
         payload = {
-            "model": "google/gemini-1.5-flash", 
+            "model": api_model, 
             "messages": [
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": prompt}
