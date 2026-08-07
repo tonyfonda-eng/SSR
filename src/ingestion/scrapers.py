@@ -32,7 +32,7 @@ def _fetch_rss_channel(source: dict) -> tuple:
         "configured_mode": configured_mode,
         "configured_url": url,
         "resolved_adapter": "Generic_RSS",
-        "actual_mode": "RSS",
+        "channel": "RSS",
         "actual_url": url,
         "checkpoint_before": None,
         "checkpoint_found": False,
@@ -146,7 +146,7 @@ def _fetch_html_channel(source: dict) -> tuple:
         "configured_mode": configured_mode,
         "configured_url": url,
         "resolved_adapter": actual_adapter,
-        "actual_mode": "HTML",
+        "channel": "HTML",
         "actual_url": url,
         "checkpoint_before": None,
         "checkpoint_found": False,
@@ -241,7 +241,7 @@ def _fetch_html_channel(source: dict) -> tuple:
                         
                 articles.append({
                     "source": source_name,
-                    "channel": ledger["actual_mode"],
+                    "channel": ledger["channel"],
                     "title": ra.get("title", "No Title"),
                     "url": ra.get("url", url),
                     "published": ra.get("published", ""),
@@ -281,7 +281,7 @@ def _fetch_html_channel(source: dict) -> tuple:
     # Generic HTML Fallback
     try:
         # Drift detector for generic
-        if configured_mode.upper() != ledger["actual_mode"].upper() and configured_mode.upper() not in ("RSS PARSING", "HTML PARSING"):
+        if configured_mode.upper() != ledger["channel"].upper() and configured_mode.upper() not in ("RSS PARSING", "HTML PARSING"):
             ledger["config_drift"] = True
             logger.warning(f"[INGESTION] SOURCE_CONFIG_DRIFT: {source_name} configured {configured_mode} but fell back to HTML.")
             

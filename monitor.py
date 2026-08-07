@@ -1007,7 +1007,7 @@ def main():
         unique_articles = []
         seen_hashes = set()
         
-        ledger_unique = {f"{entry['source']}::{entry['actual_mode']}": 0 for entry in ingestion_ledger}
+        ledger_unique = {f"{entry['source']}::{entry['channel']}": 0 for entry in ingestion_ledger}
         quarantined = 0
         
         def validate_article_contract(art):
@@ -1043,7 +1043,7 @@ def main():
                 logger.warning(f"[HANDOFF] Quarantined malformed article from {article.get('source', 'Unknown')}. Reason: {handoff_err}")
                 
         for entry in ingestion_ledger:
-            k = f"{entry['source']}::{entry['actual_mode']}"
+            k = f"{entry['source']}::{entry['channel']}"
             entry["unique_found"] = ledger_unique.get(k, 0)
             
         telemetry.ingestion_ledger = ingestion_ledger

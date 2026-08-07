@@ -329,15 +329,16 @@ def get_latest_config_snapshot() -> dict:
         return None
 
 def save_config_snapshot(config_hash: str, run_id: str, config_json: str):
+    conn = _get_connection(RESEARCH_DB_PATH)
     try:
         gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
-        conn = _get_connection(RESEARCH_DB_PATH)
         conn.execute("INSERT OR IGNORE INTO config_snapshots (hash, captured_at, run_id, config_json) VALUES (?, ?, ?, ?);", 
                      (config_hash, gmt_now, run_id, config_json))
         conn.commit()
-        conn.close()
     except Exception:
         pass
+    finally:
+        conn.close()
 
 def get_or_create_event(article_hash: str, raw_payload: bytes, mime_type: str = "text/html") -> tuple:
     conn = _get_connection(RESEARCH_DB_PATH)
@@ -363,9 +364,9 @@ def get_or_create_event(article_hash: str, raw_payload: bytes, mime_type: str = 
         return f"ERR-{event_id}", True
 
 def log_article_screening(entry: dict) -> None:
+    conn = _get_connection(RESEARCH_DB_PATH)
     try:
         gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
-        conn = _get_connection(RESEARCH_DB_PATH)
         conn.execute("""
             INSERT INTO article_screening_log
             (run_id, timestamp, headline, url, source, outcome, final_stage, drop_reason, ticker, company_name, event_family, ingestion_mode)
@@ -385,13 +386,14 @@ def log_article_screening(entry: dict) -> None:
             entry.get("ingestion_mode", "UNKNOWN")
         ))
         conn.commit()
-        conn.close()
     except Exception as e:
         logger.error(f"[DB FAULT] Failed to write article_screening_log: {e}")
+    finally:
+        conn.close()
         
 def commit_decision_capsule(capsule_data: dict, manifest_json: dict = None):
+    conn = _get_connection(RESEARCH_DB_PATH)
     try:
-        conn = _get_connection(RESEARCH_DB_PATH)
         cursor = conn.cursor()
         dec_id = capsule_data["decision_id"]
         
@@ -423,9 +425,10 @@ def commit_decision_capsule(capsule_data: dict, manifest_json: dict = None):
         ))
         
         conn.commit()
-        conn.close()
     except Exception as e:
         logger.error(f"[DB FAULT] Capsule commit failed: {e}")
+    finally:
+        conn.close()
 
 def log_event(event_data: dict):
     import json
@@ -557,10 +560,9 @@ def log_v4_shadow_event(event_data: dict):
         conn.close()
 
 def save_workflow_health(health_data=None):
+    conn = _get_connection(DEVOPS_DB_PATH)
     try:
         gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
-        conn = _get_connection(DEVOPS_DB_PATH)
-        
         funnel_json = json.dumps(health_data.get('funnel', {})) if health_data else "{}"
         
         conn.execute("""
@@ -583,17 +585,18 @@ def save_workflow_health(health_data=None):
             health_data.get('parent_run_id') if health_data else None
         ))
         conn.commit()
-        conn.close()
     except Exception as e:
         logger.error(f"[DB FAULT] Failed to save workflow health: {e}")
+    finally:
+        conn.close()
 
 def save_exception_log(*args, **kwargs): pass
 def save_source_stats(*args, **kwargs): pass
 
 def log_audit_source_metrics(run_id: str, ledger: list):
+    conn = _get_connection(AUDIT_DB_PATH)
     try:
         gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
-        conn = _get_connection(AUDIT_DB_PATH)
         for entry in ledger:
             meta = entry.get("metadata", {})
             conn.execute("""
@@ -607,14 +610,15 @@ def log_audit_source_metrics(run_id: str, ledger: list):
                 meta.get("checkpoint_found", False), meta.get("emergency_stop", False), meta.get("reason", "")
             ))
         conn.commit()
-        conn.close()
     except Exception as e:
         logger.error(f"[DB FAULT] Failed to write daily_source_metrics: {e}")
+    finally:
+        conn.close()
 
 def log_audit_ai_metrics(run_id: str, telemetry: list):
+    conn = _get_connection(AUDIT_DB_PATH)
     try:
         gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
-        conn = _get_connection(AUDIT_DB_PATH)
         for t in telemetry:
             conn.execute("""
                 INSERT INTO daily_ai_metrics 
@@ -626,15 +630,16 @@ def log_audit_ai_metrics(run_id: str, telemetry: list):
                 t.get("latency_ms", 0), t.get("cost", 0.0), t.get("success", False)
             ))
         conn.commit()
-        conn.close()
     except Exception as e:
         logger.error(f"[DB FAULT] Failed to write daily_ai_metrics: {e}")
+    finally:
+        conn.close()
 
 def log_audit_event(run_id: str, source_or_provider: str, event_type: str, severity: str, details: str):
     """Writes a black-box event log directly to the audit database."""
+    conn = _get_connection(AUDIT_DB_PATH)
     try:
         gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
-        conn = _get_connection(AUDIT_DB_PATH)
         conn.execute("""
             INSERT INTO audit_events 
             (timestamp, run_id, source_or_provider, event_type, severity, details)
@@ -643,6 +648,7 @@ def log_audit_event(run_id: str, source_or_provider: str, event_type: str, sever
             gmt_now, run_id, source_or_provider, event_type, severity, details
         ))
         conn.commit()
-        conn.close()
     except Exception as e:
         logger.error(f"[DB FAULT] Failed to write audit event: {e}")
+    finally:
+        conn.close()
