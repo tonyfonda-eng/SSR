@@ -144,12 +144,12 @@ def audit_schema(scraper, params: dict, state: dict):
         
         if not title or title.strip() == "Untitled":
             print(f"     [FAIL] Article {i} has missing or Untitled headline.")
-            fails += 1
+            print(f"DEBUG: body={repr(body)} url={a.get("url")}"); fails += 1
             continue
             
         if not body or not body.strip():
             print(f"     [FAIL] Article {i} ('{title[:30]}...') has an empty body payload.")
-            fails += 1
+            print(f"DEBUG: body={repr(body)} url={a.get("url")}"); fails += 1
             
     if fails == 0:
         print("     [PASS] Schema fidelity OK. No empty bodies or Untitled headlines.")
