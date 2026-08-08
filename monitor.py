@@ -1047,6 +1047,7 @@ def main():
                         ledger_unique[k] += 1
                 else:
                     logger.debug(f"[DEDUPE] Dropped overlapping article: {validated_article['title']} from {validated_article['source']} ({validated_article['channel']})")
+                    _record_screening(validated_article, telemetry, outcome="dropped", final_stage="dedupe_hash", drop_reason="duplicate_hash")
             except Exception as handoff_err:
                 quarantined += 1
                 logger.warning(f"[HANDOFF] Quarantined malformed article from {article.get('source', 'Unknown')}. Reason: {handoff_err}")
