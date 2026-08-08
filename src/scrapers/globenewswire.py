@@ -8,130 +8,65 @@ from src.scrapers.base import SourceScraper
 from src.config.settings import USER_AGENT
 
 class GlobeNewswireScraper(SourceScraper):
-    RSS_URL = "https://www.globenewswire.com/RssFeed/country/US/feedTitle/GlobeNewswire%20-%20US%20News"
+    RSS_URL = "https://www.globenewswire.com/RssFeed/orgclass/1/feedTitle/GlobeNewswire%20-%20News%20Releases"
 
     def get_latest_articles(self, **kwargs):
         import time
-        headers = {"User-Agent": USER_AGENT}
-        articles = []
-        seen_ids = set()
+        from curl_cffi import requests
+        import feedparser
+        
         checkpoint = kwargs.get("checkpoint")
         
-        # Extended metadata as requested
         self.scrape_metadata = {
-            "pages_visited": 0,
-            "page_limit": 20, # Increased from 5 to allow more graceful fallback
+            "source": "GlobeNewswire",
+            "mode": "RSS",
             "checkpoint_found": False,
             "emergency_stop": False,
-            "duplicate_page_detected": False,
-            "http_failures": 0,
             "reason": "",
             "last_checkpoint_url": checkpoint
         }
         
-        last_page_urls = set()
-        
-        for page in range(1, self.scrape_metadata["page_limit"] + 1):
-            self.scrape_metadata["pages_visited"] = page
-            url = f"https://www.globenewswire.com/NewsRoom?page={page}"
-            try:
-                response = get_session().get(url, headers=headers, timeout=15)
-                response.raise_for_status()
-                soup = BeautifulSoup(response.text, "html.parser")
-                
-                article_links = [a for a in soup.select("a") if 'href' in a.attrs and '/news-release/' in a['href']]
-                if not article_links:
-                    self.scrape_metadata["reason"] = "No article links on page"
-                    break
-                    
-                current_page_urls = set()
-                new_articles_on_page = 0
-                for a_tag in article_links:
-                    href = a_tag.get('href')
-                    if not href:
-                        continue
-                        
-                    full_url = href if href.startswith("http") else "https://www.globenewswire.com" + href
-                    current_page_urls.add(full_url)
-                    if checkpoint and (full_url == checkpoint or href == checkpoint):
-                        self.scrape_metadata["checkpoint_found"] = True
-                        return articles
-                    
-                    # Use the path as the unique ID to avoid language-code collisions
-                    article_id = href if not href.startswith("http") else full_url.replace("https://www.globenewswire.com", "")
-                    
-                    if article_id in seen_ids:
-                        continue
-                    seen_ids.add(article_id)
-                    
-                    # Attempt to find the publish date near the link
-                    time_elem = None
-                    parent = a_tag.find_parent(class_=lambda c: c and ('item' in c.lower() or 'article' in c.lower() or 'row' in c.lower()))
-                    if parent:
-                        time_elem = parent.find('time') or parent.find(class_=lambda c: c and 'date' in c.lower())
-                    
-                    if not time_elem:
-                        time_elem = a_tag.find_previous('time') or a_tag.find_next('time')
-                        
-                    published = ""
-                    if time_elem:
-                        published = time_elem.get('datetime') or time_elem.get_text(strip=True)
-                    
-                    articles.append({
-                        "id": article_id,
-                        "title": a_tag.get_text(strip=True),
-                        "url": full_url,
-                        "published": published
-                    })
-                    new_articles_on_page += 1
-                    
-                # Stop Condition 1: Duplicate Page Fingerprint
-                if current_page_urls and current_page_urls == last_page_urls:
-                    self.scrape_metadata["duplicate_page_detected"] = True
-                    self.scrape_metadata["reason"] = f"Duplicate page content detected on page {page}"
-                    print(f"[INFO] GlobeNewswire detected duplicate page content on page {page}. Breaking.")
-                    break
-                last_page_urls = current_page_urls
-
-                # Stop Condition 2: No New URLs on Page
-                if new_articles_on_page == 0:
-                    self.scrape_metadata["reason"] = f"No new URLs found on page {page}"
-                    break
-                    
-                if not checkpoint and page >= 3:
-                    self.scrape_metadata["reason"] = "Initial scan complete (3 pages backfilled)"
-                    print("[INFO] GlobeNewswire initial scan complete (3 pages backfilled). Stopping.")
-                    break
-                    
-                time.sleep(1)
-            except Exception as e:
-                self.scrape_metadata["http_failures"] += 1
-                self.scrape_metadata["reason"] = f"HTTP/Parsing Error on page {page}: {e}"
-                print(f"[WARNING] GlobeNewswire pagination failed on page {page}: {e}")
-                break
-                
-        # Stop Condition 3: Emergency Cap Hit (Graceful Degradation)
-        if page == self.scrape_metadata["page_limit"] and not self.scrape_metadata.get("checkpoint_found") and checkpoint:
-            self.scrape_metadata["emergency_stop"] = True
-            if not self.scrape_metadata["reason"]:
-                self.scrape_metadata["reason"] = f"Hit {self.scrape_metadata['page_limit']} page limit without checkpoint"
-            print(f"[WARN] GlobeNewswire hit emergency {self.scrape_metadata['page_limit']} page limit without finding checkpoint. Returning what was collected.")
+        articles = []
+        try:
+            r = requests.get(self.RSS_URL, headers={"User-Agent": USER_AGENT}, impersonate="chrome120", timeout=15)
+            feed = feedparser.parse(r.text)
             
+            for entry in feed.entries:
+                link = entry.get("link", "")
+                if checkpoint and (link == checkpoint or link.split("?")[0] == checkpoint.split("?")[0]):
+                    self.scrape_metadata["checkpoint_found"] = True
+                    break
+                    
+                articles.append({
+                    "id": link,
+                    "title": entry.get("title", "No title"),
+                    "url": link,
+                    "published": entry.get("published", "")
+                })
+        except Exception as e:
+            self.scrape_metadata["reason"] = f"RSS Feed fetch failed: {e}"
+            print(f"[ERROR] GlobeNewswire Scraper failed: {e}")
+            
+        print(f"    [GlobeNewswire] Total unique articles fetched: {len(articles)}")
         return articles
 
     def get_article_body(self, url):
-        headers = {"User-Agent": USER_AGENT}
-        response = get_session().get(url, headers=headers, timeout=15)
-        if response.status_code != 200:
-            return None
-
-        soup = BeautifulSoup(response.text, "html.parser")
+        from curl_cffi import requests
+        from bs4 import BeautifulSoup
         
-        # GlobeNewswire specific selectors
-        article = soup.select_one("div.article-body") or soup.select_one("main")
-        
-        if article:
-            text = article.get_text("\n", strip=True)
-            if len(text) > 500:
-                return text
-        return None
+        try:
+            response = requests.get(url, headers={"User-Agent": USER_AGENT}, impersonate="chrome120", timeout=15)
+            if response.status_code == 200:
+                soup = BeautifulSoup(response.text, "html.parser")
+                
+                # GlobeNewswire specific selectors
+                article = soup.select_one("div.article-body") or soup.select_one("main")
+                
+                if article:
+                    text = article.get_text("\n", strip=True)
+                    if len(text) > 500:
+                        return text
+        except Exception as e:
+            pass
+            
+        return "[GlobeNewswire] Classify event based on Title."

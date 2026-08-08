@@ -91,7 +91,8 @@ class ReutersScraper(SourceScraper):
 
     def get_article_body(self, url):
         """
-        Returns empty string. Reuters PerimeterX heavily protects article pages from headless scraping.
+        Returns a fallback string. Reuters PerimeterX heavily protects article pages from headless scraping.
         The AI pipeline will rely solely on the headline/URL for evaluation.
+        We must NOT return an empty string, otherwise dedupe will be poisoned by hash collisions.
         """
-        return ""
+        return "[Reuters] Classify event based on Title."

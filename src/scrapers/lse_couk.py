@@ -120,4 +120,4 @@ class LSECoukScraper(SourceScraper):
         except Exception as e:
             print(f"[WARNING] Failed to fetch LSE.co.uk article body: {e}")
             
-        return None
+        return "[LSE.co.uk] Classify event based on Title."
