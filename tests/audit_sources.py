@@ -132,6 +132,14 @@ def audit_schema(scraper, params: dict, state: dict):
     fails = 0
     for i, a in enumerate(state["articles"]):
         title = a.get("title", "")
+        
+        # Hydrate body if missing, just like monitor.py does
+        if not a.get("body") and a.get("url"):
+            try:
+                a["body"] = scraper.get_article_body(a["url"])
+            except Exception:
+                a["body"] = ""
+                
         body = a.get("body", "")
         
         if not title or title.strip() == "Untitled":
