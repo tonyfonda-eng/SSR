@@ -621,7 +621,7 @@ def log_audit_source_metrics(run_id: str, ledger: list):
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """, (
                 run_id, gmt_now, entry.get("source"), entry.get("channel"),
-                entry.get("raw_found", 0), entry.get("unique_found", 0),
+                entry.get("articles_scanned", 0), entry.get("unique_found", 0),
                 meta.get("pages_visited", 0), meta.get("page_limit", 0),
                 meta.get("checkpoint_found", False), meta.get("emergency_stop", False), meta.get("reason", "")
             ))

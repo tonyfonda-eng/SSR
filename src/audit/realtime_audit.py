@@ -35,6 +35,19 @@ def export_realtime_audit(filepath="docs/realtime_audit.json"):
         emergency_stop = bool(audit_meta.get('emergency_stop'))
         reason = str(audit_meta.get('reasons', '') or '')
         
+        # Capture TRUE raw volume from the ingestion ledger
+        raw = audit_meta.get('total_raw', 0)
+        # Capture unique volume that passed deduplication
+        unique = audit_meta.get('total_unique', 0)
+        
+        # If the source hasn't run yet today, fallback to the screening log count
+        if raw == 0 and s['total_articles'] > 0:
+            raw = s['total_articles']
+            unique = s['unique_articles']
+            
+        avg = hist_30d.get(name, 0)
+        dev_pct = calculate_anomaly(raw, avg)
+        
         grade = get_scraper_grade(dev_pct, emergency_stop)
         light = get_traffic_light(dev_pct) if not emergency_stop else "🔴"
         
@@ -44,6 +57,7 @@ def export_realtime_audit(filepath="docs/realtime_audit.json"):
             "grade": grade,
             "status_light": light,
             "raw": raw,
+            "unique": unique,
             "avg_30d": round(avg, 1),
             "dev_pct": round(dev_pct, 1),
             "lifetime_rel": round(lifetime_rel.get(name, 100.0), 1),
