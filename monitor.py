@@ -113,6 +113,9 @@ class PipelineTelemetry:
 
 def stage_dedupe_hash(article: dict, ctx: dict) -> tuple:
     article_body = article.get("body", "")
+    if not article_body or not article_body.strip():
+        return False, "dropped_empty_body_extraction_failure"
+        
     article_hash = hashlib.sha256(article_body.encode("utf-8")).hexdigest()
     event_id, is_new = get_or_create_event(article_hash, article_body.encode("utf-8"))
     article["_internal_event_id"] = event_id
