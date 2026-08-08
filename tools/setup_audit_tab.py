@@ -22,18 +22,18 @@ def setup_audit_protocol_tab():
         worksheet = spreadsheet.add_worksheet(title=tab_title, rows=100, cols=10)
     
     # Define headers
-    headers = ["Step Order", "Audit Check", "Function Mapping", "Enabled", "Parameters"]
-    worksheet.update(values=[headers], range_name='A1:E1')
+    headers = ["Step Order", "Audit Check", "Function Mapping", "Enabled", "Parameters", "Learnings (Aug 8)"]
+    worksheet.update(values=[headers], range_name='A1:F1')
     
     # Define default rules based on the protocol
     default_rules = [
-        [1, "HTTP 200 OK Verification", "audit_connectivity", "TRUE", '{"timeout_seconds": 15}'],
-        [2, "Pagination Volume Check", "audit_pagination", "TRUE", '{"min_items": 5, "max_pages": 1}'],
-        [3, "Schema & Parsing Fidelity", "audit_schema", "TRUE", '{}'],
-        [4, "Deduplication Compatibility", "audit_dedupe", "TRUE", '{}']
+        [1, "HTTP 200 OK Verification", "audit_connectivity", "TRUE", '{"timeout_seconds": 15}', 'All sources pass HTTP 200, including Cloudflare-protected ones via curl_cffi.'],
+        [2, "Pagination Volume Check", "audit_pagination", "TRUE", '{"min_items": 5, "max_pages": 1}', 'GlobeNewswire NewsRoom SPA blocked parsing; bypassed by using RSS Fast Path.'],
+        [3, "Schema & Parsing Fidelity", "audit_schema", "TRUE", '{}', 'PR Newswire HTML body parser occasionally failed; strictly enforce fallbacks. GlobeNewswire moved to RSS.'],
+        [4, "Deduplication Compatibility", "audit_dedupe", "TRUE", '{}', 'LSE and Reuters intentionally block body extraction. Fixed dedupe poisoning by returning strict fallback strings instead of empty strings.']
     ]
     
-    worksheet.update(values=default_rules, range_name='A2:E5')
+    worksheet.update(values=default_rules, range_name='A2:F5')
     
     # Format header
     worksheet.format("A1:E1", {
