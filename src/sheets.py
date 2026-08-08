@@ -174,6 +174,10 @@ def load_sources(sheet_url):
 def load_playbooks(sheet_url):
     return _safe_get_records(sheet_url, ["Playbooks", "StrategyPlaybooks"])
 
+def load_audit_protocol(sheet_url):
+    """Fetches the dynamic auditing protocol from Google Sheets."""
+    return _safe_get_records(sheet_url, ["Audit Protocol", "AuditingProtocol"])
+
 def load_global_exclusions(sheet_url):
     return _safe_get_records(sheet_url, ["GlobalExclusions", "Global Exclusions"])
 
