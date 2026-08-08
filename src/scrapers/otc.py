@@ -79,8 +79,9 @@ class OTCScraper(SourceScraper):
 
     def get_article_body(self, url):
         """
-        Returns empty string. OTC Markets heavily protects full PR body text 
+        Returns fallback string. OTC Markets heavily protects full PR body text 
         via their backend API (which is a paid commercial product).
         The AI pipeline will rely solely on the headline for zero-latency event evaluation.
+        We must NOT return an empty string to avoid dedupe poisoning hash collisions.
         """
-        return ""
+        return "[OTC Markets] Classify event based on Title."
