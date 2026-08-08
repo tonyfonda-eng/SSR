@@ -11,20 +11,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from src.sheets import load_audit_protocol, load_sources
 from src.config.settings import SHEET_URL
 
-# Dynamically import scrapers
-from src.scrapers.prnewswire import PRNewsWireScraper
-from src.scrapers.businesswire import BusinessWireScraper
-from src.scrapers.globenewswire import GlobeNewswireScraper
-from src.scrapers.edgar import EdgarScraper
-from src.scrapers.kedm import KEDMScraper
-
-SCRAPER_REGISTRY = {
-    "PR Newswire": PRNewsWireScraper,
-    "BusinessWire": BusinessWireScraper,
-    "GlobeNewswire": GlobeNewswireScraper,
-    "SEC EDGAR": EdgarScraper,
-    "KEDM": KEDMScraper
-}
+# Import the global SCRAPER_REGISTRY from the scrapers module
+from src.scrapers import SCRAPER_REGISTRY
 
 def load_protocol_rules(sheet_url: str) -> List[Dict]:
     raw_rules = load_audit_protocol(sheet_url)
