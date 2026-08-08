@@ -25,6 +25,7 @@ class ProviderRouter:
         self.settings = {}
         self.telemetry = []
         self.events = []
+        self.disabled_providers = set()
         
         total_keys = sum(len(v) for v in self.keys.values())
         logger.info(f"[AI ROUTER] Initialized with {total_keys} total keys across providers.")
@@ -69,6 +70,9 @@ class ProviderRouter:
         last_fatal_error = "EXHAUSTED"
         
         for provider in provider_order:
+            if provider in self.disabled_providers:
+                continue
+                
             while True:
                 with self._lock:
                     keys = self.keys.get(provider, [])
@@ -117,13 +121,10 @@ class ProviderRouter:
                     
                     if status_code == 401 or status_code == 403:
                         last_fatal_error = "AUTH_ERROR"
-                        # FAIL-FAST: Unauthorized key. It's dead. Drop it permanently.
-                        logger.warning(f"[AI ROUTER] {status_code} on {provider}. Purging dead key from rotation.")
-                        self.events.append({"source_or_provider": provider, "event_type": "401_UNAUTHORIZED", "severity": "CRITICAL", "details": "Key purged from rotation"})
-                        with self._lock:
-                            keys_ref = self.keys.get(provider, [])
-                            if keys_ref and keys_ref[0] == current_key:
-                                keys_ref.pop(0)
+                        self.disabled_providers.add(provider)
+                        logger.critical(f"[AI ROUTER] {status_code} on {provider}. Authentication failure. Halting rotation for this provider.")
+                        self.events.append({"source_or_provider": provider, "event_type": "401_UNAUTHORIZED", "severity": "CRITICAL", "details": "Authentication failed. Keys preserved but provider halted."})
+                        break
                         
                     elif status_code == 429:
                         last_fatal_error = "RATE_LIMITED"

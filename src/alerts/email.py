@@ -6,6 +6,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from src.config.secrets import GMAIL_USER, GMAIL_APP_PASSWORD
+from src.database import log_email_dispatch
 
 def send_alert(decision_manifest: dict, recipient: str = None):
     """
@@ -101,17 +102,53 @@ def send_alert(decision_manifest: dict, recipient: str = None):
 
     msg.attach(MIMEText(html_body, "html"))
 
+    server = None
     try:
         smtp_server = os.environ.get("SMTP_SERVER", "smtp.gmail.com")
         smtp_port = int(os.environ.get("SMTP_PORT", 465))
+        
+        event_id = decision_manifest.get("event_id", "UNKNOWN")
+        
+        log_email_dispatch(event_id, decision_id, recipient, smtp_server, smtp_port, 1, "EMAIL_ATTEMPTED")
+        
         server = smtplib.SMTP_SSL(smtp_server, smtp_port)
+        log_email_dispatch(event_id, decision_id, recipient, smtp_server, smtp_port, 1, "SMTP_CONNECTED")
+        
         server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
-        server.send_message(msg)
-        server.quit()
+        log_email_dispatch(event_id, decision_id, recipient, smtp_server, smtp_port, 1, "SMTP_AUTHENTICATED")
+        
+        log_email_dispatch(event_id, decision_id, recipient, smtp_server, smtp_port, 1, "SMTP_SEND_ATTEMPTED")
+        refused = server.send_message(msg)
+        
+        if refused:
+            log_email_dispatch(event_id, decision_id, recipient, smtp_server, smtp_port, 1, "EMAIL_REJECTED", provider_response=str(refused))
+        else:
+            log_email_dispatch(event_id, decision_id, recipient, smtp_server, smtp_port, 1, "EMAIL_ACCEPTED")
+            
         print(f" [EMAIL DISPATCH] Alert successfully sent to {recipient} for {ticker}")
-    except Exception as e:
-        print(f" [EMAIL ERROR] SMTP dispatch failed: {e}")
+        
+    except smtplib.SMTPAuthenticationError as e:
+        log_email_dispatch(decision_manifest.get("event_id", "UNKNOWN"), decision_id, recipient, os.environ.get("SMTP_SERVER", "smtp.gmail.com"), int(os.environ.get("SMTP_PORT", 465)), 1, "SMTP_AUTHENTICATION_FAILED", exc_class=e.__class__.__name__, exception_message=str(e))
+        print(f" [EMAIL ERROR] SMTP authentication failed: {e}")
         raise e
+    except (smtplib.SMTPConnectError, smtplib.SMTPServerDisconnected) as e:
+        log_email_dispatch(decision_manifest.get("event_id", "UNKNOWN"), decision_id, recipient, os.environ.get("SMTP_SERVER", "smtp.gmail.com"), int(os.environ.get("SMTP_PORT", 465)), 1, "SMTP_CONNECTION_FAILED", exc_class=e.__class__.__name__, exception_message=str(e))
+        print(f" [EMAIL ERROR] SMTP connection failed: {e}")
+        raise e
+    except smtplib.SMTPException as e:
+        log_email_dispatch(decision_manifest.get("event_id", "UNKNOWN"), decision_id, recipient, os.environ.get("SMTP_SERVER", "smtp.gmail.com"), int(os.environ.get("SMTP_PORT", 465)), 1, "SMTP_SEND_FAILED", exc_class=e.__class__.__name__, exception_message=str(e))
+        print(f" [EMAIL ERROR] SMTP send failed: {e}")
+        raise e
+    except Exception as e:
+        log_email_dispatch(decision_manifest.get("event_id", "UNKNOWN"), decision_id, recipient, os.environ.get("SMTP_SERVER", "smtp.gmail.com"), int(os.environ.get("SMTP_PORT", 465)), 1, "APPLICATION_ERROR", exc_class=e.__class__.__name__, exception_message=str(e))
+        print(f" [EMAIL ERROR] Application error during dispatch: {e}")
+        raise e
+    finally:
+        if server:
+            try:
+                server.quit()
+            except Exception:
+                pass
 
 def send_v4_event_report(event_data: dict, recipient: str = None):
     if not GMAIL_USER or not GMAIL_APP_PASSWORD or GMAIL_USER == "your-email@gmail.com":

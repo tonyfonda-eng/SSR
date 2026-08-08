@@ -308,6 +308,22 @@ def init_db():
             details TEXT
         );
     """)
+    a_conn.execute("""
+        CREATE TABLE IF NOT EXISTS email_dispatch_log (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            event_id TEXT NOT NULL,
+            decision_id TEXT NOT NULL,
+            timestamp TEXT NOT NULL,
+            recipient TEXT,
+            smtp_host TEXT,
+            smtp_port INTEGER,
+            attempt_number INTEGER,
+            outcome_state TEXT NOT NULL,
+            exception_class TEXT,
+            exception_message TEXT,
+            provider_response TEXT
+        );
+    """)
     a_conn.commit()
     a_conn.close()
 
@@ -650,5 +666,22 @@ def log_audit_event(run_id: str, source_or_provider: str, event_type: str, sever
         conn.commit()
     except Exception as e:
         logger.error(f"[DB FAULT] Failed to write audit event: {e}")
+    finally:
+        conn.close()
+
+def log_email_dispatch(event_id: str, decision_id: str, recipient: str, smtp_host: str, smtp_port: int, attempt_number: int, outcome_state: str, exception_class: str = None, exception_message: str = None, provider_response: str = None):
+    conn = _get_connection(AUDIT_DB_PATH)
+    try:
+        gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
+        conn.execute("""
+            INSERT INTO email_dispatch_log 
+            (event_id, decision_id, timestamp, recipient, smtp_host, smtp_port, attempt_number, outcome_state, exception_class, exception_message, provider_response)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+        """, (
+            event_id, decision_id, gmt_now, recipient, smtp_host, smtp_port, attempt_number, outcome_state, exception_class, exception_message, provider_response
+        ))
+        conn.commit()
+    except Exception as e:
+        logger.error(f"[DB FAULT] Failed to log email dispatch state {outcome_state}: {e}")
     finally:
         conn.close()
