@@ -150,7 +150,9 @@ class PRNewsWireScraper(SourceScraper):
                 soup = BeautifulSoup(response.text, "html.parser")
                 body = soup.find("section", class_="release-body container")
                 if body:
-                    return body.get_text(separator="\n", strip=True)
+                    text = body.get_text(separator="\n", strip=True)
+                    if text:
+                        return text
         except:
             pass
         return "[PR Newswire] Classify event based on Title."
