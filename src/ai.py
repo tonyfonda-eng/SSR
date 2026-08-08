@@ -25,6 +25,7 @@ class ParsedAIPayload:
     strategy: str
     confidence_score: float
     raw_evidence: list
+    rationale: str = ""
 
 @dataclass
 class TransactionNode:
@@ -103,11 +104,19 @@ def parse_classification_output(raw_json_str: str) -> ParsedAIPayload:
         
     try:
         data = json.loads(raw_json_str)
+        # Support both legacy schema (Event_Family) and new Google Sheets schema (classification)
+        strategy = str(data.get("classification", data.get("Event_Family", "Unknown"))).strip()
+        rationale = str(data.get("rationale", ""))
+        evidence = data.get("Evidence", [])
+        if not evidence and rationale:
+            evidence = [rationale]
+            
         return ParsedAIPayload(
             ticker=str(data.get("Ticker", "UNKNOWN")).strip().upper(),
-            strategy=str(data.get("Event_Family", "Unknown")).strip(),
-            confidence_score=float(data.get("Confidence", 50.0)) / 100.0,
-            raw_evidence=data.get("Evidence", [])
+            strategy=strategy,
+            confidence_score=float(data.get("Confidence", 100.0)) / 100.0,
+            raw_evidence=evidence,
+            rationale=rationale
         )
     except json.JSONDecodeError:
         logger.warning("[AI CORE] Failed to parse LLM output as JSON.")
@@ -266,8 +275,7 @@ def extract_halt_date(body_text: str, router=None) -> str:
 def classify_event(body_text: str, matches: list, ticker: str = None, market_cap: float = None, router=None) -> str:
     """
     Legacy wrapper for event classification.
-    Note: Returns the strategy string directly to support legacy caller signatures.
-    To utilize the full decoupled payload, the caller should implement Layer 1-3 manually.
+    Note: Returns a dict or strategy string depending on caller needs.
     """
     match_context = json.dumps([{"Rule": m["Rule"], "Summary": m["Summary"]} for m in matches])
     
@@ -275,42 +283,64 @@ def classify_event(body_text: str, matches: list, ticker: str = None, market_cap
     if market_cap:
          context_str += f"Target Market Cap: ${market_cap:,.2f}\n"
 
-    prompt = f"""Analyze this corporate text and the associated rule triggers.
-    Categorize the event into EXACTLY ONE of these families:
-    - Merger
-    - Acquisition
-    - Spin-off
-    - Tender
-    - Joint Venture
-    - Restructuring
-    - Distressed Sale
-    - Asset Purchase
-    - Take-private
-    - Minority Investment
-    - Strategic Partnership
-    - Resumption of Trading
-    - Unknown
-    - False Positive
-    
-    {context_str}
-    Rule Triggers: {match_context}
-    
-    Text: {body_text[:6000]}
-    
-    Respond in JSON format:
-    {{
-        "Ticker": "XYZ",
-        "Event_Family": "Category Name",
-        "Confidence": 95,
-        "Evidence": ["List of key phrases supporting conclusion"]
-    }}"""
+    # Try to load dynamic prompt from Google Sheets
+    dynamic_prompt = None
+    try:
+        from src.sheets import load_ai_configurations
+        from src.config.settings import SHEET_URL
+        configs = load_ai_configurations(SHEET_URL)
+        for cfg in configs:
+            if cfg.get("Prompt ID") == "CLASSIFY_EVENT_V1":
+                template = cfg.get("System Prompt Template", "")
+                schema = cfg.get("Output JSON Schema", "")
+                if template:
+                    dynamic_prompt = template.replace("{context_str}", context_str).replace("{match_context}", match_context).replace("{body_text}", body_text[:6000])
+                    dynamic_prompt += f"\n\nRespond in JSON format:\n{schema}"
+                    break
+    except Exception as e:
+        logger.warning(f"Failed to load dynamic prompt: {e}")
+        
+    if dynamic_prompt:
+        prompt = dynamic_prompt
+    else:
+        # Fallback to hardcoded prompt
+        prompt = f"""Analyze this corporate text and the associated rule triggers.
+        Categorize the event into EXACTLY ONE of these families:
+        - Merger
+        - Acquisition
+        - Spin-off
+        - Tender
+        - Joint Venture
+        - Restructuring
+        - Distressed Sale
+        - Asset Purchase
+        - Take-private
+        - Minority Investment
+        - Strategic Partnership
+        - Resumption of Trading
+        - Unknown
+        - False Positive
+        
+        {context_str}
+        Rule Triggers: {match_context}
+        
+        Text: {body_text[:6000]}
+        
+        Respond in JSON format:
+        {{
+            "classification": "Category Name",
+            "rationale": "Explanation"
+        }}"""
 
     raw_output = invoke_llm(prompt, json_mode=True, router=router, prompt_type="Event Classification")
     parsed_payload = parse_classification_output(raw_output)
     
-    # We return just the strategy string here to satisfy the legacy signature in monitor.py
-    # monitor.py handles the interpretation layer logic.
-    return parsed_payload.strategy
+    # Return a dict to allow access to rationale by the V4 pipeline
+    return {
+        "status": "OK",
+        "classification": parsed_payload.strategy,
+        "rationale": parsed_payload.rationale
+    }
 
 
 def execute_playbook(body_text: str, playbook_steps: str, event_family: str, gold_standard: str = None, market_data_str: str = "", router=None) -> str:

@@ -195,7 +195,11 @@ def stage_v4_event_classification(article: dict, ctx: dict) -> tuple:
     else:
         if ai_result.get("status") in ["EXHAUSTED", "ERROR"]: return False, "ai_exhausted"
         article["_v4_classification"] = ai_result.get("classification", "UNKNOWN")
+        article["_v4_rationale"] = ai_result.get("rationale", "")
         article["_v4_confidence"] = 100
+        
+    if article["_v4_classification"] in ["False Positive", "Unknown", "UNKNOWN"]:
+        return False, f"dropped_ai_rejection: {article.get('_v4_rationale', '')}"
         
     # Match Persistent Event ID
     try:
@@ -380,7 +384,8 @@ def stage_v4_routing(article: dict, ctx: dict) -> tuple:
         "routing_destination": "SHADOW_NO_SEND" if is_shadow else "EMAIL_DISPATCH",
         "lifecycle": lifecycle,
         "human_review_flag": article.get("_v4_human_review", 0),
-        "merge_decision": article.get("_v4_merge_decision", {})
+        "merge_decision": article.get("_v4_merge_decision", {}),
+        "ai_rationale": article.get("_v4_rationale", "")
     }
     
     if is_shadow:
