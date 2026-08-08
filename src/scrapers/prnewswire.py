@@ -48,6 +48,8 @@ class PRNewsWireScraper(SourceScraper):
                     link = entry.get("link", "")
                     if checkpoint and (link == checkpoint or link.split("?")[0] == checkpoint.split("?")[0]):
                         self.scrape_metadata["checkpoint_found"] = True
+                        self.scrape_metadata["termination_reason"] = "SUCCESS_CHECKPOINT"
+                        self.scrape_metadata["exhaustion_evidence"] = "valid"
                         print(f"    [PR Newswire] Fast Path: Checkpoint reached via RSS.")
                         return rss_articles
                     
@@ -61,6 +63,8 @@ class PRNewsWireScraper(SourceScraper):
                 
                 if not checkpoint:
                     self.scrape_metadata["checkpoint_found"] = True
+                    self.scrape_metadata["termination_reason"] = "SUCCESS_EXHAUSTED"
+                    self.scrape_metadata["exhaustion_evidence"] = "valid"
                     print(f"    [PR Newswire] Fast Path: No checkpoint provided, returning {len(rss_articles)} RSS articles.")
                     return rss_articles
                 else:
@@ -93,6 +97,9 @@ class PRNewsWireScraper(SourceScraper):
                 
                 if not items:
                     self.scrape_metadata["reason"] = f"No items found on page {page}"
+                    self.scrape_metadata["termination_reason"] = "SUCCESS_EXHAUSTED"
+                    self.scrape_metadata["exhaustion_evidence"] = "valid"
+                    self.scrape_metadata["pagination"] = {"has_next_page": False}
                     break
                     
                 for item in items:
@@ -106,6 +113,8 @@ class PRNewsWireScraper(SourceScraper):
                         self.scrape_metadata["articles_recovered"] = len(articles)
                         self.scrape_metadata["articles_scanned"] = len(articles)
                         self.scrape_metadata["oldest_article_seen"] = full_url
+                        self.scrape_metadata["termination_reason"] = "SUCCESS_CHECKPOINT"
+                        self.scrape_metadata["exhaustion_evidence"] = "valid"
                         return articles
                         
                     title_elem = item.select_one("h3")
@@ -131,6 +140,7 @@ class PRNewsWireScraper(SourceScraper):
         if self.scrape_metadata["pages_visited"] == self.scrape_metadata["page_limit"] and not self.scrape_metadata.get("checkpoint_found") and checkpoint:
             self.scrape_metadata["emergency_stop"] = True
             self.scrape_metadata["recovery_status"] = "GAP_DETECTED"
+            self.scrape_metadata["termination_reason"] = "ARBITRARY_LIMIT_REACHED"
             
         self.scrape_metadata["articles_recovered"] = len(articles)
         self.scrape_metadata["articles_scanned"] = len(articles)

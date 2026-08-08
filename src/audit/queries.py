@@ -234,6 +234,12 @@ def get_audit_source_metrics(date_str):
         SELECT source, SUM(raw_found) as total_raw, SUM(unique_found) as total_unique,
                MAX(pages_visited) as max_pages, MAX(page_limit) as page_limit,
                MAX(checkpoint_found) as checkpoint_found, MAX(emergency_stop) as emergency_stop,
+               SUM(valid_url_count) as total_valid_url,
+               SUM(valid_title_count) as total_valid_title,
+               SUM(valid_body_count) as total_valid_body,
+               SUM(entered_dedupe_count) as total_entered_dedupe,
+               SUM(dedupe_passed_count) as total_dedupe_passed,
+               SUM(dedupe_rejected_count) as total_dedupe_rejected,
                GROUP_CONCAT(DISTINCT reason) as reasons
         FROM daily_source_metrics
         WHERE substr(timestamp, 1, 10) = ?

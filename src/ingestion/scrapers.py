@@ -49,7 +49,8 @@ def _fetch_rss_channel(source: dict) -> tuple:
         "reason": "",
         "potential_recall_loss": False,
         "checkpoint_frozen": False,
-        "status": "OK", 
+        "status": "OK",
+        "termination_reason": "UNKNOWN",
         "duration_sec": 0.0
     }
     
@@ -60,6 +61,7 @@ def _fetch_rss_channel(source: dict) -> tuple:
         ledger["status"] = "EMPTY"
         ledger["health"] = "DEGRADED"
         ledger["reason"] = "No URL provided"
+        ledger["termination_reason"] = "MISSING_CONFIG"
         ledger["duration_sec"] = round(time.time() - start_time, 2)
         return articles, ledger, source_name
         
@@ -101,23 +103,29 @@ def _fetch_rss_channel(source: dict) -> tuple:
             if articles:
                 if not checkpoint or checkpoint_found:
                     ledger["recovery_status"] = "NOT_REQUIRED"
+                    ledger["termination_reason"] = "SUCCESS_CHECKPOINT" if checkpoint_found else "SUCCESS_EXHAUSTED"
+                    ledger["exhaustion_evidence"] = "valid"
                 else:
                     ledger["status"] = "GAP_DETECTED"
                     ledger["health"] = "DEGRADED"
                     ledger["reason"] = "CHECKPOINT_NOT_REACHED — BACKFILL REQUIRED"
                     ledger["recovery_status"] = "GAP_DETECTED"
+                    ledger["termination_reason"] = "ARBITRARY_LIMIT_REACHED"
                     ledger["potential_recall_loss"] = True
                     ledger["checkpoint_frozen"] = True
                     logger.warning(f"[INGESTION] {source_name} (RSS) hit feed limit without finding checkpoint. Backfill required.")
         
         if len(articles) == 0:
             ledger["status"] = "EMPTY"
+            ledger["termination_reason"] = "SUCCESS_EXHAUSTED"
+            ledger["exhaustion_evidence"] = "valid"
             
     except Exception as e:
         logger.error(f"[INGESTION] RSS fetch failed for {source_name}: {e}")
         ledger["status"] = "FAILED"
         ledger["health"] = "DEGRADED"
         ledger["reason"] = str(e)
+        ledger["termination_reason"] = "PARSER_EXCEPTION"
         ledger["recovery_status"] = "FAILED"
         ledger["checkpoint_frozen"] = True
         
@@ -163,7 +171,8 @@ def _fetch_html_channel(source: dict) -> tuple:
         "reason": "",
         "potential_recall_loss": False,
         "checkpoint_frozen": False,
-        "status": "OK", 
+        "status": "OK",
+        "termination_reason": "UNKNOWN",
         "duration_sec": 0.0,
         "metadata": {} 
     }
@@ -172,6 +181,7 @@ def _fetch_html_channel(source: dict) -> tuple:
         ledger["status"] = "EMPTY"
         ledger["health"] = "DEGRADED"
         ledger["reason"] = "No URL provided"
+        ledger["termination_reason"] = "MISSING_CONFIG"
         ledger["duration_sec"] = round(time.time() - start_time, 2)
         return articles, ledger, source_name
         
@@ -196,11 +206,25 @@ def _fetch_html_channel(source: dict) -> tuple:
                 ledger["recovery_attempted"] = meta.get("recovery_attempted", False)
                 if meta.get("actual_url"):
                     ledger["actual_url"] = meta.get("actual_url")
+                
+                term_reason = meta.get("termination_reason", "")
+                if not term_reason:
+                    term_reason = "SUCCESS_CHECKPOINT" if ledger["checkpoint_found"] else "UNEXPLAINED_TERMINATION"
+                ledger["termination_reason"] = term_reason
+                ledger["exhaustion_evidence"] = meta.get("exhaustion_evidence", "missing")
+                if "pagination" in meta:
+                    ledger["pagination"] = meta["pagination"]
+                
+                ledger["metadata"]["pages_attempted"] = meta.get("pages_attempted", ledger["pages_scanned"])
+                ledger["metadata"]["pages_successful"] = meta.get("pages_successful", ledger["pages_scanned"])
+                ledger["metadata"]["waf_events"] = meta.get("waf_events", 0)
+                ledger["metadata"]["rate_limit_events"] = meta.get("rate_limit_events", 0)
+                ledger["metadata"]["parser_errors"] = meta.get("parser_errors", 0)
                     
             if raw_articles:
-                ledger["newest_article_seen"] = raw_articles[0].get("url") or raw_articles[0].get("id")
+                ledger["newest_article_seen"] = raw_articles[0].get("published") or raw_articles[0].get("date") or raw_articles[0].get("url")
                 if not ledger["oldest_article_seen"]:
-                    ledger["oldest_article_seen"] = raw_articles[-1].get("url") or raw_articles[-1].get("id")
+                    ledger["oldest_article_seen"] = raw_articles[-1].get("published") or raw_articles[-1].get("date") or raw_articles[-1].get("url")
             
             # Drift semantics fix: if a dedicated adapter is used, we trust its mode shifts (like PRN backfill).
             # We only flag URL drift for dedicated adapters.
@@ -213,6 +237,7 @@ def _fetch_html_channel(source: dict) -> tuple:
                     ledger["status"] = "GAP_DETECTED"
                     ledger["health"] = "DEGRADED"
                     ledger["reason"] = "CHECKPOINT_NOT_REACHED — BACKFILL REQUIRED"
+                    ledger["termination_reason"] = "ARBITRARY_LIMIT_REACHED"
                     ledger["potential_recall_loss"] = True
                     ledger["checkpoint_frozen"] = True
                     logger.warning(f"[INGESTION] {source_name} hit limit without finding checkpoint.")
@@ -220,6 +245,7 @@ def _fetch_html_channel(source: dict) -> tuple:
                     ledger["status"] = "GAP_DETECTED"
                     ledger["health"] = "DEGRADED"
                     ledger["reason"] = "CHECKPOINT_NOT_REACHABLE"
+                    ledger["termination_reason"] = "BLOCKED"
                     ledger["potential_recall_loss"] = True
                     ledger["checkpoint_frozen"] = True
                     logger.warning(f"[INGESTION] SOURCE DEGRADED: {source_name} blocked by 403. Checkpoint frozen. Potential recall loss: YES.")
@@ -253,6 +279,8 @@ def _fetch_html_channel(source: dict) -> tuple:
             ledger["articles_emitted"] = len(articles)
             if len(articles) == 0 and ledger["status"] == "OK":
                 ledger["status"] = "EMPTY"
+                if ledger["termination_reason"] == "UNKNOWN":
+                    ledger["termination_reason"] = "UNEXPLAINED_TERMINATION"
                 
             if ledger["status"] in ("OK", "EMPTY") and raw_articles and ledger["recovery_status"] in ("NOT_REQUIRED", "RECOVERED") and not ledger["checkpoint_frozen"]:
                 if "checkpoints_to_set" in ledger.get("metadata", {}):
@@ -272,6 +300,7 @@ def _fetch_html_channel(source: dict) -> tuple:
             ledger["status"] = "FAILED"
             ledger["health"] = "DEGRADED"
             ledger["reason"] = str(e)
+            ledger["termination_reason"] = "PARSER_EXCEPTION"
             ledger["recovery_status"] = "FAILED"
             ledger["checkpoint_frozen"] = True
             ledger["checkpoint_after"] = ledger["checkpoint_before"]
@@ -303,10 +332,13 @@ def _fetch_html_channel(source: dict) -> tuple:
             ledger["articles_emitted"] = 1
             ledger["newest_article_seen"] = url
             ledger["oldest_article_seen"] = url
+            ledger["termination_reason"] = "SUCCESS_EXHAUSTED"
+            ledger["exhaustion_evidence"] = "valid"
         else:
             ledger["status"] = "FAILED"
             ledger["health"] = "DEGRADED"
             ledger["reason"] = f"HTTP {resp.status_code}"
+            ledger["termination_reason"] = f"HTTP_{resp.status_code}"
             
         if len(articles) == 0 and ledger["status"] == "OK":
             ledger["status"] = "EMPTY"
@@ -316,6 +348,7 @@ def _fetch_html_channel(source: dict) -> tuple:
         ledger["status"] = "FAILED"
         ledger["health"] = "DEGRADED"
         ledger["reason"] = str(e)
+        ledger["termination_reason"] = "PARSER_EXCEPTION"
         
     ledger["checkpoint_after"] = ledger["checkpoint_before"]
     ledger["duration_sec"] = round(time.time() - start_time, 2)

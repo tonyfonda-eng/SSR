@@ -120,14 +120,22 @@ def generate_markdown_report(date_str):
     
     csv_source_stats = {}
     
-    for s in source_coverage:
-        name = s['source']
-        raw = s['total_articles']
+    for audit_meta in audit_sources:
+        name = audit_meta['source']
+        raw = audit_meta.get('total_raw', 0)
+        unique = audit_meta.get('total_unique', 0)
+        
+        valid_url = audit_meta.get('total_valid_url', 0)
+        valid_title = audit_meta.get('total_valid_title', 0)
+        valid_body = audit_meta.get('total_valid_body', 0)
+        entered_dedupe = audit_meta.get('total_entered_dedupe', 0)
+        dedupe_passed = audit_meta.get('total_dedupe_passed', 0)
+        dedupe_rejected = audit_meta.get('total_dedupe_rejected', 0)
+
         avg = hist_30d.get(name, 0)
         total_avg_30d += avg
         dev_pct = calculate_anomaly(raw, avg)
         
-        audit_meta = audit_source_map.get(name, {})
         emergency_stop = bool(audit_meta.get('emergency_stop'))
         reason = str(audit_meta.get('reasons', '') or '')
         
@@ -137,11 +145,20 @@ def generate_markdown_report(date_str):
         elif dev_pct < -30:
             missed_sections.append(f"**{name}**: 🟡 Severe volume drop ({dev_pct:.1f}%). Expected ~{avg:.0f}, got {raw}. Potential acquisition gap.")
             
+        if raw > 0 and (unique / raw) < 0.30:
+            missed_sections.append(f"**{name}**: 🟡 Suspicious uniqueness rate ({(unique/raw)*100:.1f}%). {raw} read → {unique} unique. Potential scraper pagination or fingerprinting issue.")
+        if raw > 0 and (valid_body / raw) < 0.80:
+            missed_sections.append(f"**{name}**: 🔴 High empty body rate ({(valid_body/raw)*100:.1f}%). {raw} fetched → {valid_body} valid bodies. Payload parsing failure likely.")
+        if raw > 0 and (valid_title / raw) < 0.80:
+            missed_sections.append(f"**{name}**: 🔴 High untitled rate ({(valid_title/raw)*100:.1f}%). {raw} fetched → {valid_title} valid titles. Payload parsing failure likely.")
+
         grade = get_scraper_grade(dev_pct, emergency_stop)
         light = get_traffic_light(dev_pct) if not emergency_stop else "🔴"
         
         sources_analyzed.append({
-            "name": name, "mode": s['ingestion_mode'], "raw": raw, "unique": s['unique_articles'],
+            "name": name, "raw": raw, "unique": unique,
+            "valid_url": valid_url, "valid_title": valid_title, "valid_body": valid_body,
+            "entered_dedupe": entered_dedupe, "dedupe_passed": dedupe_passed, "dedupe_rejected": dedupe_rejected,
             "avg": avg, "dev_pct": dev_pct, "grade": grade, "light": light, "emergency_stop": emergency_stop,
             "reason": reason
         })
@@ -301,13 +318,11 @@ def generate_markdown_report(date_str):
         md.append(f"- **Shift:** ➡️ Flat ({ont_diff:+.2f}). Stable news mix.")
     md.append("")
     
-    md.append("## 5. Source Acquisition & Scraper Health")
-    md.append("| Source | Mode | Grade | Status | Raw | 30d Avg | Dev % | Lifetime Rel | Emergency Stop |")
+    md.append("## 5. Source-by-Source Ingestion Reconciliation")
+    md.append("| Source | Read/fetched | Unique | Valid URL | Valid title | Valid body | Entered dedupe | Dedupe passed | Dedupe rejected |")
     md.append("|---|---|---|---|---|---|---|---|---|")
     for s in sources_analyzed:
-        em_str = f"⚠️ YES ({s['reason']})" if s['emergency_stop'] else "No"
-        rel_str = f"{lifetime_rel.get(s['name'], 100.0):.1f}%"
-        md.append(f"| {s['name']} | {s['mode']} | **{s['grade']}** | {s['light']} | {s['raw']} | {s['avg']:.0f} | {s['dev_pct']:+.1f}% | {rel_str} | {em_str} |")
+        md.append(f"| {s['name']} | {s['raw']} | {s['unique']} | {s['valid_url']} | {s['valid_title']} | {s['valid_body']} | {s['entered_dedupe']} | {s['dedupe_passed']} | {s['dedupe_rejected']} |")
     md.append("")
     
     md.append("## 6. AI Prompt Economics, Telemetry & Drift")

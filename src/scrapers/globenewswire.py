@@ -43,6 +43,9 @@ class GlobeNewswireScraper(SourceScraper):
                     "url": link,
                     "published": entry.get("published", "")
                 })
+                
+            self.scrape_metadata["termination_reason"] = "SUCCESS_CHECKPOINT" if self.scrape_metadata["checkpoint_found"] else "SUCCESS_EXHAUSTED"
+            self.scrape_metadata["exhaustion_evidence"] = "valid"
         except Exception as e:
             self.scrape_metadata["reason"] = f"RSS Feed fetch failed: {e}"
             print(f"[ERROR] GlobeNewswire Scraper failed: {e}")

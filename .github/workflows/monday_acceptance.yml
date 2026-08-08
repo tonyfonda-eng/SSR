@@ -1,0 +1,65 @@
+name: SSR Monday Acceptance Test
+
+on:
+  workflow_dispatch:
+  schedule:
+    # 23:30 UTC every Monday (1)
+    - cron: '30 23 * * 1'
+
+jobs:
+  monday-acceptance:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+          fetch-depth: 0
+
+      - name: Restore database
+        uses: actions/cache/restore@v4
+        with:
+          path: |
+            ssr_cache.sqlite
+            ssr_observability.db
+            ssr_devops.db
+            ssr_audit.db
+          key: ssr-database-${{ github.sha }}
+          restore-keys: |
+            ssr-database-
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Execute Strict Audit
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GOOGLE_SERVICE_ACCOUNT_JSON: ${{ secrets.GOOGLE_SERVICE_ACCOUNT_JSON }}
+        run: |
+          python -m src.audit.monday_acceptance
+
+      - name: Archive Acceptance Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: monday-acceptance-report
+          path: docs/daily_audit/*_monday_acceptance.md
+          retention-days: 90
+
+      - name: Commit Report to Repository
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+          git add docs/daily_audit/*_monday_acceptance.md
+          git commit -m "chore: archive Monday Acceptance Report" || echo "No changes to commit"
+          git pull --rebase origin main || true
+          git push || echo "Push failed due to concurrent update"

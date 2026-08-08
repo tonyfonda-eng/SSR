@@ -529,7 +529,7 @@ def _record_screening(article: dict, telemetry: PipelineTelemetry, outcome: str,
         "company_name": company_name,
         "event_family": article.get("_ai_classification"),
         "ingestion_mode": article.get("channel", "UNKNOWN"),
-        "body_snippet": article.get("body", "")[:3000]
+        "body_sha256": article.get("body_sha256")
     }
     logger.info(f"[SCREENED] '{entry['headline'][:80]}' -> {outcome} @ {final_stage}" + (f" ({drop_reason})" if drop_reason else ""))
     try:
@@ -1017,6 +1017,13 @@ def main():
         seen_hashes = set()
         
         ledger_unique = {f"{entry['source']}::{entry['channel']}": 0 for entry in ingestion_ledger}
+        
+        source_stats = {f"{entry['source']}::{entry['channel']}": {
+            "valid_url_count": 0, "valid_title_count": 0, "valid_body_count": 0,
+            "entered_dedupe_count": 0, "dedupe_passed_count": 0, "dedupe_rejected_count": 0,
+            "integrity_sample": []
+        } for entry in ingestion_ledger}
+        
         quarantined = 0
         
         def validate_article_contract(art):
@@ -1025,36 +1032,86 @@ def main():
                 if req not in art:
                     raise KeyError(f"Missing mandatory field: {req}")
             
+            url_val = art.get("url", "").strip()
             title_text = art.get("title", "").strip().lower()
             source_text = art.get("source", "").strip().lower()
+            body_val = art.get("body", "").strip()
+            
+            if not url_val:
+                art["body_sha256"] = None
+                raise ValueError("ExtractionFailure: Missing valid URL")
+                
             if not title_text or title_text == "no title" or title_text == "html document":
-                title_text = art.get("body", "")[:200].strip().lower()
+                art["body_sha256"] = None
+                raise ValueError("ExtractionFailure: Missing or fallback title")
+                
+            if not body_val:
+                art["body_sha256"] = None
+                raise ValueError("ExtractionFailure: Empty body payload")
                 
             art["article_hash"] = hashlib.md5(f"{source_text}::{title_text}".encode('utf-8')).hexdigest()
+            art["body_sha256"] = hashlib.sha256(art.get("body", "").encode("utf-8")).hexdigest()
             return art
         
         for article in raw_articles:
+            k = f"{article.get('source', 'Unknown')}::{article.get('channel', 'Unknown')}"
+            if k not in source_stats:
+                source_stats[k] = {"valid_url_count": 0, "valid_title_count": 0, "valid_body_count": 0,
+                                   "entered_dedupe_count": 0, "dedupe_passed_count": 0, "dedupe_rejected_count": 0,
+                                   "integrity_sample": []}
+
+            url_val = article.get("url", "")
+            title_val = article.get("title", "")
+            if isinstance(url_val, str) and url_val.strip():
+                source_stats[k]["valid_url_count"] += 1
+            
+            title_clean = str(title_val).strip().lower() if title_val else ""
+            if title_clean and title_clean not in ["no title", "untitled", "html document"]:
+                source_stats[k]["valid_title_count"] += 1
+                
+            body_val = article.get("body", "")
+            if isinstance(body_val, str) and body_val.strip():
+                source_stats[k]["valid_body_count"] += 1
+
             try:
                 validated_article = validate_article_contract(article)
+                source_stats[k]["entered_dedupe_count"] += 1
                 dup_hash = validated_article["article_hash"]
                 
                 if dup_hash not in seen_hashes:
                     seen_hashes.add(dup_hash)
                     unique_articles.append(validated_article)
                     
-                    k = f"{validated_article['source']}::{validated_article['channel']}"
-                    if k in ledger_unique:
-                        ledger_unique[k] += 1
+                    k_val = f"{validated_article['source']}::{validated_article['channel']}"
+                    if k_val in ledger_unique:
+                        ledger_unique[k_val] += 1
+                    source_stats[k_val]["dedupe_passed_count"] += 1
+                    
+                    if len(source_stats[k_val]["integrity_sample"]) < 5:
+                        source_stats[k_val]["integrity_sample"].append({
+                            "url": validated_article.get("url"),
+                            "source_article_id": validated_article.get("id", validated_article.get("guid", "")),
+                            "title": validated_article.get("title"),
+                            "body_length": len(validated_article.get("body", "")),
+                            "published": validated_article.get("published"),
+                            "source": validated_article.get("source"),
+                            "body_sha256": validated_article.get("body_sha256")
+                        })
                 else:
                     logger.debug(f"[DEDUPE] Dropped overlapping article: {validated_article['title']} from {validated_article['source']} ({validated_article['channel']})")
                     _record_screening(validated_article, telemetry, outcome="dropped", final_stage="dedupe_hash", drop_reason="duplicate_hash")
+                    k_val = f"{validated_article['source']}::{validated_article['channel']}"
+                    source_stats[k_val]["dedupe_rejected_count"] += 1
             except Exception as handoff_err:
                 quarantined += 1
                 logger.warning(f"[HANDOFF] Quarantined malformed article from {article.get('source', 'Unknown')}. Reason: {handoff_err}")
+                _record_screening(article, telemetry, outcome="dropped", final_stage="ingestion_validation", drop_reason=str(handoff_err))
                 
         for entry in ingestion_ledger:
             k = f"{entry['source']}::{entry['channel']}"
             entry["unique_found"] = ledger_unique.get(k, 0)
+            stats = source_stats.get(k, {})
+            entry.update(stats)
             
         telemetry.ingestion_ledger = ingestion_ledger
         

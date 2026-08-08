@@ -136,6 +136,11 @@ def init_db():
     except sqlite3.OperationalError:
         pass
 
+    try:
+        r_conn.execute("ALTER TABLE article_screening_log ADD COLUMN body_sha256 TEXT;")
+    except sqlite3.OperationalError:
+        pass
+
     r_conn.execute("CREATE INDEX IF NOT EXISTS idx_screening_timestamp ON article_screening_log(timestamp DESC);")
     
     try:
@@ -284,6 +289,15 @@ def init_db():
             reason TEXT
         );
     """)
+    try:
+        a_conn.execute("ALTER TABLE daily_source_metrics ADD COLUMN valid_url_count INTEGER DEFAULT 0;")
+        a_conn.execute("ALTER TABLE daily_source_metrics ADD COLUMN valid_title_count INTEGER DEFAULT 0;")
+        a_conn.execute("ALTER TABLE daily_source_metrics ADD COLUMN valid_body_count INTEGER DEFAULT 0;")
+        a_conn.execute("ALTER TABLE daily_source_metrics ADD COLUMN entered_dedupe_count INTEGER DEFAULT 0;")
+        a_conn.execute("ALTER TABLE daily_source_metrics ADD COLUMN dedupe_passed_count INTEGER DEFAULT 0;")
+        a_conn.execute("ALTER TABLE daily_source_metrics ADD COLUMN dedupe_rejected_count INTEGER DEFAULT 0;")
+    except sqlite3.OperationalError: pass
+    
     a_conn.execute("""
         CREATE TABLE IF NOT EXISTS daily_ai_metrics (
             run_id TEXT NOT NULL,
@@ -385,8 +399,8 @@ def log_article_screening(entry: dict) -> None:
         gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
         conn.execute("""
             INSERT INTO article_screening_log
-            (run_id, timestamp, headline, url, source, outcome, final_stage, drop_reason, ticker, company_name, event_family, ingestion_mode)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+            (run_id, timestamp, headline, url, source, outcome, final_stage, drop_reason, ticker, company_name, event_family, ingestion_mode, body_sha256)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
         """, (
             entry.get("run_id", "UNKNOWN"),
             gmt_now,
@@ -399,7 +413,8 @@ def log_article_screening(entry: dict) -> None:
             entry.get("ticker"),
             entry.get("company_name"),
             entry.get("event_family"),
-            entry.get("ingestion_mode", "UNKNOWN")
+            entry.get("ingestion_mode", "UNKNOWN"),
+            entry.get("body_sha256")
         ))
         conn.commit()
     except Exception as e:
@@ -617,13 +632,16 @@ def log_audit_source_metrics(run_id: str, ledger: list):
             meta = entry.get("metadata", {})
             conn.execute("""
                 INSERT INTO daily_source_metrics 
-                (run_id, timestamp, source, channel, raw_found, unique_found, pages_visited, page_limit, checkpoint_found, emergency_stop, reason)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                (run_id, timestamp, source, channel, raw_found, unique_found, pages_visited, page_limit, checkpoint_found, emergency_stop, reason,
+                 valid_url_count, valid_title_count, valid_body_count, entered_dedupe_count, dedupe_passed_count, dedupe_rejected_count)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
             """, (
                 run_id, gmt_now, entry.get("source"), entry.get("channel"),
                 entry.get("articles_scanned", 0), entry.get("unique_found", 0),
                 meta.get("pages_visited", 0), meta.get("page_limit", 0),
-                meta.get("checkpoint_found", False), meta.get("emergency_stop", False), meta.get("reason", "")
+                meta.get("checkpoint_found", False), meta.get("emergency_stop", False), meta.get("reason", ""),
+                entry.get("valid_url_count", 0), entry.get("valid_title_count", 0), entry.get("valid_body_count", 0),
+                entry.get("entered_dedupe_count", 0), entry.get("dedupe_passed_count", 0), entry.get("dedupe_rejected_count", 0)
             ))
         conn.commit()
     except Exception as e:

@@ -1,4 +1,96 @@
 {
-  "timestamp": "2026-08-08T08:00:58.066194+00:00",
-  "source_metrics": []
+  "timestamp": "2026-08-08T16:39:38.867051+00:00",
+  "source_metrics": [
+    {
+      "source": "Reuters",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 100,
+      "unique": 99,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 100.0,
+      "emergency_stop": false,
+      "reason": ""
+    },
+    {
+      "source": "SEC Edgar",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 119,
+      "unique": 118,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 100.0,
+      "emergency_stop": false,
+      "reason": ""
+    },
+    {
+      "source": "PR Newswire",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 62,
+      "unique": 67,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 90.9,
+      "emergency_stop": false,
+      "reason": ""
+    },
+    {
+      "source": "LSE.co.uk",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 56,
+      "unique": 54,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 100.0,
+      "emergency_stop": false,
+      "reason": ""
+    },
+    {
+      "source": "GlobeNewswire",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 21,
+      "unique": 21,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 100.0,
+      "emergency_stop": false,
+      "reason": ""
+    },
+    {
+      "source": "Business Wire",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 11,
+      "unique": 11,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 100.0,
+      "emergency_stop": false,
+      "reason": ""
+    },
+    {
+      "source": "SEC EDGAR - S-4 (Stock Mergers)",
+      "mode": "HTML",
+      "grade": "A+",
+      "status_light": "\ud83d\udfe2",
+      "raw": 1,
+      "unique": 1,
+      "avg_30d": 0,
+      "dev_pct": 0,
+      "lifetime_rel": 100.0,
+      "emergency_stop": false,
+      "reason": ""
+    }
+  ]
 }

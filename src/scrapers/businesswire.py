@@ -54,6 +54,7 @@ class BusinessWireScraper(SourceScraper):
             "pages_visited": 1,
             "page_limit": 1,
             "emergency_stop": False,
+            "termination_reason": "",
             "reason": "",
             "checkpoints_to_set": []
         }
@@ -114,6 +115,12 @@ class BusinessWireScraper(SourceScraper):
 
         if "gap" not in self.scrape_metadata["reason"] and "failed" not in self.scrape_metadata["reason"]:
             self.scrape_metadata["checkpoint_found"] = True
+            self.scrape_metadata["termination_reason"] = "SUCCESS_CHECKPOINT"
+            self.scrape_metadata["exhaustion_evidence"] = "valid"
+        elif "failed" in self.scrape_metadata["reason"]:
+            self.scrape_metadata["termination_reason"] = "HTTP_ERROR"
+        else:
+            self.scrape_metadata["termination_reason"] = "CHECKPOINT_NOT_REACHED"
 
         print(f"    [BW RSS] Total unique articles: {len(articles)}")
         return articles

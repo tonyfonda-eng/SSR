@@ -5,6 +5,7 @@ class SourceScraper:
             "page_limit": 0,
             "checkpoint_found": False,
             "emergency_stop": False,
+            "termination_reason": "",
             "reason": ""
         }
 

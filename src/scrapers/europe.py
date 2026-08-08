@@ -24,7 +24,12 @@ class GenericRSSScraper(SourceScraper):
                         "url": entry.link,
                         "published": getattr(entry, 'published', '')
                     })
+                self.scrape_metadata["termination_reason"] = "SUCCESS_EXHAUSTED"
+                self.scrape_metadata["exhaustion_evidence"] = "valid"
+            else:
+                self.scrape_metadata["termination_reason"] = f"HTTP_{response.status_code}"
         except Exception as e:
+            self.scrape_metadata["termination_reason"] = "PARSER_ERROR"
             print(f"[ERROR] Generic RSS Scraper failed for {url}: {e}")
         return articles
 
@@ -59,7 +64,12 @@ class GenericJSONScraper(SourceScraper):
                             "url": f"{url}/{doc_id}",
                             "published": item.get('date', item.get('publishedAt', ''))
                         })
+                self.scrape_metadata["termination_reason"] = "SUCCESS_EXHAUSTED"
+                self.scrape_metadata["exhaustion_evidence"] = "valid"
+            else:
+                self.scrape_metadata["termination_reason"] = f"HTTP_{response.status_code}"
         except Exception as e:
+            self.scrape_metadata["termination_reason"] = "PARSER_ERROR"
             print(f"[ERROR] Generic JSON Scraper failed for {url}: {e}")
         return articles
 
