@@ -128,19 +128,19 @@ def send_alert(decision_manifest: dict, recipient: str = None):
         print(f" [EMAIL DISPATCH] Alert successfully sent to {recipient} for {ticker}")
         
     except smtplib.SMTPAuthenticationError as e:
-        log_email_dispatch(decision_manifest.get("event_id", "UNKNOWN"), decision_id, recipient, os.environ.get("SMTP_SERVER", "smtp.gmail.com"), int(os.environ.get("SMTP_PORT", 465)), 1, "SMTP_AUTHENTICATION_FAILED", exc_class=e.__class__.__name__, exception_message=str(e))
+        log_email_dispatch(decision_manifest.get("event_id", "UNKNOWN"), decision_id, recipient, os.environ.get("SMTP_SERVER", "smtp.gmail.com"), int(os.environ.get("SMTP_PORT", 465)), 1, "SMTP_AUTHENTICATION_FAILED", exception_class=e.__class__.__name__, exception_message=str(e))
         print(f" [EMAIL ERROR] SMTP authentication failed: {e}")
         raise e
     except (smtplib.SMTPConnectError, smtplib.SMTPServerDisconnected) as e:
-        log_email_dispatch(decision_manifest.get("event_id", "UNKNOWN"), decision_id, recipient, os.environ.get("SMTP_SERVER", "smtp.gmail.com"), int(os.environ.get("SMTP_PORT", 465)), 1, "SMTP_CONNECTION_FAILED", exc_class=e.__class__.__name__, exception_message=str(e))
+        log_email_dispatch(decision_manifest.get("event_id", "UNKNOWN"), decision_id, recipient, os.environ.get("SMTP_SERVER", "smtp.gmail.com"), int(os.environ.get("SMTP_PORT", 465)), 1, "SMTP_CONNECTION_FAILED", exception_class=e.__class__.__name__, exception_message=str(e))
         print(f" [EMAIL ERROR] SMTP connection failed: {e}")
         raise e
     except smtplib.SMTPException as e:
-        log_email_dispatch(decision_manifest.get("event_id", "UNKNOWN"), decision_id, recipient, os.environ.get("SMTP_SERVER", "smtp.gmail.com"), int(os.environ.get("SMTP_PORT", 465)), 1, "SMTP_SEND_FAILED", exc_class=e.__class__.__name__, exception_message=str(e))
+        log_email_dispatch(decision_manifest.get("event_id", "UNKNOWN"), decision_id, recipient, os.environ.get("SMTP_SERVER", "smtp.gmail.com"), int(os.environ.get("SMTP_PORT", 465)), 1, "SMTP_SEND_FAILED", exception_class=e.__class__.__name__, exception_message=str(e))
         print(f" [EMAIL ERROR] SMTP send failed: {e}")
         raise e
     except Exception as e:
-        log_email_dispatch(decision_manifest.get("event_id", "UNKNOWN"), decision_id, recipient, os.environ.get("SMTP_SERVER", "smtp.gmail.com"), int(os.environ.get("SMTP_PORT", 465)), 1, "APPLICATION_ERROR", exc_class=e.__class__.__name__, exception_message=str(e))
+        log_email_dispatch(decision_manifest.get("event_id", "UNKNOWN"), decision_id, recipient, os.environ.get("SMTP_SERVER", "smtp.gmail.com"), int(os.environ.get("SMTP_PORT", 465)), 1, "APPLICATION_ERROR", exception_class=e.__class__.__name__, exception_message=str(e))
         print(f" [EMAIL ERROR] Application error during dispatch: {e}")
         raise e
     finally:

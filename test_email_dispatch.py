@@ -1,7 +1,8 @@
 import os
 from src.alerts.email import send_alert
-from src.database import _get_connection, AUDIT_DB_PATH
+from src.database import _get_connection, AUDIT_DB_PATH, initialise_database
 
+initialise_database()
 print("Testing Email Dispatch...")
 
 # A valid dummy decision manifest matching the expected structure
