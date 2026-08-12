@@ -110,8 +110,12 @@ def send_alert(decision_manifest: dict, recipient: str = None):
         event_id = decision_manifest.get("event_id", "UNKNOWN")
         
         log_email_dispatch(event_id, decision_id, recipient, smtp_server, smtp_port, 1, "EMAIL_ATTEMPTED")
-        
-        server = smtplib.SMTP_SSL(smtp_server, smtp_port)
+        if smtp_port == 465:
+            server = smtplib.SMTP_SSL(smtp_server, smtp_port)
+        else:
+            server = smtplib.SMTP(smtp_server, smtp_port)
+            server.starttls()
+            
         log_email_dispatch(event_id, decision_id, recipient, smtp_server, smtp_port, 1, "SMTP_CONNECTED")
         
         server.login(GMAIL_USER, GMAIL_APP_PASSWORD)
