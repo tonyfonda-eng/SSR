@@ -88,7 +88,7 @@ def send_alert(decision_manifest: dict, recipient: str = None):
             
             <div class="footer">
                 Special Situations Radar (SSR 2.0) | Decision ID: {decision_id}<br>
-                Manifest Configuration: {reg.get("configuration_manifest_hash", "Unknown")}
+                Manifest Configuration: {decision_manifest.get("manifest_hash", "Unknown")}
             </div>
         </div>
     </body>
