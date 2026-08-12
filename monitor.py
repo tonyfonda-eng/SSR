@@ -793,7 +793,9 @@ def validate_pipeline_dag(execution_order: list):
                         "target_ticker": "DAG_ERROR",
                         "event_type": "Pipeline Error",
                         "headline": err,
-                        "research_summary": "Execution Halted due to DAG violation."
+                        "research_summary": "Execution Halted due to DAG violation.",
+                        "runtime_timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT"),
+                        "evidence": [{"component": "DAG Validator", "assertion": "Pipeline Stage Violation", "weight": 1.0}]
                     })
                 except Exception as e:
                     logger.error(f"Failed to send DAG alert: {e}")
@@ -1208,7 +1210,9 @@ def main():
                     "decision_id": telemetry.run_id,
                     "event_type": "SYSTEM FAILURE",
                     "target_ticker": "SSR_OPS",
-                    "canonical_sensor_id": "Flight Recorder"
+                    "canonical_sensor_id": "Flight Recorder",
+                    "runtime_timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT"),
+                    "evidence": [{"component": "Ingestion Auditor", "assertion": "Emergency limit reached on one or more sources", "weight": 1.0}]
                 })
                     
         except Exception as e:
