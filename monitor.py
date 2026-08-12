@@ -789,8 +789,9 @@ def validate_pipeline_dag(execution_order: list):
                 err = f"CRITICAL: Invalid Pipeline DAG. {first} MUST PRECEDE {second}."
                 try:
                     send_alert({
-                        "manifest_registry": {"decision_id": "SYS"},
-                        "detection_vector": {"target_ticker": "DAG_ERROR", "detected_event_type": "Pipeline Error"},
+                        "decision_id": "SYS",
+                        "target_ticker": "DAG_ERROR",
+                        "event_type": "Pipeline Error",
                         "headline": err,
                         "research_summary": "Execution Halted due to DAG violation."
                     })
@@ -1204,9 +1205,10 @@ def main():
                     "url": "https://github.com/tonyfonda-eng/SSR",
                     "research_summary": "Emergency stop was reached. Immediate investigation required.",
                     "is_update": False,
-                    "manifest_registry": {"decision_id": telemetry.run_id},
-                    "detection_vector": {"detected_event_type": "SYSTEM FAILURE", "target_ticker": "SSR_OPS"},
-                    "syndication_lineage": {"canonical_sensor_id": "Flight Recorder"}
+                    "decision_id": telemetry.run_id,
+                    "event_type": "SYSTEM FAILURE",
+                    "target_ticker": "SSR_OPS",
+                    "canonical_sensor_id": "Flight Recorder"
                 })
                     
         except Exception as e:
