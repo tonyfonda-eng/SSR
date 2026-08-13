@@ -45,5 +45,8 @@ jobs:
               except Exception as e:
                   print(f'Key {i+1} Failed: {e}')
           print(f'Total working OpenRouter keys: {success}/{len(or_keys)}')
+          if success == 0:
+              import sys
+              sys.exit(1)
           EOF
           python test_script.py

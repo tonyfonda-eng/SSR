@@ -37,6 +37,7 @@ try:
     print("Alert sent successfully (or at least no crash).")
 except Exception as e:
     print(f"Failed during send_alert: {e}")
+    raise
 
 # Check telemetry
 print("\n--- Telemetry from email_dispatch_log ---")

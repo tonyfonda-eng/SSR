@@ -40,4 +40,4 @@ jobs:
           SMTP_PASS: ${{ secrets.SMTP_PASS }}
           ALERT_EMAIL_RECIPIENT: ${{ secrets.ALERT_EMAIL_RECIPIENT }}
         run: |
-          python ssd_auditor.py
+          python tools/ssd_auditor.py

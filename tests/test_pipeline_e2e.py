@@ -19,6 +19,10 @@ def setup_test_env():
     # Ensure database is initialized
     initialise_database()
     
+    # Initialize ontology
+    from src.ontology import bootstrap_ontology
+    bootstrap_ontology()
+    
     # Load Golden Dataset
     if not os.path.exists(GOLDEN_DATASET_PATH):
         pytest.skip(f"Golden dataset not found at {GOLDEN_DATASET_PATH}")
@@ -41,7 +45,7 @@ def setup_test_env():
     
     return test_cases, config_manifest, router
 
-@patch('src.alerts.email.send_alert') # Mock outbound email so we don't spam ourselves during tests
+@patch('monitor.send_alert') # Mock outbound email so we don't spam ourselves during tests
 def test_pipeline_e2e(mock_send_alert, setup_test_env):
     test_cases, config_manifest, router = setup_test_env
     
@@ -60,7 +64,8 @@ def test_pipeline_e2e(mock_send_alert, setup_test_env):
         }
         
         # Override the generated hash so we can look it up deterministically
-        article["_article_hash"] = case.get("article_hash")
+        article["article_hash"] = case.get("article_hash")
+        article["body_sha256"] = case.get("article_hash") # Using the same hash for testing purposes
         
         # Run through pipeline
         process_article(article, telemetry, config_manifest, "TEST-HASH", router)

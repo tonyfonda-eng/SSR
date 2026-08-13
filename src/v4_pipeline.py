@@ -203,7 +203,7 @@ def stage_v4_event_classification(article: dict, ctx: dict) -> tuple:
         
     # Match Persistent Event ID
     try:
-        from src.config.settings import RESEARCH_DB_PATH
+        from src.database import RESEARCH_DB_PATH
         conn = sqlite3.connect(RESEARCH_DB_PATH)
         c = conn.cursor()
         
@@ -229,8 +229,8 @@ def stage_v4_event_classification(article: dict, ctx: dict) -> tuple:
         else:
             article["_v4_human_review"] = 0
             
-    except Exception:
-        pass
+    except Exception as e:
+        logger.error(f"[V4] Event Ledger query failed: {e}")
     finally:
         try: conn.close()
         except: pass
@@ -337,7 +337,7 @@ def stage_v4_routing(article: dict, ctx: dict) -> tuple:
     created_at = timestamp
     
     try:
-        from src.config.settings import RESEARCH_DB_PATH
+        from src.database import RESEARCH_DB_PATH
         conn = sqlite3.connect(RESEARCH_DB_PATH)
         c = conn.cursor()
         c.execute("SELECT confidence_history, evidence, lifecycle, created_at FROM event_ledger WHERE event_id = ?", (event_id,))
@@ -347,8 +347,8 @@ def stage_v4_routing(article: dict, ctx: dict) -> tuple:
             if row[1]: evidence = json.loads(row[1])
             if row[2]: lifecycle = json.loads(row[2])
             if row[3]: created_at = row[3]
-    except Exception:
-        pass
+    except Exception as e:
+        logger.error(f"[V4] Event Ledger fetch failed: {e}")
     finally:
         try: conn.close()
         except: pass

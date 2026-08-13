@@ -458,6 +458,7 @@ def commit_decision_capsule(capsule_data: dict, manifest_json: dict = None):
         conn.commit()
     except Exception as e:
         logger.error(f"[DB FAULT] Capsule commit failed: {e}")
+        raise
     finally:
         conn.close()
 

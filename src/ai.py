@@ -7,6 +7,7 @@ Decouples LLM interactions into three strict layers:
 """
 import json
 import logging
+import re
 from dataclasses import dataclass
 from typing import Dict, Any, Tuple
 from src.providers.router import ProviderRouter
@@ -339,7 +340,8 @@ def classify_event(body_text: str, matches: list, ticker: str = None, market_cap
     return {
         "status": "OK",
         "classification": parsed_payload.strategy,
-        "rationale": parsed_payload.rationale
+        "rationale": parsed_payload.rationale,
+        "confidence": parsed_payload.confidence_score
     }
 
 

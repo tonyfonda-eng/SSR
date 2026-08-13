@@ -73,7 +73,11 @@ class ProviderRouter:
             if provider in self.disabled_providers:
                 continue
                 
-            while True:
+            max_retries = max(len(self.keys.get(provider, [])) * 3, 3)
+            retry_count = 0
+                
+            while retry_count < max_retries:
+                retry_count += 1
                 with self._lock:
                     keys = self.keys.get(provider, [])
                     if not keys:
@@ -163,10 +167,10 @@ class ProviderRouter:
     def _call_gemini(self, prompt: str, api_key: str, require_json: bool, configured_model: str) -> str:
         """Executes API call to Google Gemini REST API."""
         model_map = {
-            "gemini-1.5-pro": "gemini-1.5-pro-latest",
-            "gemini-1.5-flash": "gemini-1.5-flash-latest"
+            "gemini-1.5-pro": "gemini-1.5-pro",
+            "gemini-1.5-flash": "gemini-1.5-flash"
         }
-        api_model = model_map.get(configured_model.lower(), "gemini-1.5-pro-latest")
+        api_model = model_map.get(configured_model.lower(), "gemini-1.5-pro")
         
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{api_model}:generateContent?key={api_key}"
         headers = {"Content-Type": "application/json"}

@@ -605,12 +605,7 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
         for pg in pb_gates:
             pg_idx = execution_order.index(pg)
             if pg_idx < ai_idx:
-                execution_order.remove(pg)
-                ai_idx = execution_order.index("ai_event_classification") # recount after remove
-                insert_idx = ai_idx + 1
-                if "ai_confidence_gate" in execution_order:
-                    insert_idx = max(insert_idx, execution_order.index("ai_confidence_gate") + 1)
-                execution_order.insert(insert_idx, pg)
+                raise ValueError(f"Invalid Pipeline Configuration: {pg} cannot precede ai_event_classification. Please update the configuration source.")
 
     stage_timings = {}
     v4_shadow_article = None
@@ -774,9 +769,6 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
 
 
 def validate_pipeline_dag(execution_order: list):
-    version = os.environ.get("ENTITY_ENGINE_VERSION", "1")
-    if version == "1":
-        return
         
     required_order = [
         ("candidate_generator", "ambiguity_gate"),
