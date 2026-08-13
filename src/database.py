@@ -631,19 +631,22 @@ def log_audit_source_metrics(run_id: str, ledger: list):
         gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
         for entry in ledger:
             meta = entry.get("metadata", {})
-            conn.execute("""
-                INSERT INTO daily_source_metrics 
-                (run_id, timestamp, source, channel, raw_found, unique_found, pages_visited, page_limit, checkpoint_found, emergency_stop, reason,
-                 valid_url_count, valid_title_count, valid_body_count, entered_dedupe_count, dedupe_passed_count, dedupe_rejected_count)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
-            """, (
-                run_id, gmt_now, entry.get("source"), entry.get("channel"),
-                entry.get("articles_scanned", 0), entry.get("unique_found", 0),
-                meta.get("pages_visited", 0), meta.get("page_limit", 0),
-                meta.get("checkpoint_found", False), meta.get("emergency_stop", False), meta.get("reason", ""),
-                entry.get("valid_url_count", 0), entry.get("valid_title_count", 0), entry.get("valid_body_count", 0),
-                entry.get("entered_dedupe_count", 0), entry.get("dedupe_passed_count", 0), entry.get("dedupe_rejected_count", 0)
-            ))
+            try:
+                conn.execute("""
+                    INSERT INTO daily_source_metrics 
+                    (run_id, timestamp, source, channel, raw_found, unique_found, pages_visited, page_limit, checkpoint_found, emergency_stop, reason,
+                     valid_url_count, valid_title_count, valid_body_count, entered_dedupe_count, dedupe_passed_count, dedupe_rejected_count)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+                """, (
+                    run_id, gmt_now, entry.get("source"), entry.get("channel", "UNKNOWN"),
+                    entry.get("articles_scanned", 0), entry.get("unique_found", 0),
+                    meta.get("pages_visited", 0), meta.get("page_limit", 0),
+                    meta.get("checkpoint_found", False), meta.get("emergency_stop", False), meta.get("reason", ""),
+                    entry.get("valid_url_count", 0), entry.get("valid_title_count", 0), entry.get("valid_body_count", 0),
+                    entry.get("entered_dedupe_count", 0), entry.get("dedupe_passed_count", 0), entry.get("dedupe_rejected_count", 0)
+                ))
+            except Exception as row_err:
+                logger.error(f"[DB FAULT] Failed to write daily_source_metrics row for {entry.get('source')}: {row_err} - Data: {entry}")
         conn.commit()
     except Exception as e:
         logger.error(f"[DB FAULT] Failed to write daily_source_metrics: {e}")

@@ -139,9 +139,22 @@ class PRNewsWireScraper(SourceScraper):
                 break
                 
         if self.scrape_metadata["pages_visited"] == self.scrape_metadata["page_limit"] and not self.scrape_metadata.get("checkpoint_found") and checkpoint:
-            self.scrape_metadata["emergency_stop"] = True
-            self.scrape_metadata["recovery_status"] = "GAP_DETECTED"
-            self.scrape_metadata["termination_reason"] = "ARBITRARY_LIMIT_REACHED"
+            try:
+                # Check if the missing checkpoint is actually a deleted article (404)
+                chk_resp = requests.get(checkpoint, impersonate="chrome120", timeout=5)
+                if chk_resp.status_code == 404:
+                    print(f"    [PR Newswire] Checkpoint {checkpoint} is a 404. Treating gap as closed.")
+                    self.scrape_metadata["recovery_status"] = "RECOVERED"
+                    self.scrape_metadata["termination_reason"] = "SUCCESS_EXHAUSTED"
+                    self.scrape_metadata["exhaustion_evidence"] = "valid"
+                else:
+                    self.scrape_metadata["emergency_stop"] = True
+                    self.scrape_metadata["recovery_status"] = "GAP_DETECTED"
+                    self.scrape_metadata["termination_reason"] = "ARBITRARY_LIMIT_REACHED"
+            except Exception:
+                self.scrape_metadata["emergency_stop"] = True
+                self.scrape_metadata["recovery_status"] = "GAP_DETECTED"
+                self.scrape_metadata["termination_reason"] = "ARBITRARY_LIMIT_REACHED"
             
         self.scrape_metadata["articles_recovered"] = len(articles)
         self.scrape_metadata["articles_scanned"] = len(articles)

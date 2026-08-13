@@ -21,16 +21,17 @@
   "Business Wire::RSS-Healthcare": "20260807436277",
   "Business Wire::RSS-Financial Services": "20260731563416",
   "Business Wire::RSS-Venture Capital": "20260807992310",
-  "GlobeNewswire::HTML": "https://www.globenewswire.com/news-release/2026/08/08/3341460/0/ar/%D8%AB%D9%82%D8%A9-%D9%88%D9%82%D9%88%D8%A9-%D8%B1%D8%A7%D8%B3%D8%AE%D8%AA%D8%A7%D9%86-%D9%81%D9%8A-%D8%AA%D8%B5%D9%86%D9%8A%D8%B9-freelander-8.html",
+  "GlobeNewswire::HTML": "https://www.globenewswire.com/news-release/2026/08/13/3344251/0/en/nykredit-bank-a-s-to-redeem-additional-tier-1-capital-notes-nykredit-bank-a-s.html",
   "PR Newswire::HTML-Financial": "https://www.prnewswire.com/news-releases/investor-alert-pomerantz-law-firm-investigates-claims-on-behalf-of-investors-of-teladoc-health-inc---tdoc-302845600.html",
   "PR Newswire::HTML-Tech": "https://www.prnewswire.com/news-releases/xiongan-better-city-better-life-302845894.html",
   "PR Newswire::HTML-Health": "https://www.prnewswire.com/news-releases/energenesis-biomedical-and-taiwan-tanabe-seiyaku-enter-joint-development-agreement-for-energi-f703dfu-302845312.html",
   "PR Newswire::HTML-Industrial": "https://www.prnewswire.com/news-releases/sany-baut-seine-weltweite-prasenz-durch-umfangreiche-maschinenlieferungen-nach-sudamerika-und-thailand-aus-302845887.html",
   "Business Wire::RSS-Regulatory": "20260806008388",
-  "Reuters::HTML": "https://www.reuters.com/es/negocio/5S7NXRI7XFN43IHCZVSU635BIE-2026-08-08/",
-  "SEC EDGAR - Definitive Proxy (DEFM14A)::HTML": "https://www.sec.gov/Archives/edgar/data/1036044/000119312526338993/0001193125-26-338993-index.htm",
+  "Reuters::HTML": "https://www.reuters.com/business/aerospace-defense/credible-missile-threat-led-secret-aircraft-switch-trump-source-says-2026-08-12/",
+  "SEC EDGAR - Definitive Proxy (DEFM14A)::HTML": "https://www.sec.gov/Archives/edgar/data/2028355/000121390026087896/0001213900-26-087896-index.htm",
   "SEC EDGAR - Board Rec (14D-9)::HTML": "https://www.sec.gov/Archives/edgar/data/813298/000119312526338473/0001193125-26-338473-index.htm",
-  "LSE.co.uk::HTML": "https://www.lse.co.uk/news/british-music-festivals-stage-tentative-revival-with-perks-and-payment-plans-1xjjqxgvrebojwe.html",
-  "SEC EDGAR - S-4 (Stock Mergers)::HTML": "https://www.sec.gov/Archives/edgar/data/1754301/000119312526340535/0001193125-26-340535-index.htm",
-  "SEC EDGAR - Tender Offers (SC TO)::HTML": "https://www.sec.gov/Archives/edgar/data/1080657/000149315226036654/0001493152-26-036654-index.htm"
+  "LSE.co.uk::HTML": "https://www.lse.co.uk/news/savills-backs-fy-expectations-as-h1-profit-revenue-rise-jc6g5nm602ntrn2.html",
+  "SEC EDGAR - S-4 (Stock Mergers)::HTML": "https://www.sec.gov/Archives/edgar/data/2134552/000121390026088478/0001213900-26-088478-index.htm",
+  "SEC EDGAR - Tender Offers (SC TO)::HTML": "https://www.sec.gov/Archives/edgar/data/1901164/000114036126032494/0001140361-26-032494-index.htm",
+  "SEC EDGAR - Merger Proxy (PREM14A)::HTML": "https://www.sec.gov/Archives/edgar/data/1590895/000119312526345336/0001193125-26-345336-index.htm"
 }

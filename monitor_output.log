@@ -1,3 +1,35 @@
 2026-08-13 09:28:13,378 [INFO] Initializing SSR 2.0 Highly Granular Pipeline...
 2026-08-13 09:28:13,384 [INFO] [ONTOLOGY] Bootstrapping semantic taxonomy from master configuration.
 2026-08-13 09:28:17,892 [INFO] [ONTOLOGY] Initialization complete. Loaded 12 concepts and 7 statuses.
+2026-08-13 09:28:33,223 [INFO] Locked Immutable Configuration Manifest: CFG-C1D37AD0D54D
+2026-08-13 09:28:33,224 [INFO] [AI ROUTER] Initialized with 0 total keys across providers.
+2026-08-13 09:28:33,224 [INFO] [INGESTION] Booting concurrent multi-channel ingestion for 27 active sources...
+2026-08-13 09:28:33,225 [INFO] [INGESTION] Using dedicated scraper for 'LSE.co.uk'
+2026-08-13 09:28:33,226 [INFO] [INGESTION] Using dedicated scraper for 'Reuters'
+2026-08-13 09:28:33,227 [INFO] [INGESTION] Using dedicated scraper for 'Business Wire'
+2026-08-13 09:28:33,230 [INFO] [INGESTION] Using dedicated scraper for 'GlobeNewswire'
+2026-08-13 09:28:33,231 [INFO] [INGESTION] Using dedicated scraper for 'SEC Edgar'
+2026-08-13 09:28:33,234 [INFO] [INGESTION] Using dedicated scraper for 'SEC EDGAR - Schedule 13D (Activism)'
+2026-08-13 09:28:33,235 [INFO] [INGESTION] Using dedicated scraper for 'SEC EDGAR - Form 10 (Spin-Offs)'
+2026-08-13 09:28:33,237 [INFO] [INGESTION] Using dedicated scraper for 'SEC EDGAR - Tender Offers (SC TO)'
+2026-08-13 09:28:33,238 [INFO] [INGESTION] Using dedicated scraper for 'SEC EDGAR - Board Rec (14D-9)'
+2026-08-13 09:28:33,239 [INFO] [INGESTION] Using dedicated scraper for 'SEC EDGAR - Merger Proxy (PREM14A)'
+2026-08-13 09:28:33,507 [INFO] [INGESTION] Using dedicated scraper for 'SEC EDGAR - Definitive Proxy (DEFM14A)'
+2026-08-13 09:28:33,597 [INFO] [INGESTION] Using dedicated scraper for 'SEC EDGAR - S-4 (Stock Mergers)'
+2026-08-13 09:28:33,605 [INFO] [INGESTION] Using dedicated scraper for 'SEC Edgar 8-K Items'
+2026-08-13 09:28:34,462 [INFO] [INGESTION] Using dedicated scraper for 'PR Newswire'
+2026-08-13 09:28:40,431 [INFO] [INGESTION] Using dedicated scraper for 'London Stock Exchange'
+2026-08-13 09:28:44,652 [WARNING] [INGESTION] SOURCE DEGRADED: Business Wire blocked by 403. Checkpoint frozen. Potential recall loss: YES.
+2026-08-13 09:28:46,111 [INFO] [INGESTION] Using dedicated scraper for 'EQS News (Germany)'
+2026-08-13 09:28:46,865 [INFO] [INGESTION] Using dedicated scraper for 'eMarket SDIR (Italy)'
+2026-08-13 09:28:46,888 [INFO] [INGESTION] Using dedicated scraper for 'AMF (France)'
+2026-08-13 09:28:47,378 [INFO] [INGESTION] Using dedicated scraper for 'CNMV (Spain)'
+2026-08-13 09:28:47,583 [INFO] [INGESTION] Using dedicated scraper for 'Finansinspektionen (Sweden)'
+2026-08-13 09:28:47,619 [INFO] [INGESTION] Using dedicated scraper for 'NewsWeb (Norway)'
+2026-08-13 09:28:48,153 [INFO] [INGESTION] Using dedicated scraper for 'AFM (Netherlands)'
+2026-08-13 09:28:48,153 [INFO] [INGESTION] Using dedicated scraper for 'SIX Exchange (Switzerland)'
+2026-08-13 09:28:48,153 [INFO] [INGESTION] Using dedicated scraper for 'TSX News'
+2026-08-13 09:28:48,176 [INFO] [INGESTION] Using dedicated scraper for 'ASX'
+2026-08-13 09:28:48,318 [INFO] [INGESTION] Using dedicated scraper for 'SEDAR+'
+2026-08-13 09:28:48,945 [INFO] [INGESTION] Using dedicated scraper for 'HKEX'
+2026-08-13 09:29:40,684 [WARNING] [INGESTION] PR Newswire hit limit without finding checkpoint.
