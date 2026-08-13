@@ -1439,3 +1439,19 @@
 2026-08-13 09:46:33,947 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
 2026-08-13 09:46:34,821 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
 2026-08-13 09:46:34,822 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:46:35,633 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:46:35,634 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:46:36,487 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:46:36,488 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:46:37,323 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:46:37,323 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:46:38,129 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:46:38,129 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:46:39,003 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:46:39,004 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:46:39,820 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:46:39,820 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:46:40,647 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:46:40,647 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:46:41,539 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:46:41,539 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
