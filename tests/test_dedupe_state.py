@@ -1,8 +1,9 @@
 import pytest
 import sqlite3
 import hashlib
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
+import monitor
 from monitor import process_article, PipelineTelemetry
 from src.database import initialise_database, DB_PATH, check_event_exists
 from src.ai import ProviderRouter
@@ -60,16 +61,15 @@ def test_a_crash_retry_processable():
     art = get_base_article("A", "Crash Test Article")
     telemetry = PipelineTelemetry()
     
-    # Mock a crash during stage_ontology_concepts
-    with patch('monitor.stage_ontology_concepts', side_effect=ValueError("Simulated Crash")):
+    mock_func = MagicMock(side_effect=ValueError("Simulated Crash"))
+    with patch.dict(monitor.STAGE_REGISTRY, {"ontology_concepts": mock_func}):
         try:
             process_article(art.copy(), telemetry, get_mock_config(), "HASH", ProviderRouter())
         except ValueError:
-            pass # Caught in main loop normally
+            pass
             
     assert_registry_state(art["article_hash"], expect_registry=False, expect_ledger=False)
     
-    # Retry should NOT be dropped as duplicate
     _, is_new = check_event_exists(art["article_hash"])
     assert is_new is True, "Article should be considered new on retry after a crash."
 
@@ -78,13 +78,12 @@ def test_b_legitimate_drop():
     art = get_base_article("B", "Legitimate Drop Article")
     telemetry = PipelineTelemetry()
     
-    # Mock a legitimate drop (stage returns False)
-    with patch('monitor.stage_ontology_concepts', return_value=(False, "dropped_ontology_score")):
+    mock_func = MagicMock(return_value=(False, "dropped_ontology_score"))
+    with patch.dict(monitor.STAGE_REGISTRY, {"ontology_concepts": mock_func}):
         process_article(art.copy(), telemetry, get_mock_config(), "HASH", ProviderRouter())
         
     assert_registry_state(art["article_hash"], expect_registry=True, expect_ledger=True)
     
-    # Existing committed identity should correctly produce dropped_hash_duplicate on next run
     _, is_new = check_event_exists(art["article_hash"])
     assert is_new is False, "Article should be considered duplicate after a legitimate drop."
 
@@ -93,14 +92,13 @@ def test_c_legitimate_alert():
     art = get_base_article("C", "Legitimate Alert Article")
     telemetry = PipelineTelemetry()
     
-    # Mock all stages passing
-    with patch('monitor.stage_ontology_concepts', return_value=(True, "passed")), \
-         patch('monitor.stage_ai_classification', return_value=(True, "passed", {"target_ticker": "TGT", "event_type": "Merger", "confidence": "HIGH", "analysis": "foo", "validated_trades": {}})), \
-         patch('monitor.stage_ticker_resolution', return_value=(True, "passed")), \
-         patch('monitor.stage_ai_ticker_resolution', return_value=(True, "passed")):
-         
-        with patch('monitor.send_alert', return_value=True):
-            process_article(art.copy(), telemetry, get_mock_config(), "HASH", ProviderRouter())
+    with patch.dict(monitor.STAGE_REGISTRY, {
+        "ontology_concepts": MagicMock(return_value=(True, "passed")),
+        "ai_event_classification": MagicMock(return_value=(True, "passed", {"target_ticker": "TGT", "event_type": "Merger", "confidence": "HIGH", "analysis": "foo", "validated_trades": {}})),
+        "ticker_resolution": MagicMock(return_value=(True, "passed")),
+        "ai_ticker_resolution": MagicMock(return_value=(True, "passed"))
+    }), patch('monitor.send_alert', return_value=True):
+        process_article(art.copy(), telemetry, get_mock_config(), "HASH", ProviderRouter())
             
     assert_registry_state(art["article_hash"], expect_registry=True, expect_ledger=True)
     
@@ -113,7 +111,8 @@ def test_d_crash_then_retry_success():
     telemetry = PipelineTelemetry()
     
     # Attempt 1: Crash
-    with patch('monitor.stage_ontology_concepts', side_effect=ValueError("Simulated Crash")):
+    mock_crash = MagicMock(side_effect=ValueError("Simulated Crash"))
+    with patch.dict(monitor.STAGE_REGISTRY, {"ontology_concepts": mock_crash}):
         try:
             process_article(art.copy(), telemetry, get_mock_config(), "HASH", ProviderRouter())
         except ValueError:
@@ -121,8 +120,9 @@ def test_d_crash_then_retry_success():
             
     assert_registry_state(art["article_hash"], expect_registry=False, expect_ledger=False)
     
-    # Attempt 2: Success
-    with patch('monitor.stage_ontology_concepts', return_value=(False, "dropped_business_rule")):
+    # Attempt 2: Success (legitimate drop)
+    mock_success = MagicMock(return_value=(False, "dropped_business_rule"))
+    with patch.dict(monitor.STAGE_REGISTRY, {"ontology_concepts": mock_success}):
         process_article(art.copy(), telemetry, get_mock_config(), "HASH", ProviderRouter())
         
     assert_registry_state(art["article_hash"], expect_registry=True, expect_ledger=True)
