@@ -20,8 +20,9 @@ def setup_test_env():
     initialise_database()
     
     # Initialize ontology
-    from src.ontology import bootstrap_ontology
-    bootstrap_ontology()
+    from src.ontology import load_ontology
+    from src.config.settings import SHEET_URL
+    load_ontology(SHEET_URL)
     
     # Load Golden Dataset
     if not os.path.exists(GOLDEN_DATASET_PATH):
