@@ -20,15 +20,17 @@ def get_mock_config():
     }
 
 def get_base_article(test_id: str, title: str):
+    import uuid
+    unique_title = f"{title} {uuid.uuid4()}"
     body = f"Test body {test_id}"
     art = {
-        "headline": title,
+        "headline": unique_title,
         "url": f"http://test.local/{test_id}",
         "body": body,
         "source": "test_source",
         "channel": "test_channel"
     }
-    art["article_hash"] = hashlib.md5(f"test_source::{title.lower()}".encode('utf-8')).hexdigest()
+    art["article_hash"] = hashlib.md5(f"test_source::{unique_title.lower()}".encode('utf-8')).hexdigest()
     return art
 
 def assert_registry_state(article_hash: str, expect_registry: bool, expect_ledger: bool):
