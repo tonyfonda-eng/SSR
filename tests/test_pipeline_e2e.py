@@ -10,7 +10,7 @@ import sqlite3
 from unittest.mock import patch
 from monitor import process_article, PipelineTelemetry
 from src.ai import ProviderRouter
-from src.database import initialise_database, DB_PATH, get_or_create_event
+from src.database import initialise_database, DB_PATH, check_event_exists
 
 GOLDEN_DATASET_PATH = "src/validation/test_assets/golden_benchmark.json"
 

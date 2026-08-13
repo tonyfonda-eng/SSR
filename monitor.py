@@ -13,7 +13,7 @@ import subprocess
 from datetime import datetime, timezone
 
 from src.database import (
-    initialise_database, get_or_create_event, commit_decision_capsule,
+    initialise_database, check_event_exists, commit_decision_capsule,
     save_workflow_health, save_exception_log, save_config_snapshot,
     log_article_screening, log_audit_source_metrics, log_audit_ai_metrics, log_audit_event
 )
@@ -112,8 +112,10 @@ def stage_dedupe_hash(article: dict, ctx: dict) -> tuple:
     if not article_body or not article_body.strip():
         return False, "dropped_empty_body_extraction_failure"
         
-    article_hash = hashlib.sha256(article_body.encode("utf-8")).hexdigest()
-    event_id, is_new = get_or_create_event(article_hash, article_body.encode("utf-8"))
+    article_hash = article.get("article_hash")
+    if not article_hash:
+        article_hash = hashlib.md5(article_body.encode("utf-8")).hexdigest()
+    event_id, is_new = check_event_exists(article_hash)
     article["_internal_event_id"] = event_id
     if not is_new: return False, "dropped_hash_duplicate"
     return True, "passed"
@@ -649,6 +651,9 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
                         "terminal_stage": stage_name,
                         "headline": article.get("headline", "Corporate Announcement"),
                         "url": article.get("url", "UNKNOWN"),
+                        "article_hash": article.get("article_hash"),
+                        "raw_payload_blob": article.get("body", "").encode("utf-8"),
+                        "payload_mime_type": "text/html",
                         "transaction_graph": article.get("_transaction_graph", {}),
                         "shadow_mode_v2": article.get("_shadow_mode_v2", {}),
                         "ontology_metadata": article.get("_ontology_metadata", {}),
@@ -690,6 +695,9 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
             "terminal_stage": "AI_APPROVED",
             "headline": article.get("headline", "Corporate Announcement"),
             "url": article.get("url", "UNKNOWN"),
+            "article_hash": article.get("article_hash"),
+            "raw_payload_blob": article.get("body", "").encode("utf-8"),
+            "payload_mime_type": "text/html",
             "event_type": event_family,
             "target_ticker": article.get("_target_ticker", ticker),
             "transaction_graph": article.get("_transaction_graph", {}),
