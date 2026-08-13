@@ -20,7 +20,8 @@ class PRNewsWireScraper(SourceScraper):
         
         base_url = "https://www.prnewswire.com/news-releases/news-releases-list/"
         checkpoint = kwargs.get("checkpoint")
-        max_pages = kwargs.get("max_pages", 20)
+        # Temporarily increased to 100 to catch up on overnight gap
+        max_pages = kwargs.get("max_pages", 100)
         
         self.scrape_metadata = {
             "source": "PR Newswire",
