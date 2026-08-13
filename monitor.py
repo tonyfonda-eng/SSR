@@ -1094,13 +1094,13 @@ def main():
                         })
                 else:
                     logger.debug(f"[DEDUPE] Dropped overlapping article: {validated_article['title']} from {validated_article['source']} ({validated_article['channel']})")
-                    _record_screening(validated_article, telemetry, outcome="dropped", final_stage="dedupe_hash", drop_reason="duplicate_hash")
+                    _record_screening(validated_article, telemetry, outcome="DROPPED", final_stage="dedupe_hash", drop_reason="duplicate_hash")
                     k_val = f"{validated_article['source']}::{validated_article['channel']}"
                     source_stats[k_val]["dedupe_rejected_count"] += 1
             except Exception as handoff_err:
                 quarantined += 1
                 logger.warning(f"[HANDOFF] Quarantined malformed article from {article.get('source', 'Unknown')}. Reason: {handoff_err}")
-                _record_screening(article, telemetry, outcome="dropped", final_stage="ingestion_validation", drop_reason=str(handoff_err))
+                _record_screening(article, telemetry, outcome="DROPPED", final_stage="ingestion_validation", drop_reason=str(handoff_err))
                 
         for entry in ingestion_ledger:
             k = f"{entry['source']}::{entry['channel']}"

@@ -1,1 +1,0 @@
-The changes in this commit add a backward-compatible alias DB_PATH pointing to the primary research database path (RESEARCH_DB_PATH). This fixes imports in other modules that expect DB_PATH to be present.
