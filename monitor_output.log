@@ -33,3 +33,1122 @@
 2026-08-13 09:28:48,318 [INFO] [INGESTION] Using dedicated scraper for 'SEDAR+'
 2026-08-13 09:28:48,945 [INFO] [INGESTION] Using dedicated scraper for 'HKEX'
 2026-08-13 09:29:40,684 [WARNING] [INGESTION] PR Newswire hit limit without finding checkpoint.
+2026-08-13 09:43:45,036 [INFO] [INGESTION] Download sequence complete. Downloaded 2871 raw articles across all channels.
+2026-08-13 09:43:45,161 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,204 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,217 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,225 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,235 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,242 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,249 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,255 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,262 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,269 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,278 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,285 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,294 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,309 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,321 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,335 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,343 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,354 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,363 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,370 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,378 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,384 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,390 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,395 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,402 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,407 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,414 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,420 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,429 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,441 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,454 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,468 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,483 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,493 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,502 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,513 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,524 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,534 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,543 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,561 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,576 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,590 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,602 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,621 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,635 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,651 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,664 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,678 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,687 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,694 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,702 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,712 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,722 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,734 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,748 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,760 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,770 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,780 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,790 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,801 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,811 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,820 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,828 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,837 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,845 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,854 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,861 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,868 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,877 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,887 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,896 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,904 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,913 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,922 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,932 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,942 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,951 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,959 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,966 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,973 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,980 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,986 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,993 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:45,999 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,006 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,014 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,020 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,030 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,038 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,045 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,054 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,063 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,071 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,082 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,091 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,098 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,107 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,115 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,124 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,133 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,143 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,153 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,174 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,187 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,196 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,205 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,215 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,225 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,232 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,239 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,246 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,255 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,261 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,267 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,275 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,281 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,289 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,298 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,309 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,318 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (duplicate_hash)
+2026-08-13 09:43:46,329 [INFO] INGESTION COMPLETE: 2871
+2026-08-13 09:43:46,329 [INFO] HANDOFF ACCEPTED: 2871
+2026-08-13 09:43:46,329 [INFO] HANDOFF QUARANTINED: 0
+2026-08-13 09:43:46,329 [INFO] PIPELINE PROCESSED: 2751
+2026-08-13 09:43:46,335 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,348 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,362 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,379 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,391 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,401 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,433 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,446 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,459 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,472 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,482 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,492 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,501 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,510 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,518 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,526 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,535 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,542 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,551 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,559 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,567 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,574 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,581 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,589 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,595 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,604 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,612 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,619 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,629 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,636 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,643 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,652 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,661 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,671 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,680 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,689 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,698 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,707 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,716 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,723 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,731 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,738 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,746 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,754 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,762 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,769 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,778 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,786 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,795 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:46,802 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:47,725 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:47,760 [INFO] [SCREENED] 'Untitled' -> DROPPED @ exclude_global_keywords (dropped_global_keyword: Form 4)
+2026-08-13 09:43:47,800 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:47,822 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:47,838 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:47,870 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:47,871 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:47,894 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:47,911 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:47,928 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:47,946 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:47,964 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:48,062 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:48,078 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:48,093 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:48,153 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:48,203 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:48,281 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:48,300 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:48,313 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:48,323 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:48,342 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:43:48,373 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:48,411 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:48,443 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:48,497 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:48,564 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:48,580 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:48,622 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:48,643 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:48,677 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:48,732 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:48,745 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:48,774 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:48,789 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:48,808 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:48,841 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:48,859 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:48,897 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:48,944 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:48,982 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:49,018 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:49,057 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:49,087 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:49,123 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:49,157 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:49,180 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:49,218 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:49,273 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:49,307 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:49,338 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:49,368 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:49,402 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:49,433 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:49,461 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:49,498 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:49,548 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:49,600 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:49,641 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:49,664 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:49,700 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:49,722 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:49,847 [INFO] [SCREENED] 'Untitled' -> DROPPED @ exclude_global_keywords (dropped_global_keyword: Schedule 13G)
+2026-08-13 09:43:54,491 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:43:54,491 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:43:55,432 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:43:59,327 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:43:59,327 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:43:59,373 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:59,405 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:59,431 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:43:59,456 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:01,318 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:44:01,318 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:44:01,357 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:01,385 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:01,421 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:01,453 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:01,486 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:01,519 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:01,554 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:01,585 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:01,616 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:01,645 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:01,672 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:01,697 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:01,722 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:01,747 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:01,777 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:01,815 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:01,841 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:01,867 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:01,892 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:01,923 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:01,981 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:02,019 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:02,058 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:02,089 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:02,117 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:02,147 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:02,178 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:02,205 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:02,234 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:02,289 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:02,314 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:02,342 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:02,371 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:02,399 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:02,432 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:02,468 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:02,499 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:02,528 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:02,557 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:02,584 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:02,608 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:02,617 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:02,627 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:04,488 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:44:04,489 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:44:04,537 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:04,570 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:04,602 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:04,635 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:04,669 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:04,696 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:04,722 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:04,746 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:04,769 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:04,793 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:04,816 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:04,846 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:04,876 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:04,910 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:04,959 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:04,992 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,017 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,042 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,065 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,088 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,115 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,143 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,173 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,206 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,234 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,261 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,326 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,364 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,387 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,411 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,434 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,458 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,488 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,514 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,541 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,571 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,597 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,620 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,644 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,667 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,705 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,723 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,743 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,766 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,792 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,817 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,849 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,877 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,903 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,931 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,954 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:05,980 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:06,012 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:06,055 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:06,088 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:06,116 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:06,153 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:06,184 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:06,217 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:06,255 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:06,281 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:10,165 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:44:10,166 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:44:10,213 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:44:10,304 [INFO] [SCREENED] 'Untitled' -> DROPPED @ exclude_global_keywords (dropped_global_keyword: Form 4)
+2026-08-13 09:44:10,323 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:44:12,495 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:12,500 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:44:12,562 [INFO] [SCREENED] 'Untitled' -> DROPPED @ exclude_global_keywords (dropped_global_keyword: Schedule 13G)
+2026-08-13 09:44:12,583 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:44:16,116 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:44:16,116 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:44:16,158 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:44:16,224 [INFO] [SCREENED] 'Untitled' -> DROPPED @ exclude_global_keywords (dropped_global_keyword: Form 4)
+2026-08-13 09:44:16,264 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:16,276 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:16,305 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:16,335 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:16,375 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:16,414 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:16,429 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:16,439 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:16,467 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:16,496 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:16,510 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:16,535 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:16,591 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:19,858 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:44:19,859 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:44:19,926 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:19,941 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:19,970 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,008 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:20,022 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,050 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,079 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,109 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,138 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,175 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,212 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,239 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,272 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:20,283 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,315 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:20,328 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,358 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,385 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,411 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,437 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,466 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,498 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,550 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:20,584 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:20,599 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,627 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,641 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:44:20,661 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,687 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,713 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,743 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,790 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,821 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,848 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,874 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,907 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,946 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:20,959 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:20,992 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:21,023 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:21,036 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:21,048 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:21,074 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:21,101 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:21,116 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:21,127 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:21,154 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:21,183 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:21,215 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:21,247 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:21,282 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:21,318 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:21,348 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:21,359 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:21,383 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:21,397 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:21,423 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:21,458 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:21,495 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:21,529 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:21,543 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:21,573 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:21,585 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:21,636 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:21,652 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:21,678 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:21,714 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:21,739 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:21,754 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:21,767 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:21,795 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:21,812 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:21,823 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:21,853 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:21,863 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:21,886 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:21,898 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:21,931 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:21,952 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:21,965 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:21,993 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,018 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:22,031 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,060 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,087 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:22,098 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,126 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,197 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,224 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,259 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,306 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:22,333 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,367 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,398 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,424 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,455 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,483 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,508 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,538 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:22,551 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:22,561 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,585 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,612 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,640 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:22,654 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,686 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,716 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,748 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,784 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,816 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,842 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,867 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,896 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,922 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:22,935 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,963 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:22,988 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,013 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,038 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,085 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,116 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,140 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,163 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,188 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,212 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,238 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,269 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,298 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,328 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,358 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,383 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,410 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,435 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,465 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,490 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,523 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,551 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,573 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,600 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,623 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,647 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,672 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,697 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,723 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,748 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,773 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,823 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,861 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:23,882 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,913 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,943 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:23,969 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:24,001 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:24,042 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:24,057 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:24,087 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:24,108 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:24,136 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:24,137 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:44:24,148 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:44:24,170 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:24,200 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:24,226 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:24,255 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:24,267 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:24,299 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:24,311 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:24,338 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:24,350 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:24,377 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:24,401 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:24,417 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:24,444 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:24,454 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:24,523 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:24,549 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:24,588 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:24,620 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:24,652 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:24,667 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:24,694 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:24,723 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:24,749 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:24,775 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:24,817 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:24,847 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:24,885 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:24,924 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:24,951 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:24,978 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:24,992 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:25,006 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:25,020 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:25,030 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:25,082 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:25,107 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:25,108 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:44:25,131 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:25,157 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:25,194 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:25,214 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:25,226 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:25,257 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:25,268 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:25,301 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:25,311 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:25,339 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:25,365 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:25,395 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:25,408 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:25,460 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:25,496 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:25,528 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:25,539 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:25,569 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:25,582 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:25,613 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:25,629 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:25,657 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:25,692 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:25,762 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:25,813 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:25,885 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:25,919 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:25,943 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:25,971 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:25,987 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:26,001 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,040 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,065 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,092 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,118 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,144 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,177 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:26,193 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:26,206 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,232 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,257 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,280 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,303 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,330 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:26,347 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:26,358 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,392 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,422 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,454 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,483 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,512 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:26,525 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,549 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,573 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,597 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,620 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,644 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,670 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,702 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:26,715 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,742 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,768 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,796 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,821 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,846 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,870 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,894 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:26,961 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,032 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,065 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,097 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,131 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,162 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,189 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,215 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,243 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,270 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:27,281 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,319 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,358 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:27,372 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,399 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,428 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,455 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:27,470 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,502 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:27,515 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,545 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,580 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:27,595 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,623 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,667 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:27,690 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:27,709 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,734 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,759 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:27,773 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:27,790 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,821 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,861 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,896 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,923 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:27,934 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,968 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:27,993 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:28,018 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:28,044 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:28,074 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:28,095 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:28,113 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:28,139 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:28,168 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:28,180 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:28,214 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:28,246 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:28,280 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:28,291 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:28,312 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:28,354 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:28,398 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:28,423 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:28,458 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:28,526 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:28,554 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:28,587 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:28,606 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:28,618 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:28,651 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:28,685 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:28,712 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:28,740 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:28,767 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:28,794 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:28,827 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:28,880 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:28,942 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:28,981 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:29,011 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:29,022 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:29,088 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:29,105 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:29,150 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:29,994 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:44:29,995 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:44:30,037 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:30,064 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:30,076 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:30,090 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:30,119 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:30,146 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:30,203 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:30,229 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:30,258 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:30,279 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:30,292 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:30,318 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:30,332 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:30,344 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:30,370 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:30,408 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:30,434 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:30,483 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:30,509 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:30,533 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:30,564 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:30,579 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:30,606 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:30,658 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:30,689 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:30,702 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:30,713 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:30,738 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:30,764 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:30,788 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:30,812 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:30,839 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:30,863 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:30,889 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:30,903 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:30,917 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:30,946 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:30,947 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:44:30,967 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:30,993 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,034 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:31,050 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,073 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,098 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,121 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,148 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,170 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,194 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,219 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,244 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,288 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,315 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,361 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:31,379 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:31,394 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,419 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,445 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,468 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,499 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:31,511 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,537 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,564 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,602 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,641 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:31,656 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:31,668 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,696 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,722 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:31,739 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:31,750 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,771 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,793 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,817 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,842 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,870 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,897 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,924 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:31,935 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,961 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:31,972 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:31,998 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,025 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,061 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,096 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:32,108 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,138 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,165 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,194 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,219 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,244 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:32,255 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,280 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,313 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,346 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:32,358 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,382 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,407 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,429 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,451 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,474 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,499 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,528 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,558 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,590 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:32,603 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,638 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,714 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,741 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,773 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,807 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,838 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:32,848 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,874 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:32,886 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,910 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,935 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,963 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:32,986 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:32,997 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,020 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,044 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,094 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:33,113 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:33,122 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,146 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,170 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,199 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,233 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,269 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,296 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,337 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:33,338 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:44:33,361 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,389 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:33,404 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,434 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:33,446 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,470 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,500 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,546 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,591 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,623 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,652 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,682 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:33,693 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,718 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,746 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,775 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,803 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,837 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,864 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,889 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,912 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,940 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,971 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:33,999 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,015 [INFO] [SCREENED] 'Untitled' -> DROPPED @ dedupe_hash (dropped_hash_duplicate)
+2026-08-13 09:44:34,034 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,062 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,087 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,120 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,144 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:34,156 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,182 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:34,196 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,224 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,252 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,284 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,343 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:34,357 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:34,368 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,392 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,419 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,455 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:34,465 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,489 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,514 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,548 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,575 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,602 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,636 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:34,687 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,711 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,736 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,764 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,791 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,816 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,842 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,873 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,899 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:34,984 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,018 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,075 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,112 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,137 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,160 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,185 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,213 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,240 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,265 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,293 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:35,306 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,338 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,371 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,411 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:35,436 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,462 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,490 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,520 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,543 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,567 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,594 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,620 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,650 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,680 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,708 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,732 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,757 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,788 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,824 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,875 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,926 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:35,944 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:35,969 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,005 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,040 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:36,061 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,103 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:36,126 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:36,137 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,162 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,187 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,222 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:36,235 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,264 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:36,276 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,305 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,336 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,376 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:36,394 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,419 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,443 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,469 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:36,481 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,513 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:36,525 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,549 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,573 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,598 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,628 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,652 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,676 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,723 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,750 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,777 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,801 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,825 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,848 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,901 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:36,919 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,945 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:36,970 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:37,843 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:44:37,844 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:44:37,897 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:37,932 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:37,956 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:37,989 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:38,000 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:38,026 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:38,063 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:38,099 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:38,137 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:39,519 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:44:39,520 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:44:39,589 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:39,617 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:39,653 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:39,694 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:39,719 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:39,735 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:39,755 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:39,784 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:39,799 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:39,822 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:39,865 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:39,896 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:39,908 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:39,941 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:39,966 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:39,994 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:40,018 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:40,042 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:40,065 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:40,090 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:40,114 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:40,138 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:40,168 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:40,192 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:40,224 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:40,256 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:40,280 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:40,306 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:40,336 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:40,368 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:40,404 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:40,433 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:40,460 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:40,487 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:40,507 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:40,541 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:41,403 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:44:41,404 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:44:41,445 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:41,468 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:41,496 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:42,431 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:44:42,432 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:44:42,480 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:42,501 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:42,528 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:44,117 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:44:44,117 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:44:44,938 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:44:44,938 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:44:45,822 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:44:45,823 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:44:46,919 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:44:46,919 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:44:46,971 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:47,014 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:47,041 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:47,974 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:44:47,975 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:44:48,031 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:48,058 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:48,070 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:48,084 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:48,112 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:48,139 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:48,154 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:48,181 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:48,235 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:48,246 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:48,267 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:48,294 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:49,255 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:44:49,255 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:44:49,302 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:50,247 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:44:50,247 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:44:51,221 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:44:51,221 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:44:51,243 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:51,267 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:51,302 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:51,325 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:51,349 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:51,374 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:51,403 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:52,349 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:44:52,349 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:44:52,407 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:52,433 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:52,464 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:52,504 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:52,567 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:52,594 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:52,622 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:52,647 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:52,673 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:44:52,688 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:52,711 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:52,734 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:53,774 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:44:53,774 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:44:53,816 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:53,838 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:53,860 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:54,786 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:44:54,786 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:44:55,693 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:44:55,694 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:44:55,742 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:56,599 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:44:56,599 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:44:56,660 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:56,686 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:56,706 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:56,732 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:44:56,755 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:45:08,183 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:45:08,183 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:45:08,280 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:45:08,302 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
