@@ -370,28 +370,17 @@ def save_config_snapshot(config_hash: str, run_id: str, config_json: str):
     finally:
         conn.close()
 
-def get_or_create_event(article_hash: str, raw_payload: bytes, mime_type: str = "text/html") -> tuple:
+def check_event_exists(article_hash: str) -> tuple:
     conn = _get_connection(RESEARCH_DB_PATH)
     cursor = conn.cursor()
     cursor.execute("SELECT event_id FROM event_registry WHERE article_hash = ? LIMIT 1;", (article_hash,))
     row = cursor.fetchone()
+    conn.close()
     if row:
-        event_id = row[0]
-        conn.close()
-        return event_id, False
+        return row[0], False
         
-    gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
     event_id = f"EVT-{hashlib.md5(article_hash.encode('utf-8')).hexdigest()[:12].upper()}"
-    
-    try:
-        cursor.execute("INSERT INTO event_registry (event_id, article_hash, raw_payload_blob, payload_mime_type, ingest_timestamp) VALUES (?, ?, ?, ?, ?);",
-                       (event_id, article_hash, sqlite3.Binary(raw_payload), mime_type, gmt_now))
-        conn.commit()
-        conn.close()
-        return event_id, True
-    except Exception:
-        conn.close()
-        return f"ERR-{event_id}", True
+    return event_id, True
 
 def log_article_screening(entry: dict) -> None:
     conn = _get_connection(RESEARCH_DB_PATH)
@@ -426,6 +415,21 @@ def commit_decision_capsule(capsule_data: dict, manifest_json: dict = None):
     conn = _get_connection(RESEARCH_DB_PATH)
     try:
         cursor = conn.cursor()
+        
+        # Atomically register the dedupe identity and the decision ledger
+        if "article_hash" in capsule_data and "raw_payload_blob" in capsule_data:
+            gmt_now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT")
+            cursor.execute("""
+                INSERT OR IGNORE INTO event_registry (event_id, article_hash, raw_payload_blob, payload_mime_type, ingest_timestamp)
+                VALUES (?, ?, ?, ?, ?);
+            """, (
+                capsule_data["event_id"],
+                capsule_data["article_hash"],
+                sqlite3.Binary(capsule_data["raw_payload_blob"]),
+                capsule_data.get("payload_mime_type", "text/html"),
+                gmt_now
+            ))
+            
         dec_id = capsule_data["decision_id"]
         
         cursor.execute("""
