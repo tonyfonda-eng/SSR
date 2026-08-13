@@ -2027,3 +2027,59 @@
 2026-08-13 09:49:37,400 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
 2026-08-13 09:49:37,413 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
 2026-08-13 09:49:37,440 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:38,551 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:49:38,552 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:49:38,579 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:38,604 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:38,628 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:38,652 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:38,677 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:38,701 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:38,728 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:38,756 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:38,782 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:38,816 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:38,847 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:38,871 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:40,074 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:49:40,074 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:49:41,062 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:49:41,062 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:49:41,095 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:42,012 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:49:42,013 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:49:42,061 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:42,086 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:42,863 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:49:42,863 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:49:42,895 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:42,921 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:49:42,933 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:42,956 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:42,978 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:43,002 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:43,026 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:43,052 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:43,816 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:49:43,816 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:49:44,613 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:49:44,614 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:49:45,450 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:49:45,450 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:49:45,494 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:45,518 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:46,516 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:49:46,516 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:49:46,545 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:46,571 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:46,596 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:46,623 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
+2026-08-13 09:49:47,886 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:49:47,887 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:49:47,926 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:49:47,942 [ERROR] Error processing article: name 'extract_target_ticker' is not defined
+2026-08-13 09:49:48,872 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:49:48,872 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:49:49,688 [CRITICAL] [AI CORE] Provider router exhausted all available keys.
+2026-08-13 09:49:49,688 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ai_confidence_gate (dropped_ai_confidence (scored 0.00 < 0.75))
+2026-08-13 09:49:49,740 [INFO] [SCREENED] 'Untitled' -> DROPPED @ ontology_concepts (dropped_ontology_score: 0.00 < 0.65)
