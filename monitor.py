@@ -33,7 +33,7 @@ from src.ontology import evaluate_ontology, evaluate_ontology_rich
 from src.ontology.engine import load_ontology
 from src.rules import matches_global_exclusion, matches_issuer_exclusion
 from src.rules_engine import evaluate as evaluate_deterministic_rules
-from src.ai import extract_entities_and_roles, classify_event
+from src.ai import extract_entities_and_roles, classify_event, extract_target_ticker
 from src.providers.router import ProviderRouter
 from src.financials import get_t12_metrics, query_financial_snapshot
 from src.alerts.email import send_alert
