@@ -9,20 +9,33 @@ venv.bak/
 
 # Credentials
 google_credentials.json
+secure_google_credentials.json
+archive/scratch/google_credentials.json
+test_auth.py
 
 # Databases
 *.sqlite
 *.sqlite-journal
 *.db
+*.db-wal
+*.db-shm
 data/
 
 # Python
 __pycache__/
 *.py[cod]
 *$py.class
-google_credentials.json
-archive/scratch/google_credentials.json
-secure_google_credentials.json
-google_credentials.json
-secure_google_credentials.json
-test_auth.py
+
+# Scratch / debug output — never track these
+clear_code.txt
+architecture_snapshot.txt
+out.txt
+err.txt
+run_logs.txt
+run_log.txt
+audit_data.json
+latest_config.json
+COMMIT_MESSAGE.txt
+task.md
+forensic_audit_results.md
+scratch.py

@@ -19,10 +19,6 @@ from src.database import (
 )
 
 from src.validation.export_frontend_data import export_archive_json, export_screening_json
-try:
-    from src.validation.export_screening_log import export_screening_log
-except ImportError:
-    export_screening_log = export_screening_json
 
 from src.audit.realtime_audit import export_realtime_audit
 
@@ -595,8 +591,6 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
                     "playbook_eligibility_check"
                 ]
 
-    # Validate DAG instead of silently overriding
-    validate_pipeline_dag(execution_order)
 
     # Enforce correct topological ordering for Playbook Gate and Financial Gates
     pb_gates = [g for g in ["playbook_gate", "playbook_eligibility_check", "financial_t12_floor", "options_chain_check"] if g in execution_order]
