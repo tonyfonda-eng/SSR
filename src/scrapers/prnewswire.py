@@ -148,11 +148,9 @@ class PRNewsWireScraper(SourceScraper):
                     self.scrape_metadata["termination_reason"] = "SUCCESS_EXHAUSTED"
                     self.scrape_metadata["exhaustion_evidence"] = "valid"
                 else:
-                    self.scrape_metadata["emergency_stop"] = True
                     self.scrape_metadata["recovery_status"] = "GAP_DETECTED"
                     self.scrape_metadata["termination_reason"] = "ARBITRARY_LIMIT_REACHED"
             except Exception:
-                self.scrape_metadata["emergency_stop"] = True
                 self.scrape_metadata["recovery_status"] = "GAP_DETECTED"
                 self.scrape_metadata["termination_reason"] = "ARBITRARY_LIMIT_REACHED"
             
