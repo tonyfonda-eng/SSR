@@ -1238,10 +1238,7 @@ def main():
             export_archive_json("docs/archive_data.json")
             
             logger.info("Exporting article screening log...")
-            if callable(export_screening_log):
-                export_screening_log("docs/screening_log.json")
-            else:
-                export_screening_json("docs/screening_log.json")
+            export_screening_json("docs/screening_log.json")
                 
             logger.info("Exporting real-time source audit...")
             export_realtime_audit("docs/realtime_audit.json")
