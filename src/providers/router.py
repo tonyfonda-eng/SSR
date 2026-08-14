@@ -167,10 +167,10 @@ class ProviderRouter:
     def _call_gemini(self, prompt: str, api_key: str, require_json: bool, configured_model: str) -> str:
         """Executes API call to Google Gemini REST API."""
         model_map = {
-            "gemini-1.5-pro": "gemini-1.5-pro",
-            "gemini-1.5-flash": "gemini-1.5-flash"
+            "gemini-1.5-pro": "gemini-1.5-pro-latest",
+            "gemini-1.5-flash": "gemini-1.5-flash-latest"
         }
-        api_model = model_map.get(configured_model.lower(), "gemini-1.5-pro")
+        api_model = model_map.get(configured_model.lower(), "gemini-1.5-pro-latest")
         
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{api_model}:generateContent?key={api_key}"
         headers = {"Content-Type": "application/json"}
@@ -237,7 +237,7 @@ class ProviderRouter:
             "temperature": 0.0
         }
         
-        if require_json:
+        if require_json and not api_model.startswith("google/"):
             payload["response_format"] = {"type": "json_object"}
             
         response = requests.post(url, headers=headers, json=payload, timeout=20)
