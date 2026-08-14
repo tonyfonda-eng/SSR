@@ -675,7 +675,23 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
                 if any(x in str(drop_reason) for x in ["Parse Failure", "Parse Exception", "EXHAUSTED", "ai_exhausted", "PROVIDER_ERROR"]):
                     try:
                         from src.alerts.email import send_alert
+                        from src.ontology.engine import get_all_matched_terms
                         import uuid
+                        
+                        evidence_list = [{"component": "System", "assertion": f"Pipeline halted at {stage_name}", "weight": 1.0}]
+                        
+                        for rule in article.get("_deterministic_families", []):
+                            evidence_list.append({"component": "Rules Engine", "assertion": f"Rule Triggered: {rule.get('Rule', 'Unknown')}", "weight": 1.0})
+                            
+                        onto = article.get("_ontology_metadata", {})
+                        if onto.get("matched"):
+                            matched_str = ", ".join(onto["matched"])
+                            evidence_list.append({"component": "Ontology", "assertion": f"Matched Concepts: {matched_str}", "weight": onto.get("score", 0)})
+                            
+                        terms = get_all_matched_terms(article.get("body", ""))
+                        if terms:
+                            evidence_list.append({"component": "Keywords", "assertion": f"Matched text: {', '.join(terms)}", "weight": 1.0})
+                            
                         failure_capsule = {
                             "source": article.get("source", "Unknown"),
                             "url": article.get("link", article.get("url", "#")),
@@ -684,8 +700,8 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
                             "target_ticker": article.get("_ai_ticker", article.get("_deterministic_ticker", "UNKNOWN")),
                             "decision_id": f"FAIL-{uuid.uuid4().hex[:8].upper()}",
                             "runtime_timestamp": datetime.now(timezone.utc).isoformat(),
-                            "research_summary": f"The pipeline encountered a critical AI failure during {stage_name}.\nDrop Reason: {drop_reason}\n\nPlease review the article manually to determine if it is a qualifying M&A event.",
-                            "evidence": [{"component": "System", "assertion": f"Pipeline halted at {stage_name}", "weight": 1.0}]
+                            "research_summary": f"The pipeline encountered a critical AI failure during {stage_name}.\nDrop Reason: {drop_reason}\n\nThis article bypassed the ontology and rules engine perfectly. Please review manually.",
+                            "evidence": evidence_list
                         }
                         send_alert(failure_capsule)
                         logger.info(f"[AI FAILURE ALERT SENT] {failure_capsule['url']}")
