@@ -671,6 +671,27 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
                     "timestamp": datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S GMT"),
                     "run_id": telemetry.run_id
                 }
+                
+                if any(x in str(drop_reason) for x in ["Parse Failure", "Parse Exception", "EXHAUSTED", "ai_exhausted", "PROVIDER_ERROR"]):
+                    try:
+                        from src.alerts.email import send_alert
+                        import uuid
+                        failure_capsule = {
+                            "source": article.get("source", "Unknown"),
+                            "url": article.get("link", article.get("url", "#")),
+                            "headline": article.get("title", article.get("headline", "Untitled Article")),
+                            "event_type": f"AI FAILURE: {drop_reason}",
+                            "target_ticker": article.get("_ai_ticker", article.get("_deterministic_ticker", "UNKNOWN")),
+                            "decision_id": f"FAIL-{uuid.uuid4().hex[:8].upper()}",
+                            "runtime_timestamp": datetime.now(timezone.utc).isoformat(),
+                            "research_summary": f"The pipeline encountered a critical AI failure during {stage_name}.\nDrop Reason: {drop_reason}\n\nPlease review the article manually to determine if it is a qualifying M&A event.",
+                            "evidence": [{"component": "System", "assertion": f"Pipeline halted at {stage_name}", "weight": 1.0}]
+                        }
+                        send_alert(failure_capsule)
+                        logger.info(f"[AI FAILURE ALERT SENT] {failure_capsule['url']}")
+                    except Exception as email_err:
+                        logger.error(f"Failed to send AI failure email: {email_err}")
+                        
                 return False
 
             if stage_name == "dedupe_hash" and os.environ.get("ENTITY_ENGINE_VERSION") == "shadow":
