@@ -672,7 +672,13 @@ def process_article(article: dict, telemetry: PipelineTelemetry, config_manifest
                     "run_id": telemetry.run_id
                 }
                 
-                if any(x in str(drop_reason) for x in ["Parse Failure", "Parse Exception", "EXHAUSTED", "ai_exhausted", "PROVIDER_ERROR"]):
+                is_ai_failure = any(x in str(drop_reason) for x in ["Parse Failure", "Parse Exception", "EXHAUSTED", "ai_exhausted", "PROVIDER_ERROR"])
+                is_exhausted = any(x in str(drop_reason) for x in ["EXHAUSTED", "ai_exhausted", "PROVIDER_ERROR"])
+                has_ticker = article.get("_deterministic_ticker", "UNKNOWN") != "UNKNOWN"
+                
+                # Only send parse failure alerts if we actually found a regex ticker, 
+                # but always alert on full system/provider exhaustion.
+                if is_ai_failure and (has_ticker or is_exhausted):
                     try:
                         from src.alerts.email import send_alert
                         from src.ontology.engine import get_all_matched_terms
